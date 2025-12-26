@@ -1,117 +1,81 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  email: string;
-  display_name: string;
-}
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user storage (will be replaced with Supabase)
-const STORAGE_KEY = 'bloat_ai_user';
-const USERS_KEY = 'bloat_ai_users';
-
-interface StoredUser {
-  id: string;
-  email: string;
-  password: string;
-  display_name: string;
-}
-
-function getStoredUsers(): StoredUser[] {
-  const data = localStorage.getItem(USERS_KEY);
-  return data ? JSON.parse(data) : [];
-}
-
-function saveStoredUsers(users: StoredUser[]) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setUser({
-        id: parsed.id,
-        email: parsed.email,
-        display_name: parsed.display_name,
-      });
-    }
-    setIsLoading(false);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
-    const users = getStoredUsers();
-    const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    
-    if (!foundUser) {
-      return { error: 'No account found with this email' };
-    }
-    
-    if (foundUser.password !== password) {
-      return { error: 'Incorrect password' };
-    }
-    
-    const userObj = {
-      id: foundUser.id,
-      email: foundUser.email,
-      display_name: foundUser.display_name,
-    };
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userObj));
-    setUser(userObj);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
     return { error: null };
   };
 
   const signUp = async (email: string, password: string, displayName: string): Promise<{ error: string | null }> => {
-    const users = getStoredUsers();
-    
-    if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-      return { error: 'An account with this email already exists' };
-    }
-    
-    const newUser: StoredUser = {
-      id: crypto.randomUUID(),
+    const redirectUrl = `${window.location.origin}/`;
+    const { error } = await supabase.auth.signUp({
       email,
       password,
-      display_name: displayName,
-    };
-    
-    users.push(newUser);
-    saveStoredUsers(users);
-    
-    const userObj = {
-      id: newUser.id,
-      email: newUser.email,
-      display_name: newUser.display_name,
-    };
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userObj));
-    setUser(userObj);
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: { full_name: displayName }
+      }
+    });
+    if (error) return { error: error.message };
+    return { error: null };
+  };
+
+  const signInWithGoogle = async (): Promise<{ error: string | null }> => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    });
+    if (error) return { error: error.message };
     return { error: null };
   };
 
   const signOut = async () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setUser(null);
+    await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, signIn, signUp, signOut, signInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,121 +2,109 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Bloat AI Design System - Medical-grade warmth meets modern health tracking */
+/* Bloat AI Design System - Soft, organic, medical wellness aesthetic */
 
 @layer base {
   :root {
-    /* Core Brand Colors */
-    --sage: 95 45% 56%;
-    --sage-light: 95 45% 65%;
-    --sage-dark: 95 45% 45%;
-    --navy: 210 22% 24%;
-    --navy-light: 210 22% 35%;
+    /* Soft Pastel Palette */
+    --sage: 160 35% 75%;
+    --sage-light: 160 40% 88%;
+    --sage-dark: 160 30% 55%;
+    --mint: 165 50% 82%;
+    --lavender: 270 40% 85%;
+    --lavender-light: 270 50% 92%;
+    --peach: 25 80% 85%;
+    --peach-light: 25 90% 92%;
+    --coral: 10 70% 75%;
+    --sky: 200 60% 85%;
+    --sky-light: 200 70% 92%;
     
-    /* Accent Colors */
-    --mint: 156 53% 78%;
-    --coral: 4 100% 75%;
-    --coral-light: 4 100% 92%;
-    --lavender: 270 24% 92%;
-    
-    /* Neutral Palette */
-    --warm-white: 30 20% 99%;
-    --warm-gray-50: 30 15% 97%;
-    --warm-gray-100: 30 12% 93%;
-    --warm-gray-200: 30 10% 86%;
-    --warm-gray-300: 30 8% 70%;
-    --warm-gray-400: 30 6% 55%;
-    --warm-gray-500: 30 4% 40%;
-    
-    /* Semantic Tokens */
-    --background: var(--warm-white);
-    --foreground: var(--navy);
+    /* Base Colors */
+    --background: 30 20% 98%;
+    --foreground: 220 15% 20%;
     
     --card: 0 0% 100%;
-    --card-foreground: var(--navy);
+    --card-foreground: 220 15% 20%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: var(--navy);
+    --popover-foreground: 220 15% 20%;
     
-    --primary: var(--sage);
+    --primary: 160 35% 55%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: var(--warm-gray-100);
-    --secondary-foreground: var(--navy);
+    --secondary: 270 30% 92%;
+    --secondary-foreground: 220 15% 25%;
     
-    --muted: var(--warm-gray-100);
-    --muted-foreground: var(--warm-gray-400);
+    --muted: 220 10% 94%;
+    --muted-foreground: 220 10% 50%;
     
-    --accent: var(--mint);
-    --accent-foreground: var(--navy);
+    --accent: 165 45% 85%;
+    --accent-foreground: 220 15% 20%;
     
-    --destructive: var(--coral);
+    --destructive: 10 70% 65%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: var(--warm-gray-200);
-    --input: var(--warm-gray-200);
-    --ring: var(--sage);
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 160 35% 55%;
     
-    --radius: 0.75rem;
-    
-    /* Custom Shadows */
-    --shadow-soft: 0 2px 8px -2px hsl(var(--navy) / 0.08);
-    --shadow-medium: 0 4px 16px -4px hsl(var(--navy) / 0.12);
-    --shadow-elevated: 0 8px 32px -8px hsl(var(--navy) / 0.16);
+    --radius: 1rem;
     
     /* Gradients */
-    --gradient-sage: linear-gradient(135deg, hsl(var(--sage)) 0%, hsl(var(--sage-light)) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(var(--warm-gray-50)) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(var(--sage) / 0.08) 0%, transparent 100%);
-
-    /* Sidebar (not used but required) */
-    --sidebar-background: var(--warm-gray-50);
-    --sidebar-foreground: var(--navy);
-    --sidebar-primary: var(--sage);
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: var(--warm-gray-100);
-    --sidebar-accent-foreground: var(--navy);
-    --sidebar-border: var(--warm-gray-200);
-    --sidebar-ring: var(--sage);
+    --gradient-hero: linear-gradient(180deg, hsl(165 50% 90% / 0.8) 0%, hsl(270 40% 92% / 0.6) 50%, hsl(0 0% 100%) 100%);
+    --gradient-peach: linear-gradient(135deg, hsl(25 80% 90%) 0%, hsl(35 90% 92%) 100%);
+    --gradient-mint: linear-gradient(135deg, hsl(165 50% 88%) 0%, hsl(180 45% 90%) 100%);
+    --gradient-lavender: linear-gradient(135deg, hsl(270 40% 90%) 0%, hsl(280 50% 92%) 100%);
+    --gradient-sky: linear-gradient(135deg, hsl(200 60% 88%) 0%, hsl(190 50% 90%) 100%);
+    
+    /* Sidebar (required) */
+    --sidebar-background: var(--background);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
   }
 
   .dark {
-    --background: 220 20% 10%;
-    --foreground: 30 15% 95%;
+    --background: 220 20% 8%;
+    --foreground: 220 10% 92%;
     
-    --card: 220 18% 14%;
-    --card-foreground: 30 15% 95%;
+    --card: 220 18% 12%;
+    --card-foreground: 220 10% 92%;
     
-    --popover: 220 18% 14%;
-    --popover-foreground: 30 15% 95%;
+    --popover: 220 18% 12%;
+    --popover-foreground: 220 10% 92%;
     
-    --primary: var(--sage);
-    --primary-foreground: var(--navy);
+    --primary: 160 40% 50%;
+    --primary-foreground: 220 20% 10%;
     
-    --secondary: 220 15% 20%;
-    --secondary-foreground: 30 15% 90%;
+    --secondary: 270 20% 20%;
+    --secondary-foreground: 220 10% 90%;
     
-    --muted: 220 15% 20%;
-    --muted-foreground: 30 10% 60%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 220 10% 60%;
     
-    --accent: 156 40% 30%;
-    --accent-foreground: 30 15% 95%;
+    --accent: 165 30% 25%;
+    --accent-foreground: 220 10% 92%;
     
-    --destructive: 4 80% 50%;
-    --destructive-foreground: 30 15% 95%;
+    --destructive: 10 60% 45%;
+    --destructive-foreground: 220 10% 92%;
     
-    --border: 220 15% 22%;
-    --input: 220 15% 22%;
-    --ring: var(--sage);
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 160 40% 50%;
     
-    --sidebar-background: 220 18% 12%;
-    --sidebar-foreground: 30 15% 90%;
-    --sidebar-primary: var(--sage);
-    --sidebar-primary-foreground: var(--navy);
-    --sidebar-accent: 220 15% 18%;
-    --sidebar-accent-foreground: 30 15% 90%;
-    --sidebar-border: 220 15% 20%;
-    --sidebar-ring: var(--sage);
+    --sidebar-background: 220 18% 10%;
+    --sidebar-foreground: 220 10% 90%;
+    --sidebar-primary: 160 40% 50%;
+    --sidebar-primary-foreground: 220 20% 10%;
+    --sidebar-accent: 220 15% 16%;
+    --sidebar-accent-foreground: 220 10% 90%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 160 40% 50%;
   }
 }
 
@@ -131,59 +119,80 @@
     -webkit-tap-highlight-color: transparent;
   }
   
-  /* Mobile-optimized touch targets */
   button, a, [role="button"] {
     @apply touch-manipulation;
   }
 }
 
 @layer components {
-  /* Card with soft shadow */
-  .card-elevated {
-    @apply bg-card rounded-xl border border-border;
-    box-shadow: var(--shadow-soft);
+  /* Organic blob shapes */
+  .blob {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    animation: morph 8s ease-in-out infinite;
   }
   
-  .card-elevated:hover {
-    box-shadow: var(--shadow-medium);
+  .blob-2 {
+    border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%;
+    animation: morph 10s ease-in-out infinite reverse;
   }
   
-  /* Rating scale button */
-  .rating-btn {
-    @apply w-14 h-14 rounded-full border-2 border-border flex flex-col items-center justify-center font-bold transition-all duration-200 active:scale-90;
+  .blob-3 {
+    border-radius: 50% 50% 30% 70% / 50% 70% 50% 30%;
+    animation: morph 12s ease-in-out infinite;
   }
   
-  .rating-btn-selected {
-    @apply border-primary bg-primary text-primary-foreground;
+  /* Glass card effect */
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl rounded-3xl border border-border/50;
+    box-shadow: 0 4px 24px -4px hsl(var(--foreground) / 0.06);
   }
   
-  /* Trigger chip */
-  .trigger-chip {
-    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-accent-foreground;
+  /* Soft shadow */
+  .shadow-soft {
+    box-shadow: 0 2px 16px -4px hsl(var(--foreground) / 0.08);
   }
   
-  /* Pending card highlight */
-  .pending-card {
-    @apply border-2 border-coral bg-coral-light/30;
+  /* Bottom nav styling */
+  .nav-icon {
+    @apply w-6 h-6 transition-all duration-300;
   }
   
-  /* Bottom nav safe area */
+  .nav-icon-active {
+    @apply scale-110;
+  }
+  
+  /* Gradient backgrounds */
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .bg-gradient-peach {
+    background: var(--gradient-peach);
+  }
+  
+  .bg-gradient-mint {
+    background: var(--gradient-mint);
+  }
+  
+  .bg-gradient-lavender {
+    background: var(--gradient-lavender);
+  }
+  
+  .bg-gradient-sky {
+    background: var(--gradient-sky);
+  }
+  
+  /* Safe area padding */
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 1rem);
   }
   
-  /* Smooth page transitions */
-  .page-enter {
-    @apply animate-in fade-in slide-in-from-right-4 duration-300;
-  }
-  
-  .page-exit {
-    @apply animate-out fade-out slide-out-to-left-4 duration-200;
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0);
   }
 }
 
 @layer utilities {
-  /* Hide scrollbar but keep functionality */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -192,34 +201,54 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
-  /* Glass effect */
-  .glass {
-    @apply bg-background/80 backdrop-blur-lg;
+}
+
+/* Blob morphing animation */
+@keyframes morph {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
   }
-  
-  /* Text gradient */
-  .text-gradient {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-sage);
+  25% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+  50% {
+    border-radius: 50% 60% 30% 60% / 30% 40% 70% 50%;
+  }
+  75% {
+    border-radius: 60% 40% 50% 40% / 60% 50% 30% 70%;
   }
 }
 
-/* Custom keyframe animations */
-@keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+/* Smooth fade animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-pulse-soft {
-  animation: pulse-soft 2s ease-in-out infinite;
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
 }
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }

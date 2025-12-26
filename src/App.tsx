@@ -14,10 +14,8 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Protected route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -25,18 +23,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
-
+  if (!user) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
-// Public route wrapper (redirects to dashboard if logged in)
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -44,57 +36,19 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
+  if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <PublicRoute>
-            <AuthPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/add-entry"
-        element={
-          <ProtectedRoute>
-            <AddEntryPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/history"
-        element={
-          <ProtectedRoute>
-            <HistoryPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/insights"
-        element={
-          <ProtectedRoute>
-            <InsightsPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/" element={<PublicRoute><AuthPage /></PublicRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/add-entry" element={<ProtectedRoute><AddEntryPage /></ProtectedRoute>} />
+      <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
+      <Route path="/insights" element={<ProtectedRoute><InsightsPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { MealEntry, PortionSize, EatingSpeed, SocialSetting, DetectedTrigger } from '@/types';
+import { MealEntry, DetectedTrigger } from '@/types';
 import { useAuth } from './AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 interface MealContextType {
   entries: MealEntry[];
@@ -14,66 +16,106 @@ interface MealContextType {
   getRecentEntries: (limit?: number) => MealEntry[];
   getTotalCount: () => number;
   getCompletedCount: () => number;
+  refetch: () => Promise<void>;
 }
 
 const MealContext = createContext<MealContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'bloat_ai_meals';
+// Helper to convert DB row to MealEntry
+function dbRowToMealEntry(row: any): MealEntry {
+  return {
+    ...row,
+    detected_triggers: Array.isArray(row.detected_triggers) 
+      ? row.detected_triggers as DetectedTrigger[]
+      : [],
+  };
+}
 
 export function MealProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [entries, setEntries] = useState<MealEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load entries from localStorage
-  useEffect(() => {
-    if (user) {
-      const stored = localStorage.getItem(`${STORAGE_KEY}_${user.id}`);
-      if (stored) {
-        setEntries(JSON.parse(stored));
-      } else {
-        setEntries([]);
-      }
-    } else {
+  const fetchEntries = async () => {
+    if (!user) {
       setEntries([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('meal_entries')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching entries:', error);
+    } else {
+      setEntries((data || []).map(dbRowToMealEntry));
     }
     setIsLoading(false);
-  }, [user]);
+  };
 
-  // Save entries to localStorage
   useEffect(() => {
-    if (user && !isLoading) {
-      localStorage.setItem(`${STORAGE_KEY}_${user.id}`, JSON.stringify(entries));
-    }
-  }, [entries, user, isLoading]);
+    fetchEntries();
+  }, [user]);
 
   const addEntry = async (entryData: Omit<MealEntry, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<MealEntry> => {
     if (!user) throw new Error('User not authenticated');
 
-    const now = new Date().toISOString();
-    const newEntry: MealEntry = {
-      ...entryData,
-      id: crypto.randomUUID(),
-      user_id: user.id,
-      created_at: now,
-      updated_at: now,
-    };
+    const { data, error } = await supabase
+      .from('meal_entries')
+      .insert({
+        meal_description: entryData.meal_description,
+        photo_url: entryData.photo_url,
+        portion_size: entryData.portion_size,
+        eating_speed: entryData.eating_speed,
+        social_setting: entryData.social_setting,
+        bloating_rating: entryData.bloating_rating,
+        rating_status: entryData.rating_status,
+        rating_due_at: entryData.rating_due_at,
+        detected_triggers: entryData.detected_triggers as unknown as Json,
+        user_id: user.id,
+      })
+      .select()
+      .single();
 
+    if (error) throw error;
+    
+    const newEntry = dbRowToMealEntry(data);
     setEntries(prev => [newEntry, ...prev]);
     return newEntry;
   };
 
   const updateEntry = async (id: string, updates: Partial<MealEntry>) => {
+    const dbUpdates: Record<string, any> = { ...updates };
+    if (updates.detected_triggers) {
+      dbUpdates.detected_triggers = updates.detected_triggers as unknown as Json;
+    }
+
+    const { error } = await supabase
+      .from('meal_entries')
+      .update(dbUpdates)
+      .eq('id', id);
+
+    if (error) throw error;
+
     setEntries(prev =>
       prev.map(entry =>
-        entry.id === id
-          ? { ...entry, ...updates, updated_at: new Date().toISOString() }
-          : entry
+        entry.id === id ? { ...entry, ...updates } : entry
       )
     );
   };
 
   const deleteEntry = async (id: string) => {
+    const { error } = await supabase
+      .from('meal_entries')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
     setEntries(prev => prev.filter(entry => entry.id !== id));
   };
 
@@ -96,21 +138,16 @@ export function MealProvider({ children }: { children: ReactNode }) {
 
     return entries.find(entry => {
       if (entry.rating_status !== 'pending') return false;
-      if (!entry.rating_due_at) return false;
-      
-      const dueAt = new Date(entry.rating_due_at);
-      return dueAt <= now && new Date(entry.created_at) >= oneDayAgo;
+      const createdAt = new Date(entry.created_at);
+      return createdAt >= oneDayAgo;
     }) || null;
   };
 
   const getRecentEntries = (limit = 10): MealEntry[] => {
-    return entries
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, limit);
+    return entries.slice(0, limit);
   };
 
   const getTotalCount = () => entries.length;
-
   const getCompletedCount = () => entries.filter(e => e.rating_status === 'completed').length;
 
   return (
@@ -127,6 +164,7 @@ export function MealProvider({ children }: { children: ReactNode }) {
         getRecentEntries,
         getTotalCount,
         getCompletedCount,
+        refetch: fetchEntries,
       }}
     >
       {children}
