@@ -4,6 +4,7 @@ import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, Ch
 import { Textarea } from '@/components/ui/textarea';
 import { FODMAPGuide } from '@/components/triggers/FODMAPGuide';
 import { TriggerSelectorModal } from '@/components/triggers/TriggerSelectorModal';
+import CounterLoader from '@/components/shared/CounterLoader';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -78,39 +79,6 @@ export default function AddEntryPage() {
     }
   };
 
-  // Generate creative meal title from description
-  const generateCreativeTitle = (description: string) => {
-    // Simple client-side title generation based on description
-    const words = description.split(' ');
-    const foodKeywords = ['pasta', 'salad', 'chicken', 'beef', 'fish', 'rice', 'bread', 'soup', 'pizza', 'burger', 'sandwich', 'steak', 'tacos', 'curry', 'noodles', 'sushi'];
-    const adjectives = ['Homestyle', 'Garden Fresh', 'Golden', 'Classic', 'Savory', 'Delicious', 'Artisan', 'Gourmet'];
-    
-    let mainFood = 'Meal';
-    for (const word of words) {
-      if (foodKeywords.some(k => word.toLowerCase().includes(k))) {
-        mainFood = word.charAt(0).toUpperCase() + word.slice(1);
-        break;
-      }
-    }
-    
-    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    return `${adjective} ${mainFood}`;
-  };
-
-  const getMealCategory = (description: string) => {
-    const desc = description.toLowerCase();
-    if (desc.includes('breakfast') || desc.includes('eggs') || desc.includes('pancake') || desc.includes('toast')) {
-      return 'Breakfast';
-    } else if (desc.includes('salad') || desc.includes('vegetable')) {
-      return 'Light & Fresh';
-    } else if (desc.includes('pasta') || desc.includes('rice') || desc.includes('noodle')) {
-      return 'Comfort Food';
-    } else if (desc.includes('soup') || desc.includes('stew')) {
-      return 'Warming';
-    }
-    return 'Homemade';
-  };
-
   const analyzePhoto = async (file: File) => {
     setIsAnalyzing(true);
     setPhotoAnalyzed(false);
@@ -126,8 +94,8 @@ export default function AddEntryPage() {
 
       const description = data.meal_description || 'A delicious meal';
       setAiDescription(description);
-      setCreativeMealTitle(generateCreativeTitle(description));
-      setMealCategory(getMealCategory(description));
+      setCreativeMealTitle(data.creative_title || 'Delicious Meal');
+      setMealCategory(data.meal_category || 'Homemade');
       
       const validTriggers = validateTriggers(data.triggers || []);
       setDetectedTriggers(validTriggers);
@@ -267,43 +235,58 @@ export default function AddEntryPage() {
       />
 
       {/* Photo Section - Full Bleed Hero */}
-      <section className="relative w-full aspect-square max-h-[50vh] overflow-hidden bg-gradient-to-br from-sage-light/50 to-lavender/30">
+      <section className="relative w-full aspect-[4/3] overflow-hidden">
         {!photoUrl ? (
-          /* Photo Upload Options */
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-8">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Log Your Meal</h1>
-            <p className="text-muted-foreground text-center text-sm">Take a photo or choose from your gallery</p>
+          /* Premium Photo Upload UI */
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-lavender/20 to-mint/30 flex flex-col items-center justify-center px-6">
+            {/* Decorative blobs */}
+            <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-20 right-10 w-40 h-40 bg-lavender/30 rounded-full blur-3xl" />
             
-            <div className="flex gap-4 mt-4">
-              {/* Camera Button */}
+            {/* Back button */}
+            <button
+              onClick={() => navigate(-1)}
+              className="absolute top-4 left-4 p-3 rounded-full bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg transition-all duration-200 hover:bg-card active:scale-95 z-10"
+            >
+              <X className="w-5 h-5 text-foreground" />
+            </button>
+            
+            {/* Content */}
+            <div className="relative z-10 text-center mb-8">
+              <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">Log Your Meal</h1>
+              <p className="text-muted-foreground text-sm">Snap a photo to analyze your food</p>
+            </div>
+            
+            <div className="relative z-10 flex gap-5">
+              {/* Camera Button - Premium */}
               <button
                 onClick={openCamera}
                 disabled={isAnalyzing}
-                className="flex flex-col items-center gap-3 p-6 bg-card rounded-3xl border border-border/50 transition-all duration-300 hover:scale-105 hover:-translate-y-1 active:scale-95"
-                style={{ boxShadow: '0 8px 24px -8px hsl(var(--foreground) / 0.1)' }}
+                className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
+                style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
               >
-                <div className="p-4 rounded-2xl bg-primary/10">
-                  <Camera className="w-8 h-8 text-primary" />
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-primary to-sage-dark transition-transform group-hover:scale-110">
+                  <Camera className="w-8 h-8 text-primary-foreground" />
                 </div>
-                <span className="font-semibold text-foreground text-sm">Camera</span>
+                <span className="font-semibold text-foreground">Camera</span>
               </button>
 
-              {/* Gallery Button */}
+              {/* Gallery Button - Premium */}
               <button
                 onClick={openGallery}
                 disabled={isAnalyzing}
-                className="flex flex-col items-center gap-3 p-6 bg-card rounded-3xl border border-border/50 transition-all duration-300 hover:scale-105 hover:-translate-y-1 active:scale-95"
-                style={{ boxShadow: '0 8px 24px -8px hsl(var(--foreground) / 0.1)' }}
+                className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
+                style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
               >
-                <div className="p-4 rounded-2xl bg-lavender/40">
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-lavender to-secondary transition-transform group-hover:scale-110">
                   <ImageIcon className="w-8 h-8 text-secondary-foreground" />
                 </div>
-                <span className="font-semibold text-foreground text-sm">Gallery</span>
+                <span className="font-semibold text-foreground">Gallery</span>
               </button>
             </div>
           </div>
         ) : (
-          /* Photo Preview with Gradient Overlay */
+          /* Photo Preview with Premium Overlay */
           <>
             <img
               src={photoUrl}
@@ -312,21 +295,20 @@ export default function AddEntryPage() {
             />
             
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/20 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent pointer-events-none" />
             
-            {/* Loading overlay */}
+            {/* Loading overlay with Counter Loader */}
             {isAnalyzing && (
-              <div className="absolute inset-0 bg-background/80 backdrop-blur-md flex flex-col items-center justify-center gap-4">
-                <div className="w-16 h-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
-                <span className="font-medium text-foreground">Analyzing your meal...</span>
+              <div className="absolute inset-0 bg-card/95 backdrop-blur-xl flex items-center justify-center">
+                <CounterLoader />
               </div>
             )}
             
             {/* Creative meal title overlay */}
             {photoAnalyzed && creativeMealTitle && (
-              <div className="absolute bottom-0 left-0 right-0 p-5 animate-slide-up">
-                <h1 className="text-2xl font-bold text-primary-foreground drop-shadow-lg">{creativeMealTitle}</h1>
-                <p className="text-sm text-primary-foreground/80 font-medium mt-0.5">{mealCategory}</p>
+              <div className="absolute bottom-0 left-0 right-0 p-6 animate-slide-up">
+                <p className="text-xs font-semibold text-primary-foreground/70 uppercase tracking-widest mb-1">{mealCategory}</p>
+                <h1 className="text-3xl font-bold text-primary-foreground drop-shadow-lg tracking-tight">{creativeMealTitle}</h1>
               </div>
             )}
             
@@ -335,14 +317,14 @@ export default function AddEntryPage() {
               <>
                 <button
                   onClick={removePhoto}
-                  className="absolute top-4 right-4 p-3 rounded-full bg-card/40 backdrop-blur-xl border border-card/50 transition-all duration-200 hover:bg-card/60 active:scale-95"
+                  className="absolute top-4 right-4 p-3 rounded-full bg-card/30 backdrop-blur-xl border border-card/50 shadow-lg transition-all duration-200 hover:bg-card/50 active:scale-95"
                 >
                   <RefreshCw className="w-5 h-5 text-primary-foreground" />
                 </button>
                 
                 <button
                   onClick={() => navigate(-1)}
-                  className="absolute top-4 left-4 p-3 rounded-full bg-card/40 backdrop-blur-xl border border-card/50 transition-all duration-200 hover:bg-card/60 active:scale-95"
+                  className="absolute top-4 left-4 p-3 rounded-full bg-card/30 backdrop-blur-xl border border-card/50 shadow-lg transition-all duration-200 hover:bg-card/50 active:scale-95"
                 >
                   <X className="w-5 h-5 text-primary-foreground" />
                 </button>
@@ -350,35 +332,29 @@ export default function AddEntryPage() {
             )}
           </>
         )}
-        
-        {/* Header for non-photo state */}
-        {!photoUrl && (
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute top-4 left-4 p-3 rounded-full bg-card/80 border border-border/50 transition-all duration-200 hover:bg-card"
-          >
-            <X className="w-5 h-5 text-foreground" />
-          </button>
-        )}
       </section>
 
       {/* Scrollable Content */}
-      <section className="flex-1 -mt-4 relative z-10 rounded-t-3xl bg-background overflow-y-auto pb-36">
-        <div className="p-5 space-y-4">
+      <section className="flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto pb-40 shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)]">
+        <div className="p-5 space-y-4 pt-8">
           {/* AI Analysis Results */}
           {photoAnalyzed && (
             <div className="space-y-4">
               {/* AI Detection Card - Stagger 1 */}
-              <div className="bg-card rounded-3xl p-5 border border-border/50 animate-slide-up" 
-                   style={{ animationDelay: '0ms', boxShadow: '0 4px 20px -4px hsl(var(--foreground) / 0.06)' }}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <h3 className="font-bold text-foreground">AI Detected</h3>
+              <div 
+                className="glass-card p-5 animate-slide-up opacity-0" 
+                style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-foreground text-lg">What We Found</h3>
                   </div>
                   <button
                     onClick={() => setIsEditingDescription(!isEditingDescription)}
-                    className="p-2 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                    className="p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors active:scale-95"
                   >
                     <Pencil className="w-4 h-4 text-muted-foreground" />
                   </button>
@@ -388,26 +364,33 @@ export default function AddEntryPage() {
                   <Textarea
                     value={aiDescription}
                     onChange={(e) => setAiDescription(e.target.value)}
-                    rows={2}
+                    rows={3}
                     placeholder="Describe your meal..."
-                    className="resize-none bg-muted/30 border-border/50"
+                    className="resize-none bg-muted/30 border-border/50 rounded-2xl"
                     autoFocus
                   />
                 ) : (
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed text-[15px]">
                     {aiDescription || 'Tap edit to describe your meal'}
                   </p>
                 )}
               </div>
 
               {/* Triggers Card - Stagger 2 */}
-              <div className="bg-card rounded-3xl p-5 border border-border/50 animate-slide-up" 
-                   style={{ animationDelay: '100ms', boxShadow: '0 4px 20px -4px hsl(var(--foreground) / 0.06)' }}>
+              <div 
+                className="glass-card p-5 animate-slide-up opacity-0" 
+                style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-foreground">Detected Triggers</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-coral/30 to-peach/30">
+                      <span className="text-lg">🎯</span>
+                    </div>
+                    <h3 className="font-bold text-foreground text-lg">Detected Triggers</h3>
+                  </div>
                   <button
                     onClick={() => setShowGuide(!showGuide)}
-                    className="flex items-center gap-1 text-xs text-primary font-medium"
+                    className="flex items-center gap-1.5 text-xs text-primary font-semibold px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/15 transition-colors"
                   >
                     Guide {showGuide ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                   </button>
@@ -417,87 +400,104 @@ export default function AddEntryPage() {
 
                 {/* Beautiful Trigger Pills */}
                 {detectedTriggers.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {detectedTriggers.map((trigger, index) => {
                       const categoryInfo = getTriggerCategory(trigger.category);
                       
                       return (
                         <div
                           key={index}
-                          className="flex items-center gap-3 p-4 bg-muted/30 rounded-2xl group transition-all duration-200 hover:bg-muted/50"
+                          className="flex items-center gap-3 p-4 rounded-2xl border border-border/30 group transition-all duration-200 hover:shadow-md"
+                          style={{ 
+                            background: `linear-gradient(135deg, ${categoryInfo?.color}08 0%, ${categoryInfo?.color}04 100%)`,
+                            borderLeftWidth: '4px',
+                            borderLeftColor: categoryInfo?.color || 'hsl(var(--primary))'
+                          }}
                         >
-                          {/* Colored indicator */}
+                          {/* Icon/Dot */}
                           <div 
-                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                             style={{ 
-                              backgroundColor: categoryInfo?.color || 'hsl(var(--primary))',
-                              boxShadow: `0 0 8px ${categoryInfo?.color || 'hsl(var(--primary))'}60`
+                              backgroundColor: `${categoryInfo?.color}20`
                             }}
-                          />
+                          >
+                            <div 
+                              className="w-3 h-3 rounded-full"
+                              style={{ 
+                                backgroundColor: categoryInfo?.color || 'hsl(var(--primary))',
+                                boxShadow: `0 0 12px ${categoryInfo?.color || 'hsl(var(--primary))'}60`
+                              }}
+                            />
+                          </div>
                           
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-foreground text-sm">
+                            <p className="font-semibold text-foreground text-[15px]">
                               {categoryInfo?.displayName || trigger.category}
                             </p>
                             {trigger.food && (
-                              <p className="text-xs text-muted-foreground truncate">{trigger.food}</p>
+                              <p className="text-sm text-muted-foreground truncate">{trigger.food}</p>
                             )}
                           </div>
-                          
-                          {/* Confidence */}
-                          {trigger.confidence && (
-                            <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
-                              {trigger.confidence}%
-                            </span>
-                          )}
                           
                           {/* Delete */}
                           <button
                             onClick={() => removeTrigger(index)}
-                            className="w-7 h-7 rounded-full bg-destructive/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/20"
+                            className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-destructive/20 active:scale-90"
                           >
-                            <X className="w-3.5 h-3.5 text-destructive" />
+                            <X className="w-4 h-4 text-destructive" />
                           </button>
                         </div>
                       );
                     })}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground py-4 text-center">No triggers detected</p>
+                  <div className="py-8 text-center">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-muted/50 flex items-center justify-center">
+                      <span className="text-2xl">✨</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">No triggers detected — looking good!</p>
+                  </div>
                 )}
 
                 {/* Add Trigger Button */}
                 <button
                   onClick={() => setShowTriggerModal(true)}
-                  className="w-full mt-3 flex items-center justify-center gap-2 p-3 border-2 border-dashed border-primary/30 rounded-2xl text-primary font-semibold text-sm transition-all hover:border-primary/50 hover:bg-primary/5"
+                  className="w-full mt-4 flex items-center justify-center gap-2 p-4 border-2 border-dashed border-primary/30 rounded-2xl text-primary font-semibold transition-all hover:border-primary/50 hover:bg-primary/5 active:scale-[0.98]"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-5 h-5" />
                   Add Trigger
                 </button>
               </div>
 
               {/* Bloating Rating Card - Stagger 3 */}
-              <div className="bg-card rounded-3xl p-5 border border-border/50 animate-slide-up" 
-                   style={{ animationDelay: '200ms', boxShadow: '0 4px 20px -4px hsl(var(--foreground) / 0.06)' }}>
-                <h3 className="font-bold text-foreground">How bloated?</h3>
-                <p className="text-xs text-muted-foreground mt-0.5 mb-4">Optional – We'll remind you in 90 min</p>
+              <div 
+                className="glass-card p-5 animate-slide-up opacity-0" 
+                style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
+              >
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-sky/40 to-sky-light/40">
+                    <span className="text-lg">📊</span>
+                  </div>
+                  <h3 className="font-bold text-foreground text-lg">How bloated?</h3>
+                </div>
+                <p className="text-xs text-muted-foreground ml-12 mb-5">Optional — We'll remind you in 90 min</p>
 
                 <div className="grid grid-cols-5 gap-2">
                   {[1, 2, 3, 4, 5].map(rating => (
                     <button
                       key={rating}
                       onClick={() => setBloatingRating(bloatingRating === rating ? null : rating)}
-                      className={`flex flex-col items-center justify-center gap-1 py-3 px-1 rounded-2xl border-2 transition-all duration-200 ${
+                      className={`flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-2xl border-2 transition-all duration-200 ${
                         bloatingRating === rating
                           ? 'border-primary bg-primary text-primary-foreground scale-105'
-                          : 'border-border/50 bg-muted/20 hover:border-primary/30 hover:bg-muted/40'
+                          : 'border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30'
                       }`}
                       style={bloatingRating === rating ? {
-                        boxShadow: '0 4px 12px hsl(var(--primary) / 0.3)'
+                        boxShadow: '0 8px 20px hsl(var(--primary) / 0.35)'
                       } : undefined}
                     >
-                      <span className={`text-xl font-bold ${
+                      <span className={`text-2xl font-bold ${
                         bloatingRating === rating ? '' : 'text-foreground'
                       }`}>
                         {rating}
@@ -518,17 +518,17 @@ export default function AddEntryPage() {
 
       {/* Floating Save Button */}
       {photoAnalyzed && (
-        <div className="fixed bottom-24 left-4 right-4 max-w-lg mx-auto z-40">
+        <div className="fixed bottom-28 left-4 right-4 max-w-lg mx-auto z-40 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <button
             onClick={handleSave}
             disabled={!isValid || isSaving}
-            className={`w-full h-14 flex items-center justify-center gap-2 rounded-full transition-all duration-300 ${
+            className={`w-full h-[60px] flex items-center justify-center gap-3 rounded-full font-semibold text-lg transition-all duration-300 ${
               !isValid || isSaving 
                 ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-                : 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground hover:-translate-y-0.5 active:scale-[0.98]'
+                : 'bg-gradient-to-r from-primary via-sage-dark to-primary text-primary-foreground hover:-translate-y-1 active:scale-[0.98]'
             }`}
             style={isValid && !isSaving ? {
-              boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
+              boxShadow: '0 12px 32px -4px hsl(var(--primary) / 0.5), 0 4px 12px -2px hsl(var(--foreground) / 0.1)'
             } : undefined}
           >
             {isSaving ? (
@@ -538,7 +538,7 @@ export default function AddEntryPage() {
               </>
             ) : (
               <>
-                <span className="font-semibold">Save Meal Entry</span>
+                Save Meal Entry
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
