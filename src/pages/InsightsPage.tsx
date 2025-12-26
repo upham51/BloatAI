@@ -113,7 +113,7 @@ export default function InsightsPage() {
               <p className="text-muted-foreground mt-1">Your personalized analysis</p>
             </header>
 
-            <div className="glass-card text-center py-16 space-y-4 animate-slide-up" style={{ animationFillMode: 'forwards' }}>
+            <div className="premium-card text-center py-16 space-y-4 animate-slide-up" style={{ animationFillMode: 'forwards' }}>
               <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
                 <Sparkles className="w-10 h-10 text-primary" />
               </div>
@@ -166,21 +166,21 @@ export default function InsightsPage() {
             className="grid grid-cols-3 gap-3 animate-slide-up opacity-0" 
             style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
           >
-            <div className="glass-card p-4 text-center">
+            <div className="premium-card p-4 text-center">
               <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 w-fit mx-auto mb-2">
                 <Utensils className="w-5 h-5 text-primary" />
               </div>
               <div className="text-2xl font-bold text-foreground">{insights?.totalMeals}</div>
               <div className="text-xs text-muted-foreground">Total Meals</div>
             </div>
-            <div className="glass-card p-4 text-center">
+            <div className="premium-card p-4 text-center">
               <div className="p-2 rounded-xl bg-gradient-to-br from-coral/20 to-peach/20 w-fit mx-auto mb-2">
                 <Flame className="w-5 h-5 text-coral" />
               </div>
               <div className="text-2xl font-bold text-foreground">{insights?.highBloatingCount}</div>
               <div className="text-xs text-muted-foreground">High Bloating</div>
             </div>
-            <div className="glass-card p-4 text-center">
+            <div className="premium-card p-4 text-center">
               <div className="p-2 rounded-xl bg-gradient-to-br from-sky/20 to-sky-light/20 w-fit mx-auto mb-2">
                 <Calendar className="w-5 h-5 text-sky" />
               </div>
@@ -192,12 +192,8 @@ export default function InsightsPage() {
           {/* Potential Triggers - The Star Section */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div 
-              className="rounded-3xl p-5 animate-slide-up opacity-0 bg-card/80 backdrop-blur-xl"
-              style={{ 
-                animationDelay: '100ms', 
-                animationFillMode: 'forwards',
-                boxShadow: '0 4px 20px -4px hsl(var(--foreground) / 0.08), 0 12px 40px -8px hsl(var(--foreground) / 0.12), inset 0 1px 1px hsl(0 0% 100% / 0.1)'
-              }}
+              className="premium-card p-5 animate-slide-up opacity-0"
+              style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-5">
                 <div 
@@ -281,7 +277,7 @@ export default function InsightsPage() {
 
           {/* What You Eat Most */}
           <div 
-            className="glass-card p-5 animate-slide-up opacity-0"
+            className="premium-card p-5 animate-slide-up opacity-0"
             style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}
           >
             <div className="flex items-center gap-3 mb-4">
@@ -337,7 +333,7 @@ export default function InsightsPage() {
           {/* Top Foods */}
           {insights?.topFoods && insights.topFoods.length > 0 && (
             <div 
-              className="glass-card p-5 animate-slide-up opacity-0"
+              className="premium-card p-5 animate-slide-up opacity-0"
               style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-4">
@@ -369,7 +365,7 @@ export default function InsightsPage() {
 
           {/* Tips Card */}
           <div 
-            className="glass-card p-5 animate-slide-up opacity-0 bg-gradient-to-br from-primary/5 to-transparent"
+            className="premium-card p-5 animate-slide-up opacity-0 bg-gradient-to-br from-primary/5 to-transparent"
             style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}
           >
             <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
