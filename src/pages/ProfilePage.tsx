@@ -1,16 +1,23 @@
 import { useState } from 'react';
-import { User, Mail, Bell, LogOut, Trash2, ChevronRight, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { User, Mail, Bell, LogOut, Trash2, ChevronRight, Shield, CreditCard, Crown, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription, STRIPE_PLANS } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { hasAccess, plan, subscriptionEnd, openCustomerPortal, isLoading } = useSubscription();
   const { toast } = useToast();
   
   const [pushEnabled, setPushEnabled] = useState(true);
   const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -25,6 +32,15 @@ export default function ProfilePage() {
         title: 'Error',
         description: 'Failed to sign out. Please try again.',
       });
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setIsOpeningPortal(true);
+    try {
+      await openCustomerPortal();
+    } finally {
+      setIsOpeningPortal(false);
     }
   };
 
@@ -51,7 +67,7 @@ export default function ProfilePage() {
           </header>
 
           {/* Profile Card */}
-          <div className="glass-card p-6 flex items-center gap-5 animate-slide-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
+          <div className="premium-card p-6 flex items-center gap-5 animate-slide-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-sage-dark flex items-center justify-center shadow-lg">
               <User className="w-10 h-10 text-primary-foreground" />
             </div>
@@ -66,8 +82,78 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {/* Subscription Section */}
+          <div className="premium-card overflow-hidden animate-slide-up opacity-0" style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}>
+            <div className="px-5 py-4 border-b border-border/30">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-amber-400/30 to-amber-500/20">
+                  <Crown className="w-5 h-5 text-amber-500" />
+                </div>
+                <h3 className="font-bold text-foreground">Subscription</h3>
+              </div>
+            </div>
+            
+            <div className="p-5 space-y-4">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : hasAccess ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-foreground flex items-center gap-2">
+                        Bloat AI Pro
+                        <span className="px-2 py-0.5 text-xs rounded-full bg-primary/20 text-primary font-medium">
+                          {plan === 'annual' ? 'Annual' : 'Monthly'}
+                        </span>
+                      </p>
+                      {subscriptionEnd && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Renews {format(subscriptionEnd, 'MMM d, yyyy')}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-sm font-bold text-primary">
+                      ${plan === 'annual' ? STRIPE_PLANS.annual.price : STRIPE_PLANS.monthly.price}
+                      <span className="text-xs text-muted-foreground font-normal">
+                        /{plan === 'annual' ? 'yr' : 'mo'}
+                      </span>
+                    </span>
+                  </div>
+                  <Button 
+                    onClick={handleManageSubscription}
+                    disabled={isOpeningPortal}
+                    variant="outline" 
+                    className="w-full"
+                  >
+                    {isOpeningPortal ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <CreditCard className="w-4 h-4 mr-2" />
+                    )}
+                    Manage Subscription
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="text-muted-foreground text-sm">
+                    You don't have an active subscription.
+                  </p>
+                  <Button 
+                    onClick={() => navigate('/pricing')}
+                    className="w-full bg-gradient-to-r from-primary to-sage-dark"
+                  >
+                    <Crown className="w-4 h-4 mr-2" />
+                    Upgrade to Pro
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+
           {/* Notifications Section */}
-          <div className="glass-card overflow-hidden animate-slide-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
+          <div className="premium-card overflow-hidden animate-slide-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
             <div className="px-5 py-4 border-b border-border/30">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-gradient-to-br from-peach/30 to-coral/20">
@@ -103,7 +189,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Account Section */}
-          <div className="glass-card overflow-hidden animate-slide-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+          <div className="premium-card overflow-hidden animate-slide-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
             <div className="px-5 py-4 border-b border-border/30">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-gradient-to-br from-sky/30 to-sky-light/30">
