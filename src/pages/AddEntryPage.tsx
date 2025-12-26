@@ -314,7 +314,9 @@ export default function AddEntryPage() {
             {photoAnalyzed && aiDescription && (
               <div className="absolute bottom-0 left-0 right-0 p-6 animate-slide-up">
                 <p className="text-xs font-semibold text-primary-foreground/70 uppercase tracking-widest mb-1">{mealCategory}</p>
-                <h1 className="text-2xl font-bold text-primary-foreground drop-shadow-lg tracking-tight line-clamp-2">{aiDescription.slice(0, 60)}{aiDescription.length > 60 ? '...' : ''}</h1>
+                <h1 className="text-2xl font-bold text-primary-foreground drop-shadow-lg tracking-tight line-clamp-2">
+                  {creativeMealTitle || 'Your meal'}
+                </h1>
               </div>
             )}
             
