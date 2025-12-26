@@ -128,7 +128,7 @@ export default function HistoryPage() {
           {/* Quick Stats Banner */}
           {entries.length >= 3 && (
             <div 
-              className="glass-card p-4 flex gap-4 animate-slide-up opacity-0"
+              className="premium-card p-4 flex gap-4 animate-slide-up opacity-0"
               style={{ animationDelay: '25ms', animationFillMode: 'forwards' }}
             >
               <div className="flex-1 text-center">
@@ -167,7 +167,7 @@ export default function HistoryPage() {
 
           {/* Filter Tabs */}
           <div 
-            className="glass-card p-1.5 flex gap-1.5 animate-slide-up opacity-0" 
+            className="premium-card p-1.5 flex gap-1.5 animate-slide-up opacity-0" 
             style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
           >
             <button
@@ -226,7 +226,7 @@ export default function HistoryPage() {
           {/* Empty State */}
           {filteredEntries.length === 0 && (
             <div 
-              className="glass-card text-center py-16 space-y-4 animate-slide-up opacity-0"
+              className="premium-card text-center py-16 space-y-4 animate-slide-up opacity-0"
               style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}
             >
               <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center">
@@ -311,7 +311,7 @@ function EntryCard({
 
   return (
     <div 
-      className={`glass-card overflow-hidden animate-slide-up opacity-0 ${
+      className={`premium-card overflow-hidden animate-slide-up opacity-0 ${
         isPending ? 'ring-2 ring-coral/30 ring-offset-2 ring-offset-background' : ''
       }`}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}

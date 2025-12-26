@@ -87,14 +87,15 @@ export default function DashboardPage() {
     return days;
   }, [entries]);
 
-  // Weekly stats
+  // Weekly stats - count individual meals, not days
   const weeklyStats = useMemo(() => {
     const weekAgo = subDays(new Date(), 7);
     const thisWeek = entries.filter(e => isAfter(new Date(e.created_at), weekAgo));
     const rated = thisWeek.filter(e => e.bloating_rating);
     
-    const goodDays = weekData.filter(d => d.bloating !== null && d.bloating <= 2).length;
-    const roughDays = weekData.filter(d => d.bloating !== null && d.bloating >= 4).length;
+    // Count individual meals with comfortable (≤2) or rough (≥4) bloating
+    const comfortableMeals = rated.filter(e => e.bloating_rating && e.bloating_rating <= 2).length;
+    const roughMeals = rated.filter(e => e.bloating_rating && e.bloating_rating >= 4).length;
     
     const twoWeeksAgo = subDays(new Date(), 14);
     const lastWeek = entries.filter(e => {
@@ -113,15 +114,15 @@ export default function DashboardPage() {
     const trend = lastWeekAvg > 0 ? Math.round(((lastWeekAvg - thisWeekAvg) / lastWeekAvg) * 100) : 0;
     const recentTrend = trend > 0 ? 'improving' : trend < 0 ? 'worsening' : 'stable';
     
-    return { goodDays, roughDays, trend, thisWeekAvg, mealsThisWeek: thisWeek.length, recentTrend };
-  }, [entries, weekData]);
+    return { comfortableMeals, roughMeals, trend, thisWeekAvg, mealsThisWeek: thisWeek.length, recentTrend };
+  }, [entries]);
 
   // Context-aware quote
   const dailyQuote = useMemo(() => {
     return getQuoteForContext({
       recentTrend: weeklyStats.recentTrend as 'improving' | 'worsening' | 'stable',
-      goodDaysCount: weeklyStats.goodDays,
-      roughDaysCount: weeklyStats.roughDays,
+      goodDaysCount: weeklyStats.comfortableMeals,
+      roughDaysCount: weeklyStats.roughMeals,
       totalEntries: entries.length,
       streak,
     });
@@ -270,18 +271,18 @@ export default function DashboardPage() {
             >
               <h2 className="font-bold text-foreground mb-5 text-lg">Your Week at a Glance</h2>
               
-              {/* Good/Rough Days - 3D Cards */}
+              {/* Comfortable/Rough Meals - 3D Cards */}
               <div className="flex gap-4 mb-5">
                 <div className="flex-1 p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.25),inset_0_1px_0_hsl(0_0%_100%/0.6)]">
                   <span className="text-3xl block mb-1">😊</span>
-                  <div className="text-3xl font-bold text-primary">{weeklyStats.goodDays}</div>
-                  <div className="text-sm text-muted-foreground font-medium">Good Days</div>
+                  <div className="text-3xl font-bold text-primary">{weeklyStats.comfortableMeals}</div>
+                  <div className="text-sm text-muted-foreground font-medium">Comfortable</div>
                   <div className="text-xs text-primary/70 mt-1">Bloating ≤2</div>
                 </div>
                 <div className="flex-1 p-4 rounded-2xl bg-gradient-to-br from-coral/15 to-coral/5 border border-coral/20 shadow-[0_8px_24px_-8px_hsl(var(--coral)/0.25),inset_0_1px_0_hsl(0_0%_100%/0.6)]">
                   <span className="text-3xl block mb-1">😕</span>
-                  <div className="text-3xl font-bold text-coral">{weeklyStats.roughDays}</div>
-                  <div className="text-sm text-muted-foreground font-medium">Rough Days</div>
+                  <div className="text-3xl font-bold text-coral">{weeklyStats.roughMeals}</div>
+                  <div className="text-sm text-muted-foreground font-medium">Rough</div>
                   <div className="text-xs text-coral/70 mt-1">Bloating ≥4</div>
                 </div>
               </div>
@@ -358,7 +359,7 @@ export default function DashboardPage() {
           {/* Pending Rating - Luxurious */}
           {pendingEntry && (
             <div 
-              className="premium-card p-5 border-l-4 border-coral animate-scale-in"
+              className="premium-card p-5 animate-scale-in"
               style={{ animationDelay: '200ms' }}
             >
               <p className="font-bold text-foreground mb-1">Rate your last meal</p>
@@ -373,7 +374,7 @@ export default function DashboardPage() {
           {/* Primary CTA - Luxurious with shimmer */}
           <Button
             onClick={() => navigate('/add-entry')}
-            className="w-full h-18 rounded-3xl text-lg font-bold bg-gradient-to-r from-primary to-sage-dark text-primary-foreground relative overflow-hidden group animate-slide-up opacity-0"
+            className="w-full h-16 rounded-3xl text-lg font-bold bg-gradient-to-r from-primary to-sage-dark text-primary-foreground relative overflow-hidden group animate-slide-up opacity-0"
             style={{ 
               animationDelay: '250ms', 
               animationFillMode: 'forwards',
@@ -383,13 +384,7 @@ export default function DashboardPage() {
             {/* Shimmer effect */}
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             
-            <div className="flex items-center justify-center gap-3 relative z-10">
-              <span className="text-2xl filter drop-shadow">📸</span>
-              <div className="flex flex-col items-start">
-                <span className="text-lg font-bold">Log New Meal</span>
-                <span className="text-xs font-medium opacity-90">{mealPrompt}</span>
-              </div>
-            </div>
+            <span className="text-lg font-bold relative z-10">Log New Meal</span>
           </Button>
 
           {/* Empty State */}
