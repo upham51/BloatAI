@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      error_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string
+          error_type: string
+          id: string
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message: string
+          error_type: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string
+          error_type?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "error_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meal_entries: {
         Row: {
           bloating_rating: number | null
@@ -73,6 +108,45 @@ export type Database = {
           },
         ]
       }
+      monthly_costs: {
+        Row: {
+          ai_api_cost: number | null
+          created_at: string | null
+          id: string
+          month: string
+          notes: string | null
+          other_costs: number | null
+          stripe_fees: number | null
+          supabase_cost: number | null
+          total_cost: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_api_cost?: number | null
+          created_at?: string | null
+          id?: string
+          month: string
+          notes?: string | null
+          other_costs?: number | null
+          stripe_fees?: number | null
+          supabase_cost?: number | null
+          total_cost?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_api_cost?: number | null
+          created_at?: string | null
+          id?: string
+          month?: string
+          notes?: string | null
+          other_costs?: number | null
+          stripe_fees?: number | null
+          supabase_cost?: number | null
+          total_cost?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -82,6 +156,11 @@ export type Database = {
           id: string
           onboarding_completed: boolean | null
           push_subscription: Json | null
+          stripe_customer_id: string | null
+          subscription_ends_at: string | null
+          subscription_plan: string | null
+          subscription_status: string | null
+          trial_ends_at: string | null
           updated_at: string
         }
         Insert: {
@@ -92,6 +171,11 @@ export type Database = {
           id: string
           onboarding_completed?: boolean | null
           push_subscription?: Json | null
+          stripe_customer_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          trial_ends_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -102,6 +186,11 @@ export type Database = {
           id?: string
           onboarding_completed?: boolean | null
           push_subscription?: Json | null
+          stripe_customer_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          trial_ends_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -141,15 +230,42 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -276,6 +392,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
