@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useMeals } from '@/contexts/MealContext';
-import { TRIGGER_DISPLAY } from '@/types';
+import { getTriggerCategory } from '@/types';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
@@ -114,13 +114,13 @@ export default function InsightsPage() {
             </h2>
             <div className="space-y-2">
               {insights.triggerRankings.map((trigger, index) => {
-                const display = TRIGGER_DISPLAY[trigger.category] || { name: trigger.category };
+                const categoryInfo = getTriggerCategory(trigger.category);
                 return (
                   <Card key={trigger.category} variant="elevated" className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-coral/20 flex items-center justify-center text-sm font-bold text-coral">{index + 1}</div>
                       <div className="flex-1">
-                        <p className="font-medium text-foreground">{display.name}</p>
+                        <p className="font-medium text-foreground">{categoryInfo?.displayName || trigger.category}</p>
                         <p className="text-xs text-muted-foreground">{trigger.foods.slice(0, 3).join(', ')}</p>
                       </div>
                       <div className="text-right">
@@ -136,7 +136,7 @@ export default function InsightsPage() {
         )}
 
         <Card variant="success" className="p-4">
-          <h3 className="font-semibold text-foreground mb-2">💡 Quick Tips</h3>
+          <h3 className="font-semibold text-foreground mb-2">Quick Tips</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" /><span>Keep logging meals to improve accuracy</span></li>
             <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" /><span>Try eliminating your top trigger for a week</span></li>
