@@ -10,6 +10,7 @@ import DashboardPage from "./pages/DashboardPage";
 import AddEntryPage from "./pages/AddEntryPage";
 import HistoryPage from "./pages/HistoryPage";
 import InsightsPage from "./pages/InsightsPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,7 +49,7 @@ function AppRoutes() {
       <Route path="/add-entry" element={<ProtectedRoute><AddEntryPage /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
       <Route path="/insights" element={<ProtectedRoute><InsightsPage /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
