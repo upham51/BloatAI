@@ -141,10 +141,48 @@
     animation: morph 12s ease-in-out infinite;
   }
   
-  /* Glass card effect */
+  /* Glass card effect - Enhanced */
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl rounded-3xl border border-border/50;
-    box-shadow: 0 4px 24px -4px hsl(var(--foreground) / 0.06);
+    @apply bg-card/70 backdrop-blur-xl rounded-3xl border border-card/50;
+    box-shadow: 
+      0 8px 32px hsl(var(--foreground) / 0.04),
+      0 2px 8px hsl(var(--foreground) / 0.02),
+      inset 0 1px 0 hsl(0 0% 100% / 0.8);
+  }
+  
+  .glass-card:hover {
+    box-shadow: 
+      0 12px 40px hsl(var(--foreground) / 0.06),
+      0 4px 12px hsl(var(--foreground) / 0.03),
+      inset 0 1px 0 hsl(0 0% 100% / 0.9);
+  }
+  
+  /* Premium glassmorphic panel */
+  .glass-panel {
+    @apply backdrop-blur-2xl rounded-3xl;
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(0 0% 100% / 0.5);
+    box-shadow: 
+      0 8px 32px hsl(var(--foreground) / 0.04),
+      inset 0 1px 0 hsl(0 0% 100% / 0.8);
+  }
+  
+  /* Floating button style */
+  .floating-button {
+    @apply rounded-full;
+    box-shadow: 
+      0 12px 32px hsl(var(--primary) / 0.4),
+      0 6px 16px hsl(var(--foreground) / 0.1),
+      inset 0 1px 0 hsl(0 0% 100% / 0.3);
+  }
+  
+  .floating-button:hover {
+    box-shadow: 
+      0 16px 40px hsl(var(--primary) / 0.5),
+      0 8px 20px hsl(var(--foreground) / 0.12),
+      inset 0 1px 0 hsl(0 0% 100% / 0.4);
   }
   
   /* Soft shadow */
@@ -180,6 +218,17 @@
   
   .bg-gradient-sky {
     background: var(--gradient-sky);
+  }
+  
+  /* Photo gradient overlay */
+  .photo-gradient-overlay {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      hsl(var(--foreground) / 0.05) 40%,
+      hsl(var(--foreground) / 0.3) 70%,
+      hsl(var(--foreground) / 0.6) 100%
+    );
   }
   
   /* Safe area padding */
@@ -247,8 +296,24 @@
   animation: scaleIn 0.3s ease-out;
 }
 
+/* Slide down animation */
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 500px; }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+  overflow: hidden;
+}
+
 /* Staggered animations */
 .stagger-1 { animation-delay: 0.1s; }
 .stagger-2 { animation-delay: 0.2s; }
 .stagger-3 { animation-delay: 0.3s; }
 .stagger-4 { animation-delay: 0.4s; }
+
+/* Premium easing curves */
+.ease-premium {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
