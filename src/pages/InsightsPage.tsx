@@ -192,11 +192,21 @@ export default function InsightsPage() {
           {/* Potential Triggers - The Star Section */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div 
-              className="glass-card p-5 animate-slide-up opacity-0 border-l-4 border-coral"
-              style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
+              className="rounded-3xl p-5 animate-slide-up opacity-0 bg-card/80 backdrop-blur-xl"
+              style={{ 
+                animationDelay: '100ms', 
+                animationFillMode: 'forwards',
+                boxShadow: '0 4px 20px -4px hsl(var(--foreground) / 0.08), 0 12px 40px -8px hsl(var(--foreground) / 0.12), inset 0 1px 1px hsl(0 0% 100% / 0.1)'
+              }}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-coral/30 to-peach/30">
+              <div className="flex items-center gap-3 mb-5">
+                <div 
+                  className="p-2.5 rounded-2xl"
+                  style={{
+                    background: 'linear-gradient(135deg, hsl(var(--coral) / 0.2), hsl(var(--peach) / 0.3))',
+                    boxShadow: '0 4px 12px hsl(var(--coral) / 0.2), inset 0 1px 1px hsl(0 0% 100% / 0.2)'
+                  }}
+                >
                   <AlertTriangle className="w-5 h-5 text-coral" />
                 </div>
                 <div>
@@ -211,23 +221,36 @@ export default function InsightsPage() {
                   return (
                     <div 
                       key={trigger.category}
-                      className="p-4 rounded-2xl bg-gradient-to-r from-coral/5 to-transparent border border-coral/20"
+                      className="p-4 rounded-2xl bg-gradient-to-br from-background/80 to-muted/30 backdrop-blur-sm border border-border/50 transition-all duration-200 hover:scale-[1.01]"
+                      style={{
+                        boxShadow: '0 2px 8px -2px hsl(var(--foreground) / 0.06), 0 6px 20px -4px hsl(var(--foreground) / 0.08), inset 0 1px 1px hsl(0 0% 100% / 0.08)'
+                      }}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <div 
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: categoryInfo?.color }}
+                            style={{ 
+                              backgroundColor: categoryInfo?.color,
+                              boxShadow: `0 2px 8px ${categoryInfo?.color}40`
+                            }}
                           />
                           <span className="font-bold text-foreground">
                             {categoryInfo?.displayName || trigger.category}
                           </span>
                         </div>
-                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                          trigger.suspicionScore === 'high' 
-                            ? 'bg-coral/20 text-coral' 
-                            : 'bg-peach/30 text-coral/80'
-                        }`}>
+                        <span 
+                          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                            trigger.suspicionScore === 'high' 
+                              ? 'bg-coral/15 text-coral' 
+                              : 'bg-peach/20 text-coral/80'
+                          }`}
+                          style={{
+                            boxShadow: trigger.suspicionScore === 'high' 
+                              ? '0 2px 8px hsl(var(--coral) / 0.15)' 
+                              : '0 2px 8px hsl(var(--peach) / 0.15)'
+                          }}
+                        >
                           {trigger.suspicionScore === 'high' ? '⚠️ Likely' : '🤔 Possible'}
                         </span>
                       </div>
@@ -235,11 +258,14 @@ export default function InsightsPage() {
                         Found in <span className="font-semibold text-foreground">{trigger.withHighBloating}</span> of your {insights.highBloatingCount} high-bloating meals
                       </p>
                       {trigger.topFoods.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2">
+                        <div className="flex flex-wrap gap-1.5 mt-3">
                           {trigger.topFoods.map(({ food }) => (
                             <span 
                               key={food}
-                              className="text-xs px-2 py-0.5 rounded-full bg-muted/50 text-muted-foreground"
+                              className="text-xs px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/30"
+                              style={{
+                                boxShadow: 'inset 0 1px 2px hsl(var(--foreground) / 0.03)'
+                              }}
                             >
                               {food}
                             </span>
