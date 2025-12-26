@@ -25,10 +25,9 @@ export function TriggerSelectorModal({ isOpen, onClose, onAdd }: TriggerSelector
     onAdd({
       category: selectedCategory,
       food: specificFood.trim() || '',
-      confidence: 100, // Manual entries are 100% confidence
+      confidence: 100,
     });
     
-    // Reset form
     setSelectedCategory('');
     setSpecificFood('');
     onClose();
@@ -41,33 +40,34 @@ export function TriggerSelectorModal({ isOpen, onClose, onAdd }: TriggerSelector
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
         onClick={onClose}
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl shadow-xl border border-border/50 max-h-[85vh] flex flex-col animate-slide-up">
+      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-3xl border border-border/50 max-h-[85vh] flex flex-col animate-slide-up"
+           style={{ boxShadow: '0 -8px 40px hsl(var(--foreground) / 0.15)' }}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border/30">
-          <h2 className="text-lg font-semibold text-foreground">Add Trigger</h2>
+        <div className="flex items-center justify-between p-5 border-b border-border/30">
+          <h2 className="text-lg font-bold text-foreground">Add Trigger</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-muted transition-colors"
+            className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors"
           >
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-4 overflow-y-auto flex-1">
+        <div className="p-5 space-y-4 overflow-y-auto flex-1">
           {/* Category Dropdown */}
           <div className="space-y-2">
-            <Label htmlFor="category">Select trigger category</Label>
+            <Label htmlFor="category" className="text-sm font-semibold">Select trigger category</Label>
             <select
               id="category"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="w-full h-12 px-4 rounded-2xl border border-border bg-card text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             >
               <option value="">Choose a category...</option>
               
@@ -86,34 +86,34 @@ export function TriggerSelectorModal({ isOpen, onClose, onAdd }: TriggerSelector
 
             {/* Show examples when category selected */}
             {selectedCategoryInfo && (
-              <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/5 text-primary">
-                <Lightbulb className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span className="text-sm">{selectedCategoryInfo.examples}</span>
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
+                <Lightbulb className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-primary">{selectedCategoryInfo.examples}</span>
               </div>
             )}
           </div>
 
           {/* Specific Food Input */}
           <div className="space-y-2">
-            <Label htmlFor="food">Specific food (optional)</Label>
+            <Label htmlFor="food" className="text-sm font-semibold">Specific food (optional)</Label>
             <Input
               id="food"
               type="text"
               placeholder="e.g., garlic, cheddar cheese"
               value={specificFood}
               onChange={(e) => setSpecificFood(e.target.value)}
+              className="h-12 rounded-2xl border-border bg-card"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-border/30">
+        <div className="p-5 border-t border-border/30">
           <Button
             onClick={handleAdd}
             disabled={!selectedCategory}
-            className="w-full"
+            className="w-full h-12 rounded-2xl font-semibold"
             variant="sage"
-            size="lg"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add to Meal
