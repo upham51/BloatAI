@@ -14,8 +14,6 @@ const FEATURES = [
   'Weekly trigger analysis reports',
   'Combination trigger detection',
   'Safe foods library builder',
-  'Export reports for your doctor',
-  'Priority email support',
 ];
 
 export default function PricingPage() {
@@ -73,12 +71,28 @@ export default function PricingPage() {
 
       <div className="relative z-10 min-h-screen flex flex-col px-4 py-8 max-w-lg mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8">
           <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
             ← Back
           </button>
-          
-          {/* Billing Toggle */}
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Leaf className="w-8 h-8 text-primary" />
+            <span className="text-2xl font-bold text-foreground">Bloat AI</span>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            Unlock Your Gut Health Journey
+          </h1>
+          <p className="text-muted-foreground">
+            Get unlimited AI-powered bloating insights and personalized trigger analysis
+          </p>
+        </div>
+
+        {/* Billing Toggle - Centered above card */}
+        <div className="flex justify-center mb-4">
           <div className="flex items-center bg-muted/50 rounded-full p-1">
             <button
               onClick={() => setBillingPeriod('annual')}
@@ -101,20 +115,6 @@ export default function PricingPage() {
               Monthly
             </button>
           </div>
-        </div>
-
-        {/* Title */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Leaf className="w-8 h-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">Bloat AI</span>
-          </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            Unlock Your Gut Health Journey
-          </h1>
-          <p className="text-muted-foreground">
-            Get unlimited AI-powered bloating insights and personalized trigger analysis
-          </p>
         </div>
 
         {/* Pricing Card */}
