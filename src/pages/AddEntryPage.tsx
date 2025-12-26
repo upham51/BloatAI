@@ -1,88 +1,190 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, X, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { Camera, Image, X, Sparkles, Pencil, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { OptionToggle } from '@/components/shared/OptionToggle';
 import { RatingScale } from '@/components/shared/RatingScale';
-import { TriggerChip } from '@/components/shared/TriggerChip';
+import { FODMAPGuide } from '@/components/triggers/FODMAPGuide';
+import { DetectedTriggersList } from '@/components/triggers/DetectedTriggersList';
 import { useMeals } from '@/contexts/MealContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import {
-  PortionSize,
-  EatingSpeed,
-  SocialSetting,
-  DetectedTrigger,
-  PORTION_OPTIONS,
-  SPEED_OPTIONS,
-  SOCIAL_OPTIONS,
-} from '@/types';
-
-// Mock triggers for demo (will be replaced with AI analysis)
-const MOCK_TRIGGERS: DetectedTrigger[] = [
-  { category: 'FODMAPs-fructans', food: 'garlic', confidence: 85 },
-  { category: 'dairy', food: 'cheese', confidence: 90 },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { DetectedTrigger, validateTriggers } from '@/types';
 
 export default function AddEntryPage() {
   const navigate = useNavigate();
   const { addEntry } = useMeals();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [mealDescription, setMealDescription] = useState('');
-  const [portionSize, setPortionSize] = useState<PortionSize | null>(null);
-  const [eatingSpeed, setEatingSpeed] = useState<EatingSpeed | null>(null);
-  const [socialSetting, setSocialSetting] = useState<SocialSetting | null>(null);
-  const [bloatingRating, setBloatingRating] = useState<number | null>(null);
-  const [showRatingSection, setShowRatingSection] = useState(false);
+  // Photo & AI analysis state
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [detectedTriggers, setDetectedTriggers] = useState<DetectedTrigger[]>([]);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [photoAnalyzed, setPhotoAnalyzed] = useState(false);
+
+  // AI-generated content
+  const [aiDescription, setAiDescription] = useState('');
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [detectedTriggers, setDetectedTriggers] = useState<DetectedTrigger[]>([]);
+
+  // Optional bloating rating
+  const [showRatingSection, setShowRatingSection] = useState(false);
+  const [bloatingRating, setBloatingRating] = useState<number | null>(null);
+
+  // Saving state
   const [isSaving, setIsSaving] = useState(false);
 
-  const isValid = mealDescription.trim() && portionSize && eatingSpeed && socialSetting;
+  // Form is valid when we have a photo and AI has analyzed it
+  const isValid = photoUrl && photoAnalyzed && aiDescription.trim();
 
-  const handlePhotoCapture = async () => {
-    // For demo, use a placeholder and mock triggers
-    // In production, this would open camera and call AI
+  // Handle file selection (camera or gallery)
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoUrl(previewUrl);
+    setPhotoFile(file);
+
+    // Analyze with AI
+    await analyzePhoto(file);
+  };
+
+  // Trigger file input for gallery
+  const openGallery = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.accept = 'image/*';
+      fileInputRef.current.capture = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  // Trigger file input for camera
+  const openCamera = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.accept = 'image/*';
+      fileInputRef.current.capture = 'environment';
+      fileInputRef.current.click();
+    }
+  };
+
+  // Analyze photo with AI
+  const analyzePhoto = async (file: File) => {
     setIsAnalyzing(true);
-    
-    // Simulate AI analysis delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setPhotoUrl('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop');
-    setDetectedTriggers(MOCK_TRIGGERS);
-    setIsAnalyzing(false);
-    
-    toast({
-      title: 'Photo analyzed!',
-      description: 'We detected some potential triggers.',
+    setPhotoAnalyzed(false);
+
+    try {
+      // Convert file to base64 for AI analysis
+      const base64 = await fileToBase64(file);
+      
+      const { data, error } = await supabase.functions.invoke('analyze-food', {
+        body: { imageUrl: base64 }
+      });
+
+      if (error) throw error;
+
+      // Set AI-generated description
+      setAiDescription(data.meal_description || 'A meal');
+      
+      // Validate and set triggers
+      const validTriggers = validateTriggers(data.triggers || []);
+      setDetectedTriggers(validTriggers);
+      
+      setPhotoAnalyzed(true);
+
+      if (validTriggers.length > 0) {
+        toast({
+          title: 'Photo analyzed!',
+          description: `Detected ${validTriggers.length} potential trigger${validTriggers.length !== 1 ? 's' : ''}.`,
+        });
+      } else {
+        toast({
+          title: 'Photo analyzed!',
+          description: 'No common triggers detected.',
+        });
+      }
+    } catch (error) {
+      console.error('Error analyzing photo:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Analysis failed',
+        description: 'Could not analyze the photo. Please try again.',
+      });
+      // Still allow saving with manual entry
+      setAiDescription('');
+      setPhotoAnalyzed(true);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Convert file to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
     });
   };
 
+  // Remove photo and reset
   const removePhoto = () => {
+    if (photoUrl) {
+      URL.revokeObjectURL(photoUrl);
+    }
     setPhotoUrl(null);
+    setPhotoFile(null);
+    setPhotoAnalyzed(false);
+    setAiDescription('');
     setDetectedTriggers([]);
+    setIsEditingDescription(false);
   };
 
+  // Upload photo to storage and save entry
   const handleSave = async () => {
-    if (!isValid) return;
+    if (!isValid || !user) return;
 
     setIsSaving(true);
 
     try {
+      let uploadedPhotoUrl = null;
+
+      // Upload photo if we have one
+      if (photoFile) {
+        const fileExt = photoFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('meal-photos')
+          .upload(fileName, photoFile);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+        } else {
+          const { data: urlData } = supabase.storage
+            .from('meal-photos')
+            .getPublicUrl(fileName);
+          uploadedPhotoUrl = urlData.publicUrl;
+        }
+      }
+
       const ratingDueAt = bloatingRating
         ? null
         : new Date(Date.now() + 90 * 60 * 1000).toISOString();
 
       await addEntry({
-        meal_description: mealDescription.trim(),
-        photo_url: photoUrl,
-        portion_size: portionSize!,
-        eating_speed: eatingSpeed!,
-        social_setting: socialSetting!,
+        meal_description: aiDescription.trim(),
+        photo_url: uploadedPhotoUrl,
+        portion_size: null,
+        eating_speed: null,
+        social_setting: null,
         bloating_rating: bloatingRating,
         rating_status: bloatingRating ? 'completed' : 'pending',
         rating_due_at: ratingDueAt,
@@ -90,7 +192,7 @@ export default function AddEntryPage() {
       });
 
       toast({
-        title: 'Meal logged! 🎉',
+        title: 'Meal logged!',
         description: bloatingRating
           ? 'Thanks for rating your meal.'
           : "We'll remind you to rate in 90 minutes.",
@@ -98,6 +200,7 @@ export default function AddEntryPage() {
 
       navigate('/dashboard');
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         variant: 'destructive',
         title: 'Failed to save',
@@ -110,7 +213,16 @@ export default function AddEntryPage() {
 
   return (
     <AppLayout>
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-6 pb-24">
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
         {/* Header */}
         <header className="flex items-center justify-between pt-2">
           <h1 className="text-2xl font-bold text-foreground">Log Meal</h1>
@@ -126,154 +238,172 @@ export default function AddEntryPage() {
         {/* Photo Section */}
         <section className="space-y-3">
           {!photoUrl ? (
-            <button
-              onClick={handlePhotoCapture}
-              disabled={isAnalyzing}
-              className="w-full h-48 rounded-2xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center gap-3 transition-all hover:border-primary/50 hover:bg-primary/5 active:scale-[0.99] touch-manipulation"
-            >
-              {isAnalyzing ? (
-                <>
-                  <div className="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
-                  <span className="text-sm text-muted-foreground">Analyzing your meal...</span>
-                </>
-              ) : (
-                <>
-                  <div className="p-4 rounded-full bg-primary/10">
-                    <Camera className="w-8 h-8 text-primary" />
-                  </div>
-                  <div className="text-center">
-                    <p className="font-medium text-foreground">Take Photo of Your Meal</p>
-                    <p className="text-sm text-muted-foreground">AI will detect potential triggers</p>
-                  </div>
-                </>
-              )}
-            </button>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Camera Button */}
+              <button
+                onClick={openCamera}
+                disabled={isAnalyzing}
+                className="h-40 rounded-2xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center gap-3 transition-all hover:border-primary/50 hover:bg-primary/5 active:scale-[0.98] touch-manipulation"
+              >
+                <div className="p-4 rounded-full bg-primary/10">
+                  <Camera className="w-8 h-8 text-primary" />
+                </div>
+                <span className="font-medium text-foreground">Take Photo</span>
+              </button>
+
+              {/* Gallery Button */}
+              <button
+                onClick={openGallery}
+                disabled={isAnalyzing}
+                className="h-40 rounded-2xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center gap-3 transition-all hover:border-primary/50 hover:bg-primary/5 active:scale-[0.98] touch-manipulation"
+              >
+                <div className="p-4 rounded-full bg-secondary/50">
+                  <Image className="w-8 h-8 text-secondary-foreground" />
+                </div>
+                <span className="font-medium text-foreground">Gallery</span>
+              </button>
+            </div>
           ) : (
             <div className="relative">
               <img
                 src={photoUrl}
-                alt="Meal"
+                alt="Your meal"
                 className="w-full h-48 rounded-2xl object-cover"
               />
-              <button
-                onClick={removePhoto}
-                className="absolute top-2 right-2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
-          {/* Detected Triggers */}
-          {detectedTriggers.length > 0 && (
-            <Card variant="elevated" className="animate-scale-in">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center gap-2 text-primary">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="text-sm font-medium">Detected Potential Triggers</span>
+              
+              {/* Loading overlay */}
+              {isAnalyzing && (
+                <div className="absolute inset-0 rounded-2xl bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
+                  <div className="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+                  <span className="text-sm font-medium text-foreground">Analyzing your meal...</span>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {detectedTriggers.map((trigger, i) => (
-                    <TriggerChip
-                      key={i}
-                      category={trigger.category}
-                      food={trigger.food}
-                      confidence={trigger.confidence}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </section>
-
-        {/* Meal Description */}
-        <section className="space-y-2">
-          <label className="text-sm font-medium text-foreground">
-            What did you eat?
-          </label>
-          <Textarea
-            placeholder="Describe your meal..."
-            value={mealDescription}
-            onChange={(e) => setMealDescription(e.target.value)}
-            rows={3}
-            className="resize-none"
-          />
-        </section>
-
-        {/* Options */}
-        <OptionToggle<PortionSize>
-          label="How much?"
-          options={PORTION_OPTIONS}
-          value={portionSize}
-          onChange={setPortionSize}
-        />
-
-        <OptionToggle<EatingSpeed>
-          label="Eating speed?"
-          options={SPEED_OPTIONS}
-          value={eatingSpeed}
-          onChange={setEatingSpeed}
-        />
-
-        <OptionToggle<SocialSetting>
-          label="Social setting?"
-          options={SOCIAL_OPTIONS}
-          value={socialSetting}
-          onChange={setSocialSetting}
-        />
-
-        {/* Optional Rating Section */}
-        <section className="space-y-3">
-          <button
-            onClick={() => setShowRatingSection(!showRatingSection)}
-            className="flex items-center justify-between w-full py-2 text-left"
-          >
-            <span className="text-sm font-medium text-foreground">
-              Rate bloating now? (optional)
-            </span>
-            {showRatingSection ? (
-              <ChevronUp className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-muted-foreground" />
-            )}
-          </button>
-          
-          {showRatingSection && (
-            <Card variant="elevated" className="p-4 animate-slide-down">
-              <RatingScale
-                value={bloatingRating}
-                onChange={setBloatingRating}
-              />
-              {bloatingRating && (
+              )}
+              
+              {/* Remove button */}
+              {!isAnalyzing && (
                 <button
-                  onClick={() => setBloatingRating(null)}
-                  className="w-full mt-3 text-sm text-muted-foreground hover:text-foreground"
+                  onClick={removePhoto}
+                  className="absolute top-2 right-2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                 >
-                  Clear rating
+                  <X className="w-4 h-4" />
                 </button>
               )}
-            </Card>
+            </div>
           )}
         </section>
 
+        {/* AI Analysis Results */}
+        {photoAnalyzed && (
+          <div className="space-y-4 animate-scale-in">
+            {/* AI-Generated Meal Description */}
+            <Card variant="elevated">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-primary">
+                    <Sparkles className="w-4 h-4" />
+                    <span className="text-sm font-medium">AI Detected</span>
+                  </div>
+                  <button
+                    onClick={() => setIsEditingDescription(!isEditingDescription)}
+                    className="p-1.5 rounded-full hover:bg-muted transition-colors"
+                  >
+                    <Pencil className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </div>
+
+                {isEditingDescription ? (
+                  <Textarea
+                    value={aiDescription}
+                    onChange={(e) => setAiDescription(e.target.value)}
+                    rows={2}
+                    placeholder="Describe your meal..."
+                    className="resize-none"
+                    autoFocus
+                  />
+                ) : (
+                  <p className="text-foreground">
+                    {aiDescription || 'Tap edit to describe your meal'}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* FODMAP Guide */}
+            <FODMAPGuide />
+
+            {/* Detected Triggers */}
+            <Card variant="elevated">
+              <CardContent className="p-4">
+                <DetectedTriggersList
+                  triggers={detectedTriggers}
+                  onTriggersChange={setDetectedTriggers}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Optional Rating Section */}
+        {photoAnalyzed && (
+          <section className="space-y-3">
+            <button
+              onClick={() => setShowRatingSection(!showRatingSection)}
+              className="flex items-center justify-between w-full py-2 text-left"
+            >
+              <div>
+                <span className="text-sm font-medium text-foreground">
+                  Rate bloating now?
+                </span>
+                <span className="text-xs text-muted-foreground ml-2">(optional)</span>
+              </div>
+              {showRatingSection ? (
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              )}
+            </button>
+            
+            {showRatingSection && (
+              <Card variant="elevated" className="p-4 animate-slide-down">
+                <p className="text-xs text-muted-foreground mb-3">
+                  Or we'll remind you in 90 minutes
+                </p>
+                <RatingScale
+                  value={bloatingRating}
+                  onChange={setBloatingRating}
+                />
+                {bloatingRating && (
+                  <button
+                    onClick={() => setBloatingRating(null)}
+                    className="w-full mt-3 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Clear rating
+                  </button>
+                )}
+              </Card>
+            )}
+          </section>
+        )}
+
         {/* Save Button */}
-        <Button
-          variant="sage"
-          size="xl"
-          className="w-full"
-          disabled={!isValid || isSaving}
-          onClick={handleSave}
-        >
-          {isSaving ? (
-            <span className="flex items-center gap-2">
-              <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-              Saving...
-            </span>
-          ) : (
-            'Save Entry'
-          )}
-        </Button>
+        <div className="fixed bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent">
+          <Button
+            variant="sage"
+            size="xl"
+            className="w-full max-w-lg mx-auto"
+            disabled={!isValid || isSaving}
+            onClick={handleSave}
+          >
+            {isSaving ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                Saving...
+              </span>
+            ) : (
+              'Save Meal Entry'
+            )}
+          </Button>
+        </div>
       </div>
     </AppLayout>
   );

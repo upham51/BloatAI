@@ -38,35 +38,52 @@ serve(async (req) => {
               },
               {
                 type: 'text',
-                text: `Analyze this meal photo and identify potential FODMAP triggers and bloating-causing foods.
+                text: `Analyze this meal photo and provide:
 
-Return ONLY a valid JSON array with this exact structure (no markdown, no code blocks):
-[
-  {
-    "category": "FODMAPs-fructans",
-    "food": "garlic",
-    "confidence": 85
-  }
-]
+1. A natural, appetizing description of the meal (1-2 sentences)
+2. List of FODMAP/trigger categories detected
 
-Valid categories:
-- FODMAPs-fructans (wheat, onions, garlic, artichokes)
-- FODMAPs-GOS (beans, lentils, chickpeas, cashews)
-- FODMAPs-lactose (milk, soft cheese, yogurt, ice cream)
-- FODMAPs-fructose (apples, honey, mango, watermelon)
-- FODMAPs-polyols (sugar-free gum, stone fruits, mushrooms)
-- gluten (wheat, barley, rye)
-- dairy (all milk products)
-- cruciferous (broccoli, cabbage, Brussels sprouts, cauliflower)
-- high-fat (fried foods, fatty meats, butter)
-- carbonated (soda, sparkling water, beer)
-- refined-sugar (candy, pastries, desserts)
-- alcohol (beer, wine, spirits)
-- legumes (beans, peas, lentils)
-- spicy (hot peppers, chili)
+Return ONLY valid JSON in this exact format (no markdown, no code blocks):
+{
+  "meal_description": "Spaghetti with marinara sauce, garlic bread, and a side salad with ranch dressing",
+  "triggers": [
+    {
+      "category": "fodmaps-fructans",
+      "food": "garlic",
+      "confidence": 90
+    },
+    {
+      "category": "fodmaps-lactose",
+      "food": "ranch dressing",
+      "confidence": 75
+    },
+    {
+      "category": "gluten",
+      "food": "wheat pasta",
+      "confidence": 95
+    }
+  ]
+}
 
-Only include foods you can clearly identify in the image. Set confidence 0-100 based on how certain you are.
-If you cannot identify any food or the image is not food-related, return an empty array: []`
+CRITICAL: You MUST use ONLY these exact category values (copy exactly as written):
+
+1. "fodmaps-fructans" - Wheat, bread, onions, garlic
+2. "fodmaps-gos" - Beans, lentils, chickpeas
+3. "fodmaps-lactose" - Milk, soft cheese, yogurt
+4. "fodmaps-fructose" - Apples, honey, mango
+5. "fodmaps-polyols" - Sugar-free gum, stone fruits
+6. "gluten" - Wheat, barley, rye, beer
+7. "dairy" - All milk products
+8. "cruciferous" - Broccoli, cabbage, Brussels sprouts
+9. "high-fat" - Fried foods, fatty meats
+10. "carbonated" - Soda, sparkling water
+11. "refined-sugar" - Candy, pastries, white bread
+12. "alcohol" - Beer, wine, spirits
+
+Do NOT create new categories. Only use the 12 listed above.
+Only include foods you can clearly identify with 60%+ confidence.
+If you cannot identify any triggers, return an empty triggers array.
+If you cannot identify the food, return a generic description like "A meal" and empty triggers.`
               }
             ]
           }
@@ -96,22 +113,39 @@ If you cannot identify any food or the image is not food-related, return an empt
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '[]';
+    const content = data.choices?.[0]?.message?.content || '{"meal_description": "A meal", "triggers": []}';
     
     console.log('AI response:', content);
 
     // Parse the JSON response
-    let triggers = [];
+    let result = { meal_description: 'A meal', triggers: [] };
     try {
       // Remove any markdown code blocks if present
       const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
-      triggers = JSON.parse(cleanContent);
+      const parsed = JSON.parse(cleanContent);
+      result = {
+        meal_description: parsed.meal_description || 'A meal',
+        triggers: Array.isArray(parsed.triggers) ? parsed.triggers : []
+      };
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
-      triggers = [];
     }
 
-    return new Response(JSON.stringify({ triggers }), {
+    // Validate trigger categories
+    const validCategories = [
+      'fodmaps-fructans', 'fodmaps-gos', 'fodmaps-lactose', 'fodmaps-fructose', 'fodmaps-polyols',
+      'gluten', 'dairy', 'cruciferous', 'high-fat', 'carbonated', 'refined-sugar', 'alcohol'
+    ];
+    
+    result.triggers = result.triggers.filter((trigger: any) => {
+      const isValid = validCategories.includes(trigger.category);
+      if (!isValid) {
+        console.warn(`Filtered out invalid category: ${trigger.category}`);
+      }
+      return isValid;
+    });
+
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

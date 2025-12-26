@@ -14,10 +14,116 @@ export type EatingSpeed = 'slow' | 'normal' | 'fast';
 export type SocialSetting = 'solo' | 'with_others';
 export type RatingStatus = 'pending' | 'completed' | 'skipped';
 
+// ============================================================
+// OFFICIAL TRIGGER TAXONOMY (12 Categories)
+// These are the ONLY categories the AI can detect and users can select
+// ============================================================
+
+export interface TriggerCategory {
+  id: string;
+  displayName: string;
+  examples: string;
+  color: string;
+}
+
+export const TRIGGER_CATEGORIES: TriggerCategory[] = [
+  {
+    id: 'fodmaps-fructans',
+    displayName: 'FODMAPs - Fructans',
+    examples: 'Wheat, bread, onions, garlic',
+    color: '#FF6B6B'
+  },
+  {
+    id: 'fodmaps-gos',
+    displayName: 'FODMAPs - GOS',
+    examples: 'Beans, lentils, chickpeas',
+    color: '#FF8E53'
+  },
+  {
+    id: 'fodmaps-lactose',
+    displayName: 'FODMAPs - Lactose',
+    examples: 'Milk, soft cheese, yogurt',
+    color: '#FFA07A'
+  },
+  {
+    id: 'fodmaps-fructose',
+    displayName: 'FODMAPs - Fructose',
+    examples: 'Apples, honey, mango',
+    color: '#FFB347'
+  },
+  {
+    id: 'fodmaps-polyols',
+    displayName: 'FODMAPs - Polyols',
+    examples: 'Sugar-free gum, stone fruits',
+    color: '#FFCC5C'
+  },
+  {
+    id: 'gluten',
+    displayName: 'Gluten',
+    examples: 'Wheat, barley, rye, beer',
+    color: '#95E1D3'
+  },
+  {
+    id: 'dairy',
+    displayName: 'Dairy',
+    examples: 'All milk products',
+    color: '#A8E6CF'
+  },
+  {
+    id: 'cruciferous',
+    displayName: 'Cruciferous',
+    examples: 'Broccoli, cabbage, Brussels sprouts',
+    color: '#7FB069'
+  },
+  {
+    id: 'high-fat',
+    displayName: 'High-Fat/Fried',
+    examples: 'Fried foods, fatty meats',
+    color: '#C77DFF'
+  },
+  {
+    id: 'carbonated',
+    displayName: 'Carbonated',
+    examples: 'Soda, sparkling water',
+    color: '#9D84B7'
+  },
+  {
+    id: 'refined-sugar',
+    displayName: 'Refined Sugar',
+    examples: 'Candy, pastries, white bread',
+    color: '#E0ACD5'
+  },
+  {
+    id: 'alcohol',
+    displayName: 'Alcohol',
+    examples: 'Beer, wine, spirits',
+    color: '#F3B0C3'
+  }
+];
+
+// Valid category IDs for validation
+export const VALID_TRIGGER_IDS = TRIGGER_CATEGORIES.map(c => c.id);
+
 export interface DetectedTrigger {
   category: string;
   food: string;
   confidence: number;
+}
+
+// Helper function to get category info
+export function getTriggerCategory(id: string): TriggerCategory | undefined {
+  return TRIGGER_CATEGORIES.find(c => c.id === id);
+}
+
+// Helper function to validate triggers
+export function validateTriggers(triggers: DetectedTrigger[]): DetectedTrigger[] {
+  return triggers.filter(trigger => {
+    if (!VALID_TRIGGER_IDS.includes(trigger.category)) {
+      console.warn(`Invalid trigger category detected: ${trigger.category}`);
+      return false;
+    }
+    return true;
+  });
 }
 
 export interface MealEntry {
@@ -27,9 +133,9 @@ export interface MealEntry {
   updated_at: string;
   meal_description: string;
   photo_url: string | null;
-  portion_size: PortionSize;
-  eating_speed: EatingSpeed;
-  social_setting: SocialSetting;
+  portion_size: PortionSize | null;
+  eating_speed: EatingSpeed | null;
+  social_setting: SocialSetting | null;
   bloating_rating: number | null;
   rating_status: RatingStatus;
   rating_due_at: string | null;
@@ -120,56 +226,22 @@ export const RATING_EMOJIS: Record<number, string> = {
   5: "😫"
 };
 
-// Portion size options
+// Portion size options (kept for backwards compatibility)
 export const PORTION_OPTIONS: { value: PortionSize; label: string; emoji: string }[] = [
   { value: 'small', label: 'Small', emoji: '🍽️' },
   { value: 'normal', label: 'Normal', emoji: '🍽️' },
   { value: 'large', label: 'Large', emoji: '🍽️' },
 ];
 
-// Eating speed options
+// Eating speed options (kept for backwards compatibility)
 export const SPEED_OPTIONS: { value: EatingSpeed; label: string; emoji: string }[] = [
   { value: 'slow', label: 'Slow', emoji: '🐢' },
   { value: 'normal', label: 'Normal', emoji: '🚶' },
   { value: 'fast', label: 'Fast', emoji: '🐰' },
 ];
 
-// Social setting options
+// Social setting options (kept for backwards compatibility)
 export const SOCIAL_OPTIONS: { value: SocialSetting; label: string; emoji: string }[] = [
   { value: 'solo', label: 'Solo', emoji: '🧘' },
   { value: 'with_others', label: 'With Others', emoji: '👥' },
 ];
-
-// FODMAP trigger categories
-export const TRIGGER_CATEGORIES = [
-  'FODMAPs-fructans',
-  'FODMAPs-GOS',
-  'FODMAPs-lactose',
-  'FODMAPs-fructose',
-  'FODMAPs-polyols',
-  'gluten',
-  'dairy',
-  'cruciferous',
-  'high-fat',
-  'carbonated',
-  'refined-sugar',
-  'alcohol',
-] as const;
-
-export type TriggerCategory = typeof TRIGGER_CATEGORIES[number];
-
-// Trigger category display names and colors
-export const TRIGGER_DISPLAY: Record<string, { name: string; color: string }> = {
-  'FODMAPs-fructans': { name: 'Fructans', color: 'bg-orange-100 text-orange-800' },
-  'FODMAPs-GOS': { name: 'GOS', color: 'bg-yellow-100 text-yellow-800' },
-  'FODMAPs-lactose': { name: 'Lactose', color: 'bg-blue-100 text-blue-800' },
-  'FODMAPs-fructose': { name: 'Fructose', color: 'bg-pink-100 text-pink-800' },
-  'FODMAPs-polyols': { name: 'Polyols', color: 'bg-purple-100 text-purple-800' },
-  'gluten': { name: 'Gluten', color: 'bg-amber-100 text-amber-800' },
-  'dairy': { name: 'Dairy', color: 'bg-sky-100 text-sky-800' },
-  'cruciferous': { name: 'Cruciferous', color: 'bg-green-100 text-green-800' },
-  'high-fat': { name: 'High Fat', color: 'bg-red-100 text-red-800' },
-  'carbonated': { name: 'Carbonated', color: 'bg-cyan-100 text-cyan-800' },
-  'refined-sugar': { name: 'Sugar', color: 'bg-rose-100 text-rose-800' },
-  'alcohol': { name: 'Alcohol', color: 'bg-violet-100 text-violet-800' },
-};
