@@ -311,10 +311,10 @@ export default function AddEntryPage() {
             )}
             
             {/* Creative meal title overlay */}
-            {photoAnalyzed && creativeMealTitle && (
+            {photoAnalyzed && aiDescription && (
               <div className="absolute bottom-0 left-0 right-0 p-6 animate-slide-up">
                 <p className="text-xs font-semibold text-primary-foreground/70 uppercase tracking-widest mb-1">{mealCategory}</p>
-                <h1 className="text-3xl font-bold text-primary-foreground drop-shadow-lg tracking-tight">{creativeMealTitle}</h1>
+                <h1 className="text-2xl font-bold text-primary-foreground drop-shadow-lg tracking-tight line-clamp-2">{aiDescription.slice(0, 60)}{aiDescription.length > 60 ? '...' : ''}</h1>
               </div>
             )}
             
@@ -339,7 +339,7 @@ export default function AddEntryPage() {
           </section>
 
           {/* Scrollable Content */}
-          <section className="flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto pb-40 shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)]">
+          <section className="flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)]">
             <div className="p-5 space-y-4 pt-8">
           {/* AI Analysis Results */}
           {photoAnalyzed && (
@@ -411,25 +411,24 @@ export default function AddEntryPage() {
                       return (
                         <div
                           key={index}
-                          className="flex items-center gap-3 p-4 rounded-2xl border border-border/30 group transition-all duration-200 hover:shadow-md"
+                          className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/40 group transition-all duration-200 hover:-translate-y-0.5"
                           style={{ 
-                            background: `linear-gradient(135deg, ${categoryInfo?.color}08 0%, ${categoryInfo?.color}04 100%)`,
-                            borderLeftWidth: '4px',
-                            borderLeftColor: categoryInfo?.color || 'hsl(var(--primary))'
+                            boxShadow: '0 4px 12px -2px hsl(var(--foreground) / 0.08), 0 2px 6px -2px hsl(var(--foreground) / 0.04)'
                           }}
                         >
-                          {/* Icon/Dot */}
+                          {/* Icon Badge */}
                           <div 
-                            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                            className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
                             style={{ 
-                              backgroundColor: `${categoryInfo?.color}20`
+                              background: `linear-gradient(135deg, ${categoryInfo?.color}25 0%, ${categoryInfo?.color}15 100%)`,
+                              boxShadow: `0 2px 8px ${categoryInfo?.color}20`
                             }}
                           >
                             <div 
-                              className="w-3 h-3 rounded-full"
+                              className="w-3.5 h-3.5 rounded-full"
                               style={{ 
                                 backgroundColor: categoryInfo?.color || 'hsl(var(--primary))',
-                                boxShadow: `0 0 12px ${categoryInfo?.color || 'hsl(var(--primary))'}60`
+                                boxShadow: `0 0 8px ${categoryInfo?.color || 'hsl(var(--primary))'}50`
                               }}
                             />
                           </div>
@@ -444,12 +443,13 @@ export default function AddEntryPage() {
                             )}
                           </div>
                           
-                          {/* Delete */}
+                          {/* Remove button */}
                           <button
                             onClick={() => removeTrigger(index)}
-                            className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-destructive/20 active:scale-90"
+                            className="p-2 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 active:scale-90 opacity-0 group-hover:opacity-100"
+                            aria-label="Remove trigger"
                           >
-                            <X className="w-4 h-4 text-destructive" />
+                            <X className="w-4 h-4" />
                           </button>
                         </div>
                       );
@@ -520,19 +520,19 @@ export default function AddEntryPage() {
             </div>
           </section>
 
-          {/* Floating Save Button */}
+          {/* Sticky Save Button at Bottom of Content */}
           {photoAnalyzed && (
-            <div className="fixed bottom-28 left-4 right-4 max-w-lg mx-auto z-40 animate-slide-up" style={{ animationDelay: '300ms' }}>
+            <div className="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent pt-8">
               <button
                 onClick={handleSave}
                 disabled={!isValid || isSaving}
-                className={`w-full h-[60px] flex items-center justify-center gap-3 rounded-full font-semibold text-lg transition-all duration-300 ${
+                className={`w-full h-[56px] flex items-center justify-center gap-3 rounded-2xl font-semibold text-base transition-all duration-300 ${
                   !isValid || isSaving 
                     ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-primary via-sage-dark to-primary text-primary-foreground hover:-translate-y-1 active:scale-[0.98]'
+                    : 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground hover:-translate-y-0.5 active:scale-[0.98]'
                 }`}
                 style={isValid && !isSaving ? {
-                  boxShadow: '0 12px 32px -4px hsl(var(--primary) / 0.5), 0 4px 12px -2px hsl(var(--foreground) / 0.1)'
+                  boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
                 } : undefined}
               >
                 {isSaving ? (
