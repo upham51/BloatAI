@@ -290,6 +290,46 @@ export default function HistoryPage() {
   );
 }
 
+// Inline Rating Component for pending entries
+function InlineRating({ entryId }: { entryId: string }) {
+  const { updateRating, skipRating } = useMeals();
+  const { toast } = useToast();
+  
+  const handleRate = async (rating: number) => {
+    await updateRating(entryId, rating);
+    toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+  };
+
+  const handleSkip = async () => {
+    await skipRating(entryId);
+    toast({ title: 'Rating skipped' });
+  };
+
+  return (
+    <div className="px-4 py-4 border-t border-border/50 bg-muted/30">
+      <p className="text-sm font-medium text-foreground mb-3">How did this meal make you feel?</p>
+      <div className="flex justify-between gap-2 mb-3">
+        {[1, 2, 3, 4, 5].map((rating) => (
+          <button
+            key={rating}
+            onClick={() => handleRate(rating)}
+            className="flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-xl hover:bg-primary/10 transition-colors"
+          >
+            <span className="text-2xl">{RATING_EMOJIS[rating]}</span>
+            <span className="text-2xs text-muted-foreground">{RATING_LABELS[rating]}</span>
+          </button>
+        ))}
+      </div>
+      <button 
+        onClick={handleSkip} 
+        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        Skip for now
+      </button>
+    </div>
+  );
+}
+
 function EntryCard({
   entry,
   userAvg,
@@ -335,8 +375,10 @@ function EntryCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground line-clamp-2 leading-tight">
-                  {entry.meal_description}
+                <p className="font-bold text-foreground line-clamp-1 leading-tight text-sm">
+                  {entry.meal_description.length > 50 
+                    ? entry.meal_description.substring(0, 50).trim() + '...'
+                    : entry.meal_description}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                   <Clock className="w-3 h-3" />
@@ -425,17 +467,9 @@ function EntryCard({
         </div>
       </div>
 
-      {/* Rating Footer */}
+      {/* Inline Rating */}
       {!entry.bloating_rating && isPending && (
-        <div className="px-4 py-3 border-t bg-gradient-to-r from-coral/10 to-peach/10 border-coral/20">
-          <button
-            onClick={onRate}
-            className="flex items-center gap-2 text-sm font-semibold text-coral hover:text-coral/80 transition-colors"
-          >
-            <Clock className="w-4 h-4" />
-            Rate Now — How do you feel?
-          </button>
-        </div>
+        <InlineRating entryId={entry.id} />
       )}
     </div>
   );
