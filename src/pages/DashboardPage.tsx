@@ -242,12 +242,9 @@ export default function DashboardPage() {
 
           {/* Daily Quote Card - Luxurious */}
           <div 
-            className="premium-card p-6 relative overflow-hidden animate-slide-up opacity-0"
+            className="premium-card p-6 animate-slide-up opacity-0"
             style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
           >
-            {/* Top gradient line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-sage-dark" />
-            
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-sage-dark flex items-center justify-center shadow-lg shrink-0">
                 <span className="text-xl filter drop-shadow">💭</span>
