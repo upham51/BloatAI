@@ -40,27 +40,24 @@ serve(async (req) => {
                 type: 'text',
                 text: `Analyze this meal photo and provide:
 
-1. A natural, appetizing description of the meal (1-2 sentences)
-2. List of FODMAP/trigger categories detected
+1. A creative, appetizing short title for the meal (2-4 words max, like "Caramel Bliss Pancakes" or "Garden Fresh Harvest")
+2. A meal category (1-2 words like "Breakfast Indulgence", "Comfort Food", "Light & Fresh")
+3. A natural description of the meal (1-2 sentences)
+4. List of FODMAP/trigger categories detected
 
 Return ONLY valid JSON in this exact format (no markdown, no code blocks):
 {
-  "meal_description": "Spaghetti with marinara sauce, garlic bread, and a side salad with ranch dressing",
+  "creative_title": "Golden Sunrise Stack",
+  "meal_category": "Breakfast Delight",
+  "meal_description": "Fluffy pancakes drizzled with maple syrup, served with fresh berries and whipped cream",
   "triggers": [
     {
       "category": "fodmaps-fructans",
-      "food": "garlic",
-      "confidence": 90
+      "food": "wheat flour"
     },
     {
       "category": "fodmaps-lactose",
-      "food": "ranch dressing",
-      "confidence": 75
-    },
-    {
-      "category": "gluten",
-      "food": "wheat pasta",
-      "confidence": 95
+      "food": "whipped cream"
     }
   ]
 }
@@ -81,9 +78,10 @@ CRITICAL: You MUST use ONLY these exact category values (copy exactly as written
 12. "alcohol" - Beer, wine, spirits
 
 Do NOT create new categories. Only use the 12 listed above.
-Only include foods you can clearly identify with 60%+ confidence.
+Make the creative_title sound appetizing and memorable - avoid generic names.
+Only include foods you can clearly identify.
 If you cannot identify any triggers, return an empty triggers array.
-If you cannot identify the food, return a generic description like "A meal" and empty triggers.`
+If you cannot identify the food, return a generic title and description.`
               }
             ]
           }
@@ -118,14 +116,16 @@ If you cannot identify the food, return a generic description like "A meal" and 
     console.log('AI response:', content);
 
     // Parse the JSON response
-    let result = { meal_description: 'A meal', triggers: [] };
+    let result = { meal_description: 'A meal', triggers: [], creative_title: 'Delicious Meal', meal_category: 'Homemade' };
     try {
       // Remove any markdown code blocks if present
       const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
       const parsed = JSON.parse(cleanContent);
       result = {
         meal_description: parsed.meal_description || 'A meal',
-        triggers: Array.isArray(parsed.triggers) ? parsed.triggers : []
+        triggers: Array.isArray(parsed.triggers) ? parsed.triggers : [],
+        creative_title: parsed.creative_title || 'Delicious Meal',
+        meal_category: parsed.meal_category || 'Homemade'
       };
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
