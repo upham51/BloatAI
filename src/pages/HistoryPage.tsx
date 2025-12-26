@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, MoreVertical, Clock, CheckCircle2, Flame, Edit3, TrendingUp } from 'lucide-react';
+import { Trash2, MoreVertical, Clock, CheckCircle2, Flame, Edit3, TrendingUp, Eye, Pencil, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { EditMealModal } from '@/components/meals/EditMealModal';
@@ -22,17 +23,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from '@/components/ui/drawer';
 
 type FilterType = 'all' | 'high-bloating' | 'this-week';
 
 export default function HistoryPage() {
   const navigate = useNavigate();
-  const { entries, deleteEntry, updateRating, skipRating } = useMeals();
+  const { entries, deleteEntry, updateRating, skipRating, updateEntry } = useMeals();
   const { toast } = useToast();
 
   const [filter, setFilter] = useState<FilterType>('all');
   const [ratingEntry, setRatingEntry] = useState<MealEntry | null>(null);
   const [editEntry, setEditEntry] = useState<MealEntry | null>(null);
+  const [detailsEntry, setDetailsEntry] = useState<MealEntry | null>(null);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -218,6 +227,11 @@ export default function HistoryPage() {
                 onRate={() => setRatingEntry(entry)}
                 onEdit={() => setEditEntry(entry)}
                 onDelete={() => handleDelete(entry.id, entry.meal_description)}
+                onViewDetails={() => setDetailsEntry(entry)}
+                onUpdateTitle={async (newTitle) => {
+                  await updateEntry(entry.id, { custom_title: newTitle });
+                  toast({ title: 'Title updated' });
+                }}
                 delay={100 + index * 50}
               />
             ))}
@@ -286,6 +300,81 @@ export default function HistoryPage() {
         open={!!editEntry}
         onClose={() => setEditEntry(null)}
       />
+
+      {/* Details Drawer */}
+      <Drawer open={!!detailsEntry} onOpenChange={(open) => !open && setDetailsEntry(null)}>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="text-left">
+            <DrawerTitle className="text-lg font-bold">Meal Details</DrawerTitle>
+            <DrawerDescription className="text-xs text-muted-foreground">
+              {detailsEntry && format(new Date(detailsEntry.created_at), 'EEEE, MMMM d, yyyy · h:mm a')}
+            </DrawerDescription>
+          </DrawerHeader>
+          
+          {detailsEntry && (
+            <div className="px-4 pb-8 space-y-5 overflow-y-auto">
+              {/* Photo */}
+              {detailsEntry.photo_url && (
+                <img 
+                  src={detailsEntry.photo_url} 
+                  alt="" 
+                  className="w-full aspect-video object-cover rounded-2xl shadow-md"
+                />
+              )}
+              
+              {/* Full Description */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground">AI Description</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {detailsEntry.meal_description}
+                </p>
+              </div>
+              
+              {/* Rating */}
+              {detailsEntry.bloating_rating && (
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-muted/30">
+                  <span className="text-3xl">{RATING_EMOJIS[detailsEntry.bloating_rating]}</span>
+                  <div>
+                    <p className="font-bold text-foreground">{RATING_LABELS[detailsEntry.bloating_rating]}</p>
+                    <p className="text-xs text-muted-foreground">Bloating: {detailsEntry.bloating_rating}/5</p>
+                  </div>
+                </div>
+              )}
+              
+              {/* All Triggers */}
+              {detailsEntry.detected_triggers && detailsEntry.detected_triggers.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    All Detected Triggers ({detailsEntry.detected_triggers.length})
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {detailsEntry.detected_triggers.map((trigger, i) => {
+                      const categoryInfo = getTriggerCategory(trigger.category);
+                      return (
+                        <span
+                          key={i}
+                          className="px-3 py-1.5 text-sm font-medium rounded-full flex items-center gap-1.5"
+                          style={{
+                            backgroundColor: `${categoryInfo?.color}15`,
+                            color: categoryInfo?.color,
+                            border: `1px solid ${categoryInfo?.color}30`
+                          }}
+                        >
+                          <span 
+                            className="w-2 h-2 rounded-full" 
+                            style={{ backgroundColor: categoryInfo?.color }} 
+                          />
+                          {trigger.food || categoryInfo?.displayName}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DrawerContent>
+      </Drawer>
     </AppLayout>
   );
 }
@@ -331,6 +420,9 @@ function InlineRating({ entryId }: { entryId: string }) {
 }
 
 function getQuickMealTitle(entry: MealEntry) {
+  // If user set a custom title, use it
+  if (entry.custom_title) return entry.custom_title;
+
   const foods = Array.from(
     new Set((entry.detected_triggers || []).map(t => (t.food || '').trim()).filter(Boolean))
   );
@@ -363,6 +455,8 @@ function EntryCard({
   onRate,
   onEdit,
   onDelete,
+  onViewDetails,
+  onUpdateTitle,
   delay = 0,
 }: {
   entry: MealEntry;
@@ -370,11 +464,23 @@ function EntryCard({
   onRate: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onViewDetails: () => void;
+  onUpdateTitle: (title: string) => Promise<void>;
   delay?: number;
 }) {
   const isPending = entry.rating_status === 'pending';
   const isHighBloating = entry.bloating_rating && entry.bloating_rating >= 4;
   const isAboveAvg = entry.bloating_rating && userAvg > 0 && entry.bloating_rating > userAvg + 0.5;
+  
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState(getQuickMealTitle(entry));
+
+  const handleSaveTitle = async () => {
+    if (titleInput.trim()) {
+      await onUpdateTitle(titleInput.trim());
+    }
+    setIsEditingTitle(false);
+  };
 
   return (
     <div 
@@ -385,15 +491,19 @@ function EntryCard({
     >
       <div className="p-4">
         <div className="flex gap-4">
-          {/* Photo */}
+          {/* Photo - tap to view details */}
           {entry.photo_url ? (
             <img
               src={entry.photo_url}
               alt=""
-              className="w-20 h-20 rounded-2xl object-cover flex-shrink-0 shadow-md"
+              onClick={onViewDetails}
+              className="w-20 h-20 rounded-2xl object-cover flex-shrink-0 shadow-md cursor-pointer hover:opacity-90 transition-opacity"
             />
           ) : (
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center text-3xl flex-shrink-0">
+            <div 
+              onClick={onViewDetails}
+              className="w-20 h-20 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center text-3xl flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+            >
               🍽️
             </div>
           )}
@@ -402,9 +512,34 @@ function EntryCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground line-clamp-1 leading-tight text-sm">
-                  {getQuickMealTitle(entry)}
-                </p>
+                {isEditingTitle ? (
+                  <div className="flex items-center gap-1">
+                    <Input
+                      value={titleInput}
+                      onChange={(e) => setTitleInput(e.target.value)}
+                      className="h-7 text-sm font-bold py-0 px-2"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveTitle();
+                        if (e.key === 'Escape') setIsEditingTitle(false);
+                      }}
+                    />
+                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSaveTitle}>
+                      <Check className="w-3 h-3 text-primary" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingTitle(false)}>
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setIsEditingTitle(true)}
+                    className="font-bold text-foreground line-clamp-1 leading-tight text-sm text-left hover:text-primary transition-colors flex items-center gap-1 group"
+                  >
+                    {getQuickMealTitle(entry)}
+                    <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+                  </button>
+                )}
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {format(new Date(entry.created_at), 'MMM d, h:mm a')}

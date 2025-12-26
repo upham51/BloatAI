@@ -53,6 +53,7 @@ export type Database = {
         Row: {
           bloating_rating: number | null
           created_at: string
+          custom_title: string | null
           detected_triggers: Json | null
           eating_speed: string | null
           id: string
@@ -69,6 +70,7 @@ export type Database = {
         Insert: {
           bloating_rating?: number | null
           created_at?: string
+          custom_title?: string | null
           detected_triggers?: Json | null
           eating_speed?: string | null
           id?: string
@@ -85,6 +87,7 @@ export type Database = {
         Update: {
           bloating_rating?: number | null
           created_at?: string
+          custom_title?: string | null
           detected_triggers?: Json | null
           eating_speed?: string | null
           id?: string

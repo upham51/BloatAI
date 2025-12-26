@@ -140,6 +140,7 @@ export interface MealEntry {
   rating_status: RatingStatus;
   rating_due_at: string | null;
   detected_triggers: DetectedTrigger[];
+  custom_title: string | null;
 }
 
 // Insight types
