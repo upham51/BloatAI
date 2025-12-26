@@ -125,6 +125,56 @@
 }
 
 @layer components {
+  /* Watercolor Background System */
+  .watercolor-canvas {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+  }
+  
+  .splotch {
+    position: absolute;
+    border-radius: 50%;
+    filter: url(#watercolor-bleed);
+    opacity: 0.6;
+  }
+  
+  .splotch-1 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle at 30% 30%, hsl(var(--mint) / 0.7), hsl(var(--sage) / 0.4) 70%);
+    top: -100px;
+    right: -100px;
+    animation: floatSplotch 20s ease-in-out infinite;
+  }
+  
+  .splotch-2 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle at 70% 40%, hsl(var(--lavender) / 0.6), hsl(var(--lavender-light) / 0.3) 70%);
+    top: 200px;
+    left: -120px;
+    animation: floatSplotch 25s ease-in-out infinite reverse;
+  }
+  
+  .splotch-3 {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle at 50% 60%, hsl(var(--peach) / 0.5), hsl(var(--peach-light) / 0.2) 70%);
+    bottom: 100px;
+    right: -80px;
+    animation: floatSplotch 22s ease-in-out infinite;
+    animation-delay: -5s;
+  }
+
+  @keyframes floatSplotch {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(10px, -15px) scale(1.02); }
+    50% { transform: translate(-5px, 10px) scale(0.98); }
+    75% { transform: translate(-10px, -5px) scale(1.01); }
+  }
+
   /* Organic blob shapes */
   .blob {
     border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
@@ -155,6 +205,27 @@
       0 12px 40px hsl(var(--foreground) / 0.06),
       0 4px 12px hsl(var(--foreground) / 0.03),
       inset 0 1px 0 hsl(0 0% 100% / 0.9);
+  }
+
+  /* Premium 3D Card - Luxurious */
+  .premium-card {
+    @apply bg-card/90 backdrop-blur-2xl rounded-3xl;
+    border: 1px solid hsl(var(--primary) / 0.12);
+    box-shadow: 
+      0 12px 40px -8px hsl(var(--foreground) / 0.08),
+      0 4px 16px -4px hsl(var(--foreground) / 0.04),
+      inset 0 1px 0 hsl(0 0% 100% / 0.9),
+      inset 0 -1px 0 hsl(var(--foreground) / 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .premium-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 20px 50px -12px hsl(var(--foreground) / 0.12),
+      0 8px 24px -8px hsl(var(--foreground) / 0.06),
+      inset 0 1px 0 hsl(0 0% 100% / 1),
+      inset 0 -1px 0 hsl(var(--foreground) / 0.03);
   }
   
   /* Premium glassmorphic panel */
