@@ -224,7 +224,7 @@ export default function AddEntryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col max-w-lg mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10 flex flex-col max-w-lg mx-auto">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -234,60 +234,66 @@ export default function AddEntryPage() {
         className="hidden"
       />
 
-      {/* Photo Section - Full Bleed Hero */}
-      <section className="relative w-full aspect-[4/3] overflow-hidden">
-        {!photoUrl ? (
-          /* Premium Photo Upload UI */
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-lavender/20 to-mint/30 flex flex-col items-center justify-center px-6">
-            {/* Decorative blobs */}
-            <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 right-10 w-40 h-40 bg-lavender/30 rounded-full blur-3xl" />
-            
-            {/* Back button */}
-            <button
-              onClick={() => navigate(-1)}
-              className="absolute top-4 left-4 p-3 rounded-full bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg transition-all duration-200 hover:bg-card active:scale-95 z-10"
-            >
-              <X className="w-5 h-5 text-foreground" />
-            </button>
-            
-            {/* Content */}
-            <div className="relative z-10 text-center mb-8">
-              <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">Log Your Meal</h1>
-              <p className="text-muted-foreground text-sm">Snap a photo to analyze your food</p>
-            </div>
-            
-            <div className="relative z-10 flex gap-5">
-              {/* Camera Button - Premium */}
-              <button
-                onClick={openCamera}
-                disabled={isAnalyzing}
-                className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
-                style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
-              >
-                <div className="p-5 rounded-2xl bg-gradient-to-br from-primary to-sage-dark transition-transform group-hover:scale-110">
-                  <Camera className="w-8 h-8 text-primary-foreground" />
-                </div>
-                <span className="font-semibold text-foreground">Camera</span>
-              </button>
-
-              {/* Gallery Button - Premium */}
-              <button
-                onClick={openGallery}
-                disabled={isAnalyzing}
-                className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
-                style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
-              >
-                <div className="p-5 rounded-2xl bg-gradient-to-br from-lavender to-secondary transition-transform group-hover:scale-110">
-                  <ImageIcon className="w-8 h-8 text-secondary-foreground" />
-                </div>
-                <span className="font-semibold text-foreground">Gallery</span>
-              </button>
-            </div>
+      {/* Photo Section */}
+      {!photoUrl ? (
+        /* Premium Photo Upload UI - No Empty Card */
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative">
+          {/* Decorative blobs */}
+          <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-lavender/30 rounded-full blur-3xl pointer-events-none" />
+          
+          {/* Back button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute top-4 left-4 p-3 rounded-full bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg transition-all duration-200 hover:bg-card active:scale-95 z-10"
+          >
+            <X className="w-5 h-5 text-foreground" />
+          </button>
+          
+          {/* Content */}
+          <div className="relative z-10 text-center mb-10">
+            <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">Log Your Meal</h1>
+            <p className="text-muted-foreground">Snap a photo to analyze your food</p>
           </div>
-        ) : (
-          /* Photo Preview with Premium Overlay */
-          <>
+          
+          <div className="relative z-10 flex gap-5">
+            {/* Camera Button - Premium */}
+            <button
+              onClick={openCamera}
+              disabled={isAnalyzing}
+              className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
+              style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
+            >
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-primary to-sage-dark transition-transform group-hover:scale-110">
+                <Camera className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <span className="font-semibold text-foreground">Camera</span>
+            </button>
+
+            {/* Gallery Button - Premium */}
+            <button
+              onClick={openGallery}
+              disabled={isAnalyzing}
+              className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
+              style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
+            >
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-lavender to-secondary transition-transform group-hover:scale-110">
+                <ImageIcon className="w-8 h-8 text-secondary-foreground" />
+              </div>
+              <span className="font-semibold text-foreground">Gallery</span>
+            </button>
+          </div>
+          
+          {/* Tips */}
+          <p className="relative z-10 text-xs text-muted-foreground text-center mt-10 max-w-xs">
+            💡 Tip: Good lighting helps our AI detect ingredients more accurately
+          </p>
+        </div>
+      ) : (
+        /* Photo Preview with Content */
+        <>
+          {/* Hero Photo Section */}
+          <section className="relative w-full aspect-[4/3] overflow-hidden flex-shrink-0">
             <img
               src={photoUrl}
               alt="Your meal"
@@ -330,13 +336,11 @@ export default function AddEntryPage() {
                 </button>
               </>
             )}
-          </>
-        )}
-      </section>
+          </section>
 
-      {/* Scrollable Content */}
-      <section className="flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto pb-40 shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)]">
-        <div className="p-5 space-y-4 pt-8">
+          {/* Scrollable Content */}
+          <section className="flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto pb-40 shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)]">
+            <div className="p-5 space-y-4 pt-8">
           {/* AI Analysis Results */}
           {photoAnalyzed && (
             <div className="space-y-4">
@@ -513,45 +517,47 @@ export default function AddEntryPage() {
               </div>
             </div>
           )}
-        </div>
-      </section>
+            </div>
+          </section>
 
-      {/* Floating Save Button */}
-      {photoAnalyzed && (
-        <div className="fixed bottom-28 left-4 right-4 max-w-lg mx-auto z-40 animate-slide-up" style={{ animationDelay: '300ms' }}>
-          <button
-            onClick={handleSave}
-            disabled={!isValid || isSaving}
-            className={`w-full h-[60px] flex items-center justify-center gap-3 rounded-full font-semibold text-lg transition-all duration-300 ${
-              !isValid || isSaving 
-                ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-                : 'bg-gradient-to-r from-primary via-sage-dark to-primary text-primary-foreground hover:-translate-y-1 active:scale-[0.98]'
-            }`}
-            style={isValid && !isSaving ? {
-              boxShadow: '0 12px 32px -4px hsl(var(--primary) / 0.5), 0 4px 12px -2px hsl(var(--foreground) / 0.1)'
-            } : undefined}
-          >
-            {isSaving ? (
-              <>
-                <span className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                Save Meal Entry
-                <ArrowRight className="w-5 h-5" />
-              </>
-            )}
-          </button>
-        </div>
+          {/* Floating Save Button */}
+          {photoAnalyzed && (
+            <div className="fixed bottom-28 left-4 right-4 max-w-lg mx-auto z-40 animate-slide-up" style={{ animationDelay: '300ms' }}>
+              <button
+                onClick={handleSave}
+                disabled={!isValid || isSaving}
+                className={`w-full h-[60px] flex items-center justify-center gap-3 rounded-full font-semibold text-lg transition-all duration-300 ${
+                  !isValid || isSaving 
+                    ? 'bg-muted text-muted-foreground cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-primary via-sage-dark to-primary text-primary-foreground hover:-translate-y-1 active:scale-[0.98]'
+                }`}
+                style={isValid && !isSaving ? {
+                  boxShadow: '0 12px 32px -4px hsl(var(--primary) / 0.5), 0 4px 12px -2px hsl(var(--foreground) / 0.1)'
+                } : undefined}
+              >
+                {isSaving ? (
+                  <>
+                    <span className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    Save Meal Entry
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Trigger Selector Modal */}
+          <TriggerSelectorModal
+            isOpen={showTriggerModal}
+            onClose={() => setShowTriggerModal(false)}
+            onAdd={addTrigger}
+          />
+        </>
       )}
-
-      {/* Trigger Selector Modal */}
-      <TriggerSelectorModal
-        isOpen={showTriggerModal}
-        onClose={() => setShowTriggerModal(false)}
-        onAdd={addTrigger}
-      />
     </div>
   );
 }

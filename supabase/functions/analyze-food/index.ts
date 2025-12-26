@@ -38,50 +38,58 @@ serve(async (req) => {
               },
               {
                 type: 'text',
-                text: `Analyze this meal photo and provide:
+                text: `You are an expert food analyst. Analyze this meal photo EXHAUSTIVELY. Identify EVERY visible ingredient, component, and food item.
 
-1. A creative, appetizing short title for the meal (2-4 words max, like "Caramel Bliss Pancakes" or "Garden Fresh Harvest")
-2. A meal category (1-2 words like "Breakfast Indulgence", "Comfort Food", "Light & Fresh")
-3. A natural description of the meal (1-2 sentences)
-4. List of FODMAP/trigger categories detected
+Your task:
+1. Create a creative, appetizing short title (2-4 words, like "Caramel Bliss Pancakes" or "Mediterranean Sunset Bowl")
+2. Create a meal category (1-2 words like "Breakfast Indulgence", "Comfort Food", "Light & Fresh")
+3. Write a detailed description listing ALL visible foods (2-3 sentences)
+4. Identify ALL potential FODMAP/digestive triggers
 
-Return ONLY valid JSON in this exact format (no markdown, no code blocks):
+CRITICAL INSTRUCTIONS FOR INGREDIENT DETECTION:
+- List EVERY ingredient you can see, no matter how small
+- Include all sauces, seasonings, garnishes, sides
+- If you see bread, identify the type and list wheat/gluten
+- If you see any dairy (cheese, cream, butter, milk), list it
+- If you see onions or garlic (even as seasoning), list them
+- If you see any sweeteners or sugar, list them
+- Be thorough - users depend on this for their digestive health
+
+Return ONLY valid JSON (no markdown, no code blocks):
 {
   "creative_title": "Golden Sunrise Stack",
   "meal_category": "Breakfast Delight",
-  "meal_description": "Fluffy pancakes drizzled with maple syrup, served with fresh berries and whipped cream",
+  "meal_description": "Fluffy buttermilk pancakes topped with fresh strawberries, blueberries, and whipped cream, drizzled with maple syrup and dusted with powdered sugar. Served with a side of crispy bacon.",
   "triggers": [
-    {
-      "category": "fodmaps-fructans",
-      "food": "wheat flour"
-    },
-    {
-      "category": "fodmaps-lactose",
-      "food": "whipped cream"
-    }
+    {"category": "fodmaps-fructans", "food": "wheat flour (pancakes)"},
+    {"category": "fodmaps-lactose", "food": "buttermilk"},
+    {"category": "fodmaps-lactose", "food": "whipped cream"},
+    {"category": "fodmaps-fructose", "food": "maple syrup"},
+    {"category": "high-fat", "food": "bacon"},
+    {"category": "refined-sugar", "food": "powdered sugar"}
   ]
 }
 
-CRITICAL: You MUST use ONLY these exact category values (copy exactly as written):
+VALID CATEGORY VALUES (use ONLY these exact strings):
+- "fodmaps-fructans" - Wheat, bread, pasta, onions, garlic, shallots
+- "fodmaps-gos" - Beans, lentils, chickpeas, hummus
+- "fodmaps-lactose" - Milk, cream, soft cheese, yogurt, ice cream, butter
+- "fodmaps-fructose" - Apples, honey, mango, agave, high-fructose corn syrup
+- "fodmaps-polyols" - Sugar-free items, stone fruits (peaches, plums), mushrooms
+- "gluten" - Wheat, barley, rye, bread, pasta, beer, soy sauce
+- "dairy" - All milk products including cheese, cream, butter
+- "cruciferous" - Broccoli, cabbage, cauliflower, Brussels sprouts, kale
+- "high-fat" - Fried foods, fatty meats, heavy cream, oils, butter
+- "carbonated" - Soda, sparkling water, beer
+- "refined-sugar" - Candy, pastries, white sugar, syrups, desserts
+- "alcohol" - Beer, wine, spirits, cocktails
 
-1. "fodmaps-fructans" - Wheat, bread, onions, garlic
-2. "fodmaps-gos" - Beans, lentils, chickpeas
-3. "fodmaps-lactose" - Milk, soft cheese, yogurt
-4. "fodmaps-fructose" - Apples, honey, mango
-5. "fodmaps-polyols" - Sugar-free gum, stone fruits
-6. "gluten" - Wheat, barley, rye, beer
-7. "dairy" - All milk products
-8. "cruciferous" - Broccoli, cabbage, Brussels sprouts
-9. "high-fat" - Fried foods, fatty meats
-10. "carbonated" - Soda, sparkling water
-11. "refined-sugar" - Candy, pastries, white bread
-12. "alcohol" - Beer, wine, spirits
-
-Do NOT create new categories. Only use the 12 listed above.
-Make the creative_title sound appetizing and memorable - avoid generic names.
-Only include foods you can clearly identify.
-If you cannot identify any triggers, return an empty triggers array.
-If you cannot identify the food, return a generic title and description.`
+IMPORTANT:
+- Be EXHAUSTIVE with ingredient detection
+- Include compound ingredients (e.g., if pizza, list: wheat crust, tomato sauce, cheese, toppings)
+- List each trigger separately even if multiple items share a category
+- Only include foods you can actually see or reasonably infer
+- If unsure about an ingredient, include it to be safe`
               }
             ]
           }
