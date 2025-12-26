@@ -1,30 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, Shield, Sparkles, CreditCard, ArrowRight, Leaf } from 'lucide-react';
+import { Check, Shield, Sparkles, CreditCard, ArrowRight, Leaf, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-const PRICING = {
-  monthly: {
-    price: 9.99,
-    period: 'month',
-    displayPrice: '$9.99',
-    billingText: '$9.99/month',
-    trialDays: 3,
-  },
-  annual: {
-    price: 29.99,
-    period: 'year',
-    displayPrice: '$29.99',
-    monthlyEquivalent: '$2.49/month',
-    originalPrice: '$119.88',
-    savings: '75%',
-    savingsAmount: '$89.89',
-    billingText: '$29.99/year',
-    trialDays: 3,
-  },
-};
+import { useSubscription, STRIPE_PLANS } from '@/hooks/useSubscription';
+import { useAuth } from '@/contexts/AuthContext';
 
 const FEATURES = [
   'Unlimited meal logging with photos',
@@ -41,18 +22,47 @@ export default function PricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<'annual' | 'monthly'>('annual');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { hasAccess, isLoading, isCheckingOut, startCheckout, plan, refreshSubscription } = useSubscription();
+  const [searchParams] = useSearchParams();
 
-  const selectedPlan = PRICING[billingPeriod];
-  const annualPlan = PRICING.annual;
+  // Handle checkout return
+  useEffect(() => {
+    const checkoutStatus = searchParams.get('checkout');
+    if (checkoutStatus === 'success') {
+      toast({
+        title: 'Welcome to Bloat AI Pro!',
+        description: 'Your subscription is now active. Enjoy unlimited access!',
+      });
+      refreshSubscription();
+      navigate('/dashboard', { replace: true });
+    } else if (checkoutStatus === 'cancelled') {
+      toast({
+        title: 'Checkout cancelled',
+        description: 'No worries, you can subscribe anytime.',
+      });
+    }
+  }, [searchParams, toast, navigate, refreshSubscription]);
 
-  const handleStartTrial = () => {
-    // For now, show coming soon toast
-    // In production, this would integrate with Stripe
-    toast({
-      title: 'Coming Soon',
-      description: 'Payment processing will be available soon. Contact us for early access!',
-    });
+  // Redirect if already subscribed
+  useEffect(() => {
+    if (hasAccess && !isLoading) {
+      navigate('/dashboard');
+    }
+  }, [hasAccess, isLoading, navigate]);
+
+  const handleSubscribe = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    await startCheckout(billingPeriod);
   };
+
+  const selectedPlan = billingPeriod === 'annual' ? STRIPE_PLANS.annual : STRIPE_PLANS.monthly;
+  const annualPlan = STRIPE_PLANS.annual;
+  const monthlyPlan = STRIPE_PLANS.monthly;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -103,15 +113,12 @@ export default function PricingPage() {
             Unlock Your Gut Health Journey
           </h1>
           <p className="text-muted-foreground">
-            Start your 3-day free trial, then continue with unlimited AI-powered bloating insights
+            Get unlimited AI-powered bloating insights and personalized trigger analysis
           </p>
         </div>
 
         {/* Pricing Card */}
-        <Card className="glass-panel p-6 mb-6 relative overflow-hidden">
-          {/* Top accent stripe */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-amber-400 to-primary" />
-          
+        <Card className="premium-card p-6 mb-6 relative overflow-hidden">
           {/* Badges */}
           <div className="flex gap-2 mb-4">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
@@ -120,7 +127,7 @@ export default function PricingPage() {
             </span>
             {billingPeriod === 'annual' && (
               <span className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-white text-sm font-medium">
-                Save {annualPlan.savings}
+                Save 75%
               </span>
             )}
           </div>
@@ -133,18 +140,18 @@ export default function PricingPage() {
             {billingPeriod === 'annual' ? (
               <div>
                 <span className="text-lg text-muted-foreground line-through mr-2">
-                  {annualPlan.originalPrice}
+                  ${(monthlyPlan.price * 12).toFixed(2)}
                 </span>
                 <span className="text-4xl font-bold text-primary">
-                  {annualPlan.displayPrice}
+                  ${annualPlan.price}
                 </span>
                 <span className="text-muted-foreground">/year</span>
-                <p className="text-sm text-primary mt-1">({annualPlan.monthlyEquivalent})</p>
+                <p className="text-sm text-primary mt-1">(${(annualPlan.price / 12).toFixed(2)}/month)</p>
               </div>
             ) : (
               <div>
                 <span className="text-4xl font-bold text-primary">
-                  {selectedPlan.displayPrice}
+                  ${monthlyPlan.price}
                 </span>
                 <span className="text-muted-foreground">/month</span>
               </div>
@@ -170,16 +177,30 @@ export default function PricingPage() {
 
           {/* CTA Button */}
           <Button 
-            onClick={handleStartTrial}
-            className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-sage-dark hover:from-sage-dark hover:to-primary transition-all duration-300 floating-button"
+            onClick={handleSubscribe}
+            disabled={isCheckingOut || isLoading}
+            className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-sage-dark hover:from-sage-dark hover:to-primary transition-all duration-300"
+            style={{ boxShadow: '0 8px 24px hsl(var(--primary) / 0.35)' }}
           >
-            Start 3-Day Free Trial
-            <ArrowRight className="w-5 h-5 ml-2" />
+            {isCheckingOut ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Opening Checkout...
+              </>
+            ) : (
+              <>
+                Subscribe Now
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </>
+            )}
           </Button>
 
           {/* Fine Print */}
           <p className="text-center text-xs text-muted-foreground mt-4">
-            Then {selectedPlan.billingText} • Cancel anytime
+            {billingPeriod === 'annual' 
+              ? `$${annualPlan.price}/year • Cancel anytime`
+              : `$${monthlyPlan.price}/month • Cancel anytime`
+            }
           </p>
         </Card>
 
@@ -191,7 +212,7 @@ export default function PricingPage() {
           </div>
           <div className="flex flex-col items-center gap-1">
             <Sparkles className="w-5 h-5 text-primary" />
-            <span className="text-xs text-muted-foreground">No commitment</span>
+            <span className="text-xs text-muted-foreground">Powered by Stripe</span>
           </div>
           <div className="flex flex-col items-center gap-1">
             <CreditCard className="w-5 h-5 text-primary" />
