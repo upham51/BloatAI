@@ -330,6 +330,33 @@ function InlineRating({ entryId }: { entryId: string }) {
   );
 }
 
+function getQuickMealTitle(entry: MealEntry) {
+  const foods = Array.from(
+    new Set((entry.detected_triggers || []).map(t => (t.food || '').trim()).filter(Boolean))
+  );
+
+  if (foods.length > 0) {
+    return foods.slice(0, 3).join(' • ');
+  }
+
+  // Fallback: compress the AI prose into a short noun phrase
+  const firstSentence = entry.meal_description.split(/[.!?\n]/)[0] || entry.meal_description;
+  let s = firstSentence.trim().replace(/^"|"$/g, '');
+
+  // Remove common verbose openers
+  s = s
+    .replace(/^(a|an|the)\s+/i, '')
+    .replace(/^(?:\w+\s+){0,3}(stack|bowl|plate|serving)\s+of\s+/i, '')
+    .replace(/^(vibrant|hearty|delicious|generous|beautiful|tall)\s+/i, '');
+
+  // Prefer the part before the first comma
+  s = (s.split(',')[0] || s).trim();
+
+  const words = s.split(/\s+/).filter(Boolean);
+  const short = words.slice(0, 4).join(' ');
+  return short.length > 0 ? short : 'Meal';
+}
+
 function EntryCard({
   entry,
   userAvg,
@@ -376,9 +403,7 @@ function EntryCard({
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-foreground line-clamp-1 leading-tight text-sm">
-                  {entry.meal_description.length > 50 
-                    ? entry.meal_description.substring(0, 50).trim() + '...'
-                    : entry.meal_description}
+                  {getQuickMealTitle(entry)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                   <Clock className="w-3 h-3" />
