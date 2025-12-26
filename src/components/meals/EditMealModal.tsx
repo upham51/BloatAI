@@ -16,6 +16,14 @@ import { useMeals } from '@/contexts/MealContext';
 import { useToast } from '@/hooks/use-toast';
 import { TriggerSelectorModal } from '@/components/triggers/TriggerSelectorModal';
 
+const RATING_LABELS: Record<number, string> = {
+  1: 'None',
+  2: 'Mild',
+  3: 'Moderate',
+  4: 'Strong',
+  5: 'Severe',
+};
+
 interface EditMealModalProps {
   entry: MealEntry | null;
   open: boolean;
@@ -28,6 +36,7 @@ export function EditMealModal({ entry, open, onClose }: EditMealModalProps) {
   
   const [description, setDescription] = useState('');
   const [mealTime, setMealTime] = useState('');
+  const [bloatingRating, setBloatingRating] = useState<number | null>(null);
   const [triggers, setTriggers] = useState<DetectedTrigger[]>([]);
   const [triggerModalOpen, setTriggerModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,6 +46,7 @@ export function EditMealModal({ entry, open, onClose }: EditMealModalProps) {
     if (entry) {
       setDescription(entry.meal_description);
       setMealTime(format(new Date(entry.created_at), "yyyy-MM-dd'T'HH:mm"));
+      setBloatingRating(entry.bloating_rating);
       setTriggers(entry.detected_triggers || []);
     }
   }, [entry]);
@@ -49,6 +59,8 @@ export function EditMealModal({ entry, open, onClose }: EditMealModalProps) {
       await updateEntry(entry.id, {
         meal_description: description,
         created_at: new Date(mealTime).toISOString(),
+        bloating_rating: bloatingRating,
+        rating_status: bloatingRating ? 'completed' : entry.rating_status,
         detected_triggers: triggers,
       });
       
@@ -150,6 +162,36 @@ export function EditMealModal({ entry, open, onClose }: EditMealModalProps) {
                 onChange={(e) => setMealTime(e.target.value)}
                 className="rounded-xl bg-muted/30 border-border/50"
               />
+            </div>
+
+            {/* Bloating Rating */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Bloating Rating</Label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((rating) => (
+                  <button
+                    key={rating}
+                    type="button"
+                    onClick={() => setBloatingRating(rating)}
+                    className={`flex-1 flex flex-col items-center justify-center py-3 rounded-xl border-2 transition-all duration-200 ${
+                      bloatingRating === rating
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border/50 bg-muted/30 hover:border-primary/50'
+                    }`}
+                  >
+                    <span className="text-lg font-bold">{rating}</span>
+                    <span className="text-[10px] text-muted-foreground">{RATING_LABELS[rating]}</span>
+                  </button>
+                ))}
+              </div>
+              {bloatingRating && (
+                <button
+                  onClick={() => setBloatingRating(null)}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear rating
+                </button>
+              )}
             </div>
 
             {/* Triggers */}

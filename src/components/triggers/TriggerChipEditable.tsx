@@ -12,8 +12,10 @@ export function TriggerChipEditable({ trigger, onRemove }: TriggerChipEditablePr
   
   return (
     <div
-      className="flex items-center justify-between p-3 rounded-xl bg-background shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-      style={{ borderLeft: `4px solid ${categoryInfo?.color || '#7FB069'}` }}
+      className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/40 transition-all duration-200 hover:-translate-y-0.5"
+      style={{ 
+        boxShadow: '0 4px 12px -2px hsl(var(--foreground) / 0.08), 0 2px 6px -2px hsl(var(--foreground) / 0.04)'
+      }}
     >
       <div className="flex flex-col gap-0.5 flex-1 min-w-0">
         <span className="text-sm font-semibold text-foreground truncate">
