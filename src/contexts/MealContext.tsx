@@ -77,6 +77,7 @@ export function MealProvider({ children }: { children: ReactNode }) {
         rating_status: entryData.rating_status,
         rating_due_at: entryData.rating_due_at,
         detected_triggers: entryData.detected_triggers as unknown as Json,
+        custom_title: entryData.custom_title,
         user_id: user.id,
       })
       .select()

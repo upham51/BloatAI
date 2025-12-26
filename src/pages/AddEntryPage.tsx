@@ -201,6 +201,7 @@ export default function AddEntryPage() {
         rating_status: bloatingRating ? 'completed' : 'pending',
         rating_due_at: ratingDueAt,
         detected_triggers: detectedTriggers,
+        custom_title: creativeMealTitle || null,
       });
 
       toast({
