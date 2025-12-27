@@ -197,10 +197,8 @@ export default function AddEntryPage() {
         if (uploadError) {
           console.error('Upload error:', uploadError);
         } else {
-          const { data: urlData } = supabase.storage
-            .from('meal-photos')
-            .getPublicUrl(fileName);
-          uploadedPhotoUrl = urlData.publicUrl;
+          // Store the file path, not the public URL (bucket is now private)
+          uploadedPhotoUrl = fileName;
         }
       }
 
