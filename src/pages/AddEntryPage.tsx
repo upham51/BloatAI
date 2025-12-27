@@ -342,6 +342,7 @@ export default function AddEntryPage() {
         /* Text Only Mode */
         <TextOnlyModeWrapper onBack={() => setEntryMode('photo')} />
       ) : (
+        <>
           <section className="relative w-full aspect-[4/3] overflow-hidden flex-shrink-0">
             <img
               src={photoUrl}
