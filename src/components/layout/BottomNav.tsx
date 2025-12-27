@@ -36,18 +36,16 @@ export function BottomNav() {
             {({ isActive }) => (
               <>
                 {isCenter ? (
-                  /* Center FAB-style button */
+                  /* Center FAB-style button - Solid color */
                   <div 
                     className={cn(
-                      'relative flex items-center justify-center w-14 h-14 -mt-6 rounded-full transition-all duration-300',
-                      isActive
-                        ? 'bg-gradient-to-br from-primary via-primary to-sage-dark scale-110'
-                        : 'bg-gradient-to-br from-primary/90 to-sage-dark/90 hover:scale-105'
+                      'relative flex items-center justify-center w-14 h-14 -mt-6 rounded-full transition-all duration-300 bg-primary',
+                      isActive ? 'scale-110' : 'hover:scale-105'
                     )}
                     style={{
                       boxShadow: isActive
-                        ? '0 8px 24px -4px hsl(var(--primary) / 0.5), 0 4px 12px -2px hsl(var(--primary) / 0.3), inset 0 1px 0 hsl(0 0% 100% / 0.3)'
-                        : '0 4px 16px -4px hsl(var(--primary) / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.2)'
+                        ? '0 8px 24px -4px hsl(var(--primary) / 0.5), 0 4px 12px -2px hsl(var(--primary) / 0.3)'
+                        : '0 4px 16px -4px hsl(var(--primary) / 0.4)'
                     }}
                   >
                     <Icon className="w-7 h-7 text-primary-foreground" strokeWidth={2.5} />

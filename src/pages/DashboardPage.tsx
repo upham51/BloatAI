@@ -1,22 +1,38 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ChevronRight, TrendingUp, TrendingDown, Flame, Settings } from 'lucide-react';
+import { Plus, ChevronRight, TrendingUp, TrendingDown, Flame, Settings, AlertTriangle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useAdmin } from '@/hooks/useAdmin';
-import { RATING_LABELS, getTriggerCategory } from '@/types';
+import { RATING_LABELS, getTriggerCategory, MealEntry } from '@/types';
 import { format, subDays, isAfter, startOfDay } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getQuoteForContext, getTimeBasedGreeting, getMealPrompt } from '@/lib/quotes';
+
+// Trigger display names for the insights
+const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
+  'fodmaps-fructans': 'Wheat/Fructans',
+  'fodmaps-gos': 'Beans/GOS',
+  'fodmaps-lactose': 'Lactose',
+  'fodmaps-fructose': 'Fructose',
+  'fodmaps-polyols': 'Polyols',
+  'gluten': 'Gluten',
+  'dairy': 'Dairy',
+  'cruciferous': 'Cruciferous',
+  'high-fat': 'Fried/Fatty',
+  'carbonated': 'Carbonated',
+  'refined-sugar': 'Sugar',
+  'alcohol': 'Alcohol'
+};
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isAdmin } = useAdmin();
-  const { entries, getPendingEntry, updateRating, skipRating } = useMeals();
+  const { entries, getPendingEntry, updateRating, skipRating, getCompletedCount } = useMeals();
   const { toast } = useToast();
 
   const pendingEntry = getPendingEntry();
@@ -61,39 +77,68 @@ export default function DashboardPage() {
     return count;
   }, [entries]);
 
-  // Weekly data for mini chart
-  const weekData = useMemo(() => {
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = subDays(new Date(), i);
-      const dayStart = startOfDay(date);
-      const dayEntries = entries.filter(e => {
-        const entryDate = startOfDay(new Date(e.created_at));
-        return entryDate.getTime() === dayStart.getTime();
+  // Calculate completed meal count
+  const completedCount = getCompletedCount();
+
+  // Weekly insights data - Top Triggers
+  const topTriggers = useMemo(() => {
+    const weekAgo = subDays(new Date(), 7);
+    const roughMeals = entries.filter(e => 
+      isAfter(new Date(e.created_at), weekAgo) && 
+      e.bloating_rating && e.bloating_rating >= 3
+    );
+
+    const triggerStats: Record<string, { 
+      category: string; 
+      meal_count: number; 
+      total_bloating: number;
+    }> = {};
+
+    roughMeals.forEach(meal => {
+      meal.detected_triggers?.forEach(trigger => {
+        if (!triggerStats[trigger.category]) {
+          triggerStats[trigger.category] = {
+            category: trigger.category,
+            meal_count: 0,
+            total_bloating: 0,
+          };
+        }
+        triggerStats[trigger.category].meal_count++;
+        triggerStats[trigger.category].total_bloating += meal.bloating_rating || 0;
       });
-      
-      const ratedEntries = dayEntries.filter(e => e.bloating_rating);
-      const avgBloating = ratedEntries.length > 0 
-        ? ratedEntries.reduce((sum, e) => sum + (e.bloating_rating || 0), 0) / ratedEntries.length 
-        : null;
-      
-      days.push({
-        day: format(date, 'EEE')[0],
-        fullDay: format(date, 'EEEE'),
-        bloating: avgBloating,
-        hasData: dayEntries.length > 0,
-      });
-    }
-    return days;
+    });
+
+    return Object.values(triggerStats)
+      .map(t => ({
+        ...t,
+        avg_bloating: t.total_bloating / t.meal_count,
+        severity: (t.total_bloating / t.meal_count) >= 4 ? 'high' : (t.total_bloating / t.meal_count) >= 3 ? 'medium' : 'low',
+        display_name: CATEGORY_DISPLAY_NAMES[t.category] || getTriggerCategory(t.category)?.displayName?.split(' - ')[1] || t.category,
+      }))
+      .sort((a, b) => b.avg_bloating - a.avg_bloating || b.meal_count - a.meal_count)
+      .slice(0, 3);
   }, [entries]);
 
-  // Weekly stats - count individual meals, not days
+  // Safe meals from past 7 days
+  const safeMeals = useMemo(() => {
+    const weekAgo = subDays(new Date(), 7);
+    return entries
+      .filter(e => 
+        isAfter(new Date(e.created_at), weekAgo) && 
+        e.bloating_rating !== null &&
+        e.bloating_rating !== undefined &&
+        e.bloating_rating <= 2
+      )
+      .sort((a, b) => (a.bloating_rating || 0) - (b.bloating_rating || 0))
+      .slice(0, 3);
+  }, [entries]);
+
+  // Weekly stats for trend
   const weeklyStats = useMemo(() => {
     const weekAgo = subDays(new Date(), 7);
     const thisWeek = entries.filter(e => isAfter(new Date(e.created_at), weekAgo));
     const rated = thisWeek.filter(e => e.bloating_rating);
     
-    // Count individual meals with comfortable (≤2) or rough (≥4) bloating
     const comfortableMeals = rated.filter(e => e.bloating_rating && e.bloating_rating <= 2).length;
     const roughMeals = rated.filter(e => e.bloating_rating && e.bloating_rating >= 4).length;
     
@@ -128,38 +173,20 @@ export default function DashboardPage() {
     });
   }, [weeklyStats, entries.length, streak]);
 
-  // Latest insight/win
-  const latestInsight = useMemo(() => {
-    if (entries.length < 3) return null;
-    
-    const recentGoodMeals = entries.filter(e => e.bloating_rating && e.bloating_rating <= 2).slice(0, 3);
-    if (recentGoodMeals.length >= 2) {
-      return {
-        type: 'win',
-        message: `You've had ${recentGoodMeals.length} comfortable meals recently. You're finding what works!`,
-      };
-    }
-    
-    const triggerCounts: Record<string, number> = {};
-    entries.slice(0, 10).forEach(entry => {
-      if (entry.bloating_rating && entry.bloating_rating >= 4) {
-        entry.detected_triggers?.forEach(t => {
-          triggerCounts[t.category] = (triggerCounts[t.category] || 0) + 1;
-        });
+  // Quick log meal function
+  const handleQuickLog = (meal: MealEntry) => {
+    navigate('/add-entry', { 
+      state: { 
+        prefilled: {
+          meal_title: meal.meal_title,
+          meal_emoji: meal.meal_emoji,
+          triggers: meal.detected_triggers,
+          isDuplicate: true,
+          original_meal_id: meal.id
+        }
       }
     });
-    
-    const topTrigger = Object.entries(triggerCounts).sort((a, b) => b[1] - a[1])[0];
-    if (topTrigger && topTrigger[1] >= 2) {
-      const categoryName = getTriggerCategory(topTrigger[0])?.displayName;
-      return {
-        type: 'insight',
-        message: `${categoryName} appeared in ${topTrigger[1]} of your recent high-bloating meals. Worth investigating.`,
-      };
-    }
-    
-    return null;
-  }, [entries]);
+  };
 
   const handleRate = async (rating: number) => {
     if (!pendingEntry) return;
@@ -240,13 +267,13 @@ export default function DashboardPage() {
             </button>
           )}
 
-          {/* Daily Quote Card - Luxurious */}
+          {/* Daily Quote Card */}
           <div 
             className="premium-card p-6 animate-slide-up opacity-0"
             style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
           >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-sage-dark flex items-center justify-center shadow-lg shrink-0">
+              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg shrink-0">
                 <span className="text-xl filter drop-shadow">💭</span>
               </div>
               <div className="flex-1 min-w-0">
@@ -260,100 +287,122 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Weekly Snapshot - Luxurious */}
-          {entries.length >= 3 && (
+          {/* Weekly Insights Card - NEW */}
+          {completedCount >= 5 ? (
             <div 
-              className="premium-card p-6 animate-slide-up opacity-0"
+              className="premium-card p-5 animate-slide-up opacity-0 space-y-4"
               style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
             >
-              <h2 className="font-bold text-foreground mb-5 text-lg">Your Week at a Glance</h2>
-              
-              {/* Comfortable/Rough Meals - 3D Cards */}
-              <div className="flex gap-4 mb-5">
-                <div className="flex-1 p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.25),inset_0_1px_0_hsl(0_0%_100%/0.6)]">
-                  <span className="text-3xl block mb-1">😊</span>
-                  <div className="text-3xl font-bold text-primary">{weeklyStats.comfortableMeals}</div>
-                  <div className="text-sm text-muted-foreground font-medium">Comfortable</div>
-                  <div className="text-xs text-primary/70 mt-1">Bloating ≤2</div>
-                </div>
-                <div className="flex-1 p-4 rounded-2xl bg-gradient-to-br from-coral/15 to-coral/5 border border-coral/20 shadow-[0_8px_24px_-8px_hsl(var(--coral)/0.25),inset_0_1px_0_hsl(0_0%_100%/0.6)]">
-                  <span className="text-3xl block mb-1">😕</span>
-                  <div className="text-3xl font-bold text-coral">{weeklyStats.roughMeals}</div>
-                  <div className="text-sm text-muted-foreground font-medium">Rough</div>
-                  <div className="text-xs text-coral/70 mt-1">Bloating ≥4</div>
-                </div>
-              </div>
-              
-              {/* Mini Weekly Chart */}
-              <div className="flex justify-between items-end gap-1.5 h-16 px-2 mb-4">
-                {weekData.map((day, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-                    <div 
-                      className={`w-full rounded-t-lg transition-all shadow-sm ${
-                        day.bloating === null 
-                          ? 'bg-muted/40 h-2' 
-                          : day.bloating <= 2 
-                            ? 'bg-gradient-to-t from-primary to-primary/70' 
-                            : day.bloating >= 4 
-                              ? 'bg-gradient-to-t from-coral to-coral/70' 
-                              : 'bg-muted-foreground/50'
-                      }`}
-                      style={{ 
-                        height: day.bloating !== null ? `${Math.max(20, (day.bloating / 5) * 100)}%` : '8px',
-                      }}
-                    />
-                    <span className="text-xs text-muted-foreground font-medium">{day.day}</span>
+              {/* Top Triggers Section */}
+              {topTriggers.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-coral" />
+                    <span className="font-bold text-foreground text-sm">Avoid This Week</span>
                   </div>
-                ))}
-              </div>
-              
-              {/* Trend */}
-              {weeklyStats.trend !== 0 && (
-                <div className={`flex items-center gap-1.5 text-sm font-medium ${
-                  weeklyStats.trend > 0 ? 'text-primary' : 'text-coral'
-                }`}>
-                  {weeklyStats.trend > 0 ? (
-                    <>
-                      <TrendingDown className="w-4 h-4" />
-                      <span>{weeklyStats.trend}% better than last week</span>
-                    </>
-                  ) : (
-                    <>
-                      <TrendingUp className="w-4 h-4" />
-                      <span>{Math.abs(weeklyStats.trend)}% worse than last week</span>
-                    </>
-                  )}
+                  <div className="space-y-2">
+                    {topTriggers.map((trigger, idx) => (
+                      <div 
+                        key={trigger.category}
+                        className={`flex items-center gap-3 p-3 rounded-xl ${
+                          trigger.severity === 'high' 
+                            ? 'bg-coral/10' 
+                            : trigger.severity === 'medium' 
+                              ? 'bg-peach/20' 
+                              : 'bg-primary/10'
+                        }`}
+                      >
+                        <span className="text-lg">
+                          {trigger.severity === 'high' && '🔴'}
+                          {trigger.severity === 'medium' && '🟡'}
+                          {trigger.severity === 'low' && '🟢'}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-foreground text-sm">
+                            {trigger.display_name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {trigger.meal_count} meal{trigger.meal_count !== 1 ? 's' : ''} • Avg {trigger.avg_bloating.toFixed(1)}/5
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-3">
+                  <span className="text-2xl">🎉</span>
+                  <p className="text-sm text-muted-foreground mt-1">No major triggers this week! Keep it up!</p>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Latest Insight/Win - Luxurious */}
-          {latestInsight && (
-            <button 
-              onClick={() => navigate('/insights')}
-              className="premium-card p-5 w-full text-left animate-slide-up opacity-0"
-              style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}
-            >
-              <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
-                  latestInsight.type === 'win' 
-                    ? 'bg-gradient-to-br from-primary/30 to-primary/10' 
-                    : 'bg-gradient-to-br from-coral/30 to-coral/10'
-                }`}>
-                  <span className="text-xl">{latestInsight.type === 'win' ? '🎉' : '🎯'}</span>
+              
+              {/* Divider */}
+              <div className="h-px bg-border" />
+              
+              {/* Safe Meals Section */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="font-bold text-foreground text-sm">Your Safe Go-Tos</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground font-medium leading-relaxed">{latestInsight.message}</p>
-                  <p className="text-sm text-primary mt-2 flex items-center gap-1 font-semibold">
-                    See Full Analysis <ChevronRight className="w-4 h-4" />
-                  </p>
-                </div>
+                {safeMeals.length > 0 ? (
+                  <div className="flex gap-2">
+                    {safeMeals.map((meal) => (
+                      <button
+                        key={meal.id}
+                        onClick={() => handleQuickLog(meal)}
+                        className="flex-1 flex flex-col items-center gap-1 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors text-center"
+                      >
+                        <span className="text-xl">{meal.meal_emoji || '🍽️'}</span>
+                        <span className="text-xs font-medium text-foreground line-clamp-2">
+                          {meal.meal_title || meal.custom_title || 'Meal'}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-2">
+                    <span className="text-lg">🔍</span>
+                    <p className="text-xs text-muted-foreground mt-1">Looking for safe meals...</p>
+                  </div>
+                )}
               </div>
-            </button>
-          )}
+              
+              {/* View Full Insights Link */}
+              <button 
+                onClick={() => navigate('/insights')}
+                className="w-full text-center text-sm text-primary font-semibold flex items-center justify-center gap-1 pt-2"
+              >
+                See Detailed Analysis <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          ) : completedCount > 0 ? (
+            /* Building insights state */
+            <div 
+              className="premium-card p-6 animate-slide-up opacity-0 text-center"
+              style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
+            >
+              <span className="text-4xl block mb-3">📊</span>
+              <h3 className="font-bold text-foreground mb-2">Building Your Insights</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Log {5 - completedCount} more meal{5 - completedCount !== 1 ? 's' : ''} with bloating ratings to see your triggers and safe foods
+              </p>
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
+                <div 
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{ width: `${(completedCount / 5) * 100}%` }}
+                />
+              </div>
+              <Button
+                onClick={() => navigate('/add-entry')}
+                className="bg-primary text-primary-foreground rounded-full px-6"
+              >
+                Log a Meal
+              </Button>
+            </div>
+          ) : null}
 
-          {/* Pending Rating - Luxurious */}
+          {/* Pending Rating */}
           {pendingEntry && (
             <div 
               className="premium-card p-5 animate-scale-in"
@@ -368,19 +417,16 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Primary CTA - Luxurious with shimmer */}
+          {/* Primary CTA - Solid color, no gradient */}
           <Button
             onClick={() => navigate('/add-entry')}
-            className="w-full h-16 rounded-3xl text-lg font-bold bg-gradient-to-r from-primary to-sage-dark text-primary-foreground relative overflow-hidden group animate-slide-up opacity-0"
+            className="w-full h-16 rounded-3xl text-lg font-bold bg-primary text-primary-foreground relative overflow-hidden group animate-slide-up opacity-0"
             style={{ 
               animationDelay: '250ms', 
               animationFillMode: 'forwards',
-              boxShadow: '0 16px 40px -8px hsl(var(--primary) / 0.4), 0 8px 20px -4px hsl(var(--foreground) / 0.1), inset 0 1px 0 hsl(0 0% 100% / 0.3)'
+              boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
             }}
           >
-            {/* Shimmer effect */}
-            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-            
             <span className="text-lg font-bold relative z-10">Log New Meal</span>
           </Button>
 

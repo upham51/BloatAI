@@ -23,6 +23,25 @@ const RATING_LABELS: Record<number, string> = {
 
 type EntryMode = 'photo' | 'text';
 
+// Text only mode component wrapper
+function TextOnlyModeWrapper({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="flex-1 flex flex-col">
+      {/* Back button */}
+      <div className="px-6 pt-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <X className="w-4 h-4" />
+          Back to photo
+        </button>
+      </div>
+      <TextOnlyEntry />
+    </div>
+  );
+}
+
 export default function AddEntryPage() {
   const navigate = useNavigate();
   const { addEntry } = useMeals();
@@ -255,42 +274,9 @@ export default function AddEntryPage() {
         className="hidden"
       />
 
-      {/* Tab Selector - Only show when no photo */}
-      {!photoUrl && (
-        <div className="px-6 pt-6 pb-2">
-          <div className="flex bg-muted/50 rounded-full p-1">
-            <button
-              onClick={() => setEntryMode('photo')}
-              className={`flex-1 py-3 px-4 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                entryMode === 'photo'
-                  ? 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground shadow-lg'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              📸 Photo
-            </button>
-            <button
-              onClick={() => setEntryMode('text')}
-              className={`flex-1 py-3 px-4 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                entryMode === 'text'
-                  ? 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground shadow-lg'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              ✍️ Text Only
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Text Only Mode */}
-      {entryMode === 'text' && !photoUrl && (
-        <TextOnlyEntry />
-      )}
-
-      {/* Photo Mode */}
+      {/* Photo Mode - No Toggle */}
       {entryMode === 'photo' && !photoUrl ? (
-        /* Premium Photo Upload UI - No Empty Card */
+        /* Premium Photo Upload UI */
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative">
           {/* Decorative blobs */}
           <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
@@ -311,42 +297,51 @@ export default function AddEntryPage() {
           </div>
           
           <div className="relative z-10 flex gap-5">
-            {/* Camera Button - Premium */}
+            {/* Camera Button */}
             <button
               onClick={openCamera}
               disabled={isAnalyzing}
               className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
               style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
             >
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-primary to-sage-dark transition-transform group-hover:scale-110">
+              <div className="p-5 rounded-2xl bg-primary transition-transform group-hover:scale-110">
                 <Camera className="w-8 h-8 text-primary-foreground" />
               </div>
               <span className="font-semibold text-foreground">Camera</span>
             </button>
 
-            {/* Gallery Button - Premium */}
+            {/* Gallery Button */}
             <button
               onClick={openGallery}
               disabled={isAnalyzing}
               className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
               style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
             >
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-lavender to-secondary transition-transform group-hover:scale-110">
+              <div className="p-5 rounded-2xl bg-lavender transition-transform group-hover:scale-110">
                 <ImageIcon className="w-8 h-8 text-secondary-foreground" />
               </div>
               <span className="font-semibold text-foreground">Gallery</span>
             </button>
           </div>
           
+          {/* Text Only Link - Below buttons */}
+          <button
+            onClick={() => setEntryMode('text')}
+            className="relative z-10 mt-8 text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+          >
+            <Pencil className="w-4 h-4" />
+            Or describe your meal with text
+          </button>
+          
           {/* Tips */}
-          <p className="relative z-10 text-xs text-muted-foreground text-center mt-10 max-w-xs">
+          <p className="relative z-10 text-xs text-muted-foreground text-center mt-8 max-w-xs">
             💡 Tip: Good lighting helps our AI detect ingredients more accurately
           </p>
         </div>
+      ) : entryMode === 'text' && !photoUrl ? (
+        /* Text Only Mode */
+        <TextOnlyModeWrapper onBack={() => setEntryMode('photo')} />
       ) : (
-        /* Photo Preview with Content */
-        <>
-          {/* Hero Photo Section */}
           <section className="relative w-full aspect-[4/3] overflow-hidden flex-shrink-0">
             <img
               src={photoUrl}

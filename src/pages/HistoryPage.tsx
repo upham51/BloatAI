@@ -161,7 +161,7 @@ export default function HistoryPage() {
           {/* Quick Stats Banner */}
           {entries.length >= 3 && (
             <div 
-              className="premium-card p-4 flex gap-4 animate-slide-up opacity-0"
+              className="premium-card p-3 flex gap-3 animate-slide-up opacity-0"
               style={{ animationDelay: '25ms', animationFillMode: 'forwards' }}
             >
               <div className="flex-1 text-center">
@@ -205,23 +205,21 @@ export default function HistoryPage() {
           >
             <button
               onClick={() => setFilter('all')}
-              className={`flex-1 py-3 px-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
+              className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
                 filter === 'all'
-                  ? 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground shadow-lg'
+                  ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
-              style={filter === 'all' ? { boxShadow: '0 4px 16px hsl(var(--primary) / 0.3)' } : undefined}
             >
               All ({entries.length})
             </button>
             <button
               onClick={() => setFilter('high-bloating')}
-              className={`flex-1 py-3 px-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
+              className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
                 filter === 'high-bloating'
-                  ? 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground shadow-lg'
+                  ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
-              style={filter === 'high-bloating' ? { boxShadow: '0 4px 16px hsl(var(--primary) / 0.3)' } : undefined}
             >
               <span className="flex items-center justify-center gap-1">
                 <Flame className="w-3 h-3" />
@@ -230,12 +228,11 @@ export default function HistoryPage() {
             </button>
             <button
               onClick={() => setFilter('this-week')}
-              className={`flex-1 py-3 px-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
+              className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
                 filter === 'this-week'
-                  ? 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground shadow-lg'
+                  ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
-              style={filter === 'this-week' ? { boxShadow: '0 4px 16px hsl(var(--primary) / 0.3)' } : undefined}
             >
               This Week ({stats.thisWeekCount})
             </button>
@@ -286,8 +283,7 @@ export default function HistoryPage() {
               {filter === 'all' && (
                 <Button
                   onClick={() => navigate('/add-entry')}
-                  className="mt-4 bg-gradient-to-r from-primary to-sage-dark text-primary-foreground rounded-full px-8 py-6 font-semibold shadow-lg"
-                  style={{ boxShadow: '0 8px 24px hsl(var(--primary) / 0.35)' }}
+                  className="mt-4 bg-primary text-primary-foreground rounded-full px-8 py-6 font-semibold shadow-md"
                 >
                   Log Your First Meal
                 </Button>
@@ -610,27 +606,27 @@ function EntryCard({
   return (
     <div 
       className={`premium-card overflow-hidden animate-slide-up opacity-0 ${
-        isPending ? 'ring-2 ring-coral/30 ring-offset-2 ring-offset-background' : ''
+        isPending ? 'ring-2 ring-coral/30 ring-offset-1 ring-offset-background' : ''
       }`}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
-      {/* Title Row at Top */}
-      <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+      {/* Title Row at Top - Compact */}
+      <div className="px-3 pt-3 pb-1.5 flex items-center justify-between">
         <button 
           onClick={onEditTitle}
-          className="flex items-center gap-2 group"
+          className="flex items-center gap-1.5 group min-w-0"
         >
-          <span className="text-xl">{displayEmoji}</span>
-          <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors">
+          <span className="text-lg">{displayEmoji}</span>
+          <span className="font-bold text-foreground text-sm group-hover:text-primary transition-colors truncate">
             {displayTitle}
           </span>
-          <Pencil className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
         </button>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8 rounded-xl hover:bg-muted/50">
-              <MoreVertical className="w-4 h-4" />
+            <Button variant="ghost" size="icon" className="flex-shrink-0 h-7 w-7 rounded-lg hover:bg-muted/50">
+              <MoreVertical className="w-3.5 h-3.5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="rounded-xl">
@@ -646,19 +642,19 @@ function EntryCard({
         </DropdownMenu>
       </div>
 
-      <div className="px-4 pb-4">
-        <div className="flex gap-4">
-          {/* Photo - tap to view details */}
+      <div className="px-3 pb-3">
+        <div className="flex gap-3">
+          {/* Photo - tap to view details - Smaller */}
           {entry.photo_url ? (
             <MealPhoto
               photoUrl={entry.photo_url}
               onClick={onViewDetails}
-              className="w-20 h-20 rounded-2xl object-cover flex-shrink-0 shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-16 h-16 rounded-xl object-cover flex-shrink-0 shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
             />
           ) : (
             <div 
               onClick={onViewDetails}
-              className="w-20 h-20 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center text-3xl flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+              className="w-16 h-16 rounded-xl bg-muted/30 flex items-center justify-center text-2xl flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
             >
               {entry.entry_method === 'text' ? '✍️' : '🍽️'}
             </div>
@@ -674,17 +670,17 @@ function EntryCard({
                 </p>
               </div>
 
-              {/* BIGGER Bloating Rating */}
+              {/* Compact Bloating Rating */}
               {entry.bloating_rating && (
-                <div className={`flex flex-col items-center px-3 py-2 rounded-xl ${
+                <div className={`flex flex-col items-center px-2.5 py-1.5 rounded-lg ${
                   entry.bloating_rating <= 2 
                     ? 'bg-primary/15' 
                     : entry.bloating_rating >= 4 
                       ? 'bg-coral/15' 
                       : 'bg-muted/50'
                 }`}>
-                  <span className="text-2xl">{RATING_EMOJIS[entry.bloating_rating]}</span>
-                  <span className={`text-sm font-bold ${
+                  <span className="text-xl">{RATING_EMOJIS[entry.bloating_rating]}</span>
+                  <span className={`text-xs font-bold ${
                     entry.bloating_rating <= 2 
                       ? 'text-primary' 
                       : entry.bloating_rating >= 4 
@@ -693,7 +689,6 @@ function EntryCard({
                   }`}>
                     {entry.bloating_rating}/5
                   </span>
-                  <span className="text-2xs text-muted-foreground">{RATING_LABELS[entry.bloating_rating]}</span>
                 </div>
               )}
             </div>
@@ -736,11 +731,11 @@ function EntryCard({
           </div>
         </div>
 
-        {/* Notes Display */}
+        {/* Notes Display - Compact */}
         {entry.notes && (
-          <div className="mt-3 p-2.5 rounded-xl bg-muted/30 flex items-start gap-2">
-            <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground italic leading-relaxed">
+          <div className="mt-2 p-2 rounded-lg bg-muted/30 flex items-start gap-1.5">
+            <FileText className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <p className="text-2xs text-muted-foreground italic leading-relaxed line-clamp-2">
               {entry.notes}
             </p>
           </div>
