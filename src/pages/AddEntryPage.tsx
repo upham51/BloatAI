@@ -4,6 +4,8 @@ import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, Ch
 import { Textarea } from '@/components/ui/textarea';
 import { FODMAPGuide } from '@/components/triggers/FODMAPGuide';
 import { TriggerSelectorModal } from '@/components/triggers/TriggerSelectorModal';
+import { NotesInput } from '@/components/meals/NotesInput';
+import { TextOnlyEntry } from '@/components/meals/TextOnlyEntry';
 import CounterLoader from '@/components/shared/CounterLoader';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,12 +21,17 @@ const RATING_LABELS: Record<number, string> = {
   5: 'Severe',
 };
 
+type EntryMode = 'photo' | 'text';
+
 export default function AddEntryPage() {
   const navigate = useNavigate();
   const { addEntry } = useMeals();
   const { user } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Entry mode
+  const [entryMode, setEntryMode] = useState<EntryMode>('photo');
 
   // Photo & AI analysis state
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
@@ -36,8 +43,13 @@ export default function AddEntryPage() {
   const [aiDescription, setAiDescription] = useState('');
   const [creativeMealTitle, setCreativeMealTitle] = useState('');
   const [mealCategory, setMealCategory] = useState('');
+  const [mealEmoji, setMealEmoji] = useState('🍽️');
+  const [titleOptions, setTitleOptions] = useState<string[]>([]);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [detectedTriggers, setDetectedTriggers] = useState<DetectedTrigger[]>([]);
+
+  // Notes
+  const [notes, setNotes] = useState('');
 
   // Trigger selector modal & guide
   const [showTriggerModal, setShowTriggerModal] = useState(false);
@@ -94,8 +106,10 @@ export default function AddEntryPage() {
 
       const description = data.meal_description || 'A delicious meal';
       setAiDescription(description);
-      setCreativeMealTitle(data.creative_title || 'Delicious Meal');
+      setCreativeMealTitle(data.creative_title || data.meal_title || 'Delicious Meal');
       setMealCategory(data.meal_category || 'Homemade');
+      setMealEmoji(data.meal_emoji || '🍽️');
+      setTitleOptions(data.title_options || [data.creative_title || 'Delicious Meal']);
       
       const validTriggers = validateTriggers(data.triggers || []);
       setDetectedTriggers(validTriggers);
@@ -143,8 +157,11 @@ export default function AddEntryPage() {
     setAiDescription('');
     setCreativeMealTitle('');
     setMealCategory('');
+    setMealEmoji('🍽️');
+    setTitleOptions([]);
     setDetectedTriggers([]);
     setIsEditingDescription(false);
+    setNotes('');
   };
 
   const removeTrigger = (index: number) => {
@@ -202,6 +219,11 @@ export default function AddEntryPage() {
         rating_due_at: ratingDueAt,
         detected_triggers: detectedTriggers,
         custom_title: creativeMealTitle || null,
+        meal_emoji: mealEmoji,
+        meal_title: creativeMealTitle,
+        title_options: titleOptions,
+        notes: notes || null,
+        entry_method: 'photo',
       });
 
       toast({
@@ -235,8 +257,41 @@ export default function AddEntryPage() {
         className="hidden"
       />
 
-      {/* Photo Section */}
-      {!photoUrl ? (
+      {/* Tab Selector - Only show when no photo */}
+      {!photoUrl && (
+        <div className="px-6 pt-6 pb-2">
+          <div className="flex bg-muted/50 rounded-full p-1">
+            <button
+              onClick={() => setEntryMode('photo')}
+              className={`flex-1 py-3 px-4 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                entryMode === 'photo'
+                  ? 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground shadow-lg'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              📸 Photo
+            </button>
+            <button
+              onClick={() => setEntryMode('text')}
+              className={`flex-1 py-3 px-4 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                entryMode === 'text'
+                  ? 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground shadow-lg'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              ✍️ Text Only
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Text Only Mode */}
+      {entryMode === 'text' && !photoUrl && (
+        <TextOnlyEntry />
+      )}
+
+      {/* Photo Mode */}
+      {entryMode === 'photo' && !photoUrl ? (
         /* Premium Photo Upload UI - No Empty Card */
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative">
           {/* Decorative blobs */}
