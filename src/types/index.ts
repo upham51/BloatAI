@@ -126,6 +126,15 @@ export function validateTriggers(triggers: DetectedTrigger[]): DetectedTrigger[]
   });
 }
 
+export type EntryMethod = 'photo' | 'text';
+
+export interface MealIngredient {
+  name: string;
+  detail: string;
+  is_trigger: boolean;
+  trigger_category: string | null;
+}
+
 export interface MealEntry {
   id: string;
   user_id: string;
@@ -141,7 +150,42 @@ export interface MealEntry {
   rating_due_at: string | null;
   detected_triggers: DetectedTrigger[];
   custom_title: string | null;
+  meal_emoji: string | null;
+  meal_title: string | null;
+  title_options: string[];
+  notes: string | null;
+  entry_method: EntryMethod;
 }
+
+// Common triggers for manual text entry
+export const COMMON_TRIGGERS = [
+  { id: 'wheat', name: 'Wheat/Bread', category: 'fodmaps-fructans' },
+  { id: 'onions', name: 'Onions', category: 'fodmaps-fructans' },
+  { id: 'garlic', name: 'Garlic', category: 'fodmaps-fructans' },
+  { id: 'beans', name: 'Beans/Lentils', category: 'fodmaps-gos' },
+  { id: 'milk', name: 'Milk', category: 'fodmaps-lactose' },
+  { id: 'yogurt', name: 'Yogurt', category: 'fodmaps-lactose' },
+  { id: 'cheese', name: 'Cheese', category: 'dairy' },
+  { id: 'apples', name: 'Apples', category: 'fodmaps-fructose' },
+  { id: 'pears', name: 'Pears', category: 'fodmaps-fructose' },
+  { id: 'watermelon', name: 'Watermelon', category: 'fodmaps-fructose' },
+  { id: 'mushrooms', name: 'Mushrooms', category: 'fodmaps-polyols' },
+  { id: 'cauliflower', name: 'Cauliflower', category: 'fodmaps-polyols' },
+  { id: 'fried', name: 'Fried Food', category: 'high-fat' },
+  { id: 'soda', name: 'Soda/Fizzy Drinks', category: 'carbonated' },
+  { id: 'candy', name: 'Candy/Sweets', category: 'refined-sugar' },
+  { id: 'alcohol', name: 'Alcohol', category: 'alcohol' }
+];
+
+// Quick note chips for context
+export const QUICK_NOTES = [
+  { emoji: '😰', label: 'Stressed' },
+  { emoji: '🌙', label: 'Ate late' },
+  { emoji: '⚡', label: 'Rushed' },
+  { emoji: '🍴', label: 'Rushed eating' },
+  { emoji: '😋', label: 'Very hungry' },
+  { emoji: '🍽️', label: 'Restaurant' },
+];
 
 // Insight types
 export interface TriggerRanking {

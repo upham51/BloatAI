@@ -56,14 +56,19 @@ export type Database = {
           custom_title: string | null
           detected_triggers: Json | null
           eating_speed: string | null
+          entry_method: string | null
           id: string
           meal_description: string
+          meal_emoji: string | null
+          meal_title: string | null
+          notes: string | null
           notification_sent: boolean | null
           photo_url: string | null
           portion_size: string | null
           rating_due_at: string | null
           rating_status: string | null
           social_setting: string | null
+          title_options: Json | null
           updated_at: string
           user_id: string
         }
@@ -73,14 +78,19 @@ export type Database = {
           custom_title?: string | null
           detected_triggers?: Json | null
           eating_speed?: string | null
+          entry_method?: string | null
           id?: string
           meal_description: string
+          meal_emoji?: string | null
+          meal_title?: string | null
+          notes?: string | null
           notification_sent?: boolean | null
           photo_url?: string | null
           portion_size?: string | null
           rating_due_at?: string | null
           rating_status?: string | null
           social_setting?: string | null
+          title_options?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -90,14 +100,19 @@ export type Database = {
           custom_title?: string | null
           detected_triggers?: Json | null
           eating_speed?: string | null
+          entry_method?: string | null
           id?: string
           meal_description?: string
+          meal_emoji?: string | null
+          meal_title?: string | null
+          notes?: string | null
           notification_sent?: boolean | null
           photo_url?: string | null
           portion_size?: string | null
           rating_due_at?: string | null
           rating_status?: string | null
           social_setting?: string | null
+          title_options?: Json | null
           updated_at?: string
           user_id?: string
         }

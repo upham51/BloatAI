@@ -41,29 +41,49 @@ serve(async (req) => {
                 text: `You are an expert food analyst. Analyze this meal photo EXHAUSTIVELY. Identify EVERY visible ingredient, component, and food item.
 
 Your task:
-1. Create a creative, appetizing short title (2-4 words, like "Caramel Bliss Pancakes" or "Mediterranean Sunset Bowl")
-2. Create a meal category (1-2 words like "Breakfast Indulgence", "Comfort Food", "Light & Fresh")
-3. Write a detailed description listing ALL visible foods (2-3 sentences)
-4. Identify ALL potential FODMAP/digestive triggers
+1. Create a memorable, short meal title (2-4 words MAXIMUM) following the pattern: [Adjective] + [Main Dish] + [Optional: Style/Bowl/Stack/Plate]
+2. Provide 3 alternative title options the user can choose from
+3. Choose an appropriate meal emoji
+4. Identify the meal category (1-2 words like "Breakfast", "Lunch", "Dinner", "Snack")
+5. Write a detailed description listing ALL visible foods (2-3 sentences)
+6. List all ingredients with their trigger information
+7. Identify ALL potential FODMAP/digestive triggers
 
-CRITICAL INSTRUCTIONS FOR INGREDIENT DETECTION:
-- List EVERY ingredient you can see, no matter how small
-- Include all sauces, seasonings, garnishes, sides
-- If you see bread, identify the type and list wheat/gluten
-- If you see any dairy (cheese, cream, butter, milk), list it
-- If you see onions or garlic (even as seasoning), list them
-- If you see any sweeteners or sugar, list them
-- Be thorough - users depend on this for their digestive health
+NAMING RULES:
+- Title must be 2-4 words maximum
+- Examples: "Spicy Chicken Bowl", "Sweet Pancakes", "Garden Salad", "Breakfast Stack"
+- Make it memorable and easy to reference later
+
+MEAL EMOJI GUIDE:
+- Breakfast: 🥞 🍳 🥣 🍞 🥤
+- Lunch/Dinner: 🥗 🍜 🥘 🍝 🍕 🍔 🥪 🍚 🍛 🍲
+- Proteins: 🍗 🐟 🥩
+- Sides: 🥦 🍟
+- Snacks: 🍎 🥛 🥜
+- Default: 🍽️
 
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "creative_title": "Golden Sunrise Stack",
-  "meal_category": "Breakfast Delight",
+  "meal_emoji": "🥞",
+  "meal_title": "Sweet Pancake Stack",
+  "title_options": ["Sweet Pancake Stack", "Caramel Pancakes", "Breakfast Stack"],
+  "main_dish": "pancakes",
+  "meal_category": "Breakfast",
+  "creative_title": "Sweet Pancake Stack",
   "meal_description": "Fluffy buttermilk pancakes topped with fresh strawberries, blueberries, and whipped cream, drizzled with maple syrup and dusted with powdered sugar. Served with a side of crispy bacon.",
+  "ingredients": [
+    {"name": "Pancakes", "detail": "wheat-based", "is_trigger": true, "trigger_category": "fodmaps-fructans"},
+    {"name": "Buttermilk", "detail": "dairy", "is_trigger": true, "trigger_category": "fodmaps-lactose"},
+    {"name": "Whipped cream", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy"},
+    {"name": "Maple syrup", "detail": "contains fructose", "is_trigger": true, "trigger_category": "fodmaps-fructose"},
+    {"name": "Bacon", "detail": "fatty meat", "is_trigger": true, "trigger_category": "high-fat"},
+    {"name": "Strawberries", "detail": "low FODMAP fruit", "is_trigger": false, "trigger_category": null},
+    {"name": "Powdered sugar", "detail": "refined sugar", "is_trigger": true, "trigger_category": "refined-sugar"}
+  ],
   "triggers": [
     {"category": "fodmaps-fructans", "food": "wheat flour (pancakes)"},
     {"category": "fodmaps-lactose", "food": "buttermilk"},
-    {"category": "fodmaps-lactose", "food": "whipped cream"},
+    {"category": "dairy", "food": "whipped cream"},
     {"category": "fodmaps-fructose", "food": "maple syrup"},
     {"category": "high-fat", "food": "bacon"},
     {"category": "refined-sugar", "food": "powdered sugar"}
@@ -94,7 +114,7 @@ IMPORTANT:
             ]
           }
         ],
-        max_tokens: 1024,
+        max_tokens: 1500,
       }),
     });
 
@@ -124,7 +144,26 @@ IMPORTANT:
     console.log('AI response:', content);
 
     // Parse the JSON response
-    let result = { meal_description: 'A meal', triggers: [], creative_title: 'Delicious Meal', meal_category: 'Homemade' };
+    let result: {
+      meal_description: string;
+      triggers: any[];
+      creative_title: string;
+      meal_category: string;
+      meal_emoji: string;
+      meal_title: string;
+      title_options: string[];
+      ingredients: any[];
+    } = { 
+      meal_description: 'A meal', 
+      triggers: [], 
+      creative_title: 'Delicious Meal', 
+      meal_category: 'Homemade',
+      meal_emoji: '🍽️',
+      meal_title: 'Delicious Meal',
+      title_options: ['Delicious Meal'],
+      ingredients: []
+    };
+    
     try {
       // Remove any markdown code blocks if present
       const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
@@ -132,8 +171,12 @@ IMPORTANT:
       result = {
         meal_description: parsed.meal_description || 'A meal',
         triggers: Array.isArray(parsed.triggers) ? parsed.triggers : [],
-        creative_title: parsed.creative_title || 'Delicious Meal',
-        meal_category: parsed.meal_category || 'Homemade'
+        creative_title: parsed.creative_title || parsed.meal_title || 'Delicious Meal',
+        meal_category: parsed.meal_category || 'Homemade',
+        meal_emoji: parsed.meal_emoji || '🍽️',
+        meal_title: parsed.meal_title || parsed.creative_title || 'Delicious Meal',
+        title_options: Array.isArray(parsed.title_options) ? parsed.title_options : [parsed.meal_title || 'Delicious Meal'],
+        ingredients: Array.isArray(parsed.ingredients) ? parsed.ingredients : []
       };
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
@@ -151,6 +194,17 @@ IMPORTANT:
         console.warn(`Filtered out invalid category: ${trigger.category}`);
       }
       return isValid;
+    });
+
+    // Also validate ingredient trigger categories
+    result.ingredients = result.ingredients.map((ingredient: any) => {
+      if (ingredient.is_trigger && ingredient.trigger_category) {
+        if (!validCategories.includes(ingredient.trigger_category)) {
+          ingredient.is_trigger = false;
+          ingredient.trigger_category = null;
+        }
+      }
+      return ingredient;
     });
 
     return new Response(JSON.stringify(result), {

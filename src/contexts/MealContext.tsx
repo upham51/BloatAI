@@ -28,6 +28,10 @@ function dbRowToMealEntry(row: any): MealEntry {
     detected_triggers: Array.isArray(row.detected_triggers) 
       ? row.detected_triggers as DetectedTrigger[]
       : [],
+    title_options: Array.isArray(row.title_options) 
+      ? row.title_options as string[]
+      : [],
+    entry_method: row.entry_method || 'photo',
   };
 }
 
@@ -78,6 +82,11 @@ export function MealProvider({ children }: { children: ReactNode }) {
         rating_due_at: entryData.rating_due_at,
         detected_triggers: entryData.detected_triggers as unknown as Json,
         custom_title: entryData.custom_title,
+        meal_emoji: entryData.meal_emoji,
+        meal_title: entryData.meal_title,
+        title_options: entryData.title_options as unknown as Json,
+        notes: entryData.notes,
+        entry_method: entryData.entry_method,
         user_id: user.id,
       })
       .select()
