@@ -1,14 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, MoreVertical, Clock, CheckCircle2, Flame, Edit3, TrendingUp, Eye, Pencil, X, Check } from 'lucide-react';
+import { Trash2, MoreVertical, Clock, Flame, Edit3, TrendingUp, Pencil, X, Check, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { EditMealModal } from '@/components/meals/EditMealModal';
+import { EditTitleModal } from '@/components/meals/EditTitleModal';
 import { useMeals } from '@/contexts/MealContext';
 import { useToast } from '@/hooks/use-toast';
-import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory } from '@/types';
+import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTES } from '@/types';
 import { formatDistanceToNow, format, isAfter, subDays } from 'date-fns';
 import {
   DropdownMenu,
@@ -42,6 +44,9 @@ export default function HistoryPage() {
   const [ratingEntry, setRatingEntry] = useState<MealEntry | null>(null);
   const [editEntry, setEditEntry] = useState<MealEntry | null>(null);
   const [detailsEntry, setDetailsEntry] = useState<MealEntry | null>(null);
+  const [editTitleEntry, setEditTitleEntry] = useState<MealEntry | null>(null);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [notesInput, setNotesInput] = useState('');
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -116,6 +121,24 @@ export default function HistoryPage() {
     await skipRating(ratingEntry.id);
     toast({ title: 'Rating skipped' });
     setRatingEntry(null);
+  };
+
+  const handleSaveNotes = async () => {
+    if (!detailsEntry) return;
+    await updateEntry(detailsEntry.id, { notes: notesInput.trim() || null });
+    setDetailsEntry({ ...detailsEntry, notes: notesInput.trim() || undefined });
+    setIsEditingNotes(false);
+    toast({ title: 'Notes updated' });
+  };
+
+  const handleOpenDetails = (entry: MealEntry) => {
+    setDetailsEntry(entry);
+    setNotesInput(entry.notes || '');
+    setIsEditingNotes(false);
+  };
+
+  const getMealDisplayTitle = (entry: MealEntry) => {
+    return entry.custom_title || entry.meal_title || getQuickMealTitle(entry);
   };
 
   return (
@@ -227,11 +250,8 @@ export default function HistoryPage() {
                 onRate={() => setRatingEntry(entry)}
                 onEdit={() => setEditEntry(entry)}
                 onDelete={() => handleDelete(entry.id, entry.meal_description)}
-                onViewDetails={() => setDetailsEntry(entry)}
-                onUpdateTitle={async (newTitle) => {
-                  await updateEntry(entry.id, { custom_title: newTitle });
-                  toast({ title: 'Title updated' });
-                }}
+                onViewDetails={() => handleOpenDetails(entry)}
+                onEditTitle={() => setEditTitleEntry(entry)}
                 delay={100 + index * 50}
               />
             ))}
@@ -301,13 +321,38 @@ export default function HistoryPage() {
         onClose={() => setEditEntry(null)}
       />
 
+      {/* Edit Title Modal */}
+      {editTitleEntry && (
+        <EditTitleModal
+          isOpen={!!editTitleEntry}
+          onClose={() => setEditTitleEntry(null)}
+          currentTitle={getMealDisplayTitle(editTitleEntry)}
+          currentEmoji={editTitleEntry.meal_emoji || '🍽️'}
+          titleOptions={(editTitleEntry.title_options as string[]) || []}
+          onSave={async (newTitle) => {
+            await updateEntry(editTitleEntry.id, { custom_title: newTitle });
+            toast({ title: 'Title updated' });
+          }}
+        />
+      )}
+
       {/* Details Drawer */}
       <Drawer open={!!detailsEntry} onOpenChange={(open) => !open && setDetailsEntry(null)}>
         <DrawerContent className="max-h-[85vh]">
           <DrawerHeader className="text-left">
-            <DrawerTitle className="text-lg font-bold">Meal Details</DrawerTitle>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{detailsEntry?.meal_emoji || '🍽️'}</span>
+              <DrawerTitle className="text-lg font-bold">
+                {detailsEntry && getMealDisplayTitle(detailsEntry)}
+              </DrawerTitle>
+            </div>
             <DrawerDescription className="text-xs text-muted-foreground">
               {detailsEntry && format(new Date(detailsEntry.created_at), 'EEEE, MMMM d, yyyy · h:mm a')}
+              {detailsEntry?.entry_method === 'text' && (
+                <span className="ml-2 px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-2xs">
+                  Text entry
+                </span>
+              )}
             </DrawerDescription>
           </DrawerHeader>
           
@@ -324,7 +369,7 @@ export default function HistoryPage() {
               
               {/* Full Description */}
               <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground">AI Description</h3>
+                <h3 className="text-sm font-semibold text-foreground">Description</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {detailsEntry.meal_description}
                 </p>
@@ -345,7 +390,7 @@ export default function HistoryPage() {
               {detailsEntry.detected_triggers && detailsEntry.detected_triggers.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="text-sm font-semibold text-foreground">
-                    All Detected Triggers ({detailsEntry.detected_triggers.length})
+                    Detected Triggers ({detailsEntry.detected_triggers.length})
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {detailsEntry.detected_triggers.map((trigger, i) => {
@@ -371,6 +416,90 @@ export default function HistoryPage() {
                   </div>
                 </div>
               )}
+
+              {/* Notes Section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Notes
+                  </h3>
+                  {!isEditingNotes && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditingNotes(true)}
+                      className="text-xs h-7"
+                    >
+                      <Pencil className="w-3 h-3 mr-1" />
+                      {detailsEntry.notes ? 'Edit' : 'Add'}
+                    </Button>
+                  )}
+                </div>
+
+                {isEditingNotes ? (
+                  <div className="space-y-3">
+                    <Textarea
+                      value={notesInput}
+                      onChange={(e) => setNotesInput(e.target.value.slice(0, 200))}
+                      placeholder="How did you feel? Any context..."
+                      className="min-h-[80px] rounded-xl resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground text-right">
+                      {notesInput.length}/200 characters
+                    </p>
+                    
+                    {/* Quick note chips */}
+                    <div className="flex flex-wrap gap-2">
+                      {QUICK_NOTES.map((note, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            const newNotes = notesInput
+                              ? `${notesInput}, ${note.label}`
+                              : note.label;
+                            setNotesInput(newNotes.slice(0, 200));
+                          }}
+                          className="px-3 py-1.5 text-xs rounded-full border border-border/50 hover:border-primary/50 hover:bg-primary/10 transition-colors"
+                        >
+                          {note.emoji} {note.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditingNotes(false);
+                          setNotesInput(detailsEntry.notes || '');
+                        }}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSaveNotes}
+                        className="flex-1 bg-gradient-to-r from-primary to-sage-dark"
+                      >
+                        Save Notes
+                      </Button>
+                    </div>
+                  </div>
+                ) : detailsEntry.notes ? (
+                  <div className="p-3 rounded-xl bg-muted/30">
+                    <p className="text-sm text-muted-foreground italic">
+                      {detailsEntry.notes}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                    No notes added
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </DrawerContent>
@@ -422,6 +551,9 @@ function InlineRating({ entryId }: { entryId: string }) {
 function getQuickMealTitle(entry: MealEntry) {
   // If user set a custom title, use it
   if (entry.custom_title) return entry.custom_title;
+  
+  // If AI generated a title, use it
+  if (entry.meal_title) return entry.meal_title;
 
   const foods = Array.from(
     new Set((entry.detected_triggers || []).map(t => (t.food || '').trim()).filter(Boolean))
@@ -456,7 +588,7 @@ function EntryCard({
   onEdit,
   onDelete,
   onViewDetails,
-  onUpdateTitle,
+  onEditTitle,
   delay = 0,
 }: {
   entry: MealEntry;
@@ -465,22 +597,15 @@ function EntryCard({
   onEdit: () => void;
   onDelete: () => void;
   onViewDetails: () => void;
-  onUpdateTitle: (title: string) => Promise<void>;
+  onEditTitle: () => void;
   delay?: number;
 }) {
   const isPending = entry.rating_status === 'pending';
   const isHighBloating = entry.bloating_rating && entry.bloating_rating >= 4;
   const isAboveAvg = entry.bloating_rating && userAvg > 0 && entry.bloating_rating > userAvg + 0.5;
   
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [titleInput, setTitleInput] = useState(getQuickMealTitle(entry));
-
-  const handleSaveTitle = async () => {
-    if (titleInput.trim()) {
-      await onUpdateTitle(titleInput.trim());
-    }
-    setIsEditingTitle(false);
-  };
+  const displayTitle = entry.custom_title || entry.meal_title || getQuickMealTitle(entry);
+  const displayEmoji = entry.meal_emoji || '🍽️';
 
   return (
     <div 
@@ -489,7 +614,39 @@ function EntryCard({
       }`}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
-      <div className="p-4">
+      {/* Title Row at Top */}
+      <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+        <button 
+          onClick={onEditTitle}
+          className="flex items-center gap-2 group"
+        >
+          <span className="text-xl">{displayEmoji}</span>
+          <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors">
+            {displayTitle}
+          </span>
+          <Pencil className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        </button>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8 rounded-xl hover:bg-muted/50">
+              <MoreVertical className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="rounded-xl">
+            <DropdownMenuItem onClick={onEdit} className="rounded-lg">
+              <Edit3 className="w-4 h-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onDelete} className="text-destructive rounded-lg">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="px-4 pb-4">
         <div className="flex gap-4">
           {/* Photo - tap to view details */}
           {entry.photo_url ? (
@@ -504,7 +661,7 @@ function EntryCard({
               onClick={onViewDetails}
               className="w-20 h-20 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center text-3xl flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
             >
-              🍽️
+              {entry.entry_method === 'text' ? '✍️' : '🍽️'}
             </div>
           )}
 
@@ -512,35 +669,7 @@ function EntryCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                {isEditingTitle ? (
-                  <div className="flex items-center gap-1">
-                    <Input
-                      value={titleInput}
-                      onChange={(e) => setTitleInput(e.target.value)}
-                      className="h-7 text-sm font-bold py-0 px-2"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveTitle();
-                        if (e.key === 'Escape') setIsEditingTitle(false);
-                      }}
-                    />
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSaveTitle}>
-                      <Check className="w-3 h-3 text-primary" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsEditingTitle(false)}>
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <button 
-                    onClick={() => setIsEditingTitle(true)}
-                    className="font-bold text-foreground line-clamp-1 leading-tight text-sm text-left hover:text-primary transition-colors flex items-center gap-1 group"
-                  >
-                    {getQuickMealTitle(entry)}
-                    <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-50 transition-opacity" />
-                  </button>
-                )}
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {format(new Date(entry.created_at), 'MMM d, h:mm a')}
                 </p>
@@ -568,29 +697,11 @@ function EntryCard({
                   <span className="text-2xs text-muted-foreground">{RATING_LABELS[entry.bloating_rating]}</span>
                 </div>
               )}
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8 rounded-xl hover:bg-muted/50">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-xl">
-                  <DropdownMenuItem onClick={onEdit} className="rounded-lg">
-                    <Edit3 className="w-4 h-4 mr-2" />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onDelete} className="text-destructive rounded-lg">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
 
             {/* Triggers */}
             {entry.detected_triggers && entry.detected_triggers.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3">
+              <div className="flex flex-wrap gap-1.5 mt-2">
                 {entry.detected_triggers.slice(0, 3).map((trigger, i) => {
                   const categoryInfo = getTriggerCategory(trigger.category);
                   return (
@@ -625,6 +736,16 @@ function EntryCard({
             )}
           </div>
         </div>
+
+        {/* Notes Display */}
+        {entry.notes && (
+          <div className="mt-3 p-2.5 rounded-xl bg-muted/30 flex items-start gap-2">
+            <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground italic leading-relaxed">
+              {entry.notes}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Inline Rating */}
