@@ -79,17 +79,17 @@ export default function AdminUserSearch() {
         return;
       }
 
-      // Use separate queries to avoid SQL injection in .or() clause
+      // Use prefix-only wildcards to prevent performance attacks
       const { data: emailMatches, error: emailError } = await supabase
         .from('profiles')
         .select('*')
-        .ilike('email', `%${sanitized}%`)
+        .ilike('email', `${sanitized}%`)
         .limit(10);
 
       const { data: nameMatches, error: nameError } = await supabase
         .from('profiles')
         .select('*')
-        .ilike('display_name', `%${sanitized}%`)
+        .ilike('display_name', `${sanitized}%`)
         .limit(10);
 
       if (emailError) throw emailError;
