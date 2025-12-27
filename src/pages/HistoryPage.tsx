@@ -8,6 +8,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { EditMealModal } from '@/components/meals/EditMealModal';
 import { EditTitleModal } from '@/components/meals/EditTitleModal';
+import { MealPhoto } from '@/components/meals/MealPhoto';
 import { useMeals } from '@/contexts/MealContext';
 import { useToast } from '@/hooks/use-toast';
 import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTES } from '@/types';
@@ -360,9 +361,8 @@ export default function HistoryPage() {
             <div className="px-4 pb-8 space-y-5 overflow-y-auto">
               {/* Photo */}
               {detailsEntry.photo_url && (
-                <img 
-                  src={detailsEntry.photo_url} 
-                  alt="" 
+                <MealPhoto 
+                  photoUrl={detailsEntry.photo_url} 
                   className="w-full aspect-video object-cover rounded-2xl shadow-md"
                 />
               )}
@@ -650,9 +650,8 @@ function EntryCard({
         <div className="flex gap-4">
           {/* Photo - tap to view details */}
           {entry.photo_url ? (
-            <img
-              src={entry.photo_url}
-              alt=""
+            <MealPhoto
+              photoUrl={entry.photo_url}
               onClick={onViewDetails}
               className="w-20 h-20 rounded-2xl object-cover flex-shrink-0 shadow-md cursor-pointer hover:opacity-90 transition-opacity"
             />

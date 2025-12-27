@@ -15,6 +15,7 @@ import { MealEntry, DetectedTrigger, getTriggerCategory, TRIGGER_CATEGORIES } fr
 import { useMeals } from '@/contexts/MealContext';
 import { useToast } from '@/hooks/use-toast';
 import { TriggerSelectorModal } from '@/components/triggers/TriggerSelectorModal';
+import { MealPhoto } from '@/components/meals/MealPhoto';
 
 const RATING_LABELS: Record<number, string> = {
   1: 'None',
@@ -127,9 +128,8 @@ export function EditMealModal({ entry, open, onClose }: EditMealModalProps) {
             {/* Photo Preview */}
             {entry.photo_url && (
               <div className="rounded-2xl overflow-hidden">
-                <img 
-                  src={entry.photo_url} 
-                  alt="" 
+                <MealPhoto 
+                  photoUrl={entry.photo_url} 
                   className="w-full h-40 object-cover"
                 />
               </div>

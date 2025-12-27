@@ -70,17 +70,40 @@ export default function AdminUserSearch() {
     setSelectedUser(null);
     
     try {
-      const { data: users, error } = await supabase
+      // Sanitize input: only allow alphanumeric, @, ., _, -, and spaces
+      const sanitized = searchQuery.trim().replace(/[^a-zA-Z0-9@._\-\s]/g, '').slice(0, 100);
+      
+      if (!sanitized) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
+
+      // Use separate queries to avoid SQL injection in .or() clause
+      const { data: emailMatches, error: emailError } = await supabase
         .from('profiles')
         .select('*')
-        .or(`email.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
+        .ilike('email', `%${sanitized}%`)
         .limit(10);
 
-      if (error) throw error;
+      const { data: nameMatches, error: nameError } = await supabase
+        .from('profiles')
+        .select('*')
+        .ilike('display_name', `%${sanitized}%`)
+        .limit(10);
+
+      if (emailError) throw emailError;
+      if (nameError) throw nameError;
+
+      // Merge and deduplicate results
+      const allUsers = [...new Map(
+        [...(emailMatches || []), ...(nameMatches || [])]
+          .map(u => [u.id, u])
+      ).values()].slice(0, 10);
 
       // Get meal counts for each user
       const usersWithCounts = await Promise.all(
-        (users || []).map(async (user) => {
+        allUsers.map(async (user) => {
           const { count } = await supabase
             .from('meal_entries')
             .select('id', { count: 'exact', head: true })
