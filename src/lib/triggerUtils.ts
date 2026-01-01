@@ -90,6 +90,42 @@ const INGREDIENT_TRANSFORMATIONS: Record<string, string> = {
 };
 
 /**
+ * Normalize ingredient name to canonical form for deduplication
+ */
+export function normalizeIngredient(ingredient: string): string {
+  if (!ingredient) return '';
+  
+  let normalized = ingredient
+    .replace(/\(.*?\)/g, '')
+    .split(',')[0]
+    .trim();
+  
+  const lowerCase = normalized.toLowerCase();
+  
+  // Check for exact transformations first
+  if (INGREDIENT_TRANSFORMATIONS[lowerCase]) {
+    return INGREDIENT_TRANSFORMATIONS[lowerCase];
+  }
+  
+  // Check for partial matches in transformations
+  for (const [key, value] of Object.entries(INGREDIENT_TRANSFORMATIONS)) {
+    if (lowerCase.includes(key)) {
+      return value;
+    }
+  }
+  
+  // Remove common descriptors and capitalize
+  normalized = normalized
+    .replace(/^(a|an|the)\s+/i, '')
+    .replace(/^(fresh|raw|cooked|grilled|fried|baked|roasted|steamed|boiled)\s+/i, '')
+    .replace(/^(diced|sliced|chopped|minced|crushed|shredded)\s+/i, '')
+    .replace(/^(organic|natural|homemade)\s+/i, '');
+  
+  const words = normalized.split(/\s+/).slice(0, 2).filter(Boolean);
+  return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') || ingredient;
+}
+
+/**
  * Abbreviate ingredient name to 1-2 words max
  */
 export function abbreviateIngredient(ingredient: string): string {
@@ -173,6 +209,61 @@ export function formatTriggerDisplay(
       category: trigger.category,
     };
   });
+}
+
+// Safe food alternatives for common triggers
+const SAFE_ALTERNATIVES: Record<string, string[]> = {
+  'fodmaps-fructans': ['garlic-infused oil', 'green part of scallions', 'chives', 'asafoetida'],
+  'fodmaps-gos': ['canned lentils (rinsed)', 'firm tofu', 'tempeh'],
+  'fodmaps-lactose': ['lactose-free milk', 'hard cheeses', 'almond milk', 'oat milk'],
+  'fodmaps-fructose': ['blueberries', 'strawberries', 'oranges', 'grapes'],
+  'fodmaps-polyols': ['maple syrup', 'rice malt syrup', 'glucose'],
+  'gluten': ['rice', 'quinoa', 'gluten-free bread', 'sourdough (long ferment)'],
+  'dairy': ['lactose-free milk', 'almond milk', 'oat milk', 'coconut yogurt'],
+  'cruciferous': ['carrots', 'zucchini', 'bell peppers', 'spinach', 'cucumber'],
+  'high-fat': ['grilled proteins', 'baked alternatives', 'air-fried options'],
+  'carbonated': ['still water', 'herbal tea', 'infused water'],
+  'refined-sugar': ['maple syrup', 'stevia', 'fresh fruit'],
+  'alcohol': ['mocktails', 'sparkling water with lime', 'kombucha'],
+  'spicy': ['herbs like basil', 'mild paprika', 'turmeric'],
+};
+
+/**
+ * Get safe alternatives for a trigger category
+ */
+export function getSafeAlternatives(category: string): string[] {
+  const lower = category.toLowerCase();
+  if (SAFE_ALTERNATIVES[lower]) {
+    return SAFE_ALTERNATIVES[lower];
+  }
+  for (const [key, alternatives] of Object.entries(SAFE_ALTERNATIVES)) {
+    if (lower.includes(key) || key.includes(lower)) {
+      return alternatives;
+    }
+  }
+  return [];
+}
+
+/**
+ * Deduplicate foods by normalizing names and merging counts
+ */
+export function deduplicateFoods(
+  foods: Array<{ food: string; count: number }>
+): Array<{ food: string; count: number }> {
+  const normalized: Record<string, { food: string; count: number }> = {};
+  
+  for (const item of foods) {
+    const normalizedName = normalizeIngredient(item.food);
+    const key = normalizedName.toLowerCase();
+    
+    if (normalized[key]) {
+      normalized[key].count += item.count;
+    } else {
+      normalized[key] = { food: normalizedName, count: item.count };
+    }
+  }
+  
+  return Object.values(normalized).sort((a, b) => b.count - a.count);
 }
 
 /**
