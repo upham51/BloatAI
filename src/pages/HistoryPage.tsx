@@ -13,6 +13,7 @@ import { useMeals } from '@/contexts/MealContext';
 import { useToast } from '@/hooks/use-toast';
 import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTES } from '@/types';
 import { formatDistanceToNow, format, isAfter, subDays } from 'date-fns';
+import { formatTriggerDisplay } from '@/lib/triggerUtils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -642,94 +643,83 @@ function EntryCard({
         </DropdownMenu>
       </div>
 
-      <div className="px-3 pb-3">
-        <div className="flex gap-3">
-          {/* Photo - tap to view details - Smaller */}
-          {entry.photo_url ? (
-            <MealPhoto
-              photoUrl={entry.photo_url}
-              onClick={onViewDetails}
-              className="w-16 h-16 rounded-xl object-cover flex-shrink-0 shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
-            />
-          ) : (
-            <div 
-              onClick={onViewDetails}
-              className="w-16 h-16 rounded-xl bg-muted/30 flex items-center justify-center text-2xl flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              {entry.entry_method === 'text' ? '✍️' : '🍽️'}
+      {/* Main Content - Larger Image First */}
+      <div className="p-3 space-y-3">
+        {/* Large Photo */}
+        {entry.photo_url ? (
+          <MealPhoto
+            photoUrl={entry.photo_url}
+            onClick={onViewDetails}
+            className="w-full aspect-[4/3] rounded-xl object-cover shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+          />
+        ) : (
+          <div 
+            onClick={onViewDetails}
+            className="w-full aspect-[4/3] rounded-xl bg-muted/30 flex items-center justify-center text-4xl cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            {entry.entry_method === 'text' ? '✍️' : '🍽️'}
+          </div>
+        )}
+
+        {/* Info Row */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {format(new Date(entry.created_at), 'MMM d, h:mm a')}
+            </p>
+          </div>
+
+          {/* Bloating Rating */}
+          {entry.bloating_rating && (
+            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
+              entry.bloating_rating <= 2 
+                ? 'bg-primary/15' 
+                : entry.bloating_rating >= 4 
+                  ? 'bg-coral/15' 
+                  : 'bg-muted/50'
+            }`}>
+              <span className="text-lg">{RATING_EMOJIS[entry.bloating_rating]}</span>
+              <span className={`text-xs font-bold ${
+                entry.bloating_rating <= 2 
+                  ? 'text-primary' 
+                  : entry.bloating_rating >= 4 
+                    ? 'text-coral' 
+                    : 'text-foreground'
+              }`}>
+                {entry.bloating_rating}/5
+              </span>
             </div>
           )}
+        </div>
 
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {format(new Date(entry.created_at), 'MMM d, h:mm a')}
-                </p>
-              </div>
-
-              {/* Compact Bloating Rating */}
-              {entry.bloating_rating && (
-                <div className={`flex flex-col items-center px-2.5 py-1.5 rounded-lg ${
-                  entry.bloating_rating <= 2 
-                    ? 'bg-primary/15' 
-                    : entry.bloating_rating >= 4 
-                      ? 'bg-coral/15' 
-                      : 'bg-muted/50'
-                }`}>
-                  <span className="text-xl">{RATING_EMOJIS[entry.bloating_rating]}</span>
-                  <span className={`text-xs font-bold ${
-                    entry.bloating_rating <= 2 
-                      ? 'text-primary' 
-                      : entry.bloating_rating >= 4 
-                        ? 'text-coral' 
-                        : 'text-foreground'
-                  }`}>
-                    {entry.bloating_rating}/5
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Triggers */}
-            {entry.detected_triggers && entry.detected_triggers.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {entry.detected_triggers.slice(0, 3).map((trigger, i) => {
-                  const categoryInfo = getTriggerCategory(trigger.category);
-                  return (
-                    <span
-                      key={i}
-                      className="px-2 py-0.5 text-xs font-medium rounded-full flex items-center gap-1"
-                      style={{
-                        backgroundColor: `${categoryInfo?.color}15`,
-                        color: categoryInfo?.color,
-                        border: `1px solid ${categoryInfo?.color}30`
-                      }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: categoryInfo?.color }} />
-                      {trigger.food || categoryInfo?.displayName?.split(' - ')[1] || categoryInfo?.displayName}
-                    </span>
-                  );
-                })}
-                {entry.detected_triggers.length > 3 && (
-                  <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground">
-                    +{entry.detected_triggers.length - 3}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Above Average Warning */}
-            {isAboveAvg && (
-              <div className="flex items-center gap-1.5 mt-2 text-xs text-coral">
-                <TrendingUp className="w-3 h-3" />
-                <span>{Math.round(((entry.bloating_rating! - userAvg) / userAvg) * 100)}% above your average</span>
-              </div>
+        {/* Triggers with Icon + Name */}
+        {entry.detected_triggers && entry.detected_triggers.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {formatTriggerDisplay(entry.detected_triggers).slice(0, 6).map((trigger, i) => (
+              <span
+                key={i}
+                className="flex items-center gap-1 text-sm"
+              >
+                <span className="text-base">{trigger.icon}</span>
+                <span className="text-muted-foreground text-xs">{trigger.name}</span>
+              </span>
+            ))}
+            {entry.detected_triggers.length > 6 && (
+              <span className="text-xs text-muted-foreground">
+                +{entry.detected_triggers.length - 6} more
+              </span>
             )}
           </div>
-        </div>
+        )}
+
+        {/* Above Average Warning */}
+        {isAboveAvg && (
+          <div className="flex items-center gap-1.5 text-xs text-coral">
+            <TrendingUp className="w-3 h-3" />
+            <span>{Math.round(((entry.bloating_rating! - userAvg) / userAvg) * 100)}% above your average</span>
+          </div>
+        )}
 
         {/* Notes Display - Compact */}
         {entry.notes && (
