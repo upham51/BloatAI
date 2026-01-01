@@ -1,12 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, Calendar, ChevronRight } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, ChevronRight, Lightbulb, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
+import CounterLoader from '@/components/shared/CounterLoader';
 import { useMeals } from '@/contexts/MealContext';
 import { getTriggerCategory } from '@/types';
 import { subDays, isAfter } from 'date-fns';
-import { validatePercentage } from '@/lib/triggerUtils';
+import { validatePercentage, deduplicateFoods, getIconForTrigger, abbreviateIngredient, getSafeAlternatives } from '@/lib/triggerUtils';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
@@ -14,6 +15,23 @@ export default function InsightsPage() {
   const completedCount = getCompletedCount();
   const neededForInsights = 3;
   const hasEnoughData = entries.length >= neededForInsights;
+
+  // Loading state for AI magic animation
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [analysisKey, setAnalysisKey] = useState(0);
+
+  // Trigger re-analysis on page visit
+  useEffect(() => {
+    setIsAnalyzing(true);
+    setAnalysisKey(prev => prev + 1);
+    
+    // Simulate AI analysis delay
+    const timer = setTimeout(() => {
+      setIsAnalyzing(false);
+    }, 1200);
+    
+    return () => clearTimeout(timer);
+  }, [entries.length]); // Re-run when entries change
 
   const insights = useMemo(() => {
     if (entries.length < neededForInsights) return null;
@@ -88,7 +106,7 @@ export default function InsightsPage() {
       .filter(t => t.suspicionScore !== 'low' && t.count >= 2)
       .slice(0, 3);
 
-    // Most common foods you eat
+    // Most common foods you eat - DEDUPLICATED
     const allFoods: Map<string, number> = new Map();
     entries.forEach(entry => {
       entry.detected_triggers?.forEach(trigger => {
@@ -98,9 +116,10 @@ export default function InsightsPage() {
         }
       });
     });
-    const topFoods = Array.from(allFoods.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
+    
+    // Deduplicate similar foods (broccoli florets + broccoli = broccoli)
+    const deduplicatedFoods = deduplicateFoods(Array.from(allFoods.entries()));
+    const topFoods = deduplicatedFoods.slice(0, 5);
 
     const lowBloatingMeals = entries.filter(e => e.bloating_rating && e.bloating_rating <= 2);
 
@@ -114,7 +133,48 @@ export default function InsightsPage() {
       lowBloatingCount: lowBloatingMeals.length,
       ratedCount: completedCount,
     };
-  }, [entries, completedCount]);
+  }, [entries, completedCount, analysisKey]);
+
+  // Generate AI summary based on data
+  const aiSummary = useMemo(() => {
+    if (!insights || !insights.potentialTriggers.length) return null;
+
+    const topTrigger = insights.potentialTriggers[0];
+    const topTriggerInfo = getTriggerCategory(topTrigger.category);
+    const alternatives = getSafeAlternatives(topTrigger.category);
+
+    return {
+      overview: [
+        `${topTriggerInfo?.displayName || topTrigger.category} appears in ${topTrigger.percentage}% of your meals`,
+        insights.highBloatingCount > 0 
+          ? `${insights.highBloatingCount} of your meals caused significant bloating`
+          : 'Most of your meals have been comfortable',
+        insights.lowBloatingCount > 0
+          ? `${insights.lowBloatingCount} meals were comfortable with low bloating`
+          : null,
+      ].filter(Boolean) as string[],
+      topTrigger: topTriggerInfo?.displayName || topTrigger.category,
+      alternatives: alternatives.slice(0, 4),
+      tip: `Try reducing ${topTriggerInfo?.displayName || topTrigger.category} for 1-2 weeks to see if symptoms improve.`,
+    };
+  }, [insights]);
+
+  // Full-screen loading state
+  if (isAnalyzing && hasEnoughData) {
+    return (
+      <AppLayout>
+        <div className="fixed inset-0 bg-background z-50 flex flex-col items-center justify-center">
+          <CounterLoader />
+          <p className="mt-6 text-lg font-semibold text-primary animate-pulse">
+            ✨ Working AI Magic...
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Analyzing your meal patterns
+          </p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (!hasEnoughData) {
     return (
@@ -144,14 +204,14 @@ export default function InsightsPage() {
                 </div>
                 <div className="h-3 bg-muted/50 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-primary to-sage-dark transition-all duration-500 rounded-full" 
+                    className="h-full bg-primary transition-all duration-500 rounded-full" 
                     style={{ width: `${(entries.length / neededForInsights) * 100}%` }} 
                   />
                 </div>
               </div>
               <Button 
                 onClick={() => navigate('/add-entry')}
-                className="mt-6 bg-gradient-to-r from-primary to-sage-dark text-primary-foreground rounded-full px-8 py-6 font-semibold shadow-lg"
+                className="mt-6 bg-primary text-primary-foreground rounded-full px-8 py-6 font-semibold shadow-lg hover:bg-primary/90"
                 style={{ boxShadow: '0 8px 24px hsl(var(--primary) / 0.35)' }}
               >
                 Log a Meal
@@ -177,33 +237,87 @@ export default function InsightsPage() {
             <p className="text-muted-foreground mt-1">Based on {insights?.totalMeals} meals logged</p>
           </header>
 
-          {/* Quick Stats */}
+          {/* Quick Stats - Only 2 columns now */}
           <div 
-            className="grid grid-cols-3 gap-3 animate-slide-up opacity-0" 
+            className="grid grid-cols-2 gap-4 animate-slide-up opacity-0" 
             style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
           >
-            <div className="premium-card p-4 text-center">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 w-fit mx-auto mb-2">
-                <Utensils className="w-5 h-5 text-primary" />
+            <div className="premium-card p-5 text-center">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 w-fit mx-auto mb-3">
+                <Utensils className="w-6 h-6 text-primary" />
               </div>
-              <div className="text-2xl font-bold text-foreground">{insights?.totalMeals}</div>
-              <div className="text-xs text-muted-foreground">Total Meals</div>
+              <div className="text-3xl font-bold text-foreground">{insights?.totalMeals}</div>
+              <div className="text-sm text-muted-foreground mt-1">Total Meals</div>
             </div>
-            <div className="premium-card p-4 text-center">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-coral/20 to-peach/20 w-fit mx-auto mb-2">
-                <Flame className="w-5 h-5 text-coral" />
+            <div className="premium-card p-5 text-center">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-coral/20 to-peach/20 w-fit mx-auto mb-3">
+                <Flame className="w-6 h-6 text-coral" />
               </div>
-              <div className="text-2xl font-bold text-foreground">{insights?.highBloatingCount}</div>
-              <div className="text-xs text-muted-foreground">High Bloating</div>
-            </div>
-            <div className="premium-card p-4 text-center">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-sky/20 to-sky-light/20 w-fit mx-auto mb-2">
-                <Calendar className="w-5 h-5 text-sky" />
-              </div>
-              <div className="text-2xl font-bold text-foreground">{insights?.mealsThisWeek}</div>
-              <div className="text-xs text-muted-foreground">This Week</div>
+              <div className="text-3xl font-bold text-foreground">{insights?.highBloatingCount}</div>
+              <div className="text-sm text-muted-foreground mt-1">High Bloating</div>
             </div>
           </div>
+
+          {/* AI Summary Card - NEW */}
+          {aiSummary && (
+            <div 
+              className="premium-card p-5 animate-slide-up opacity-0 border-2 border-primary/20"
+              style={{ animationDelay: '75ms', animationFillMode: 'forwards' }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div 
+                  className="p-2.5 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10"
+                  style={{
+                    boxShadow: '0 4px 12px hsl(var(--primary) / 0.2), inset 0 1px 1px hsl(0 0% 100% / 0.2)'
+                  }}
+                >
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-foreground text-lg">Your Analysis</h2>
+                  <p className="text-xs text-muted-foreground">Personalized insights from your data</p>
+                </div>
+              </div>
+
+              {/* Overview */}
+              <div className="space-y-2 mb-5">
+                {aiSummary.overview.map((item, index) => (
+                  <div key={index} className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span className="text-sm text-muted-foreground">{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Safe Alternatives */}
+              {aiSummary.alternatives.length > 0 && (
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-mint/20 to-primary/5 border border-primary/10 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Heart className="w-4 h-4 text-primary" />
+                    <span className="font-semibold text-foreground text-sm">
+                      Try Instead of {aiSummary.topTrigger}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {aiSummary.alternatives.map((alt, index) => (
+                      <span 
+                        key={index}
+                        className="text-xs px-3 py-1.5 rounded-full bg-background/80 text-foreground border border-primary/20 font-medium"
+                      >
+                        {alt}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Tip */}
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-muted/30">
+                <Lightbulb className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-muted-foreground">{aiSummary.tip}</span>
+              </div>
+            </div>
+          )}
 
           {/* Potential Triggers - The Star Section */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
@@ -230,6 +344,7 @@ export default function InsightsPage() {
               <div className="space-y-3">
                 {insights.potentialTriggers.map((trigger) => {
                   const categoryInfo = getTriggerCategory(trigger.category);
+                  const icon = getIconForTrigger(trigger.category);
                   return (
                     <div 
                       key={trigger.category}
@@ -240,13 +355,7 @@ export default function InsightsPage() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full"
-                            style={{ 
-                              backgroundColor: categoryInfo?.color,
-                              boxShadow: `0 2px 8px ${categoryInfo?.color}40`
-                            }}
-                          />
+                          <span className="text-xl">{icon}</span>
                           <span className="font-bold text-foreground">
                             {categoryInfo?.displayName || trigger.category}
                           </span>
@@ -271,17 +380,22 @@ export default function InsightsPage() {
                       </p>
                       {trigger.topFoods.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-3">
-                          {trigger.topFoods.map(({ food }) => (
-                            <span 
-                              key={food}
-                              className="text-xs px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/30"
-                              style={{
-                                boxShadow: 'inset 0 1px 2px hsl(var(--foreground) / 0.03)'
-                              }}
-                            >
-                              {food}
-                            </span>
-                          ))}
+                          {trigger.topFoods.map(({ food }) => {
+                            const foodIcon = getIconForTrigger(food);
+                            const abbrevFood = abbreviateIngredient(food);
+                            return (
+                              <span 
+                                key={food}
+                                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/30"
+                                style={{
+                                  boxShadow: 'inset 0 1px 2px hsl(var(--foreground) / 0.03)'
+                                }}
+                              >
+                                <span>{foodIcon}</span>
+                                <span>{abbrevFood}</span>
+                              </span>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -309,14 +423,12 @@ export default function InsightsPage() {
             <div className="space-y-3">
               {insights?.triggerFrequencies.slice(0, 5).map((trigger) => {
                 const categoryInfo = getTriggerCategory(trigger.category);
+                const icon = getIconForTrigger(trigger.category);
                 return (
                   <div key={trigger.category} className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div 
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{ backgroundColor: categoryInfo?.color }}
-                        />
+                        <span className="text-lg">{icon}</span>
                         <span className="text-sm font-medium text-foreground">
                           {categoryInfo?.displayName || trigger.category}
                         </span>
@@ -346,7 +458,7 @@ export default function InsightsPage() {
             )}
           </div>
 
-          {/* Top Foods */}
+          {/* Top Foods - with emoji icons */}
           {insights?.topFoods && insights.topFoods.length > 0 && (
             <div 
               className="premium-card p-5 animate-slide-up opacity-0"
@@ -363,18 +475,21 @@ export default function InsightsPage() {
               </div>
 
               <div className="space-y-2">
-                {insights.topFoods.map(([food, count], index) => (
-                  <div 
-                    key={food}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-lavender/50 to-secondary/30 flex items-center justify-center text-xs font-bold text-foreground">
-                      {index + 1}
+                {insights.topFoods.map(([food, count], index) => {
+                  const icon = getIconForTrigger(food);
+                  return (
+                    <div 
+                      key={food}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lavender/50 to-secondary/30 flex items-center justify-center text-lg">
+                        {icon}
+                      </div>
+                      <span className="flex-1 font-medium text-foreground">{food}</span>
+                      <span className="text-sm text-muted-foreground">{count}x</span>
                     </div>
-                    <span className="flex-1 font-medium text-foreground">{food}</span>
-                    <span className="text-sm text-muted-foreground">{count}x</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

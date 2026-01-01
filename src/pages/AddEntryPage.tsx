@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { DetectedTrigger, validateTriggers, getTriggerCategory } from '@/types';
+import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
 
 const RATING_LABELS: Record<number, string> = {
   1: 'None',
@@ -454,11 +455,15 @@ export default function AddEntryPage() {
 
                 {showGuide && <FODMAPGuide />}
 
-                {/* Beautiful Trigger Pills */}
+                {/* Beautiful Trigger Pills with Emoji Icons */}
                 {detectedTriggers.length > 0 ? (
                   <div className="space-y-2.5">
                     {detectedTriggers.map((trigger, index) => {
                       const categoryInfo = getTriggerCategory(trigger.category);
+                      const icon = getIconForTrigger(trigger.food || trigger.category);
+                      const displayName = trigger.food 
+                        ? abbreviateIngredient(trigger.food) 
+                        : categoryInfo?.displayName || trigger.category;
                       
                       return (
                         <div
@@ -468,30 +473,18 @@ export default function AddEntryPage() {
                             boxShadow: '0 4px 12px -2px hsl(var(--foreground) / 0.08), 0 2px 6px -2px hsl(var(--foreground) / 0.04)'
                           }}
                         >
-                          {/* Icon Badge */}
-                          <div 
-                            className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                            style={{ 
-                              background: `linear-gradient(135deg, ${categoryInfo?.color}25 0%, ${categoryInfo?.color}15 100%)`,
-                              boxShadow: `0 2px 8px ${categoryInfo?.color}20`
-                            }}
-                          >
-                            <div 
-                              className="w-3.5 h-3.5 rounded-full"
-                              style={{ 
-                                backgroundColor: categoryInfo?.color || 'hsl(var(--primary))',
-                                boxShadow: `0 0 8px ${categoryInfo?.color || 'hsl(var(--primary))'}50`
-                              }}
-                            />
-                          </div>
+                          {/* Emoji Icon */}
+                          <span className="text-3xl flex-shrink-0">{icon}</span>
                           
                           {/* Info */}
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-foreground text-[15px]">
-                              {categoryInfo?.displayName || trigger.category}
+                              {displayName}
                             </p>
                             {trigger.food && (
-                              <p className="text-sm text-muted-foreground truncate">{trigger.food}</p>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {categoryInfo?.displayName || trigger.category}
+                              </p>
                             )}
                           </div>
                           
@@ -581,7 +574,7 @@ export default function AddEntryPage() {
                 className={`w-full h-[56px] flex items-center justify-center gap-3 rounded-2xl font-semibold text-base transition-all duration-300 ${
                   !isValid || isSaving 
                     ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-primary to-sage-dark text-primary-foreground hover:-translate-y-0.5 active:scale-[0.98]'
+                    : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 active:scale-[0.98]'
                 }`}
                 style={isValid && !isSaving ? {
                   boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
