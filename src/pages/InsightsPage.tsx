@@ -118,7 +118,8 @@ export default function InsightsPage() {
     });
     
     // Deduplicate similar foods (broccoli florets + broccoli = broccoli)
-    const deduplicatedFoods = deduplicateFoods(Array.from(allFoods.entries()));
+    const foodsArray = Array.from(allFoods.entries()).map(([food, count]) => ({ food, count }));
+    const deduplicatedFoods = deduplicateFoods(foodsArray);
     const topFoods = deduplicatedFoods.slice(0, 5);
 
     const lowBloatingMeals = entries.filter(e => e.bloating_rating && e.bloating_rating <= 2);
@@ -475,18 +476,18 @@ export default function InsightsPage() {
               </div>
 
               <div className="space-y-2">
-                {insights.topFoods.map(([food, count], index) => {
-                  const icon = getIconForTrigger(food);
+                {insights.topFoods.map((item, index) => {
+                  const icon = getIconForTrigger(item.food);
                   return (
                     <div 
-                      key={food}
+                      key={item.food}
                       className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lavender/50 to-secondary/30 flex items-center justify-center text-lg">
                         {icon}
                       </div>
-                      <span className="flex-1 font-medium text-foreground">{food}</span>
-                      <span className="text-sm text-muted-foreground">{count}x</span>
+                      <span className="flex-1 font-medium text-foreground">{item.food}</span>
+                      <span className="text-sm text-muted-foreground">{item.count}x</span>
                     </div>
                   );
                 })}
