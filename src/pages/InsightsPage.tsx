@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useMeals } from '@/contexts/MealContext';
 import { getTriggerCategory } from '@/types';
-import { format, subDays, isAfter } from 'date-fns';
+import { subDays, isAfter } from 'date-fns';
+import { validatePercentage } from '@/lib/triggerUtils';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
@@ -20,49 +21,66 @@ export default function InsightsPage() {
     const totalMeals = entries.length;
     const last7Days = entries.filter(e => isAfter(new Date(e.created_at), subDays(new Date(), 7)));
     
-    // Trigger frequency analysis
-    const triggerCounts: Record<string, { 
-      count: number; 
+    // Trigger frequency analysis - count meals that contain each trigger
+    const triggerMealCounts: Record<string, { 
+      mealsWithTrigger: Set<string>;
       foods: Map<string, number>;
-      withHighBloating: number;
+      highBloatingMealsWithTrigger: Set<string>;
     }> = {};
+    
+    // High-bloating meals for the "potential triggers" section
+    const highBloatingMeals = entries.filter(e => e.bloating_rating && e.bloating_rating >= 4);
+    const totalHighBloating = highBloatingMeals.length;
     
     entries.forEach(entry => {
       entry.detected_triggers?.forEach(trigger => {
-        if (!triggerCounts[trigger.category]) {
-          triggerCounts[trigger.category] = { count: 0, foods: new Map(), withHighBloating: 0 };
+        if (!triggerMealCounts[trigger.category]) {
+          triggerMealCounts[trigger.category] = { 
+            mealsWithTrigger: new Set(), 
+            foods: new Map(), 
+            highBloatingMealsWithTrigger: new Set() 
+          };
         }
-        triggerCounts[trigger.category].count++;
+        // Use entry.id to count unique meals with this trigger
+        triggerMealCounts[trigger.category].mealsWithTrigger.add(entry.id);
         
         if (trigger.food) {
-          const currentCount = triggerCounts[trigger.category].foods.get(trigger.food) || 0;
-          triggerCounts[trigger.category].foods.set(trigger.food, currentCount + 1);
+          const currentCount = triggerMealCounts[trigger.category].foods.get(trigger.food) || 0;
+          triggerMealCounts[trigger.category].foods.set(trigger.food, currentCount + 1);
         }
         
         // Track if this trigger appeared in a high-bloating meal
         if (entry.bloating_rating && entry.bloating_rating >= 4) {
-          triggerCounts[trigger.category].withHighBloating++;
+          triggerMealCounts[trigger.category].highBloatingMealsWithTrigger.add(entry.id);
         }
       });
     });
 
-    // Calculate frequency percentages and sort by frequency
-    const triggerFrequencies = Object.entries(triggerCounts)
-      .map(([category, stats]) => ({
-        category,
-        count: stats.count,
-        percentage: Math.round((stats.count / totalMeals) * 100),
-        topFoods: Array.from(stats.foods.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(([food, count]) => ({ food, count })),
-        suspicionScore: stats.count >= 3 && stats.withHighBloating >= 2 
-          ? 'high' 
-          : stats.withHighBloating >= 1 
-            ? 'medium' 
-            : 'low',
-        withHighBloating: stats.withHighBloating,
-      }))
+    // Calculate frequency percentages - VALIDATED to never exceed 100%
+    const triggerFrequencies = Object.entries(triggerMealCounts)
+      .map(([category, stats]) => {
+        const mealCount = stats.mealsWithTrigger.size;
+        const highBloatingCount = stats.highBloatingMealsWithTrigger.size;
+        // Ensure count never exceeds total
+        const validMealCount = Math.min(mealCount, totalMeals);
+        const validHighBloatingCount = Math.min(highBloatingCount, totalHighBloating);
+        
+        return {
+          category,
+          count: validMealCount,
+          percentage: validatePercentage((validMealCount / totalMeals) * 100),
+          topFoods: Array.from(stats.foods.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([food, count]) => ({ food, count })),
+          suspicionScore: validMealCount >= 3 && validHighBloatingCount >= 2 
+            ? 'high' 
+            : validHighBloatingCount >= 1 
+              ? 'medium' 
+              : 'low',
+          withHighBloating: validHighBloatingCount,
+        };
+      })
       .sort((a, b) => b.count - a.count);
 
     // Potential triggers (appear frequently in high-bloating meals)
@@ -84,8 +102,6 @@ export default function InsightsPage() {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    // Meals with high bloating
-    const highBloatingMeals = entries.filter(e => e.bloating_rating && e.bloating_rating >= 4);
     const lowBloatingMeals = entries.filter(e => e.bloating_rating && e.bloating_rating <= 2);
 
     return {
@@ -94,7 +110,7 @@ export default function InsightsPage() {
       triggerFrequencies,
       potentialTriggers,
       topFoods,
-      highBloatingCount: highBloatingMeals.length,
+      highBloatingCount: totalHighBloating,
       lowBloatingCount: lowBloatingMeals.length,
       ratedCount: completedCount,
     };

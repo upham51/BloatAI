@@ -1,16 +1,16 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ChevronRight, TrendingUp, TrendingDown, Flame, Settings, AlertTriangle, Sparkles } from 'lucide-react';
+import { ChevronRight, Flame, Settings, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useAdmin } from '@/hooks/useAdmin';
-import { RATING_LABELS, getTriggerCategory, MealEntry } from '@/types';
-import { format, subDays, isAfter, startOfDay } from 'date-fns';
+import { RATING_LABELS, getTriggerCategory } from '@/types';
+import { format, subDays, isAfter } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { getQuoteForContext, getTimeBasedGreeting, getMealPrompt } from '@/lib/quotes';
+import { getTimeBasedGreeting } from '@/lib/quotes';
 
 // Trigger display names for the insights
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
@@ -37,11 +37,9 @@ export default function DashboardPage() {
 
   const pendingEntry = getPendingEntry();
   const [greeting, setGreeting] = useState(getTimeBasedGreeting());
-  const [mealPrompt, setMealPrompt] = useState(getMealPrompt());
 
   useEffect(() => {
     setGreeting(getTimeBasedGreeting());
-    setMealPrompt(getMealPrompt());
   }, []);
 
   // Get display name
@@ -118,75 +116,6 @@ export default function DashboardPage() {
       .sort((a, b) => b.avg_bloating - a.avg_bloating || b.meal_count - a.meal_count)
       .slice(0, 3);
   }, [entries]);
-
-  // Safe meals from past 7 days
-  const safeMeals = useMemo(() => {
-    const weekAgo = subDays(new Date(), 7);
-    return entries
-      .filter(e => 
-        isAfter(new Date(e.created_at), weekAgo) && 
-        e.bloating_rating !== null &&
-        e.bloating_rating !== undefined &&
-        e.bloating_rating <= 2
-      )
-      .sort((a, b) => (a.bloating_rating || 0) - (b.bloating_rating || 0))
-      .slice(0, 3);
-  }, [entries]);
-
-  // Weekly stats for trend
-  const weeklyStats = useMemo(() => {
-    const weekAgo = subDays(new Date(), 7);
-    const thisWeek = entries.filter(e => isAfter(new Date(e.created_at), weekAgo));
-    const rated = thisWeek.filter(e => e.bloating_rating);
-    
-    const comfortableMeals = rated.filter(e => e.bloating_rating && e.bloating_rating <= 2).length;
-    const roughMeals = rated.filter(e => e.bloating_rating && e.bloating_rating >= 4).length;
-    
-    const twoWeeksAgo = subDays(new Date(), 14);
-    const lastWeek = entries.filter(e => {
-      const date = new Date(e.created_at);
-      return isAfter(date, twoWeeksAgo) && !isAfter(date, weekAgo);
-    });
-    const lastWeekRated = lastWeek.filter(e => e.bloating_rating);
-    
-    const thisWeekAvg = rated.length > 0 
-      ? rated.reduce((sum, e) => sum + (e.bloating_rating || 0), 0) / rated.length 
-      : 0;
-    const lastWeekAvg = lastWeekRated.length > 0 
-      ? lastWeekRated.reduce((sum, e) => sum + (e.bloating_rating || 0), 0) / lastWeekRated.length 
-      : 0;
-    
-    const trend = lastWeekAvg > 0 ? Math.round(((lastWeekAvg - thisWeekAvg) / lastWeekAvg) * 100) : 0;
-    const recentTrend = trend > 0 ? 'improving' : trend < 0 ? 'worsening' : 'stable';
-    
-    return { comfortableMeals, roughMeals, trend, thisWeekAvg, mealsThisWeek: thisWeek.length, recentTrend };
-  }, [entries]);
-
-  // Context-aware quote
-  const dailyQuote = useMemo(() => {
-    return getQuoteForContext({
-      recentTrend: weeklyStats.recentTrend as 'improving' | 'worsening' | 'stable',
-      goodDaysCount: weeklyStats.comfortableMeals,
-      roughDaysCount: weeklyStats.roughMeals,
-      totalEntries: entries.length,
-      streak,
-    });
-  }, [weeklyStats, entries.length, streak]);
-
-  // Quick log meal function
-  const handleQuickLog = (meal: MealEntry) => {
-    navigate('/add-entry', { 
-      state: { 
-        prefilled: {
-          meal_title: meal.meal_title,
-          meal_emoji: meal.meal_emoji,
-          triggers: meal.detected_triggers,
-          isDuplicate: true,
-          original_meal_id: meal.id
-        }
-      }
-    });
-  };
 
   const handleRate = async (rating: number) => {
     if (!pendingEntry) return;
@@ -267,108 +196,47 @@ export default function DashboardPage() {
             </button>
           )}
 
-          {/* Daily Quote Card */}
-          <div 
-            className="premium-card p-6 animate-slide-up opacity-0"
-            style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg shrink-0">
-                <span className="text-xl filter drop-shadow">💭</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-base text-foreground italic leading-relaxed font-medium">
-                  "{dailyQuote.text}"
-                </p>
-                <p className="text-sm text-primary mt-3 font-semibold">
-                  — {dailyQuote.author}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Weekly Insights Card - NEW */}
-          {completedCount >= 5 ? (
+          {/* Weekly Insights Card - shows triggers to avoid */}
+          {completedCount >= 5 && topTriggers.length > 0 && (
             <div 
               className="premium-card p-5 animate-slide-up opacity-0 space-y-4"
-              style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
             >
-              {/* Top Triggers Section */}
-              {topTriggers.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-coral" />
-                    <span className="font-bold text-foreground text-sm">Avoid This Week</span>
-                  </div>
-                  <div className="space-y-2">
-                    {topTriggers.map((trigger, idx) => (
-                      <div 
-                        key={trigger.category}
-                        className={`flex items-center gap-3 p-3 rounded-xl ${
-                          trigger.severity === 'high' 
-                            ? 'bg-coral/10' 
-                            : trigger.severity === 'medium' 
-                              ? 'bg-peach/20' 
-                              : 'bg-primary/10'
-                        }`}
-                      >
-                        <span className="text-lg">
-                          {trigger.severity === 'high' && '🔴'}
-                          {trigger.severity === 'medium' && '🟡'}
-                          {trigger.severity === 'low' && '🟢'}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground text-sm">
-                            {trigger.display_name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {trigger.meal_count} meal{trigger.meal_count !== 1 ? 's' : ''} • Avg {trigger.avg_bloating.toFixed(1)}/5
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-3">
-                  <span className="text-2xl">🎉</span>
-                  <p className="text-sm text-muted-foreground mt-1">No major triggers this week! Keep it up!</p>
-                </div>
-              )}
-              
-              {/* Divider */}
-              <div className="h-px bg-border" />
-              
-              {/* Safe Meals Section */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="font-bold text-foreground text-sm">Your Safe Go-Tos</span>
+                  <AlertTriangle className="w-4 h-4 text-coral" />
+                  <span className="font-bold text-foreground text-sm">Watch Out This Week</span>
                 </div>
-                {safeMeals.length > 0 ? (
-                  <div className="flex gap-2">
-                    {safeMeals.map((meal) => (
-                      <button
-                        key={meal.id}
-                        onClick={() => handleQuickLog(meal)}
-                        className="flex-1 flex flex-col items-center gap-1 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors text-center"
-                      >
-                        <span className="text-xl">{meal.meal_emoji || '🍽️'}</span>
-                        <span className="text-xs font-medium text-foreground line-clamp-2">
-                          {meal.meal_title || meal.custom_title || 'Meal'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-2">
-                    <span className="text-lg">🔍</span>
-                    <p className="text-xs text-muted-foreground mt-1">Looking for safe meals...</p>
-                  </div>
-                )}
+                <div className="space-y-2">
+                  {topTriggers.map((trigger) => (
+                    <div 
+                      key={trigger.category}
+                      className={`flex items-center gap-3 p-3 rounded-xl ${
+                        trigger.severity === 'high' 
+                          ? 'bg-coral/10' 
+                          : trigger.severity === 'medium' 
+                            ? 'bg-peach/20' 
+                            : 'bg-primary/10'
+                      }`}
+                    >
+                      <span className="text-lg">
+                        {trigger.severity === 'high' && '🔴'}
+                        {trigger.severity === 'medium' && '🟡'}
+                        {trigger.severity === 'low' && '🟢'}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-sm">
+                          {trigger.display_name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {trigger.meal_count} meal{trigger.meal_count !== 1 ? 's' : ''} • Avg {trigger.avg_bloating.toFixed(1)}/5
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
               
-              {/* View Full Insights Link */}
               <button 
                 onClick={() => navigate('/insights')}
                 className="w-full text-center text-sm text-primary font-semibold flex items-center justify-center gap-1 pt-2"
@@ -376,16 +244,18 @@ export default function DashboardPage() {
                 See Detailed Analysis <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-          ) : completedCount > 0 ? (
-            /* Building insights state */
+          )}
+
+          {/* Building insights state - show when some meals logged but not enough */}
+          {completedCount > 0 && completedCount < 5 && (
             <div 
               className="premium-card p-6 animate-slide-up opacity-0 text-center"
-              style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
             >
               <span className="text-4xl block mb-3">📊</span>
               <h3 className="font-bold text-foreground mb-2">Building Your Insights</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Log {5 - completedCount} more meal{5 - completedCount !== 1 ? 's' : ''} with bloating ratings to see your triggers and safe foods
+                Log {5 - completedCount} more meal{5 - completedCount !== 1 ? 's' : ''} with bloating ratings to see your triggers
               </p>
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
                 <div 
@@ -400,13 +270,13 @@ export default function DashboardPage() {
                 Log a Meal
               </Button>
             </div>
-          ) : null}
+          )}
 
           {/* Pending Rating */}
           {pendingEntry && (
             <div 
               className="premium-card p-5 animate-scale-in"
-              style={{ animationDelay: '200ms' }}
+              style={{ animationDelay: '100ms' }}
             >
               <p className="font-bold text-foreground mb-1">Rate your last meal</p>
               <p className="text-sm text-muted-foreground mb-4 line-clamp-1">{pendingEntry.meal_description}</p>
@@ -417,12 +287,12 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Primary CTA - Solid color, no gradient */}
+          {/* Primary CTA */}
           <Button
             onClick={() => navigate('/add-entry')}
             className="w-full h-16 rounded-3xl text-lg font-bold bg-primary text-primary-foreground relative overflow-hidden group animate-slide-up opacity-0"
             style={{ 
-              animationDelay: '250ms', 
+              animationDelay: '150ms', 
               animationFillMode: 'forwards',
               boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
             }}
@@ -438,11 +308,11 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Streak Card (for users with streaks) - Luxurious */}
+          {/* Streak Card (for users with streaks >= 3) */}
           {streak >= 3 && (
             <div 
               className="premium-card p-6 bg-gradient-to-br from-coral/10 to-peach/10 text-center animate-slide-up opacity-0"
-              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
             >
               <div className="text-5xl mb-3 filter drop-shadow">🔥</div>
               <div className="text-3xl font-bold text-foreground">{streak}-day streak!</div>
