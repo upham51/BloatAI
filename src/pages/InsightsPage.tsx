@@ -6,9 +6,11 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import CounterLoader from '@/components/shared/CounterLoader';
 import { RootCauseProfileCard } from '@/components/quiz/RootCauseProfileCard';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
+import { PersonalizedInsightsCard } from '@/components/insights/PersonalizedInsightsCard';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useRootCauseAssessment } from '@/hooks/useRootCauseAssessment';
 import { getTriggerCategory } from '@/types';
 import { subDays, isAfter } from 'date-fns';
 import { validatePercentage, deduplicateFoods, getIconForTrigger, abbreviateIngredient, getSafeAlternatives } from '@/lib/triggerUtils';
@@ -17,6 +19,7 @@ export default function InsightsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: userProfile } = useProfile(user?.id);
+  const { data: assessment } = useRootCauseAssessment(user?.id);
   const { entries, getCompletedCount } = useMeals();
   const completedCount = getCompletedCount();
   const neededForInsights = 3;
@@ -176,7 +179,7 @@ export default function InsightsPage() {
             ✨ Working AI Magic...
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Analyzing your meal patterns
+            Combining your quiz results & meal data for personalized insights
           </p>
         </div>
       </AppLayout>
@@ -250,6 +253,15 @@ export default function InsightsPage() {
               <RootCauseProfileCard userId={user.id} userProfile={userProfile} />
             </div>
           )}
+
+          {/* Personalized Insights - The Nutritionist's Advice */}
+          <div className="animate-slide-up opacity-0" style={{ animationDelay: '40ms', animationFillMode: 'forwards' }}>
+            <PersonalizedInsightsCard
+              profile={userProfile || null}
+              assessment={assessment || null}
+              mealEntries={entries}
+            />
+          </div>
 
           {/* Quick Stats - Only 2 columns now */}
           <div 
