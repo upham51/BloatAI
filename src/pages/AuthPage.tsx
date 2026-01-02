@@ -4,6 +4,7 @@ import { Leaf, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { BackgroundPaths } from '@/components/ui/background-paths';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -65,9 +66,12 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-primary/5 to-background">
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-6">
+      {/* Animated Background */}
+      <BackgroundPaths />
+
       {/* Logo and branding */}
-      <div className="text-center mb-8 animate-fade-in">
+      <div className="relative z-10 text-center mb-8 animate-fade-in">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-4">
           <Leaf className="w-10 h-10 text-primary" />
         </div>
@@ -76,7 +80,7 @@ export default function AuthPage() {
       </div>
 
       {/* Auth Card */}
-      <Card variant="elevated" className="w-full max-w-sm animate-slide-up">
+      <Card variant="elevated" className="relative z-10 w-full max-w-sm animate-slide-up">
         <CardHeader className="text-center">
           <CardTitle>{isLogin ? 'Welcome back' : 'Create account'}</CardTitle>
           <CardDescription>
@@ -166,7 +170,7 @@ export default function AuthPage() {
       </Card>
 
       {/* Footer */}
-      <p className="mt-8 text-xs text-muted-foreground text-center max-w-xs">
+      <p className="relative z-10 mt-8 text-xs text-muted-foreground text-center max-w-xs">
         By continuing, you agree to our Terms of Service and Privacy Policy
       </p>
     </div>
