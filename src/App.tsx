@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MealProvider } from "@/contexts/MealContext";
 import { useAdmin } from "@/hooks/useAdmin";
+import { OnboardingGate } from "@/components/OnboardingGate";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -68,11 +69,11 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<PublicRoute><AuthPage /></PublicRoute>} />
       <Route path="/pricing" element={<PricingPage />} />
-      <Route path="/dashboard" element={<ProtectedRoute><SubscriptionGate><DashboardPage /></SubscriptionGate></ProtectedRoute>} />
-      <Route path="/add-entry" element={<ProtectedRoute><SubscriptionGate><AddEntryPage /></SubscriptionGate></ProtectedRoute>} />
-      <Route path="/history" element={<ProtectedRoute><SubscriptionGate><HistoryPage /></SubscriptionGate></ProtectedRoute>} />
-      <Route path="/insights" element={<ProtectedRoute><SubscriptionGate><InsightsPage /></SubscriptionGate></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><OnboardingGate><SubscriptionGate><DashboardPage /></SubscriptionGate></OnboardingGate></ProtectedRoute>} />
+      <Route path="/add-entry" element={<ProtectedRoute><OnboardingGate><SubscriptionGate><AddEntryPage /></SubscriptionGate></OnboardingGate></ProtectedRoute>} />
+      <Route path="/history" element={<ProtectedRoute><OnboardingGate><SubscriptionGate><HistoryPage /></SubscriptionGate></OnboardingGate></ProtectedRoute>} />
+      <Route path="/insights" element={<ProtectedRoute><OnboardingGate><SubscriptionGate><InsightsPage /></SubscriptionGate></OnboardingGate></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><OnboardingGate><ProfilePage /></OnboardingGate></ProtectedRoute>} />
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/users" element={<AdminRoute><AdminUserSearch /></AdminRoute>} />
       <Route path="/admin/errors" element={<AdminRoute><AdminErrorLogs /></AdminRoute>} />
