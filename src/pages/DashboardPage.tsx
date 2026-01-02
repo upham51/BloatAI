@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
+import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -340,6 +341,14 @@ export default function DashboardPage() {
               )}
             </div>
           )}
+
+          {/* Bloating Guide */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}
+          >
+            <BloatingGuide />
+          </div>
         </div>
       </div>
 

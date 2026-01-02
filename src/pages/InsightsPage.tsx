@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import CounterLoader from '@/components/shared/CounterLoader';
 import { RootCauseProfileCard } from '@/components/quiz/RootCauseProfileCard';
+import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -534,6 +535,14 @@ export default function InsightsPage() {
                 </li>
               )}
             </ul>
+          </div>
+
+          {/* Bloating Guide */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '275ms', animationFillMode: 'forwards' }}
+          >
+            <BloatingGuide />
           </div>
         </div>
       </div>
