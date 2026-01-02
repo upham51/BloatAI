@@ -98,7 +98,10 @@ export function OnboardingModal({ isOpen, userId, onComplete }: OnboardingModalP
         })
         .eq('id', userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
 
       toast({
         title: 'Profile ready!',
@@ -106,11 +109,12 @@ export function OnboardingModal({ isOpen, userId, onComplete }: OnboardingModalP
       });
 
       onComplete();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Onboarding error:', error);
+      const errorMessage = error?.message || 'Please try again.';
       toast({
         title: 'Error saving profile',
-        description: 'Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -188,12 +192,6 @@ export function OnboardingModal({ isOpen, userId, onComplete }: OnboardingModalP
                     </Button>
                   </div>
                 </div>
-
-                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-3">
-                  <p className="text-xs text-blue-900 dark:text-blue-100">
-                    📘 Hormones and metabolism affect digestion differently by age and sex
-                  </p>
-                </div>
               </div>
             )}
 
@@ -220,12 +218,6 @@ export function OnboardingModal({ isOpen, userId, onComplete }: OnboardingModalP
                       {goal.label}
                     </Button>
                   ))}
-                </div>
-
-                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-3 mt-4">
-                  <p className="text-xs text-blue-900 dark:text-blue-100">
-                    📘 We'll tailor insights based on your goal
-                  </p>
                 </div>
               </div>
             )}
@@ -254,12 +246,6 @@ export function OnboardingModal({ isOpen, userId, onComplete }: OnboardingModalP
                       {freq.label}
                     </Button>
                   ))}
-                </div>
-
-                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-3 mt-4">
-                  <p className="text-xs text-blue-900 dark:text-blue-100">
-                    📘 Sets baseline for measuring your progress
-                  </p>
                 </div>
               </div>
             )}
@@ -317,12 +303,6 @@ export function OnboardingModal({ isOpen, userId, onComplete }: OnboardingModalP
                     Skip - I'll add later
                   </Button>
                 )}
-
-                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-3">
-                  <p className="text-xs text-blue-900 dark:text-blue-100">
-                    📘 Some medications affect digestion - we'll help spot patterns
-                  </p>
-                </div>
               </div>
             )}
 
