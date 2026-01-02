@@ -76,6 +76,25 @@ export function OnboardingModal({ isOpen, userId, onComplete }: OnboardingModalP
 
     setIsSubmitting(true);
     try {
+      // First, verify the user profile exists
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('id, email, onboarding_completed')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error('Error fetching profile:', fetchError);
+        throw new Error(`Cannot fetch profile: ${fetchError.message}`);
+      }
+
+      if (!existingProfile) {
+        console.error('Profile does not exist for userId:', userId);
+        throw new Error('Profile not found. Please try logging out and back in.');
+      }
+
+      console.log('Updating profile for user:', existingProfile.email);
+
       const onboardingData: OnboardingData = {
         ageRange: ageRange as AgeRange,
         biologicalSex: biologicalSex as BiologicalSex,
@@ -85,21 +104,28 @@ export function OnboardingModal({ isOpen, userId, onComplete }: OnboardingModalP
         completedAt: new Date().toISOString(),
       };
 
+      const updateData = {
+        age_range: onboardingData.ageRange,
+        biological_sex: onboardingData.biologicalSex,
+        primary_goal: onboardingData.primaryGoal,
+        bloating_frequency: onboardingData.bloatingFrequency,
+        medications: onboardingData.medications,
+        onboarding_completed: true,
+        onboarding_completed_at: onboardingData.completedAt,
+      };
+
+      console.log('Attempting to update with data:', updateData);
+
       const { error } = await supabase
         .from('profiles')
-        .update({
-          age_range: onboardingData.ageRange,
-          biological_sex: onboardingData.biologicalSex,
-          primary_goal: onboardingData.primaryGoal,
-          bloating_frequency: onboardingData.bloatingFrequency,
-          medications: onboardingData.medications,
-          onboarding_completed: true,
-          onboarding_completed_at: onboardingData.completedAt,
-        })
+        .update(updateData)
         .eq('id', userId);
 
       if (error) {
         console.error('Supabase update error:', error);
+        console.error('Error code:', error.code);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
         throw error;
       }
 
@@ -111,7 +137,19 @@ export function OnboardingModal({ isOpen, userId, onComplete }: OnboardingModalP
       onComplete();
     } catch (error: any) {
       console.error('Onboarding error:', error);
-      const errorMessage = error?.message || 'Please try again.';
+
+      // Provide helpful error messages
+      let errorMessage = error?.message || 'Please try again.';
+
+      // Check for common database errors
+      if (error?.code === '42703' || errorMessage.includes('column') || errorMessage.includes('does not exist')) {
+        errorMessage = 'Database setup required. Please check ONBOARDING_DEBUG.md in the repository for SQL migration instructions.';
+      } else if (error?.code === '42501' || errorMessage.includes('permission denied')) {
+        errorMessage = 'Permission error. Please check your Supabase RLS policies.';
+      } else if (errorMessage.includes('Profile not found')) {
+        errorMessage = 'Profile not found. Try logging out and back in.';
+      }
+
       toast({
         title: 'Error saving profile',
         description: errorMessage,
