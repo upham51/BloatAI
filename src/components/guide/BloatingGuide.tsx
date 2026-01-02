@@ -45,27 +45,14 @@ export function BloatingGuide() {
                   Three Things Happening Inside You
                 </h4>
 
-                <div className="space-y-3 pl-2">
-                  <div className="border-l-2 border-primary/30 pl-3 space-y-1">
-                    <p className="font-medium">💨 1. The Gas Bubble Effect</p>
-                    <p className="text-muted-foreground">
-                      Your large intestine is full of helpful bacteria. When they break down food you can't digest, they produce gas (hydrogen, CO₂, methane). Too much gas too quickly stretches your intestines, causing that tight, painful feeling.
-                    </p>
-                  </div>
-
-                  <div className="border-l-2 border-orange-300 pl-3 space-y-1">
-                    <p className="font-medium">🚗 2. The Traffic Jam (Slow Digestion)</p>
-                    <p className="text-muted-foreground">
-                      Sometimes, food movement through your digestive system (motility) slows down. This creates a backup, like a traffic jam. Food and gas get stuck together, making you feel super full.
-                    </p>
-                  </div>
-
-                  <div className="border-l-2 border-red-300 pl-3 space-y-1">
-                    <p className="font-medium">🔊 3. The Overactive Alarm System</p>
-                    <p className="text-muted-foreground">
-                      For some people, gut nerves are extra-sensitive. They feel a normal amount of gas as intense pain or pressure. It's not more gas; it's a louder signal to the brain.
-                    </p>
-                  </div>
+                {/* INFOGRAPHIC #1: 3 Types of Bloating */}
+                <div className="my-4 rounded-lg overflow-hidden border border-border shadow-sm">
+                  <img
+                    src="/assets/images/bloat-guide-infographic-1-three-types.png"
+                    alt="3 Types of Bloating: Gas Bubble Effect, Traffic Jam (Slow Motility), and Overactive Alarm System illustrated with digestive system diagrams"
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
                 </div>
 
                 <div className="bg-pink-50 dark:bg-pink-950/20 border border-pink-200 dark:border-pink-900 rounded-lg p-3">
@@ -101,38 +88,30 @@ export function BloatingGuide() {
               </div>
 
               <div className="space-y-3">
+                <h4 className="font-semibold">What Happens Step-by-Step</h4>
+
+                {/* INFOGRAPHIC #2: FODMAP Journey */}
+                <div className="my-4 rounded-lg overflow-hidden border border-border shadow-sm">
+                  <img
+                    src="/assets/images/bloat-guide-infographic-2-fodmap-journey.png"
+                    alt="Your FODMAP Journey from bite to bloat: showing the digestive process from eating high-FODMAP food through small intestine absorption failure to large intestine fermentation and resulting gas and bloating"
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
                 <h4 className="font-semibold">🚨 Common High-FODMAP Foods</h4>
 
-                <div className="grid grid-cols-1 gap-2">
-                  <div className="border rounded-lg p-2">
-                    <p className="font-medium text-xs mb-1">🍊 Fruits</p>
-                    <p className="text-xs text-muted-foreground">Apples, pears, mangoes, watermelon, peaches, plums</p>
-                  </div>
-
-                  <div className="border rounded-lg p-2">
-                    <p className="font-medium text-xs mb-1">🥦 Vegetables</p>
-                    <p className="text-xs text-muted-foreground">Onions, garlic, asparagus, cauliflower, mushrooms</p>
-                  </div>
-
-                  <div className="border rounded-lg p-2">
-                    <p className="font-medium text-xs mb-1">🍞 Grains</p>
-                    <p className="text-xs text-muted-foreground">Wheat, rye, barley (bread, pasta, cereal)</p>
-                  </div>
-
-                  <div className="border rounded-lg p-2">
-                    <p className="font-medium text-xs mb-1">🫘 Legumes</p>
-                    <p className="text-xs text-muted-foreground">Beans, lentils, chickpeas</p>
-                  </div>
-
-                  <div className="border rounded-lg p-2">
-                    <p className="font-medium text-xs mb-1">🥛 Dairy</p>
-                    <p className="text-xs text-muted-foreground">Milk, soft cheeses, yogurt (if lactose intolerant)</p>
-                  </div>
-
-                  <div className="border rounded-lg p-2">
-                    <p className="font-medium text-xs mb-1">🍯 Sweeteners</p>
-                    <p className="text-xs text-muted-foreground">HFCS, honey, sugar alcohols (sorbitol, xylitol)</p>
-                  </div>
+                {/* INFOGRAPHIC #3: High-FODMAP Foods Grid */}
+                <div className="my-4 rounded-lg overflow-hidden border border-border shadow-sm">
+                  <img
+                    src="/assets/images/bloat-guide-infographic-3-food-grid.png"
+                    alt="High-FODMAP Foods Quick Reference Guide: visual grid showing fruits (apples, pears, mangoes, watermelon, peaches, plums), vegetables (onions, garlic, asparagus, cauliflower, mushrooms, snow peas), grains (wheat, rye, barley), legumes (beans, lentils, chickpeas), dairy products, and sweeteners to avoid"
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
                 </div>
               </div>
             </AccordionContent>
