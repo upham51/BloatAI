@@ -90,43 +90,9 @@ const INGREDIENT_TRANSFORMATIONS: Record<string, string> = {
 };
 
 /**
- * Normalize ingredient name to canonical form for deduplication
- */
-export function normalizeIngredient(ingredient: string): string {
-  if (!ingredient) return '';
-  
-  let normalized = ingredient
-    .replace(/\(.*?\)/g, '')
-    .split(',')[0]
-    .trim();
-  
-  const lowerCase = normalized.toLowerCase();
-  
-  // Check for exact transformations first
-  if (INGREDIENT_TRANSFORMATIONS[lowerCase]) {
-    return INGREDIENT_TRANSFORMATIONS[lowerCase];
-  }
-  
-  // Check for partial matches in transformations
-  for (const [key, value] of Object.entries(INGREDIENT_TRANSFORMATIONS)) {
-    if (lowerCase.includes(key)) {
-      return value;
-    }
-  }
-  
-  // Remove common descriptors and capitalize
-  normalized = normalized
-    .replace(/^(a|an|the)\s+/i, '')
-    .replace(/^(fresh|raw|cooked|grilled|fried|baked|roasted|steamed|boiled)\s+/i, '')
-    .replace(/^(diced|sliced|chopped|minced|crushed|shredded)\s+/i, '')
-    .replace(/^(organic|natural|homemade)\s+/i, '');
-  
-  const words = normalized.split(/\s+/).slice(0, 2).filter(Boolean);
-  return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') || ingredient;
-}
-
-/**
- * Abbreviate ingredient name to 1-2 words max
+ * Normalize and abbreviate ingredient name to 1-2 words max.
+ * Used for both display purposes and deduplication.
+ * Removes verbose descriptors, applies common transformations, and capitalizes.
  */
 export function abbreviateIngredient(ingredient: string): string {
   if (!ingredient) return '';
@@ -251,18 +217,18 @@ export function deduplicateFoods(
   foods: Array<{ food: string; count: number }>
 ): Array<{ food: string; count: number }> {
   const normalized: Record<string, { food: string; count: number }> = {};
-  
+
   for (const item of foods) {
-    const normalizedName = normalizeIngredient(item.food);
+    const normalizedName = abbreviateIngredient(item.food);
     const key = normalizedName.toLowerCase();
-    
+
     if (normalized[key]) {
       normalized[key].count += item.count;
     } else {
       normalized[key] = { food: normalizedName, count: item.count };
     }
   }
-  
+
   return Object.values(normalized).sort((a, b) => b.count - a.count);
 }
 
