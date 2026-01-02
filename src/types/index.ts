@@ -6,6 +6,12 @@ export interface Profile {
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean;
+  age_range?: string;
+  biological_sex?: string;
+  primary_goal?: string;
+  bloating_frequency?: string;
+  medications?: string[];
+  onboarding_completed_at?: string;
 }
 
 // Meal entry types
