@@ -4,9 +4,11 @@ import { ChevronRight, Flame, Settings, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
+import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useAdmin } from '@/hooks/useAdmin';
+import { useProfile } from '@/hooks/useProfile';
 import { RATING_LABELS, getTriggerCategory } from '@/types';
 import { format, subDays, isAfter } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -34,9 +36,18 @@ export default function DashboardPage() {
   const { isAdmin } = useAdmin();
   const { entries, getPendingEntry, updateRating, skipRating, getCompletedCount } = useMeals();
   const { toast } = useToast();
+  const { data: userProfile, refetch: refetchProfile } = useProfile(user?.id);
 
   const pendingEntry = getPendingEntry();
   const [greeting, setGreeting] = useState(getTimeBasedGreeting());
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Show onboarding if user hasn't completed it
+  useEffect(() => {
+    if (userProfile && !userProfile.onboarding_completed) {
+      setShowOnboarding(true);
+    }
+  }, [userProfile]);
 
   useEffect(() => {
     setGreeting(getTimeBasedGreeting());
@@ -331,6 +342,18 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Onboarding Modal - shows for new users */}
+      {user && (
+        <OnboardingModal
+          isOpen={showOnboarding}
+          userId={user.id}
+          onComplete={() => {
+            setShowOnboarding(false);
+            refetchProfile();
+          }}
+        />
+      )}
     </AppLayout>
   );
 }

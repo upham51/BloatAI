@@ -4,13 +4,18 @@ import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, ChevronRight, Lig
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import CounterLoader from '@/components/shared/CounterLoader';
+import { RootCauseProfileCard } from '@/components/quiz/RootCauseProfileCard';
 import { useMeals } from '@/contexts/MealContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { getTriggerCategory } from '@/types';
 import { subDays, isAfter } from 'date-fns';
 import { validatePercentage, deduplicateFoods, getIconForTrigger, abbreviateIngredient, getSafeAlternatives } from '@/lib/triggerUtils';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: userProfile } = useProfile(user?.id);
   const { entries, getCompletedCount } = useMeals();
   const completedCount = getCompletedCount();
   const neededForInsights = 3;
@@ -237,6 +242,13 @@ export default function InsightsPage() {
             <h1 className="text-3xl font-bold text-foreground tracking-tight">Your Insights</h1>
             <p className="text-muted-foreground mt-1">Based on {insights?.totalMeals} meals logged</p>
           </header>
+
+          {/* Root Cause Profile Card */}
+          {user && (
+            <div className="animate-slide-up opacity-0" style={{ animationDelay: '25ms', animationFillMode: 'forwards' }}>
+              <RootCauseProfileCard userId={user.id} userProfile={userProfile} />
+            </div>
+          )}
 
           {/* Quick Stats - Only 2 columns now */}
           <div 
