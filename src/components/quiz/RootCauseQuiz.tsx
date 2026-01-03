@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -29,6 +39,7 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Partial<RootCauseQuizAnswers>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   const { toast } = useToast();
 
   // Filter out skipped questions based on user profile
@@ -113,6 +124,27 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
     }
   };
 
+  const handleExitAttempt = () => {
+    // Check if user has answered any questions
+    const hasAnswers = Object.keys(answers).length > 0;
+    if (hasAnswers) {
+      // Show confirmation dialog
+      setShowExitConfirmation(true);
+    } else {
+      // No progress to lose, close immediately
+      onClose();
+    }
+  };
+
+  const handleConfirmExit = () => {
+    setShowExitConfirmation(false);
+    onClose();
+  };
+
+  const handleCancelExit = () => {
+    setShowExitConfirmation(false);
+  };
+
   const handleSubmit = async () => {
     if (!canProceed()) return;
 
@@ -167,7 +199,13 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase insert error:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        throw error;
+      }
 
       toast({
         title: 'Assessment complete!',
@@ -179,11 +217,23 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
       }
 
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Quiz submission error:', error);
+
+      let errorMessage = 'Please try again.';
+
+      // Check for table doesn't exist error
+      if (error?.code === '42P01' || error?.message?.includes('relation') || error?.message?.includes('does not exist')) {
+        errorMessage = 'Database setup required. Please contact support or check SETUP_SQL.md for database migration instructions.';
+      } else if (error?.code === '23505') {
+        errorMessage = 'Duplicate assessment detected. Please try again.';
+      } else if (error?.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+
       toast({
         title: 'Error saving assessment',
-        description: 'Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -202,8 +252,26 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
   if (!currentQuestion) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleExitAttempt();
+          }
+        }}
+      >
+        <DialogContent
+          className="sm:max-w-2xl max-h-[90vh] overflow-y-auto"
+          onInteractOutside={(e) => {
+            e.preventDefault();
+            handleExitAttempt();
+          }}
+          onEscapeKeyDown={(e) => {
+            e.preventDefault();
+            handleExitAttempt();
+          }}
+        >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Root Cause Assessment
@@ -332,6 +400,27 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
         </div>
       </DialogContent>
     </Dialog>
+
+      {/* Exit Confirmation Dialog */}
+      <AlertDialog open={showExitConfirmation} onOpenChange={setShowExitConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress will be lost and you'll need to restart the quiz from the beginning.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelExit}>
+              Continue Quiz
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmExit}>
+              Leave Quiz
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

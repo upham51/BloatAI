@@ -16,10 +16,19 @@ export function useRootCauseAssessment(userId: string | undefined) {
         .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
+      // Gracefully handle table not existing yet (user needs to run migration)
+      if (error) {
+        // PostgreSQL error code 42P01 = undefined table
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          console.warn('root_cause_assessments table does not exist yet. Run SETUP_SQL.md or FIX_QUIZ_ERROR.md');
+          return null;
+        }
+        throw error;
+      }
       return data as RootCauseAssessment | null;
     },
     enabled: !!userId,
+    retry: false, // Don't retry if table doesn't exist
   });
 }
 
@@ -35,10 +44,18 @@ export function useAllAssessments(userId: string | undefined) {
         .eq('user_id', userId)
         .order('completed_at', { ascending: false });
 
-      if (error) throw error;
+      // Gracefully handle table not existing yet
+      if (error) {
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          console.warn('root_cause_assessments table does not exist yet. Run SETUP_SQL.md or FIX_QUIZ_ERROR.md');
+          return [];
+        }
+        throw error;
+      }
       return data as RootCauseAssessment[];
     },
     enabled: !!userId,
+    retry: false,
   });
 }
 
