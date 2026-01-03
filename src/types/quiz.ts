@@ -182,7 +182,7 @@ export interface QuizQuestion {
   type: 'single-choice' | 'multi-choice' | 'text-input';
   options?: QuizOption[];
   explanation?: string;
-  skipLogic?: (answers: Partial<RootCauseQuizAnswers>) => boolean; // Function to determine if question should be skipped
+  skipLogic?: (answers: Partial<RootCauseQuizAnswers> & { biologicalSex?: string }) => boolean; // Function to determine if question should be skipped
 }
 
 export interface QuizOption {

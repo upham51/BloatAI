@@ -8,7 +8,7 @@ export function useRootCauseAssessment(userId: string | undefined) {
     queryFn: async () => {
       if (!userId) return null;
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('root_cause_assessments')
         .select('*')
         .eq('user_id', userId)
@@ -29,7 +29,7 @@ export function useAllAssessments(userId: string | undefined) {
     queryFn: async () => {
       if (!userId) return [];
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('root_cause_assessments')
         .select('*')
         .eq('user_id', userId)
@@ -47,7 +47,7 @@ export function useDeleteAssessment() {
 
   return useMutation({
     mutationFn: async (assessmentId: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('root_cause_assessments')
         .delete()
         .eq('id', assessmentId);
