@@ -23,14 +23,19 @@ export const STRIPE_PLANS = {
 } as const;
 
 export function useSubscription() {
-  const { user, session } = useAuth();
-  const { isAdmin } = useAdmin();
+  const { user, session, isLoading: authLoading } = useAuth();
+  const { isAdmin, isLoading: adminLoading } = useAdmin();
   const [status, setStatus] = useState<SubscriptionStatus>('loading');
   const [subscriptionEnd, setSubscriptionEnd] = useState<Date | null>(null);
   const [plan, setPlan] = useState<'monthly' | 'annual' | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const checkSubscription = useCallback(async () => {
+    // Wait for auth and admin status to be determined
+    if (authLoading || adminLoading) {
+      return;
+    }
+
     if (!user || !session) {
       setStatus('inactive');
       return;
@@ -69,7 +74,7 @@ export function useSubscription() {
       console.error('Error checking subscription:', err);
       setStatus('inactive');
     }
-  }, [user, session, isAdmin]);
+  }, [user, session, isAdmin, authLoading, adminLoading]);
 
   useEffect(() => {
     checkSubscription();

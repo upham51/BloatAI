@@ -126,7 +126,7 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
       const redFlags = detectRedFlags(answers as RootCauseQuizAnswers, scores);
 
       // Get previous assessment count for retake number
-      const { data: previousAssessments } = await supabase
+      const { data: previousAssessments } = await (supabase as any)
         .from('root_cause_assessments')
         .select('retake_number')
         .eq('user_id', userId)
@@ -134,7 +134,7 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
         .limit(1);
 
       const retakeNumber = previousAssessments && previousAssessments.length > 0
-        ? previousAssessments[0].retake_number + 1
+        ? (previousAssessments[0] as any).retake_number + 1
         : 1;
 
       // Save to database
@@ -161,7 +161,7 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
         ai_report_medical_consult: redFlags.length > 0 ? redFlags.join(' | ') : null,
       };
 
-      const { data: savedAssessment, error } = await supabase
+      const { data: savedAssessment, error } = await (supabase as any)
         .from('root_cause_assessments')
         .insert(assessmentData)
         .select()
@@ -175,7 +175,7 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
       });
 
       if (onComplete && savedAssessment) {
-        onComplete(savedAssessment as RootCauseAssessment);
+        onComplete(savedAssessment as unknown as RootCauseAssessment);
       }
 
       onClose();
