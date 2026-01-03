@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from './useAdmin';
+import { useProfile } from './useProfile';
 
 type SubscriptionStatus = 'active' | 'inactive' | 'loading';
 
@@ -25,6 +26,7 @@ export const STRIPE_PLANS = {
 export function useSubscription() {
   const { user, session } = useAuth();
   const { isAdmin } = useAdmin();
+  const { data: userProfile } = useProfile(user?.id);
   const [status, setStatus] = useState<SubscriptionStatus>('loading');
   const [subscriptionEnd, setSubscriptionEnd] = useState<Date | null>(null);
   const [plan, setPlan] = useState<'monthly' | 'annual' | null>(null);
@@ -36,8 +38,8 @@ export function useSubscription() {
       return;
     }
 
-    // Admins always have access
-    if (isAdmin) {
+    // Admins and test accounts always have access
+    if (isAdmin || userProfile?.test_mode) {
       setStatus('active');
       setPlan('annual');
       return;
@@ -69,7 +71,7 @@ export function useSubscription() {
       console.error('Error checking subscription:', err);
       setStatus('inactive');
     }
-  }, [user, session, isAdmin]);
+  }, [user, session, isAdmin, userProfile]);
 
   useEffect(() => {
     checkSubscription();

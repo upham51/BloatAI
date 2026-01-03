@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useAdmin } from '@/hooks/useAdmin';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { Loader2 } from 'lucide-react';
 
@@ -24,22 +25,29 @@ interface OnboardingGateProps {
 export function OnboardingGate({ children }: OnboardingGateProps) {
   const { user } = useAuth();
   const { data: userProfile, isLoading, refetch } = useProfile(user?.id);
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
+    // Skip onboarding for admins and test accounts
+    if (isAdmin || userProfile?.test_mode) {
+      setShowOnboarding(false);
+      return;
+    }
+
     if (userProfile && !userProfile.onboarding_completed) {
       setShowOnboarding(true);
     } else if (userProfile && userProfile.onboarding_completed) {
       setShowOnboarding(false);
     }
-  }, [userProfile]);
+  }, [userProfile, isAdmin]);
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
     refetch(); // Refresh profile to get updated onboarding status
   };
 
-  if (isLoading) {
+  if (isLoading || isAdminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">

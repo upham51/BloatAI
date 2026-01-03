@@ -6,6 +6,7 @@ export interface Profile {
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean;
+  test_mode?: boolean;
   age_range?: string;
   biological_sex?: string;
   primary_goal?: string;
