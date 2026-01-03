@@ -36,30 +36,13 @@ export function BloatingGuide() {
                 </h4>
 
                 {/* INFOGRAPHIC #1: 3 Types of Bloating */}
-                <div className="my-4 rounded-lg overflow-hidden border-2 border-border shadow-md bg-gradient-to-br from-primary/5 to-lavender/10 p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3 p-4 bg-background/80 rounded-xl border border-border/50">
-                      <span className="text-3xl">💨</span>
-                      <div>
-                        <h5 className="font-bold text-foreground mb-1">1. Gas Bubble Effect</h5>
-                        <p className="text-sm text-muted-foreground">Trapped gas in your intestines creates pressure and discomfort</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-4 bg-background/80 rounded-xl border border-border/50">
-                      <span className="text-3xl">🚗</span>
-                      <div>
-                        <h5 className="font-bold text-foreground mb-1">2. Traffic Jam (Slow Motility)</h5>
-                        <p className="text-sm text-muted-foreground">Food moves too slowly through your digestive system</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-4 bg-background/80 rounded-xl border border-border/50">
-                      <span className="text-3xl">🔊</span>
-                      <div>
-                        <h5 className="font-bold text-foreground mb-1">3. Overactive Alarm System</h5>
-                        <p className="text-sm text-muted-foreground">Your gut nerves are extra sensitive to normal amounts of gas</p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="my-4 rounded-lg overflow-hidden border border-border shadow-sm">
+                  <img
+                    src="/assets/images/bloat-guide-infographic-1-three-types.png"
+                    alt="3 Types of Bloating: Gas Bubble Effect, Traffic Jam (Slow Motility), and Overactive Alarm System illustrated with digestive system diagrams"
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
                 </div>
 
                 <div className="bg-pink-50 dark:bg-pink-950/20 border border-pink-200 dark:border-pink-900 rounded-lg p-3">
@@ -98,33 +81,13 @@ export function BloatingGuide() {
                 <h4 className="font-semibold">What Happens Step-by-Step</h4>
 
                 {/* INFOGRAPHIC #2: FODMAP Journey */}
-                <div className="my-4 rounded-lg overflow-hidden border-2 border-border shadow-md bg-gradient-to-br from-blue/5 to-primary/10 p-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-background/80 rounded-xl border border-border/50">
-                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
-                      <p className="text-sm"><strong>You eat</strong> a food high in FODMAPs</p>
-                    </div>
-                    <div className="ml-4 border-l-2 border-primary/30 h-4"></div>
-                    <div className="flex items-center gap-3 p-3 bg-background/80 rounded-xl border border-border/50">
-                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
-                      <p className="text-sm">Sugars arrive in <strong>small intestine</strong> but can't absorb properly</p>
-                    </div>
-                    <div className="ml-4 border-l-2 border-primary/30 h-4"></div>
-                    <div className="flex items-center gap-3 p-3 bg-background/80 rounded-xl border border-border/50">
-                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
-                      <p className="text-sm">They pull in water (causing <strong>distension</strong>)</p>
-                    </div>
-                    <div className="ml-4 border-l-2 border-primary/30 h-4"></div>
-                    <div className="flex items-center gap-3 p-3 bg-background/80 rounded-xl border border-border/50">
-                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm flex-shrink-0">4</div>
-                      <p className="text-sm">Travel to <strong>large intestine</strong> where bacteria feast</p>
-                    </div>
-                    <div className="ml-4 border-l-2 border-primary/30 h-4"></div>
-                    <div className="flex items-center gap-3 p-3 bg-coral/10 rounded-xl border-2 border-coral/30">
-                      <div className="w-8 h-8 rounded-full bg-coral text-white flex items-center justify-center font-bold text-sm flex-shrink-0">5</div>
-                      <p className="text-sm font-semibold text-coral">💨 Gas production = <strong>BLOATING!</strong></p>
-                    </div>
-                  </div>
+                <div className="my-4 rounded-lg overflow-hidden border border-border shadow-sm">
+                  <img
+                    src="/assets/images/bloat-guide-infographic-2-fodmap-journey.png"
+                    alt="Your FODMAP Journey from bite to bloat: showing the digestive process from eating high-FODMAP food through small intestine absorption failure to large intestine fermentation and resulting gas and bloating"
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
                 </div>
               </div>
 
@@ -132,33 +95,13 @@ export function BloatingGuide() {
                 <h4 className="font-semibold">🚨 Common High-FODMAP Foods</h4>
 
                 {/* INFOGRAPHIC #3: High-FODMAP Foods Grid */}
-                <div className="my-4 rounded-lg overflow-hidden border-2 border-border shadow-md bg-gradient-to-br from-coral/5 to-peach/10 p-6">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-background/80 rounded-xl border border-border/50">
-                      <p className="font-bold text-sm mb-2 flex items-center gap-1">🍊 Fruits</p>
-                      <p className="text-xs text-muted-foreground">Apples, pears, mangoes, watermelon, peaches, plums</p>
-                    </div>
-                    <div className="p-3 bg-background/80 rounded-xl border border-border/50">
-                      <p className="font-bold text-sm mb-2 flex items-center gap-1">🥦 Vegetables</p>
-                      <p className="text-xs text-muted-foreground">Onions, garlic, asparagus, cauliflower, mushrooms</p>
-                    </div>
-                    <div className="p-3 bg-background/80 rounded-xl border border-border/50">
-                      <p className="font-bold text-sm mb-2 flex items-center gap-1">🍞 Grains</p>
-                      <p className="text-xs text-muted-foreground">Wheat, rye, barley</p>
-                    </div>
-                    <div className="p-3 bg-background/80 rounded-xl border border-border/50">
-                      <p className="font-bold text-sm mb-2 flex items-center gap-1">🫘 Legumes</p>
-                      <p className="text-xs text-muted-foreground">Beans, lentils, chickpeas</p>
-                    </div>
-                    <div className="p-3 bg-background/80 rounded-xl border border-border/50">
-                      <p className="font-bold text-sm mb-2 flex items-center gap-1">🥛 Dairy</p>
-                      <p className="text-xs text-muted-foreground">Milk, soft cheeses, yogurt</p>
-                    </div>
-                    <div className="p-3 bg-background/80 rounded-xl border border-border/50">
-                      <p className="font-bold text-sm mb-2 flex items-center gap-1">🍯 Sweeteners</p>
-                      <p className="text-xs text-muted-foreground">HFCS, honey, sugar alcohols</p>
-                    </div>
-                  </div>
+                <div className="my-4 rounded-lg overflow-hidden border border-border shadow-sm">
+                  <img
+                    src="/assets/images/bloat-guide-infographic-3-food-grid.png"
+                    alt="High-FODMAP Foods Quick Reference Guide: visual grid showing fruits (apples, pears, mangoes, watermelon, peaches, plums), vegetables (onions, garlic, asparagus, cauliflower, mushrooms, snow peas), grains (wheat, rye, barley), legumes (beans, lentils, chickpeas), dairy products, and sweeteners to avoid"
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
                 </div>
               </div>
             </AccordionContent>
