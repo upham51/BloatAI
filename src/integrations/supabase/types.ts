@@ -167,12 +167,18 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age_range: string | null
           avatar_url: string | null
+          biological_sex: string | null
+          bloating_frequency: string | null
           created_at: string
           display_name: string | null
           email: string | null
           id: string
+          medications: string[] | null
           onboarding_completed: boolean | null
+          onboarding_completed_at: string | null
+          primary_goal: string | null
           push_subscription: Json | null
           stripe_customer_id: string | null
           subscription_ends_at: string | null
@@ -182,12 +188,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          age_range?: string | null
           avatar_url?: string | null
+          biological_sex?: string | null
+          bloating_frequency?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
           id: string
+          medications?: string[] | null
           onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          primary_goal?: string | null
           push_subscription?: Json | null
           stripe_customer_id?: string | null
           subscription_ends_at?: string | null
@@ -197,12 +209,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          age_range?: string | null
           avatar_url?: string | null
+          biological_sex?: string | null
+          bloating_frequency?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
           id?: string
+          medications?: string[] | null
           onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          primary_goal?: string | null
           push_subscription?: Json | null
           stripe_customer_id?: string | null
           subscription_ends_at?: string | null
