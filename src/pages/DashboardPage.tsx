@@ -1,11 +1,11 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Flame, Settings, AlertTriangle } from 'lucide-react';
+import { ChevronRight, Flame, Settings, AlertTriangle, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
-import { BloatingGuide } from '@/components/guide/BloatingGuide';
+import { BloatingGuideModal } from '@/components/guide/BloatingGuideModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const pendingEntry = getPendingEntry();
   const [greeting, setGreeting] = useState(getTimeBasedGreeting());
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showBloatingGuide, setShowBloatingGuide] = useState(false);
 
   // Show onboarding if user hasn't completed it
   useEffect(() => {
@@ -342,15 +343,35 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Bloating Guide */}
-          <div
-            className="animate-slide-up opacity-0"
+          {/* Bloating Guide Card */}
+          <button
+            onClick={() => setShowBloatingGuide(true)}
+            className="premium-card p-6 text-left hover:scale-[1.01] transition-all duration-200 animate-slide-up opacity-0 group"
             style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}
           >
-            <BloatingGuide />
-          </div>
+            <div className="flex items-center gap-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-lavender/20 shadow-sm group-hover:shadow-md transition-shadow">
+                <span className="text-3xl">🎈</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-foreground mb-1 flex items-center gap-2">
+                  The Complete Guide to Bloating
+                  <ChevronRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Learn about causes, relief, and prevention
+                </p>
+              </div>
+            </div>
+          </button>
         </div>
       </div>
+
+      {/* Bloating Guide Modal */}
+      <BloatingGuideModal
+        isOpen={showBloatingGuide}
+        onClose={() => setShowBloatingGuide(false)}
+      />
 
       {/* Onboarding Modal - shows for new users */}
       {user && (

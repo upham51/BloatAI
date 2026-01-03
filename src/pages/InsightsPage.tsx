@@ -1,11 +1,11 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, ChevronRight, Lightbulb, Heart } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, ChevronRight, Lightbulb, Heart, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import CounterLoader from '@/components/shared/CounterLoader';
 import { RootCauseProfileCard } from '@/components/quiz/RootCauseProfileCard';
-import { BloatingGuide } from '@/components/guide/BloatingGuide';
+import { BloatingGuideModal } from '@/components/guide/BloatingGuideModal';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -25,6 +25,9 @@ export default function InsightsPage() {
   // Loading state for AI magic animation
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [analysisKey, setAnalysisKey] = useState(0);
+
+  // Bloating guide modal state
+  const [showBloatingGuide, setShowBloatingGuide] = useState(false);
 
   // Trigger re-analysis on page visit
   useEffect(() => {
@@ -537,15 +540,35 @@ export default function InsightsPage() {
             </ul>
           </div>
 
-          {/* Bloating Guide */}
-          <div
-            className="animate-slide-up opacity-0"
+          {/* Bloating Guide Button */}
+          <button
+            onClick={() => setShowBloatingGuide(true)}
+            className="premium-card p-6 text-left hover:scale-[1.01] transition-all duration-200 animate-slide-up opacity-0 group"
             style={{ animationDelay: '275ms', animationFillMode: 'forwards' }}
           >
-            <BloatingGuide />
-          </div>
+            <div className="flex items-center gap-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-lavender/20 shadow-sm group-hover:shadow-md transition-shadow">
+                <span className="text-3xl">🎈</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-foreground mb-1 flex items-center gap-2">
+                  The Complete Guide to Bloating
+                  <ChevronRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Everything you need to know about bloating and how to fix it
+                </p>
+              </div>
+            </div>
+          </button>
         </div>
       </div>
+
+      {/* Bloating Guide Modal */}
+      <BloatingGuideModal
+        isOpen={showBloatingGuide}
+        onClose={() => setShowBloatingGuide(false)}
+      />
     </AppLayout>
   );
 }
