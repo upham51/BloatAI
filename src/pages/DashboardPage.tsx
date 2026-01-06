@@ -6,6 +6,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
+import { Particles } from '@/components/ui/particles';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -144,19 +145,14 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <div className="relative min-h-screen">
-        {/* Watercolor Background */}
-        <svg width="0" height="0" style={{ position: 'absolute' }}>
-          <filter id="watercolor-bleed">
-            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.03" numOctaves="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="100" />
-          </filter>
-        </svg>
-        
-        <div className="watercolor-canvas">
-          <div className="splotch splotch-1"></div>
-          <div className="splotch splotch-2"></div>
-          <div className="splotch splotch-3"></div>
-        </div>
+        {/* Particles Background */}
+        <Particles
+          className="absolute inset-0"
+          quantity={100}
+          ease={50}
+          color="#8B7355"
+          refresh={false}
+        />
 
         <div className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5">
           {/* Header with time-based greeting */}
