@@ -14,6 +14,18 @@ import { format, subDays, isAfter } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getTimeBasedGreeting } from '@/lib/quotes';
 
+// Food background images for the weekly average card
+const FOOD_BACKGROUNDS = [
+  '/images/food-backgrounds/food-bg-1.svg',
+  '/images/food-backgrounds/food-bg-2.svg',
+  '/images/food-backgrounds/food-bg-3.svg',
+  '/images/food-backgrounds/food-bg-4.svg',
+  '/images/food-backgrounds/food-bg-5.svg',
+  '/images/food-backgrounds/food-bg-6.svg',
+  '/images/food-backgrounds/food-bg-7.svg',
+  '/images/food-backgrounds/food-bg-8.svg',
+];
+
 // Trigger display names for the insights
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   'fodmaps-fructans': 'Wheat/Fructans',
@@ -40,6 +52,17 @@ export default function DashboardPage() {
   const pendingEntry = getPendingEntry();
   const [greeting, setGreeting] = useState(getTimeBasedGreeting());
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Randomly select a food background image that persists during the session
+  const [foodBackground] = useState(() =>
+    FOOD_BACKGROUNDS[Math.floor(Math.random() * FOOD_BACKGROUNDS.length)]
+  );
+
+  // Preload the selected background image for instant display
+  useEffect(() => {
+    const img = new Image();
+    img.src = foodBackground;
+  }, [foodBackground]);
 
   // Show onboarding if user hasn't completed it
   useEffect(() => {
@@ -209,36 +232,51 @@ export default function DashboardPage() {
           {/* Main Bloating & Meals Card */}
           {completedCount >= 5 && (
             <div
-              className="premium-card p-6 animate-slide-up opacity-0"
+              className="premium-card p-6 animate-slide-up opacity-0 relative overflow-hidden"
               style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
             >
-              <h2 className="text-sm font-semibold text-muted-foreground mb-4">Weekly Average</h2>
+              {/* Background Image */}
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{
+                  backgroundImage: `url(${foodBackground})`,
+                  opacity: 0.15,
+                }}
+              />
 
-              {/* Main metric display */}
-              <div className="flex items-center justify-between mb-6">
-                {/* Bloating Score */}
-                <div className="flex-1">
-                  <div className="text-5xl font-bold text-foreground mb-1">
-                    {weeklyBloating.toFixed(1)}
+              {/* Gradient overlay for better text contrast */}
+              <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/40 to-background/60" />
+
+              {/* Content (relative to stack on top of background) */}
+              <div className="relative z-10">
+                <h2 className="text-sm font-semibold text-muted-foreground mb-4">Weekly Average</h2>
+
+                {/* Main metric display */}
+                <div className="flex items-center justify-between mb-6">
+                  {/* Bloating Score */}
+                  <div className="flex-1">
+                    <div className="text-5xl font-bold text-foreground mb-1 drop-shadow-sm">
+                      {weeklyBloating.toFixed(1)}
+                    </div>
+                    <div className="text-sm text-muted-foreground font-medium">Bloating Score</div>
                   </div>
-                  <div className="text-sm text-muted-foreground">Bloating Score</div>
+
+                  {/* Divider */}
+                  <div className="w-px h-16 bg-border mx-4" />
+
+                  {/* Today's Meals */}
+                  <div className="flex-1 text-right">
+                    <div className="text-5xl font-bold text-foreground mb-1 drop-shadow-sm">
+                      {todaysMeals}
+                    </div>
+                    <div className="text-sm text-muted-foreground font-medium">Meals Today</div>
+                  </div>
                 </div>
 
-                {/* Divider */}
-                <div className="w-px h-16 bg-border mx-4" />
-
-                {/* Today's Meals */}
-                <div className="flex-1 text-right">
-                  <div className="text-5xl font-bold text-foreground mb-1">
-                    {todaysMeals}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Meals Today</div>
+                {/* Subtext */}
+                <div className="text-xs text-muted-foreground text-center pt-3 border-t border-border/50">
+                  Based on last 7 days
                 </div>
-              </div>
-
-              {/* Subtext */}
-              <div className="text-xs text-muted-foreground text-center pt-3 border-t border-border/50">
-                Based on last 7 days
               </div>
             </div>
           )}
