@@ -20,43 +20,47 @@ export default function InsightsPage() {
   const { entries, getCompletedCount } = useMeals();
   const completedCount = getCompletedCount();
   const neededForInsights = 3;
-  const hasEnoughData = entries.length >= neededForInsights;
+  // Check completed entries for insights, not just total entries
+  const hasEnoughData = completedCount >= neededForInsights;
 
   // Loading state for AI magic animation
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [analysisKey, setAnalysisKey] = useState(0);
 
-  // Trigger re-analysis on page visit
+  // Trigger re-analysis on page visit - optimized for faster loading
   useEffect(() => {
     setIsAnalyzing(true);
     setAnalysisKey(prev => prev + 1);
 
-    // Simulate AI analysis delay - faster for better UX
+    // Minimal loading delay for smooth UX (reduced from 800ms)
     const timer = setTimeout(() => {
       setIsAnalyzing(false);
-    }, 800);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, [entries.length]); // Re-run when entries change
 
   const insights = useMemo(() => {
-    if (entries.length < neededForInsights) return null;
+    // Only analyze completed meals (those with bloating ratings)
+    const completedEntries = entries.filter(e => e.rating_status === 'completed');
 
-    const totalMeals = entries.length;
-    const last7Days = entries.filter(e => isAfter(new Date(e.created_at), subDays(new Date(), 7)));
-    
+    if (completedEntries.length < neededForInsights) return null;
+
+    const totalMeals = completedEntries.length;
+    const last7Days = completedEntries.filter(e => isAfter(new Date(e.created_at), subDays(new Date(), 7)));
+
     // Trigger frequency analysis - count meals that contain each trigger
-    const triggerMealCounts: Record<string, { 
+    const triggerMealCounts: Record<string, {
       mealsWithTrigger: Set<string>;
       foods: Map<string, number>;
       highBloatingMealsWithTrigger: Set<string>;
     }> = {};
-    
-    // High-bloating meals for the "potential triggers" section
-    const highBloatingMeals = entries.filter(e => e.bloating_rating && e.bloating_rating >= 4);
+
+    // High-bloating meals for the "potential triggers" section - only from completed entries
+    const highBloatingMeals = completedEntries.filter(e => e.bloating_rating && e.bloating_rating >= 4);
     const totalHighBloating = highBloatingMeals.length;
-    
-    entries.forEach(entry => {
+
+    completedEntries.forEach(entry => {
       entry.detected_triggers?.forEach(trigger => {
         if (!triggerMealCounts[trigger.category]) {
           triggerMealCounts[trigger.category] = { 
@@ -112,9 +116,9 @@ export default function InsightsPage() {
       .filter(t => t.suspicionScore !== 'low' && t.count >= 2)
       .slice(0, 3);
 
-    // Most common foods you eat - DEDUPLICATED
+    // Most common foods you eat - DEDUPLICATED - only from completed entries
     const allFoods: Map<string, number> = new Map();
-    entries.forEach(entry => {
+    completedEntries.forEach(entry => {
       entry.detected_triggers?.forEach(trigger => {
         if (trigger.food) {
           const current = allFoods.get(trigger.food) || 0;
@@ -122,13 +126,13 @@ export default function InsightsPage() {
         }
       });
     });
-    
+
     // Deduplicate similar foods (broccoli florets + broccoli = broccoli)
     const foodsArray = Array.from(allFoods.entries()).map(([food, count]) => ({ food, count }));
     const deduplicatedFoods = deduplicateFoods(foodsArray);
     const topFoods = deduplicatedFoods.slice(0, 5);
 
-    const lowBloatingMeals = entries.filter(e => e.bloating_rating && e.bloating_rating <= 2);
+    const lowBloatingMeals = completedEntries.filter(e => e.bloating_rating && e.bloating_rating <= 2);
 
     return {
       totalMeals,
@@ -138,9 +142,8 @@ export default function InsightsPage() {
       topFoods,
       highBloatingCount: totalHighBloating,
       lowBloatingCount: lowBloatingMeals.length,
-      ratedCount: completedCount,
     };
-  }, [entries, completedCount, analysisKey]);
+  }, [entries, completedCount]);
 
   // Generate AI summary based on data
   const aiSummary = useMemo(() => {
@@ -202,17 +205,17 @@ export default function InsightsPage() {
               </div>
               <h2 className="text-xl font-bold text-foreground">Insights Coming Soon!</h2>
               <p className="text-muted-foreground max-w-xs mx-auto">
-                Log {neededForInsights - entries.length} more meal{neededForInsights - entries.length !== 1 ? 's' : ''} to unlock your personalized analysis.
+                Rate {neededForInsights - completedCount} more meal{neededForInsights - completedCount !== 1 ? 's' : ''} to unlock your personalized analysis.
               </p>
               <div className="max-w-xs mx-auto mt-4">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Progress</span>
-                  <span className="font-bold text-foreground">{entries.length}/{neededForInsights}</span>
+                  <span className="font-bold text-foreground">{completedCount}/{neededForInsights}</span>
                 </div>
                 <div className="h-3 bg-muted/50 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-500 rounded-full" 
-                    style={{ width: `${(entries.length / neededForInsights) * 100}%` }} 
+                  <div
+                    className="h-full bg-primary transition-all duration-500 rounded-full"
+                    style={{ width: `${(completedCount / neededForInsights) * 100}%` }}
                   />
                 </div>
               </div>
@@ -528,7 +531,7 @@ export default function InsightsPage() {
                 <ChevronRight className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                 <span>Log more meals to improve insight accuracy</span>
               </li>
-              {insights?.ratedCount < insights?.totalMeals && (
+              {completedCount < entries.length && (
                 <li className="flex items-start gap-2">
                   <ChevronRight className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                   <span>Rate your pending meals to track bloating patterns</span>
