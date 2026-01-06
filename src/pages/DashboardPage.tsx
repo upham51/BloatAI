@@ -232,7 +232,7 @@ export default function DashboardPage() {
           {/* Main Bloating & Meals Card */}
           {completedCount >= 5 && (
             <div
-              className="premium-card p-6 animate-slide-up opacity-0 relative overflow-hidden"
+              className="premium-card !bg-transparent p-6 animate-slide-up opacity-0 relative overflow-hidden"
               style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
             >
               {/* Background Image */}
@@ -240,12 +240,12 @@ export default function DashboardPage() {
                 className="absolute inset-0 bg-cover bg-center"
                 style={{
                   backgroundImage: `url(${foodBackground})`,
-                  opacity: 0.15,
+                  opacity: 0.35,
                 }}
               />
 
               {/* Gradient overlay for better text contrast */}
-              <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/40 to-background/60" />
+              <div className="absolute inset-0 bg-gradient-to-br from-card/85 via-card/70 to-card/85" />
 
               {/* Content (relative to stack on top of background) */}
               <div className="relative z-10">
