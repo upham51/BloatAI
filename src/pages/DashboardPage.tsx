@@ -242,40 +242,56 @@ export default function DashboardPage() {
               <img
                 src={foodBackground}
                 alt="Food background"
-                className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none"
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                style={{ opacity: 0.95 }}
               />
 
-              {/* Gradient overlay for better text contrast */}
-              <div className="absolute inset-0 bg-gradient-to-br from-card/85 via-card/70 to-card/85 pointer-events-none" />
+              {/* Dark overlay for text contrast - works with both dark foods and white plates */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.5) 100%)'
+                }}
+              />
 
               {/* Content (relative to stack on top of background) */}
               <div className="relative z-10">
-                <h2 className="text-sm font-semibold text-muted-foreground mb-4">Weekly Average</h2>
+                <h2 className="text-sm font-bold text-white mb-4 drop-shadow-lg">Weekly Average</h2>
 
                 {/* Main metric display */}
                 <div className="flex items-center justify-between mb-6">
                   {/* Bloating Score */}
                   <div className="flex-1">
-                    <div className="text-5xl font-bold text-foreground mb-1 drop-shadow-sm">
+                    <div
+                      className="text-5xl font-extrabold text-white mb-1"
+                      style={{
+                        textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.9)'
+                      }}
+                    >
                       {weeklyBloating.toFixed(1)}
                     </div>
-                    <div className="text-sm text-muted-foreground font-medium">Bloating Score</div>
+                    <div className="text-sm text-white font-semibold drop-shadow-lg">Bloating Score</div>
                   </div>
 
                   {/* Divider */}
-                  <div className="w-px h-16 bg-border mx-4" />
+                  <div className="w-px h-16 bg-white/40 mx-4 shadow-lg" />
 
                   {/* Today's Meals */}
                   <div className="flex-1 text-right">
-                    <div className="text-5xl font-bold text-foreground mb-1 drop-shadow-sm">
+                    <div
+                      className="text-5xl font-extrabold text-white mb-1"
+                      style={{
+                        textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.9)'
+                      }}
+                    >
                       {todaysMeals}
                     </div>
-                    <div className="text-sm text-muted-foreground font-medium">Meals Today</div>
+                    <div className="text-sm text-white font-semibold drop-shadow-lg">Meals Today</div>
                   </div>
                 </div>
 
                 {/* Subtext */}
-                <div className="text-xs text-muted-foreground text-center pt-3 border-t border-border/50">
+                <div className="text-xs text-white/90 text-center pt-3 border-t border-white/30 drop-shadow-md">
                   Based on last 7 days
                 </div>
               </div>
