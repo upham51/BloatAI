@@ -16,14 +16,14 @@ import { getTimeBasedGreeting } from '@/lib/quotes';
 
 // Food background images for the weekly average card
 const FOOD_BACKGROUNDS = [
-  '/images/food-backgrounds/food-bg-1.svg',
-  '/images/food-backgrounds/food-bg-2.svg',
-  '/images/food-backgrounds/food-bg-3.svg',
-  '/images/food-backgrounds/food-bg-4.svg',
-  '/images/food-backgrounds/food-bg-5.svg',
-  '/images/food-backgrounds/food-bg-6.svg',
-  '/images/food-backgrounds/food-bg-7.svg',
-  '/images/food-backgrounds/food-bg-8.svg',
+  '/images/food-backgrounds/food-bg-1.webp',
+  '/images/food-backgrounds/food-bg-2.webp',
+  '/images/food-backgrounds/food-bg-3.webp',
+  '/images/food-backgrounds/food-bg-4.webp',
+  '/images/food-backgrounds/food-bg-5.webp',
+  '/images/food-backgrounds/food-bg-6.webp',
+  '/images/food-backgrounds/food-bg-7.webp',
+  '/images/food-backgrounds/food-bg-8.webp',
 ];
 
 // Trigger display names for the insights
