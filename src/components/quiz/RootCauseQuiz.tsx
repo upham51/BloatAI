@@ -118,56 +118,60 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
 
     setIsSubmitting(true);
     try {
-      // Calculate scores
+      // Calculate scores - all synchronous, very fast
       const scores = calculateQuizScores(answers as RootCauseQuizAnswers);
       const overallScore = calculateOverallScore(scores);
       const riskLevel = getRiskLevel(overallScore);
       const topCauses = getTopCauses(scores);
       const redFlags = detectRedFlags(answers as RootCauseQuizAnswers, scores);
 
-      // Get previous assessment count for retake number
-      const { data: previousAssessments } = await (supabase as any)
+      // Generate AI reports - synchronous, very fast
+      const aiReportSummary = generateAIReportSummary(scores, overallScore, riskLevel);
+      const aiReportActionSteps = generateActionSteps(scores, topCauses);
+      const aiReportLongTerm = generateLongTermRecommendations(scores, topCauses);
+
+      // Calculate retake number using a subquery - single fast query
+      const { data: countData } = await (supabase as any)
         .from('root_cause_assessments')
-        .select('retake_number')
-        .eq('user_id', userId)
-        .order('retake_number', { ascending: false })
-        .limit(1);
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId);
 
-      const retakeNumber = previousAssessments && previousAssessments.length > 0
-        ? (previousAssessments[0] as any).retake_number + 1
-        : 1;
+      const retakeNumber = (countData?.length || 0) + 1;
 
-      // Save to database
+      // Prepare assessment data - ensure all fields are valid
       const assessmentData = {
         user_id: userId,
         completed_at: new Date().toISOString(),
-        aerophagia_score: scores.aerophagia.score,
-        motility_score: scores.motility.score,
-        dysbiosis_score: scores.dysbiosis.score,
-        brain_gut_score: scores.brainGut.score,
-        hormonal_score: scores.hormonal.score,
-        structural_score: scores.structural.score,
-        lifestyle_score: scores.lifestyle.score,
-        overall_score: overallScore,
-        risk_level: riskLevel,
-        top_causes: topCauses,
-        red_flags: redFlags,
+        aerophagia_score: Math.max(0, Math.min(10, scores.aerophagia.score || 0)),
+        motility_score: Math.max(0, Math.min(11, scores.motility.score || 0)),
+        dysbiosis_score: Math.max(0, Math.min(11, scores.dysbiosis.score || 0)),
+        brain_gut_score: Math.max(0, Math.min(14, scores.brainGut.score || 0)),
+        hormonal_score: Math.max(0, Math.min(6, scores.hormonal.score || 0)),
+        structural_score: Math.max(0, Math.min(10, scores.structural.score || 0)),
+        lifestyle_score: Math.max(0, Math.min(6, scores.lifestyle.score || 0)),
+        overall_score: Math.max(0, Math.min(100, overallScore || 0)),
+        risk_level: riskLevel || 'Low',
+        top_causes: topCauses || [],
+        red_flags: redFlags || [],
         individual_answers: answers,
         retake_number: retakeNumber,
-        // AI report will be generated separately
-        ai_report_summary: generateAIReportSummary(scores, overallScore, riskLevel),
-        ai_report_action_steps: generateActionSteps(scores, topCauses),
-        ai_report_long_term: generateLongTermRecommendations(scores, topCauses),
+        ai_report_summary: aiReportSummary,
+        ai_report_action_steps: aiReportActionSteps,
+        ai_report_long_term: aiReportLongTerm,
         ai_report_medical_consult: redFlags.length > 0 ? redFlags.join(' | ') : null,
       };
 
+      // Single database insert
       const { data: savedAssessment, error } = await (supabase as any)
         .from('root_cause_assessments')
         .insert(assessmentData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error details:', error);
+        throw error;
+      }
 
       toast({
         title: 'Assessment complete!',
@@ -178,12 +182,22 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
         onComplete(savedAssessment as unknown as RootCauseAssessment);
       }
 
+      // Reset form and close
+      setAnswers({});
+      setCurrentQuestionIndex(0);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Quiz submission error:', error);
+
+      // Provide more detailed error message
+      const errorMessage = error?.message || 'Please try again.';
+      const isValidationError = errorMessage.includes('check constraint') || errorMessage.includes('violates');
+
       toast({
-        title: 'Error saving assessment',
-        description: 'Please try again.',
+        title: isValidationError ? 'Invalid data detected' : 'Error saving assessment',
+        description: isValidationError
+          ? 'Some answers are out of range. Please contact support.'
+          : errorMessage,
         variant: 'destructive',
       });
     } finally {

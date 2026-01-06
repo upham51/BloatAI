@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, ChevronRight, Lightbulb, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
-import CounterLoader from '@/components/shared/CounterLoader';
+import InsightsLoader from '@/components/shared/InsightsLoader';
 import { RootCauseProfileCard } from '@/components/quiz/RootCauseProfileCard';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { useMeals } from '@/contexts/MealContext';
@@ -30,12 +30,12 @@ export default function InsightsPage() {
   useEffect(() => {
     setIsAnalyzing(true);
     setAnalysisKey(prev => prev + 1);
-    
-    // Simulate AI analysis delay
+
+    // Simulate AI analysis delay - faster for better UX
     const timer = setTimeout(() => {
       setIsAnalyzing(false);
-    }, 1200);
-    
+    }, 800);
+
     return () => clearTimeout(timer);
   }, [entries.length]); // Re-run when entries change
 
@@ -171,12 +171,12 @@ export default function InsightsPage() {
     return (
       <AppLayout>
         <div className="fixed inset-0 bg-background z-50 flex flex-col items-center justify-center">
-          <CounterLoader />
+          <InsightsLoader />
           <p className="mt-6 text-lg font-semibold text-primary animate-pulse">
-            ✨ Working AI Magic...
+            Analyzing your insights
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Analyzing your meal patterns
+            Crunching the numbers...
           </p>
         </div>
       </AppLayout>

@@ -481,3 +481,17 @@
   0%, 20%, 30%, 50%, 60%, 80%, 90%, 100% { transform: translateX(0); }
   10%, 40%, 70% { transform: translateX(28px); }
 }
+
+/* Insights Loader Animation */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
