@@ -1,15 +1,13 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Flame, Settings, AlertTriangle } from 'lucide-react';
+import { Flame, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
-import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { Particles } from '@/components/ui/particles';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
-import { useAdmin } from '@/hooks/useAdmin';
 import { useProfile } from '@/hooks/useProfile';
 import { RATING_LABELS, getTriggerCategory } from '@/types';
 import { format, subDays, isAfter } from 'date-fns';
@@ -35,7 +33,6 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isAdmin } = useAdmin();
   const { entries, getPendingEntry, updateRating, skipRating, getCompletedCount } = useMeals();
   const { toast } = useToast();
   const { data: userProfile, refetch: refetchProfile } = useProfile(user?.id);
@@ -94,14 +91,14 @@ export default function DashboardPage() {
   // Weekly insights data - Top Triggers
   const topTriggers = useMemo(() => {
     const weekAgo = subDays(new Date(), 7);
-    const roughMeals = entries.filter(e => 
-      isAfter(new Date(e.created_at), weekAgo) && 
+    const roughMeals = entries.filter(e =>
+      isAfter(new Date(e.created_at), weekAgo) &&
       e.bloating_rating && e.bloating_rating >= 3
     );
 
-    const triggerStats: Record<string, { 
-      category: string; 
-      meal_count: number; 
+    const triggerStats: Record<string, {
+      category: string;
+      meal_count: number;
       total_bloating: number;
     }> = {};
 
@@ -127,7 +124,27 @@ export default function DashboardPage() {
         display_name: CATEGORY_DISPLAY_NAMES[t.category] || getTriggerCategory(t.category)?.displayName?.split(' - ')[1] || t.category,
       }))
       .sort((a, b) => b.avg_bloating - a.avg_bloating || b.meal_count - a.meal_count)
-      .slice(0, 3);
+      .slice(0, 2);
+  }, [entries]);
+
+  // Calculate today's meals
+  const todaysMeals = useMemo(() => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    return entries.filter(e => format(new Date(e.created_at), 'yyyy-MM-dd') === today).length;
+  }, [entries]);
+
+  // Calculate average bloating for the week
+  const weeklyBloating = useMemo(() => {
+    const weekAgo = subDays(new Date(), 7);
+    const weekMeals = entries.filter(e =>
+      isAfter(new Date(e.created_at), weekAgo) &&
+      e.bloating_rating !== null && e.bloating_rating !== undefined
+    );
+
+    if (weekMeals.length === 0) return 0;
+
+    const total = weekMeals.reduce((sum, meal) => sum + (meal.bloating_rating || 0), 0);
+    return total / weekMeals.length;
   }, [entries]);
 
   const handleRate = async (rating: number) => {
@@ -166,7 +183,7 @@ export default function DashboardPage() {
                   {firstName}
                 </h1>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 {streak > 0 ? (
                   <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-coral/15 to-peach/15 border border-coral/20 shadow-sm">
@@ -177,10 +194,10 @@ export default function DashboardPage() {
                 ) : (
                   <div />
                 )}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => navigate('/profile')} 
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate('/profile')}
                   className="w-11 h-11 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm"
                 >
                   <Settings className="w-5 h-5" />
@@ -189,74 +206,89 @@ export default function DashboardPage() {
             </div>
           </header>
 
-          {/* Admin Link */}
-          {isAdmin && (
-            <button
-              onClick={() => navigate('/admin')}
-              className="w-full premium-card p-4 flex items-center justify-between text-sm font-medium text-primary animate-slide-up opacity-0"
-              style={{ animationDelay: '25ms', animationFillMode: 'forwards' }}
-            >
-              <span className="flex items-center gap-2">
-                <span className="text-lg">⚡</span>
-                Admin Dashboard
-              </span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          )}
-
-          {/* Weekly Insights Card - shows triggers to avoid */}
-          {completedCount >= 5 && topTriggers.length > 0 && (
-            <div 
-              className="premium-card p-5 animate-slide-up opacity-0 space-y-4"
+          {/* Main Bloating & Meals Card */}
+          {completedCount >= 5 && (
+            <div
+              className="premium-card p-6 animate-slide-up opacity-0"
               style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
             >
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-coral" />
-                  <span className="font-bold text-foreground text-sm">Watch Out This Week</span>
+              <h2 className="text-sm font-semibold text-muted-foreground mb-4">Weekly Average</h2>
+
+              {/* Main metric display */}
+              <div className="flex items-center justify-between mb-6">
+                {/* Bloating Score */}
+                <div className="flex-1">
+                  <div className="text-5xl font-bold text-foreground mb-1">
+                    {weeklyBloating.toFixed(1)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Bloating Score</div>
                 </div>
-                <div className="space-y-2">
-                  {topTriggers.map((trigger) => (
-                    <div 
-                      key={trigger.category}
-                      className={`flex items-center gap-3 p-3 rounded-xl ${
-                        trigger.severity === 'high' 
-                          ? 'bg-coral/10' 
-                          : trigger.severity === 'medium' 
-                            ? 'bg-peach/20' 
-                            : 'bg-primary/10'
-                      }`}
-                    >
-                      <span className="text-lg">
-                        {trigger.severity === 'high' && '🔴'}
-                        {trigger.severity === 'medium' && '🟡'}
-                        {trigger.severity === 'low' && '🟢'}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-foreground text-sm">
-                          {trigger.display_name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {trigger.meal_count} meal{trigger.meal_count !== 1 ? 's' : ''} • Avg {trigger.avg_bloating.toFixed(1)}/5
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+
+                {/* Divider */}
+                <div className="w-px h-16 bg-border mx-4" />
+
+                {/* Today's Meals */}
+                <div className="flex-1 text-right">
+                  <div className="text-5xl font-bold text-foreground mb-1">
+                    {todaysMeals}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Meals Today</div>
                 </div>
               </div>
-              
-              <button 
-                onClick={() => navigate('/insights')}
-                className="w-full text-center text-sm text-primary font-semibold flex items-center justify-center gap-1 pt-2"
-              >
-                See Detailed Analysis <ChevronRight className="w-4 h-4" />
-              </button>
+
+              {/* Subtext */}
+              <div className="text-xs text-muted-foreground text-center pt-3 border-t border-border/50">
+                Based on last 7 days
+              </div>
+            </div>
+          )}
+
+          {/* Smaller Metric Cards Row */}
+          {completedCount >= 5 && (
+            <div
+              className="grid grid-cols-2 gap-3 animate-slide-up opacity-0"
+              style={{ animationDelay: '75ms', animationFillMode: 'forwards' }}
+            >
+              {/* Weekly Triggers Card */}
+              <div className="premium-card p-4">
+                <h3 className="text-xs font-semibold text-muted-foreground mb-3">Top Triggers</h3>
+                {topTriggers.length > 0 ? (
+                  <div className="space-y-2">
+                    {topTriggers.map((trigger) => (
+                      <div key={trigger.category} className="flex items-center gap-2">
+                        <span className="text-base">
+                          {trigger.severity === 'high' && '🔴'}
+                          {trigger.severity === 'medium' && '🟡'}
+                          {trigger.severity === 'low' && '🟢'}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">
+                            {trigger.display_name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {trigger.avg_bloating.toFixed(1)}/5
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No triggers yet</p>
+                )}
+              </div>
+
+              {/* Total Meals Card */}
+              <div className="premium-card p-4">
+                <h3 className="text-xs font-semibold text-muted-foreground mb-3">Total Logged</h3>
+                <div className="text-4xl font-bold text-foreground mb-1">{completedCount}</div>
+                <p className="text-xs text-muted-foreground">Meals tracked</p>
+              </div>
             </div>
           )}
 
           {/* Building insights state - show when some meals logged but not enough */}
           {completedCount > 0 && completedCount < 5 && (
-            <div 
+            <div
               className="premium-card p-6 animate-slide-up opacity-0 text-center"
               style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
             >
@@ -266,7 +298,7 @@ export default function DashboardPage() {
                 Log {5 - completedCount} more meal{5 - completedCount !== 1 ? 's' : ''} with bloating ratings to see your triggers
               </p>
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
-                <div 
+                <div
                   className="h-full bg-primary rounded-full transition-all"
                   style={{ width: `${(completedCount / 5) * 100}%` }}
                 />
@@ -282,7 +314,7 @@ export default function DashboardPage() {
 
           {/* Pending Rating */}
           {pendingEntry && (
-            <div 
+            <div
               className="premium-card p-5 animate-scale-in"
               style={{ animationDelay: '100ms' }}
             >
@@ -299,52 +331,14 @@ export default function DashboardPage() {
           <Button
             onClick={() => navigate('/add-entry')}
             className="w-full h-16 rounded-3xl text-lg font-bold bg-primary text-primary-foreground relative overflow-hidden group animate-slide-up opacity-0"
-            style={{ 
-              animationDelay: '150ms', 
+            style={{
+              animationDelay: '150ms',
               animationFillMode: 'forwards',
               boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
             }}
           >
             <span className="text-lg font-bold relative z-10">Log New Meal</span>
           </Button>
-
-          {/* Empty State */}
-          {entries.length === 0 && (
-            <div className="text-center py-8 animate-fade-in">
-              <p className="text-5xl mb-3">🥗</p>
-              <p className="text-muted-foreground">Start tracking to discover your triggers</p>
-            </div>
-          )}
-
-          {/* Streak Card (for users with streaks >= 3) */}
-          {streak >= 3 && (
-            <div 
-              className="premium-card p-6 bg-gradient-to-br from-coral/10 to-peach/10 text-center animate-slide-up opacity-0"
-              style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
-            >
-              <div className="text-5xl mb-3 filter drop-shadow">🔥</div>
-              <div className="text-3xl font-bold text-foreground">{streak}-day streak!</div>
-              <p className="text-sm text-muted-foreground mt-2">
-                {streak < 7 && `${7 - streak} more days to unlock your first insight!`}
-                {streak >= 7 && streak < 14 && "Keep it up! You're building valuable data."}
-                {streak >= 14 && 'Incredible consistency! Your insights are highly accurate.'}
-              </p>
-              {streak >= 7 && (
-                <div className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-full bg-coral/20 border border-coral/30 shadow-sm">
-                  <span className="text-xl">🏆</span>
-                  <span className="text-sm font-bold text-coral">Week Warrior</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Bloating Guide */}
-          <div
-            className="animate-slide-up opacity-0"
-            style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}
-          >
-            <BloatingGuide />
-          </div>
         </div>
       </div>
 
