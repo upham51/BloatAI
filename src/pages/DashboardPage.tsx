@@ -13,6 +13,7 @@ import { RATING_LABELS, getTriggerCategory } from '@/types';
 import { format, subDays, isAfter } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getTimeBasedGreeting } from '@/lib/quotes';
+import { getIconForTrigger } from '@/lib/triggerUtils';
 
 // Food background images for the weekly average card
 const FOOD_BACKGROUNDS = [
@@ -294,10 +295,8 @@ export default function DashboardPage() {
                   <div className="space-y-2">
                     {topTriggers.map((trigger) => (
                       <div key={trigger.category} className="flex items-center gap-2">
-                        <span className="text-base">
-                          {trigger.severity === 'high' && '🔴'}
-                          {trigger.severity === 'medium' && '🟡'}
-                          {trigger.severity === 'low' && '🟢'}
+                        <span className="text-2xl flex-shrink-0">
+                          {getIconForTrigger(trigger.category)}
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-foreground truncate">
