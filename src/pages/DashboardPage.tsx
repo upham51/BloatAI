@@ -60,8 +60,11 @@ export default function DashboardPage() {
 
   // Preload the selected background image for instant display
   useEffect(() => {
+    console.log('🍽️ Food background selected:', foodBackground);
     const img = new Image();
     img.src = foodBackground;
+    img.onload = () => console.log('✅ Food background loaded successfully');
+    img.onerror = () => console.error('❌ Food background failed to load:', foodBackground);
   }, [foodBackground]);
 
   // Show onboarding if user hasn't completed it
@@ -236,16 +239,14 @@ export default function DashboardPage() {
               style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
             >
               {/* Background Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{
-                  backgroundImage: `url(${foodBackground})`,
-                  opacity: 0.35,
-                }}
+              <img
+                src={foodBackground}
+                alt="Food background"
+                className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none"
               />
 
               {/* Gradient overlay for better text contrast */}
-              <div className="absolute inset-0 bg-gradient-to-br from-card/85 via-card/70 to-card/85" />
+              <div className="absolute inset-0 bg-gradient-to-br from-card/85 via-card/70 to-card/85 pointer-events-none" />
 
               {/* Content (relative to stack on top of background) */}
               <div className="relative z-10">
