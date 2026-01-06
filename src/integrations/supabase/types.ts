@@ -231,6 +231,74 @@ export type Database = {
         }
         Relationships: []
       }
+      root_cause_assessments: {
+        Row: {
+          aerophagia_score: number
+          answers: Json | null
+          brain_gut_score: number
+          completed_at: string
+          created_at: string
+          dysbiosis_score: number
+          hormonal_score: number
+          id: string
+          lifestyle_score: number
+          motility_score: number
+          overall_score: number
+          primary_root_cause: string | null
+          retake_number: number
+          secondary_root_cause: string | null
+          structural_score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aerophagia_score?: number
+          answers?: Json | null
+          brain_gut_score?: number
+          completed_at?: string
+          created_at?: string
+          dysbiosis_score?: number
+          hormonal_score?: number
+          id?: string
+          lifestyle_score?: number
+          motility_score?: number
+          overall_score?: number
+          primary_root_cause?: string | null
+          retake_number?: number
+          secondary_root_cause?: string | null
+          structural_score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aerophagia_score?: number
+          answers?: Json | null
+          brain_gut_score?: number
+          completed_at?: string
+          created_at?: string
+          dysbiosis_score?: number
+          hormonal_score?: number
+          id?: string
+          lifestyle_score?: number
+          motility_score?: number
+          overall_score?: number
+          primary_root_cause?: string | null
+          retake_number?: number
+          secondary_root_cause?: string | null
+          structural_score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "root_cause_assessments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_insights: {
         Row: {
           confidence_score: number | null
