@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -16,7 +16,7 @@ interface RootCauseProfileCardProps {
   userProfile?: Profile;
 }
 
-export function RootCauseProfileCard({ userId, userProfile }: RootCauseProfileCardProps) {
+export const RootCauseProfileCard = memo(function RootCauseProfileCard({ userId, userProfile }: RootCauseProfileCardProps) {
   const [showQuiz, setShowQuiz] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const { data: assessment, isLoading, refetch } = useRootCauseAssessment(userId);
@@ -248,4 +248,4 @@ export function RootCauseProfileCard({ userId, userProfile }: RootCauseProfileCa
       />
     </>
   );
-}
+});
