@@ -17,14 +17,14 @@ import { getIconForTrigger } from '@/lib/triggerUtils';
 
 // Food background images for the weekly average card
 const FOOD_BACKGROUNDS = [
-  '/images/food-backgrounds/food-bg-1.svg',
-  '/images/food-backgrounds/food-bg-2.svg',
-  '/images/food-backgrounds/food-bg-3.svg',
-  '/images/food-backgrounds/food-bg-4.svg',
-  '/images/food-backgrounds/food-bg-5.svg',
-  '/images/food-backgrounds/food-bg-6.svg',
-  '/images/food-backgrounds/food-bg-7.svg',
-  '/images/food-backgrounds/food-bg-8.svg',
+  '/assets/images/food-backgrounds/food-bg-1.webp',
+  '/assets/images/food-backgrounds/food-bg-2.webp',
+  '/assets/images/food-backgrounds/food-bg-3.webp',
+  '/assets/images/food-backgrounds/food-bg-4.webp',
+  '/assets/images/food-backgrounds/food-bg-5.webp',
+  '/assets/images/food-backgrounds/food-bg-6.webp',
+  '/assets/images/food-backgrounds/food-bg-7.webp',
+  '/assets/images/food-backgrounds/food-bg-8.webp',
 ];
 
 // Trigger display names for the insights
@@ -61,8 +61,11 @@ export default function DashboardPage() {
 
   // Preload the selected background image for instant display
   useEffect(() => {
+    console.log('🍽️ Food background selected:', foodBackground);
     const img = new Image();
     img.src = foodBackground;
+    img.onload = () => console.log('✅ Food background loaded successfully');
+    img.onerror = () => console.error('❌ Food background failed to load:', foodBackground);
   }, [foodBackground]);
 
   // Show onboarding if user hasn't completed it
@@ -233,20 +236,18 @@ export default function DashboardPage() {
           {/* Main Bloating & Meals Card */}
           {completedCount >= 5 && (
             <div
-              className="premium-card p-6 animate-slide-up opacity-0 relative overflow-hidden"
+              className="premium-card !bg-transparent p-6 animate-slide-up opacity-0 relative overflow-hidden"
               style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
             >
               {/* Background Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{
-                  backgroundImage: `url(${foodBackground})`,
-                  opacity: 0.15,
-                }}
+              <img
+                src={foodBackground}
+                alt="Food background"
+                className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none"
               />
 
               {/* Gradient overlay for better text contrast */}
-              <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/40 to-background/60" />
+              <div className="absolute inset-0 bg-gradient-to-br from-card/85 via-card/70 to-card/85 pointer-events-none" />
 
               {/* Content (relative to stack on top of background) */}
               <div className="relative z-10">
