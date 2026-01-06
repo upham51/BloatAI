@@ -24,7 +24,7 @@ export function BloatingGuideModal({ isOpen, onClose }: BloatingGuideModalProps)
           <div className="p-8 pb-16 space-y-8">
             {/* Header */}
             <div className="text-center space-y-3 pt-4">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-coral to-peach bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold text-primary">
                 🎈 The Complete Guide to Bloating
               </h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
