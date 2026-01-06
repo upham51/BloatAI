@@ -200,36 +200,35 @@ export default function DashboardPage() {
 
         <div className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5">
           {/* Header with time-based greeting */}
-          <header className="pt-4 animate-slide-up" style={{ animationFillMode: 'forwards' }}>
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-base font-medium text-muted-foreground tracking-tight">
+          <header className="pt-2 animate-slide-up relative" style={{ animationFillMode: 'forwards' }}>
+            {/* Settings button - absolute positioned in top right */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/profile')}
+              className="absolute top-2 right-0 w-11 h-11 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm"
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
+
+            <div className="flex flex-col gap-2.5 items-center text-center">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xl font-semibold text-muted-foreground tracking-tight">
                   {greeting},
                 </span>
-                <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                   {firstName}
                 </h1>
               </div>
 
-              <div className="flex items-center justify-between">
-                {streak > 0 ? (
-                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-coral/15 to-peach/15 border border-coral/20 shadow-sm">
-                    <Flame className="w-5 h-5 text-coral drop-shadow-sm" />
-                    <span className="text-lg font-bold text-coral">{streak}</span>
-                    <span className="text-sm font-semibold text-coral/80">day streak</span>
-                  </div>
-                ) : (
-                  <div />
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate('/profile')}
-                  className="w-11 h-11 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm"
-                >
-                  <Settings className="w-5 h-5" />
-                </Button>
-              </div>
+              {/* Centered streak badge */}
+              {streak > 0 && (
+                <div className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-gradient-to-r from-coral/20 to-peach/20 border border-coral/30 shadow-md">
+                  <Flame className="w-6 h-6 text-coral drop-shadow-sm" />
+                  <span className="text-xl font-bold text-coral">{streak}</span>
+                  <span className="text-base font-semibold text-coral/90">day streak</span>
+                </div>
+              )}
             </div>
           </header>
 
@@ -243,7 +242,7 @@ export default function DashboardPage() {
               <img
                 src={foodBackground}
                 alt="Food background"
-                className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none"
+                className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
               />
 
               {/* Gradient overlay for better text contrast */}
