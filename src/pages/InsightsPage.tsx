@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, ChevronRight, Lightbulb, Heart } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, ChevronRight, Lightbulb, Heart, Brain, Clock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import InsightsLoader from '@/components/shared/InsightsLoader';
@@ -13,15 +13,16 @@ import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useRootCauseAssessment } from '@/hooks/useRootCauseAssessment';
 import { getTriggerCategory } from '@/types';
-import { subDays, isAfter } from 'date-fns';
-import { validatePercentage, deduplicateFoods, getIconForTrigger, abbreviateIngredient, getSafeAlternatives } from '@/lib/triggerUtils';
-import { isHighBloating } from '@/lib/bloatingUtils';
+import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
+import { generateComprehensiveInsight } from '@/lib/insightsAnalysis';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: userProfile } = useProfile(user?.id);
+  const { data: quizAssessment } = useRootCauseAssessment(user?.id);
   const { entries, getCompletedCount } = useMeals();
   const completedCount = getCompletedCount();
   const neededForInsights = 3;
@@ -45,135 +46,10 @@ export default function InsightsPage() {
     return () => clearTimeout(timer);
   }, [entries.length]); // Re-run when entries change
 
+  // Generate comprehensive insights using new analysis engine
   const insights = useMemo(() => {
-    // Only analyze completed meals (those with bloating ratings)
-    const completedEntries = entries.filter(e => e.rating_status === 'completed');
-
-    if (completedEntries.length < neededForInsights) return null;
-
-    const totalMeals = completedEntries.length;
-    const last7Days = completedEntries.filter(e => isAfter(new Date(e.created_at), subDays(new Date(), 7)));
-
-    // Trigger frequency analysis - count meals that contain each trigger
-    const triggerMealCounts: Record<string, {
-      mealsWithTrigger: Set<string>;
-      foods: Map<string, number>;
-      highBloatingMealsWithTrigger: Set<string>;
-    }> = {};
-
-    // High-bloating meals for the "potential triggers" section - only from completed entries
-    const highBloatingMeals = completedEntries.filter(e => isHighBloating(e.bloating_rating));
-    const totalHighBloating = highBloatingMeals.length;
-
-    completedEntries.forEach(entry => {
-      entry.detected_triggers?.forEach(trigger => {
-        if (!triggerMealCounts[trigger.category]) {
-          triggerMealCounts[trigger.category] = { 
-            mealsWithTrigger: new Set(), 
-            foods: new Map(), 
-            highBloatingMealsWithTrigger: new Set() 
-          };
-        }
-        // Use entry.id to count unique meals with this trigger
-        triggerMealCounts[trigger.category].mealsWithTrigger.add(entry.id);
-        
-        if (trigger.food) {
-          const currentCount = triggerMealCounts[trigger.category].foods.get(trigger.food) || 0;
-          triggerMealCounts[trigger.category].foods.set(trigger.food, currentCount + 1);
-        }
-
-
-        // Track if this trigger appeared in a high-bloating meal
-        if (isHighBloating(entry.bloating_rating)) {
-          triggerMealCounts[trigger.category].highBloatingMealsWithTrigger.add(entry.id);
-        }
-      });
-    });
-
-    // Calculate frequency percentages - VALIDATED to never exceed 100%
-    const triggerFrequencies = Object.entries(triggerMealCounts)
-      .map(([category, stats]) => {
-        const mealCount = stats.mealsWithTrigger.size;
-        const highBloatingCount = stats.highBloatingMealsWithTrigger.size;
-        // Ensure count never exceeds total
-        const validMealCount = Math.min(mealCount, totalMeals);
-        const validHighBloatingCount = Math.min(highBloatingCount, totalHighBloating);
-        
-        return {
-          category,
-          count: validMealCount,
-          percentage: validatePercentage((validMealCount / totalMeals) * 100),
-          topFoods: Array.from(stats.foods.entries())
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 3)
-            .map(([food, count]) => ({ food, count })),
-          suspicionScore: validMealCount >= 3 && validHighBloatingCount >= 2 
-            ? 'high' 
-            : validHighBloatingCount >= 1 
-              ? 'medium' 
-              : 'low',
-          withHighBloating: validHighBloatingCount,
-        };
-      })
-      .sort((a, b) => b.count - a.count);
-
-    // Potential triggers (appear frequently in high-bloating meals)
-    const potentialTriggers = triggerFrequencies
-      .filter(t => t.suspicionScore !== 'low' && t.count >= 2)
-      .slice(0, 3);
-
-    // Most common foods you eat - DEDUPLICATED - only from completed entries
-    const allFoods: Map<string, number> = new Map();
-    completedEntries.forEach(entry => {
-      entry.detected_triggers?.forEach(trigger => {
-        if (trigger.food) {
-          const current = allFoods.get(trigger.food) || 0;
-          allFoods.set(trigger.food, current + 1);
-        }
-      });
-    });
-
-    // Deduplicate similar foods (broccoli florets + broccoli = broccoli)
-    const foodsArray = Array.from(allFoods.entries()).map(([food, count]) => ({ food, count }));
-    const deduplicatedFoods = deduplicateFoods(foodsArray);
-    const topFoods = deduplicatedFoods.slice(0, 5);
-
-    const lowBloatingMeals = completedEntries.filter(e => e.bloating_rating && e.bloating_rating <= 2);
-
-    return {
-      totalMeals,
-      mealsThisWeek: last7Days.length,
-      triggerFrequencies,
-      potentialTriggers,
-      topFoods,
-      highBloatingCount: totalHighBloating,
-      lowBloatingCount: lowBloatingMeals.length,
-    };
-  }, [entries, completedCount]);
-
-  // Generate AI summary based on data
-  const aiSummary = useMemo(() => {
-    if (!insights || !insights.potentialTriggers.length) return null;
-
-    const topTrigger = insights.potentialTriggers[0];
-    const topTriggerInfo = getTriggerCategory(topTrigger.category);
-    const alternatives = getSafeAlternatives(topTrigger.category);
-
-    return {
-      overview: [
-        `${topTriggerInfo?.displayName || topTrigger.category} appears in ${topTrigger.percentage}% of your meals`,
-        insights.highBloatingCount > 0 
-          ? `${insights.highBloatingCount} of your meals caused significant bloating`
-          : 'Most of your meals have been comfortable',
-        insights.lowBloatingCount > 0
-          ? `${insights.lowBloatingCount} meals were comfortable with low bloating`
-          : null,
-      ].filter(Boolean) as string[],
-      topTrigger: topTriggerInfo?.displayName || topTrigger.category,
-      alternatives: alternatives.slice(0, 4),
-      tip: `Try reducing ${topTriggerInfo?.displayName || topTrigger.category} for 1-2 weeks to see if symptoms improve.`,
-    };
-  }, [insights]);
+    return generateComprehensiveInsight(entries, quizAssessment);
+  }, [entries, completedCount, quizAssessment]);
 
   // Full-screen loading state
   if (isAnalyzing && hasEnoughData) {
@@ -273,8 +149,8 @@ export default function InsightsPage() {
             </div>
           </div>
 
-          {/* AI Summary Card - NEW */}
-          {aiSummary && (
+          {/* Comprehensive Analysis Card - REDESIGNED */}
+          {insights && (
             <div
               className="premium-card p-5 animate-slide-up opacity-0 border-2 border-primary/20"
               style={{ animationDelay: '75ms', animationFillMode: 'forwards' }}
@@ -289,48 +165,84 @@ export default function InsightsPage() {
                   <Sparkles className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-foreground text-lg">Your Analysis</h2>
-                  <p className="text-xs text-muted-foreground">Personalized insights from your data</p>
+                  <h2 className="font-bold text-foreground text-lg">Your Complete Analysis</h2>
+                  <p className="text-xs text-muted-foreground">Comprehensive insights from ALL your data</p>
                 </div>
               </div>
 
-              {/* Overview */}
-              <div className="space-y-2 mb-5">
-                {aiSummary.overview.map((item, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span className="text-sm text-muted-foreground">{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Safe Alternatives */}
-              {aiSummary.alternatives.length > 0 && (
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-mint/20 to-primary/5 border border-primary/10 mb-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Heart className="w-4 h-4 text-primary" />
-                    <span className="font-semibold text-foreground text-sm">
-                      Try Instead of {aiSummary.topTrigger}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {aiSummary.alternatives.map((alt, index) => (
-                      <span
-                        key={index}
-                        className="text-xs px-3 py-1.5 rounded-full bg-background/80 text-foreground border border-primary/20 font-medium"
-                      >
-                        {alt}
-                      </span>
+              {/* Overview Section */}
+              {insights.summary.overview.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    Overview
+                  </h3>
+                  <div className="space-y-2">
+                    {insights.summary.overview.map((item, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-primary mt-0.5">•</span>
+                        <span className="text-sm text-muted-foreground">{item}</span>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Quick Tip */}
-              <div className="flex items-start gap-2 p-3 rounded-xl bg-muted/30">
-                <Lightbulb className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-muted-foreground">{aiSummary.tip}</span>
-              </div>
+              {/* Behavioral Insights Section */}
+              {insights.summary.behavioralInsights.length > 0 && (
+                <div className="mb-4 p-3 rounded-xl bg-gradient-to-br from-lavender/10 to-transparent border border-lavender/20">
+                  <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-lavender" />
+                    Behavioral Patterns
+                  </h3>
+                  <div className="space-y-1.5">
+                    {insights.summary.behavioralInsights.map((item, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-lavender mt-0.5 text-xs">▸</span>
+                        <span className="text-sm text-muted-foreground">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Root Cause Connections Section */}
+              {insights.summary.rootCauseConnections.length > 0 && (
+                <div className="mb-4 p-3 rounded-xl bg-gradient-to-br from-mint/10 to-transparent border border-mint/20">
+                  <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-mint" />
+                    Root Cause Insights
+                  </h3>
+                  <div className="space-y-1.5">
+                    {insights.summary.rootCauseConnections.map((item, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-mint mt-0.5 text-xs">▸</span>
+                        <span className="text-sm text-muted-foreground">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Top Recommendations Section */}
+              {insights.summary.topRecommendations.length > 0 && (
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-mint/5 border border-primary/20">
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-primary" />
+                    Action Steps
+                  </h3>
+                  <div className="space-y-2.5">
+                    {insights.summary.topRecommendations.map((item, index) => (
+                      <div key={index} className="flex items-start gap-2.5">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
+                          <span className="text-xs font-bold text-primary">{index + 1}</span>
+                        </div>
+                        <span className="text-sm text-foreground font-medium">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
