@@ -123,23 +123,19 @@ export default function AuthPage() {
 
           {/* Logo Card */}
           <div className="bg-white rounded-[2rem] shadow-2xl p-10 flex flex-col items-center justify-center">
-            <img src="/bloat-ai-logo.svg" alt="Bloat AI Logo" className="w-20 h-20 object-contain mb-6" />
-            <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">
+            
+            <h2 className="font-bold text-gray-900 text-center mb-3 text-4xl">
               Welcome
             </h2>
-            <p className="text-sm text-gray-600 text-center max-w-xs leading-relaxed">
-              Ready to feel lighter? Your personalized bloat tracker is waiting.
-            </p>
+            <p className="text-sm text-gray-600 text-center max-w-xs leading-relaxed">Say goodbye to the bloat!</p>
           </div>
 
           {/* Form Card */}
-          <div className="bg-white rounded-[2rem] shadow-2xl p-8">
+          <div className="rounded-[2rem] shadow-2xl p-8 bg-accent my-0">
             <h2 className="text-3xl font-bold text-gray-900 mb-3">
               Sign In
             </h2>
-            <p className="text-sm text-gray-600 mb-8 leading-relaxed">
-              Ready to feel lighter? Your personalized bloat tracker is waiting. Let's get you back on track!
-            </p>
+            <p className="text-sm text-gray-600 mb-8 leading-relaxed">Ready to reclaim that comfortable feeling?</p>
 
             {/* Form */}
             <form onSubmit={handleSignIn} className="space-y-5">
