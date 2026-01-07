@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useProfile } from '@/hooks/useProfile';
 import { RATING_LABELS, getTriggerCategory } from '@/types';
-import { format, subDays, isAfter } from 'date-fns';
+import { format, subDays, isAfter, differenceInCalendarDays, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getTimeBasedGreeting } from '@/lib/quotes';
 import { getIconForTrigger } from '@/lib/triggerUtils';
@@ -86,7 +86,7 @@ export default function DashboardPage() {
   const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'there';
   const firstName = displayName.split(' ')[0];
 
-  // Calculate streak - Fixed off-by-one error
+  // Calculate streak - Fixed timezone issues
   const streak = useMemo(() => {
     if (entries.length === 0) return 0;
 
@@ -94,20 +94,19 @@ export default function DashboardPage() {
       format(new Date(e.created_at), 'yyyy-MM-dd')
     ))].sort().reverse();
 
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const mostRecentEntry = sortedDates[0];
+    const today = new Date();
+    const mostRecentEntryDate = parseISO(sortedDates[0]);
 
-    // Calculate days since last entry
-    const daysSinceLastEntry = Math.floor(
-      (new Date(today).getTime() - new Date(mostRecentEntry).getTime()) / (24 * 60 * 60 * 1000)
-    );
+    // Calculate days since last entry using calendar days (timezone-safe)
+    const daysSinceLastEntry = differenceInCalendarDays(today, mostRecentEntryDate);
 
     // Streak is broken if more than 1 day has passed
+    // 0 = logged today, 1 = logged yesterday (streak continues), 2+ = streak broken
     if (daysSinceLastEntry > 1) return 0;
 
     // Count consecutive days backwards from most recent entry
     let count = 0;
-    let currentDate = new Date(mostRecentEntry);
+    let currentDate = mostRecentEntryDate;
 
     for (const dateStr of sortedDates) {
       const expectedDate = format(currentDate, 'yyyy-MM-dd');

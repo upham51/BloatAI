@@ -1,4 +1,6 @@
 import { useSignedUrl } from '@/hooks/useSignedUrl';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 interface MealPhotoProps {
   photoUrl: string | null;
@@ -8,7 +10,18 @@ interface MealPhotoProps {
 }
 
 export function MealPhoto({ photoUrl, alt = '', className = '', onClick }: MealPhotoProps) {
-  const signedUrl = useSignedUrl(photoUrl);
+  const { url: signedUrl, isLoading } = useSignedUrl(photoUrl);
+
+  if (isLoading) {
+    return (
+      <Skeleton
+        className={cn(
+          "w-full",
+          className
+        )}
+      />
+    );
+  }
 
   if (!signedUrl) {
     return null;

@@ -4,29 +4,35 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Hook to generate a signed URL for a private storage file
  * Returns the signed URL if the path is a storage path, otherwise returns the original URL
+ * Also returns a loading state to enable skeleton/loading UI
  */
-export function useSignedUrl(photoUrl: string | null): string | null {
+export function useSignedUrl(photoUrl: string | null): { url: string | null; isLoading: boolean } {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!photoUrl) {
       setSignedUrl(null);
+      setIsLoading(false);
       return;
     }
+
+    setIsLoading(true);
 
     // Check if this is a Supabase storage URL that needs signing
     // Old public URLs contain the project ID and 'object/public/'
     // New storage paths are just the file path like 'userId/timestamp.ext'
     const isStoragePath = !photoUrl.startsWith('http') || photoUrl.includes('/storage/v1/object/');
-    
+
     if (!isStoragePath) {
       // External URL, use as-is
       setSignedUrl(photoUrl);
+      setIsLoading(false);
       return;
     }
 
     let filePath = photoUrl;
-    
+
     // Extract file path from full Supabase URL if needed
     if (photoUrl.includes('/storage/v1/object/')) {
       // Parse the path from URL like: .../storage/v1/object/public/meal-photos/userId/file.jpg
@@ -53,13 +59,15 @@ export function useSignedUrl(photoUrl: string | null): string | null {
       } catch (err) {
         console.error('Error in signed URL generation:', err);
         setSignedUrl(photoUrl);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     generateSignedUrl();
   }, [photoUrl]);
 
-  return signedUrl;
+  return { url: signedUrl, isLoading };
 }
 
 /**
