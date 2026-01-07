@@ -94,7 +94,7 @@ export default function AuthPage() {
           {/* Bottom Section - Content on Colored Background */}
           <div className="flex-1 px-8 pb-16 flex flex-col justify-center">
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Welcome Back!
+              Welcome Back! 🎉
             </h1>
             <p className="text-lg text-gray-800 mb-12 leading-relaxed">
               Your gut's best friend is here. Track what you eat, discover what bloats, and feel amazing again. Let's do this!
