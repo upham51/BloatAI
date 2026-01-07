@@ -18,6 +18,7 @@ export const TRIGGER_ICONS: Record<string, string> = {
   // Proteins
   'protein': '🥩',
   'meat': '🥩',
+  'steak': '🥩',
   'beef': '🥩',
   'pork': '🐷',
   'bacon': '🥓',
@@ -36,6 +37,19 @@ export const TRIGGER_ICONS: Record<string, string> = {
   'egg': '🥚',
   'tofu': '🧈',
   'tempeh': '🧈',
+
+  // Herbs & Spices
+  'herb': '🌿',
+  'herbs': '🌿',
+  'compound herb': '🌿',
+  'basil': '🌿',
+  'parsley': '🌿',
+  'cilantro': '🌿',
+  'oregano': '🌿',
+  'thyme': '🌿',
+  'rosemary': '🌿',
+  'mint': '🌿',
+  'dill': '🌿',
 
   // Grains & Carbs
   'wheat': '🌾',
@@ -132,6 +146,8 @@ export const TRIGGER_ICONS: Record<string, string> = {
 
   // Condiments & Sauces
   'sauce': '🥫',
+  'jus': '🥫',
+  'gravy': '🥫',
   'soy sauce': '🥫',
   'teriyaki': '🥫',
   'hot sauce': '🌶️',
@@ -296,16 +312,26 @@ export function abbreviateIngredient(ingredient: string): string {
 export function getIconForTrigger(categoryOrFood: string): string {
   if (!categoryOrFood) return '🍽️';
   
-  const lower = categoryOrFood.toLowerCase();
+  const lower = categoryOrFood.toLowerCase().trim();
   
-  // Check for exact category match first
+  // Check for exact match first
   if (TRIGGER_ICONS[lower]) {
     return TRIGGER_ICONS[lower];
   }
   
-  // Check for partial matches
+  // Check for whole-word matches only (avoid "steak" matching "tea")
+  const words = lower.split(/[\s\-\/]+/);
+  for (const word of words) {
+    if (TRIGGER_ICONS[word]) {
+      return TRIGGER_ICONS[word];
+    }
+  }
+  
+  // Check if any key is a whole word within the input
   for (const [key, icon] of Object.entries(TRIGGER_ICONS)) {
-    if (lower.includes(key) || key.includes(lower)) {
+    // Only match if key appears as a complete word
+    const regex = new RegExp(`\\b${key}\\b`, 'i');
+    if (regex.test(lower)) {
       return icon;
     }
   }
