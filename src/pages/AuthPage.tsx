@@ -193,7 +193,7 @@ export default function AuthPage() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-[2rem] shadow-2xl p-8 my-0">
+        <div className="rounded-[2rem] shadow-2xl p-8 bg-peach-light my-[52px] py-0">
           <h2 className="text-3xl font-bold text-gray-900 mb-3">
             Sign Up
           </h2>
