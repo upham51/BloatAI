@@ -10,6 +10,10 @@ import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { FoodSafetyList } from '@/components/insights/FoodSafetyList';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
+import { TriggerFrequencyChart } from '@/components/insights/TriggerFrequencyChart';
+import { BehavioralPatternsChart } from '@/components/insights/BehavioralPatternsChart';
+import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
+import { HealthScoreGauge } from '@/components/insights/HealthScoreGauge';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -246,11 +250,53 @@ export default function InsightsPage() {
             </div>
           )}
 
+          {/* Health Score Gauge */}
+          {insights && (
+            <div
+              className="animate-slide-up opacity-0"
+              style={{ animationDelay: '85ms', animationFillMode: 'forwards' }}
+            >
+              <HealthScoreGauge
+                avgBloating={insights.avgBloating}
+                totalMeals={insights.totalMeals}
+                lowBloatingCount={insights.lowBloatingCount}
+              />
+            </div>
+          )}
+
+          {/* Weekly Progress Chart */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '90ms', animationFillMode: 'forwards' }}
+          >
+            <WeeklyProgressChart entries={entries} />
+          </div>
+
+          {/* Behavioral Patterns Radar Chart */}
+          {insights && insights.notesPatterns.length > 0 && (
+            <div
+              className="animate-slide-up opacity-0"
+              style={{ animationDelay: '95ms', animationFillMode: 'forwards' }}
+            >
+              <BehavioralPatternsChart patterns={insights.notesPatterns} />
+            </div>
+          )}
+
+          {/* Trigger Frequency Chart */}
+          {insights && insights.triggerFrequencies.length > 0 && (
+            <div
+              className="animate-slide-up opacity-0"
+              style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
+            >
+              <TriggerFrequencyChart triggers={insights.triggerFrequencies} />
+            </div>
+          )}
+
           {/* Recommendation Cards - Swipeable */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '90ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '105ms', animationFillMode: 'forwards' }}
             >
               <RecommendationCards
                 topTriggers={insights.potentialTriggers.map((t) => t.category)}
@@ -261,7 +307,7 @@ export default function InsightsPage() {
           {/* Bloat Heatmap Calendar */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '110ms', animationFillMode: 'forwards' }}
           >
             <BloatHeatmap entries={entries} />
           </div>
@@ -269,7 +315,7 @@ export default function InsightsPage() {
           {/* Food Safety List (Traffic Light System) */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '115ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '120ms', animationFillMode: 'forwards' }}
           >
             <FoodSafetyList entries={entries} />
           </div>
@@ -360,58 +406,6 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* What You Eat Most */}
-          <div 
-            className="premium-card p-5 animate-slide-up opacity-0"
-            style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
-                <TrendingUp className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-bold text-foreground text-lg">Trigger Frequency</h2>
-                <p className="text-xs text-muted-foreground">How often each category appears</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {insights?.triggerFrequencies.slice(0, 5).map((trigger) => {
-                const categoryInfo = getTriggerCategory(trigger.category);
-                const icon = getIconForTrigger(trigger.category);
-                return (
-                  <div key={trigger.category} className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{icon}</span>
-                        <span className="text-sm font-medium text-foreground">
-                          {categoryInfo?.displayName || trigger.category}
-                        </span>
-                      </div>
-                      <span className="text-sm text-muted-foreground">
-                        {trigger.count} meal{trigger.count !== 1 ? 's' : ''} ({trigger.percentage}%)
-                      </span>
-                    </div>
-                    <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ 
-                          width: `${trigger.percentage}%`,
-                          backgroundColor: categoryInfo?.color || 'hsl(var(--primary))'
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {insights?.triggerFrequencies.length === 0 && (
-              <p className="text-center text-muted-foreground py-4">
-                No triggers detected yet. Keep logging meals!
-              </p>
-            )}
-          </div>
 
           {/* Top Foods - with emoji icons */}
           {insights?.topFoods && insights.topFoods.length > 0 && (
