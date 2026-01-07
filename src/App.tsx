@@ -17,6 +17,7 @@ import PricingPage from "./pages/PricingPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUserSearch from "./pages/admin/AdminUserSearch";
 import AdminErrorLogs from "./pages/admin/AdminErrorLogs";
+import EmojiTest from "./pages/admin/EmojiTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,6 +77,7 @@ function AppRoutes() {
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/users" element={<AdminRoute><AdminUserSearch /></AdminRoute>} />
       <Route path="/admin/errors" element={<AdminRoute><AdminErrorLogs /></AdminRoute>} />
+      <Route path="/admin/emoji-test" element={<AdminRoute><EmojiTest /></AdminRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

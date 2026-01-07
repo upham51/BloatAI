@@ -3,17 +3,18 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Users, 
-  CreditCard, 
-  UtensilsCrossed, 
-  Camera, 
+import {
+  Users,
+  CreditCard,
+  UtensilsCrossed,
+  Camera,
   AlertTriangle,
   DollarSign,
   RefreshCw,
   BarChart3,
   Search,
-  FileWarning
+  FileWarning,
+  Smile
 } from 'lucide-react';
 
 interface Metrics {
@@ -147,7 +148,7 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {/* Navigation Tabs */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Link to="/admin">
             <Button variant="default" size="sm" className="bg-primary text-primary-foreground">
               <BarChart3 className="w-4 h-4 mr-2" />
@@ -164,6 +165,12 @@ export default function AdminDashboard() {
             <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-slate-700">
               <FileWarning className="w-4 h-4 mr-2" />
               Error Logs
+            </Button>
+          </Link>
+          <Link to="/admin/emoji-test">
+            <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-slate-700">
+              <Smile className="w-4 h-4 mr-2" />
+              Emoji Test
             </Button>
           </Link>
         </div>
