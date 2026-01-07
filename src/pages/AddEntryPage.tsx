@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { DetectedTrigger, validateTriggers, getTriggerCategory } from '@/types';
 import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
 import { haptics } from '@/lib/haptics';
+import { validateMealDescription, retryWithBackoff } from '@/lib/bloatingUtils';
 
 const RATING_LABELS: Record<number, string> = {
   1: 'None',
@@ -129,21 +130,40 @@ export default function AddEntryPage() {
 
     try {
       const base64 = await fileToBase64(file);
-      
-      const { data, error } = await supabase.functions.invoke('analyze-food', {
-        body: { imageUrl: base64 }
+
+      // Use retry logic for AI analysis
+      const { data, error } = await retryWithBackoff(async () => {
+        const result = await supabase.functions.invoke('analyze-food', {
+          body: { imageUrl: base64 }
+        });
+        if (result.error) throw result.error;
+        return result;
       });
 
       if (error) throw error;
 
-      const description = data.meal_description || 'A delicious meal';
+      // Safely handle potentially malformed AI response
+      const description = (typeof data?.meal_description === 'string' && data.meal_description.trim())
+        ? data.meal_description.trim()
+        : 'A delicious meal';
+
       setAiDescription(description);
-      setCreativeMealTitle(data.creative_title || data.meal_title || 'Delicious Meal');
-      setMealCategory(data.meal_category || 'Homemade');
-      setMealEmoji(data.meal_emoji || '🍽️');
-      setTitleOptions(data.title_options || [data.creative_title || 'Delicious Meal']);
-      
-      const validTriggers = validateTriggers(data.triggers || []);
+      setCreativeMealTitle(
+        (typeof data?.creative_title === 'string' && data.creative_title) ||
+        (typeof data?.meal_title === 'string' && data.meal_title) ||
+        'Delicious Meal'
+      );
+      setMealCategory((typeof data?.meal_category === 'string' && data.meal_category) || 'Homemade');
+      setMealEmoji((typeof data?.meal_emoji === 'string' && data.meal_emoji) || '🍽️');
+
+      const titleOptions = Array.isArray(data?.title_options) && data.title_options.length > 0
+        ? data.title_options
+        : [data?.creative_title || 'Delicious Meal'];
+      setTitleOptions(titleOptions);
+
+      // Safely validate triggers - handle malformed or missing data
+      const triggers = Array.isArray(data?.triggers) ? data.triggers : [];
+      const validTriggers = validateTriggers(triggers);
       setDetectedTriggers(validTriggers);
       setPhotoAnalyzed(true);
 
@@ -165,10 +185,11 @@ export default function AddEntryPage() {
       toast({
         variant: 'destructive',
         title: 'Analysis failed',
-        description: 'Could not analyze the photo. Please try again.',
+        description: 'Please describe your meal manually or try taking another photo.',
       });
+      // Don't set photoAnalyzed=true on error - force user to take action
       setAiDescription('');
-      setPhotoAnalyzed(true);
+      setIsEditingDescription(true); // Auto-open description editing
     } finally {
       setIsAnalyzing(false);
     }
@@ -215,6 +236,18 @@ export default function AddEntryPage() {
   const handleSave = async () => {
     if (!isValid || !user) return;
 
+    // Validate meal description
+    const validation = validateMealDescription(aiDescription);
+    if (!validation.valid) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid description',
+        description: validation.error || 'Please add a valid meal description.',
+      });
+      setIsEditingDescription(true);
+      return;
+    }
+
     haptics.medium();
     setIsSaving(true);
 
@@ -224,7 +257,7 @@ export default function AddEntryPage() {
       if (photoFile) {
         const fileExt = photoFile.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-        
+
         const { error: uploadError } = await supabase.storage
           .from('meal-photos')
           .upload(fileName, photoFile);
