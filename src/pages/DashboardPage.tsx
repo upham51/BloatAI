@@ -317,7 +317,7 @@ export default function DashboardPage() {
               {/* Total Meals Card */}
               <div className="premium-card p-4">
                 <h3 className="text-xs font-semibold text-muted-foreground mb-3">Total Logged</h3>
-                <div className="text-4xl font-bold text-foreground mb-1">{completedCount}</div>
+                <div className="text-4xl font-bold text-foreground mb-1">{entries.length}</div>
                 <p className="text-xs text-muted-foreground">Meals tracked</p>
               </div>
             </div>

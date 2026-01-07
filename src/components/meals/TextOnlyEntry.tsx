@@ -1,13 +1,19 @@
 import { useState, useMemo } from 'react';
-import { Search, X, ArrowRight } from 'lucide-react';
+import { Search, X, ArrowRight, ChevronDown, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { NotesInput } from './NotesInput';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { MealEntry, DetectedTrigger, COMMON_TRIGGERS, RATING_LABELS, getTriggerCategory } from '@/types';
-
+import { MealEntry, DetectedTrigger, RATING_LABELS, getTriggerCategory, TRIGGER_CATEGORIES } from '@/types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 export function TextOnlyEntry() {
   const navigate = useNavigate();
   const { addEntry, entries } = useMeals();
@@ -67,26 +73,22 @@ export function TextOnlyEntry() {
     return meal.meal_emoji || '🍽️';
   };
 
-  const toggleTrigger = (triggerId: string) => {
-    const triggerInfo = COMMON_TRIGGERS.find(t => t.id === triggerId);
-    if (!triggerInfo) return;
-
-    const exists = selectedTriggers.some(t => t.category === triggerInfo.category && t.food === triggerInfo.name);
-    if (exists) {
-      setSelectedTriggers(prev => prev.filter(t => !(t.category === triggerInfo.category && t.food === triggerInfo.name)));
-    } else {
-      setSelectedTriggers(prev => [...prev, {
-        category: triggerInfo.category,
-        food: triggerInfo.name,
-        confidence: 1
-      }]);
-    }
+  const addTriggerFromCategory = (categoryId: string) => {
+    const categoryInfo = getTriggerCategory(categoryId);
+    if (!categoryInfo) return;
+    
+    const exists = selectedTriggers.some(t => t.category === categoryId);
+    if (exists) return;
+    
+    setSelectedTriggers(prev => [...prev, {
+      category: categoryId,
+      food: categoryInfo.displayName,
+      confidence: 1
+    }]);
   };
 
-  const isTriggerSelected = (triggerId: string) => {
-    const triggerInfo = COMMON_TRIGGERS.find(t => t.id === triggerId);
-    if (!triggerInfo) return false;
-    return selectedTriggers.some(t => t.category === triggerInfo.category && t.food === triggerInfo.name);
+  const removeTrigger = (index: number) => {
+    setSelectedTriggers(prev => prev.filter((_, i) => i !== index));
   };
 
   const selectMeal = (meal: MealEntry) => {
@@ -271,40 +273,76 @@ export function TextOnlyEntry() {
             className="rounded-xl"
           />
 
-          {/* Trigger Selection */}
+          {/* Trigger Selection - Dropdown Style */}
           <div className="space-y-3">
             <p className="text-xs font-semibold text-muted-foreground">
               Select potential triggers (optional):
             </p>
-            <div className="grid grid-cols-2 gap-2">
-              {COMMON_TRIGGERS.map((trigger) => {
-                const categoryInfo = getTriggerCategory(trigger.category);
-                const isSelected = isTriggerSelected(trigger.id);
-                return (
-                  <button
-                    key={trigger.id}
-                    onClick={() => toggleTrigger(trigger.id)}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 text-left ${
-                      isSelected
-                        ? 'border-current bg-current/10'
-                        : 'border-border/50 bg-card hover:border-current/30'
-                    }`}
-                    style={{ 
-                      color: isSelected ? categoryInfo?.color : undefined,
-                      borderColor: isSelected ? categoryInfo?.color : undefined
-                    }}
-                  >
-                    <span 
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: categoryInfo?.color }}
-                    />
-                    <span className={`text-sm font-medium ${isSelected ? '' : 'text-foreground'}`}>
-                      {trigger.name}
+            
+            {/* Selected Triggers */}
+            {selectedTriggers.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {selectedTriggers.map((trigger, index) => {
+                  const categoryInfo = getTriggerCategory(trigger.category);
+                  return (
+                    <span
+                      key={index}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
+                      style={{
+                        backgroundColor: `${categoryInfo?.color}15`,
+                        color: categoryInfo?.color,
+                        border: `1px solid ${categoryInfo?.color}30`
+                      }}
+                    >
+                      <span 
+                        className="w-2 h-2 rounded-full" 
+                        style={{ backgroundColor: categoryInfo?.color }} 
+                      />
+                      {categoryInfo?.displayName}
+                      <button 
+                        onClick={() => removeTrigger(index)}
+                        className="ml-1 hover:opacity-70"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
                     </span>
-                  </button>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
+            
+            {/* Dropdown Selector */}
+            <Select onValueChange={addTriggerFromCategory}>
+              <SelectTrigger className="w-full rounded-xl bg-card border-border/50">
+                <SelectValue placeholder="+ Add a trigger category..." />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border z-50">
+                {TRIGGER_CATEGORIES.map((category) => {
+                  const isSelected = selectedTriggers.some(t => t.category === category.id);
+                  if (isSelected) return null;
+                  return (
+                    <SelectItem 
+                      key={category.id} 
+                      value={category.id}
+                      className="cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span 
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <div>
+                          <span className="font-medium">{category.displayName}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {category.examples}
+                          </span>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )}

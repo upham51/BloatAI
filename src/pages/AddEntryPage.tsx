@@ -519,6 +519,14 @@ export default function AddEntryPage() {
                 </button>
               </div>
 
+              {/* Notes Card - Stagger 2.5 */}
+              <div 
+                className="glass-card p-5 animate-slide-up opacity-0" 
+                style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}
+              >
+                <NotesInput value={notes} onChange={setNotes} />
+              </div>
+
               {/* Bloating Rating Card - Stagger 3 */}
               <div 
                 className="glass-card p-5 animate-slide-up opacity-0" 
