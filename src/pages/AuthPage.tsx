@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, Chrome } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,7 +16,7 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -72,63 +72,46 @@ export default function AuthPage() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await signInWithGoogle();
-      if (error) {
-        toast({
-          variant: 'destructive',
-          title: 'Google sign in failed',
-          description: error,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Google sign in failed',
-        description: 'An error occurred',
-      });
-    }
-  };
-
   // Welcome Screen
   if (view === 'welcome') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sage via-mint to-sage-light flex items-center justify-center p-4 lg:p-8">
-        <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center animate-fade-in">
-          {/* Left Side - Logo Card */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-[2.5rem] shadow-2xl p-12 lg:p-16 flex flex-col items-center justify-center min-h-[500px]">
+      <div className="min-h-screen bg-gradient-to-br from-sage via-mint to-sage-light flex flex-col">
+        {/* Top Section - White Card with Logo */}
+        <div className="flex-shrink-0 p-6 pt-12">
+          <div className="bg-white rounded-[2rem] shadow-xl p-10 flex flex-col items-center">
             <img
               src="/bloat-ai-logo.svg"
               alt="Bloat AI Logo"
-              className="w-32 h-32 lg:w-40 lg:h-40 object-contain mb-8"
+              className="w-28 h-28 object-contain mb-6"
             />
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 text-center">
+            <h2 className="text-3xl font-bold text-gray-900 text-center">
               BLOAT AI
             </h2>
           </div>
+        </div>
 
-          {/* Right Side - Welcome Card */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-[2.5rem] shadow-2xl p-10 lg:p-14 min-h-[500px] flex flex-col justify-center">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Welcome
+        {/* Bottom Section - Green Background with Content */}
+        <div className="flex-1 flex items-center justify-center px-6 pb-12">
+          <div className="w-full max-w-md">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Welcome Back!
             </h1>
-            <p className="text-base lg:text-lg text-gray-600 mb-10 leading-relaxed">
+            <p className="text-base text-gray-800 mb-10 leading-relaxed">
               Your gut's best friend is here. Track what you eat, discover what bloats, and feel amazing again. Let's do this!
             </p>
 
             {/* Buttons */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Button
                 onClick={() => setView('signin')}
-                className="w-full h-16 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Sign In
               </Button>
               <Button
                 onClick={() => setView('signup')}
                 variant="outline"
-                className="w-full h-16 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-900 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
+                className="w-full h-14 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-900 rounded-full text-lg font-semibold transition-all duration-300"
               >
                 Sign Up
               </Button>
@@ -142,31 +125,33 @@ export default function AuthPage() {
   // Sign In Screen
   if (view === 'signin') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sage via-mint to-sage-light flex items-center justify-center p-4 lg:p-8">
-        <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-stretch animate-fade-in">
-          {/* Left Side - Logo Card */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-[2.5rem] shadow-2xl p-12 lg:p-16 flex flex-col items-center justify-center min-h-[600px] relative">
-            <button
-              onClick={() => setView('welcome')}
-              className="absolute left-8 top-8 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
+      <div className="min-h-screen bg-gradient-to-br from-sage via-mint to-sage-light flex flex-col">
+        {/* Top Section - White Card with Logo */}
+        <div className="flex-shrink-0 p-6 pt-12 relative">
+          <button
+            onClick={() => setView('welcome')}
+            className="absolute left-8 top-8 text-gray-900 hover:text-gray-700 transition-colors z-10"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div className="bg-white rounded-[2rem] shadow-xl p-10 flex flex-col items-center">
             <img
               src="/bloat-ai-logo.svg"
               alt="Bloat AI Logo"
-              className="w-32 h-32 lg:w-40 lg:h-40 object-contain mb-8"
+              className="w-28 h-28 object-contain mb-6"
             />
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 text-center mb-4">
+            <h2 className="text-3xl font-bold text-gray-900 text-center mb-3">
               Welcome
             </h2>
-            <p className="text-gray-600 text-center max-w-xs">
+            <p className="text-gray-600 text-center text-sm max-w-xs">
               Ready to feel lighter? Your personalized bloat tracker is waiting.
             </p>
           </div>
+        </div>
 
-          {/* Right Side - Sign In Form */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-[2.5rem] shadow-2xl p-10 lg:p-14 min-h-[600px] flex flex-col justify-center relative">
+        {/* Bottom Section - Form on Green Background */}
+        <div className="flex-1 flex items-start justify-center px-6 pb-12 pt-6">
+          <div className="w-full max-w-md bg-white rounded-[2rem] shadow-xl p-8">
             <div className="text-right mb-6">
               <button
                 onClick={() => setView('signup')}
@@ -176,11 +161,11 @@ export default function AuthPage() {
               </button>
             </div>
 
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
               Sign In
             </h2>
             <p className="text-sm text-gray-600 mb-8 leading-relaxed">
-              Enter your credentials to access your account
+              Ready to feel lighter? Your personalized bloat tracker is waiting. Let's get you back on track!
             </p>
 
             {/* Form */}
@@ -191,7 +176,7 @@ export default function AuthPage() {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-14 px-4 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
+                  className="h-12 px-4 text-base rounded-xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
                   required
                 />
               </div>
@@ -202,7 +187,7 @@ export default function AuthPage() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-14 px-4 pr-12 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
+                  className="h-12 px-4 pr-12 text-base rounded-xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
                   required
                   minLength={6}
                 />
@@ -226,7 +211,7 @@ export default function AuthPage() {
 
               <Button
                 type="submit"
-                className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 mt-2"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -240,28 +225,6 @@ export default function AuthPage() {
               </Button>
             </form>
 
-            {/* Social Login */}
-            <div className="mt-8 space-y-3">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-white px-4 text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                onClick={handleGoogleSignIn}
-                variant="outline"
-                className="w-full h-12 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-200 rounded-full text-base font-medium transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3"
-              >
-                <Chrome className="w-5 h-5 text-blue-500" />
-                Continue with Google
-              </Button>
-            </div>
-
             <p className="text-xs text-gray-400 text-center mt-8">
               By continuing, you agree to our Terms of Service and Privacy Policy
             </p>
@@ -273,31 +236,33 @@ export default function AuthPage() {
 
   // Sign Up Screen
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender via-peach to-lavender-light flex items-center justify-center p-4 lg:p-8">
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-stretch animate-fade-in">
-        {/* Left Side - Logo Card */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-[2.5rem] shadow-2xl p-12 lg:p-16 flex flex-col items-center justify-center min-h-[650px] relative">
-          <button
-            onClick={() => setView('welcome')}
-            className="absolute left-8 top-8 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-lavender via-peach to-lavender-light flex flex-col">
+      {/* Top Section - White Card with Logo */}
+      <div className="flex-shrink-0 p-6 pt-12 relative">
+        <button
+          onClick={() => setView('welcome')}
+          className="absolute left-8 top-8 text-gray-900 hover:text-gray-700 transition-colors z-10"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <div className="bg-white rounded-[2rem] shadow-xl p-10 flex flex-col items-center">
           <img
             src="/bloat-ai-logo.svg"
             alt="Bloat AI Logo"
-            className="w-32 h-32 lg:w-40 lg:h-40 object-contain mb-8"
+            className="w-28 h-28 object-contain mb-6"
           />
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 text-center mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-3">
             Join Us
           </h2>
-          <p className="text-gray-600 text-center max-w-xs">
+          <p className="text-gray-600 text-center text-sm max-w-xs">
             Your gut health journey starts here. Feel amazing again!
           </p>
         </div>
+      </div>
 
-        {/* Right Side - Sign Up Form */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-[2.5rem] shadow-2xl p-10 lg:p-14 min-h-[650px] flex flex-col justify-center relative">
+      {/* Bottom Section - Form on Colored Background */}
+      <div className="flex-1 flex items-start justify-center px-6 pb-12 pt-6">
+        <div className="w-full max-w-md bg-white rounded-[2rem] shadow-xl p-8">
           <div className="text-right mb-6">
             <button
               onClick={() => setView('signin')}
@@ -307,11 +272,11 @@ export default function AuthPage() {
             </button>
           </div>
 
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">
             Sign Up
           </h2>
           <p className="text-sm text-gray-600 mb-8 leading-relaxed">
-            Create your account to start tracking your gut health
+            Join thousands feeling better every day. Your gut health journey starts here!
           </p>
 
           {/* Form */}
@@ -322,7 +287,7 @@ export default function AuthPage() {
                 placeholder="Your Name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="h-14 px-4 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
+                className="h-12 px-4 text-base rounded-xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
                 required
               />
             </div>
@@ -333,7 +298,7 @@ export default function AuthPage() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-14 px-4 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
+                className="h-12 px-4 text-base rounded-xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
                 required
               />
             </div>
@@ -344,7 +309,7 @@ export default function AuthPage() {
                 placeholder="Password (min. 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-14 px-4 pr-12 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
+                className="h-12 px-4 pr-12 text-base rounded-xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
                 required
                 minLength={6}
               />
@@ -359,7 +324,7 @@ export default function AuthPage() {
 
             <Button
               type="submit"
-              className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+              className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 mt-2"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -372,28 +337,6 @@ export default function AuthPage() {
               )}
             </Button>
           </form>
-
-          {/* Social Login */}
-          <div className="mt-8 space-y-3">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-4 text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              onClick={handleGoogleSignIn}
-              variant="outline"
-              className="w-full h-12 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-200 rounded-full text-base font-medium transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3"
-            >
-              <Chrome className="w-5 h-5 text-blue-500" />
-              Continue with Google
-            </Button>
-          </div>
 
           <p className="text-xs text-gray-400 text-center mt-8">
             By continuing, you agree to our Terms of Service and Privacy Policy
