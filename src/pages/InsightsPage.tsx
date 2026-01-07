@@ -16,6 +16,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { getTriggerCategory } from '@/types';
 import { subDays, isAfter } from 'date-fns';
 import { validatePercentage, deduplicateFoods, getIconForTrigger, abbreviateIngredient, getSafeAlternatives } from '@/lib/triggerUtils';
+import { isHighBloating } from '@/lib/bloatingUtils';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ export default function InsightsPage() {
     }> = {};
 
     // High-bloating meals for the "potential triggers" section - only from completed entries
-    const highBloatingMeals = completedEntries.filter(e => e.bloating_rating && e.bloating_rating >= 4);
+    const highBloatingMeals = completedEntries.filter(e => isHighBloating(e.bloating_rating));
     const totalHighBloating = highBloatingMeals.length;
 
     completedEntries.forEach(entry => {
@@ -80,9 +81,10 @@ export default function InsightsPage() {
           const currentCount = triggerMealCounts[trigger.category].foods.get(trigger.food) || 0;
           triggerMealCounts[trigger.category].foods.set(trigger.food, currentCount + 1);
         }
-        
+
+
         // Track if this trigger appeared in a high-bloating meal
-        if (entry.bloating_rating && entry.bloating_rating >= 4) {
+        if (isHighBloating(entry.bloating_rating)) {
           triggerMealCounts[trigger.category].highBloatingMealsWithTrigger.add(entry.id);
         }
       });
@@ -240,7 +242,7 @@ export default function InsightsPage() {
           {/* Header */}
           <header className="pt-2 animate-slide-up" style={{ animationFillMode: 'forwards' }}>
             <h1 className="text-3xl font-bold text-foreground tracking-tight">Your Insights</h1>
-            <p className="text-muted-foreground mt-1">Based on {entries.length} meals logged</p>
+            <p className="text-muted-foreground mt-1">Based on {completedCount} rated meals</p>
           </header>
 
           {/* Root Cause Profile Card */}
@@ -259,8 +261,8 @@ export default function InsightsPage() {
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 w-fit mx-auto mb-3">
                 <Utensils className="w-6 h-6 text-primary" />
               </div>
-              <div className="text-3xl font-bold text-foreground">{entries.length}</div>
-              <div className="text-sm text-muted-foreground mt-1">Total Meals</div>
+              <div className="text-3xl font-bold text-foreground">{completedCount}</div>
+              <div className="text-sm text-muted-foreground mt-1">Rated Meals</div>
             </div>
             <div className="premium-card p-5 text-center">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-coral/20 to-peach/20 w-fit mx-auto mb-3">

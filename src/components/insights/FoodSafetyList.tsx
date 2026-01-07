@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
 import { MealEntry } from '@/types';
 import { getIconForTrigger } from '@/lib/triggerUtils';
+import { isHighBloating, isLowBloating, HIGH_BLOATING_THRESHOLD } from '@/lib/bloatingUtils';
 
 interface FoodSafetyListProps {
   entries: MealEntry[];
@@ -53,13 +54,13 @@ export function FoodSafetyList({ entries }: FoodSafetyListProps) {
 
       let safetyLevel: 'safe' | 'caution' | 'danger';
 
-      // Classify based on average bloating and consistency
-      const highBloatCount = stats.bloatScores.filter((s) => s >= 4).length;
-      const lowBloatCount = stats.bloatScores.filter((s) => s <= 2).length;
+      // Classify based on average bloating and consistency using shared utilities
+      const highBloatCount = stats.bloatScores.filter((s) => isHighBloating(s)).length;
+      const lowBloatCount = stats.bloatScores.filter((s) => isLowBloating(s)).length;
 
-      if (avgBloating <= 2 && lowBloatCount >= stats.count * 0.7) {
+      if (isLowBloating(avgBloating) && lowBloatCount >= stats.count * 0.7) {
         safetyLevel = 'safe';
-      } else if (avgBloating >= 4 || highBloatCount >= stats.count * 0.6) {
+      } else if (avgBloating >= HIGH_BLOATING_THRESHOLD || highBloatCount >= stats.count * 0.6) {
         safetyLevel = 'danger';
       } else {
         safetyLevel = 'caution';

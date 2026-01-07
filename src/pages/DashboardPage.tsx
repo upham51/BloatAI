@@ -13,6 +13,7 @@ import { format, subDays, isAfter } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getTimeBasedGreeting } from '@/lib/quotes';
 import { getIconForTrigger } from '@/lib/triggerUtils';
+import { isHighBloating } from '@/lib/bloatingUtils';
 
 // Food background images for the weekly average card
 const FOOD_BACKGROUNDS = [
@@ -82,22 +83,29 @@ export default function DashboardPage() {
   const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'there';
   const firstName = displayName.split(' ')[0];
 
-  // Calculate streak
+  // Calculate streak - Fixed off-by-one error
   const streak = useMemo(() => {
     if (entries.length === 0) return 0;
-    
-    const sortedDates = [...new Set(entries.map(e => 
+
+    const sortedDates = [...new Set(entries.map(e =>
       format(new Date(e.created_at), 'yyyy-MM-dd')
     ))].sort().reverse();
-    
+
     const today = format(new Date(), 'yyyy-MM-dd');
-    const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
-    
-    if (sortedDates[0] !== today && sortedDates[0] !== yesterday) return 0;
-    
+    const mostRecentEntry = sortedDates[0];
+
+    // Calculate days since last entry
+    const daysSinceLastEntry = Math.floor(
+      (new Date(today).getTime() - new Date(mostRecentEntry).getTime()) / (24 * 60 * 60 * 1000)
+    );
+
+    // Streak is broken if more than 1 day has passed
+    if (daysSinceLastEntry > 1) return 0;
+
+    // Count consecutive days backwards from most recent entry
     let count = 0;
-    let currentDate = sortedDates[0] === today ? new Date() : subDays(new Date(), 1);
-    
+    let currentDate = new Date(mostRecentEntry);
+
     for (const dateStr of sortedDates) {
       const expectedDate = format(currentDate, 'yyyy-MM-dd');
       if (dateStr === expectedDate) {
@@ -107,7 +115,7 @@ export default function DashboardPage() {
         break;
       }
     }
-    
+
     return count;
   }, [entries]);
 
@@ -119,7 +127,7 @@ export default function DashboardPage() {
     const weekAgo = subDays(new Date(), 7);
     const roughMeals = entries.filter(e =>
       isAfter(new Date(e.created_at), weekAgo) &&
-      e.bloating_rating && e.bloating_rating >= 3
+      e.bloating_rating && e.bloating_rating >= 3 // Moderate or higher
     );
 
     const triggerStats: Record<string, {

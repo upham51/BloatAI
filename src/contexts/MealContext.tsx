@@ -3,6 +3,7 @@ import { MealEntry, DetectedTrigger } from '@/types';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
+import { retryWithBackoff } from '@/lib/bloatingUtils';
 
 interface MealContextType {
   entries: MealEntry[];
@@ -69,31 +70,37 @@ export function MealProvider({ children }: { children: ReactNode }) {
   const addEntry = async (entryData: Omit<MealEntry, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<MealEntry> => {
     if (!user) throw new Error('User not authenticated');
 
-    const { data, error } = await supabase
-      .from('meal_entries')
-      .insert({
-        meal_description: entryData.meal_description,
-        photo_url: entryData.photo_url,
-        portion_size: entryData.portion_size,
-        eating_speed: entryData.eating_speed,
-        social_setting: entryData.social_setting,
-        bloating_rating: entryData.bloating_rating,
-        rating_status: entryData.rating_status,
-        rating_due_at: entryData.rating_due_at,
-        detected_triggers: entryData.detected_triggers as unknown as Json,
-        custom_title: entryData.custom_title,
-        meal_emoji: entryData.meal_emoji,
-        meal_title: entryData.meal_title,
-        title_options: entryData.title_options as unknown as Json,
-        notes: entryData.notes,
-        entry_method: entryData.entry_method,
-        user_id: user.id,
-      })
-      .select()
-      .single();
+    // Use retry logic for database operations
+    const { data, error } = await retryWithBackoff(async () => {
+      const result = await supabase
+        .from('meal_entries')
+        .insert({
+          meal_description: entryData.meal_description,
+          photo_url: entryData.photo_url,
+          portion_size: entryData.portion_size,
+          eating_speed: entryData.eating_speed,
+          social_setting: entryData.social_setting,
+          bloating_rating: entryData.bloating_rating,
+          rating_status: entryData.rating_status,
+          rating_due_at: entryData.rating_due_at,
+          detected_triggers: entryData.detected_triggers as unknown as Json,
+          custom_title: entryData.custom_title,
+          meal_emoji: entryData.meal_emoji,
+          meal_title: entryData.meal_title,
+          title_options: entryData.title_options as unknown as Json,
+          notes: entryData.notes,
+          entry_method: entryData.entry_method,
+          user_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (result.error) throw result.error;
+      return result;
+    });
 
     if (error) throw error;
-    
+
     const newEntry = dbRowToMealEntry(data);
     setEntries(prev => [newEntry, ...prev]);
     return newEntry;
@@ -105,13 +112,20 @@ export function MealProvider({ children }: { children: ReactNode }) {
       dbUpdates.detected_triggers = updates.detected_triggers as unknown as Json;
     }
 
-    const { error } = await supabase
-      .from('meal_entries')
-      .update(dbUpdates)
-      .eq('id', id);
+    // Fix optimistic update race condition: only update local state AFTER successful DB update
+    const { error } = await retryWithBackoff(async () => {
+      const result = await supabase
+        .from('meal_entries')
+        .update(dbUpdates)
+        .eq('id', id);
+
+      if (result.error) throw result.error;
+      return result;
+    });
 
     if (error) throw error;
 
+    // Update local state only after successful database update
     setEntries(prev =>
       prev.map(entry =>
         entry.id === id ? { ...entry, ...updates } : entry
@@ -144,13 +158,43 @@ export function MealProvider({ children }: { children: ReactNode }) {
 
   const getPendingEntry = (): MealEntry | null => {
     const now = new Date();
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    return entries.find(entry => {
-      if (entry.rating_status !== 'pending') return false;
+    // Filter all pending entries
+    const pendingEntries = entries.filter(entry => entry.rating_status === 'pending');
+
+    if (pendingEntries.length === 0) return null;
+
+    // Find the entry that is most overdue (has the earliest rating_due_at that has passed)
+    // Or the oldest pending entry if none have a due date
+    const overdueEntries = pendingEntries.filter(entry => {
+      if (!entry.rating_due_at) return false;
+      const dueAt = new Date(entry.rating_due_at);
+      return dueAt <= now;
+    });
+
+    // Return the most overdue entry (earliest due date)
+    if (overdueEntries.length > 0) {
+      return overdueEntries.sort((a, b) => {
+        const aTime = new Date(a.rating_due_at!).getTime();
+        const bTime = new Date(b.rating_due_at!).getTime();
+        return aTime - bTime;
+      })[0];
+    }
+
+    // If no overdue entries, return the oldest pending entry (still within 24 hours)
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const recentPending = pendingEntries.filter(entry => {
       const createdAt = new Date(entry.created_at);
       return createdAt >= oneDayAgo;
-    }) || null;
+    });
+
+    if (recentPending.length > 0) {
+      return recentPending.sort((a, b) => {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      })[0];
+    }
+
+    return null;
   };
 
   const getRecentEntries = (limit = 10): MealEntry[] => {

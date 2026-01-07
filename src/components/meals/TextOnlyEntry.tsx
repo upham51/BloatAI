@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, X, ArrowRight, ChevronDown, Plus } from 'lucide-react';
+import { Search, X, ArrowRight, ChevronDown, Plus, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { NotesInput } from './NotesInput';
 import { useMeals } from '@/contexts/MealContext';
@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { MealEntry, DetectedTrigger, RATING_LABELS, getTriggerCategory, TRIGGER_CATEGORIES } from '@/types';
+import { validateMealDescription } from '@/lib/bloatingUtils';
 import {
   Select,
   SelectContent,
@@ -104,12 +105,29 @@ export function TextOnlyEntry() {
 
   const handleSave = async () => {
     if (!user) return;
-    
-    const title = selectedMeal 
-      ? getMealTitle(selectedMeal) 
+
+    const title = selectedMeal
+      ? getMealTitle(selectedMeal)
       : manualMealTitle.trim();
-    
-    if (!title) return;
+
+    // Validate meal description
+    const validation = validateMealDescription(title);
+    if (!validation.valid) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid meal name',
+        description: validation.error || 'Please enter a valid meal name.',
+      });
+      return;
+    }
+
+    // Warn if no triggers selected (but allow save)
+    if (selectedTriggers.length === 0 && !selectedMeal) {
+      toast({
+        title: 'No triggers added',
+        description: 'Adding triggers helps us provide better insights.',
+      });
+    }
 
     setIsSaving(true);
 
@@ -343,6 +361,16 @@ export function TextOnlyEntry() {
                 })}
               </SelectContent>
             </Select>
+
+            {/* Warning for no triggers */}
+            {!selectedMeal && selectedTriggers.length === 0 && manualMealTitle.trim().length > 0 && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900">
+                <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                  <span className="font-semibold">Tip:</span> Adding triggers helps us identify patterns and provide better insights.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
