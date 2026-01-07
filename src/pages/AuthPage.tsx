@@ -123,13 +123,13 @@ export default function AuthPage() {
 
           {/* Logo Card */}
           <div className="bg-white rounded-[2rem] shadow-2xl p-10 flex flex-col items-center justify-center">
-            <img src="/bloat-ai-logo.svg" alt="Bloat AI Logo" className="w-25 h-25 object-contain mb-6" />
+            <img src="/bloat-ai-logo.svg" alt="Bloat AI Logo" className="w-23 h-23 object-contain mb-6 " />
             
             
           </div>
 
           {/* Form Card */}
-          <div className="bg-white rounded-[2rem] shadow-2xl p-8">
+          <div className="rounded-[2rem] shadow-2xl p-8 bg-[#d1d1d1]">
             <h2 className="text-3xl font-bold text-gray-900 mb-3">
               Sign In
             </h2>
