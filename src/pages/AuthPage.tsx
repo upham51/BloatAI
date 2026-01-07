@@ -186,24 +186,14 @@ export default function AuthPage() {
         </div>
 
         {/* Logo Card */}
-        <div className="bg-white rounded-[2rem] shadow-2xl p-10 flex flex-col items-center justify-center">
-          <img src="/bloat-ai-logo.svg" alt="Bloat AI Logo" className="w-20 h-20 object-contain mb-6" />
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">
-            Join Us
-          </h2>
-          <p className="text-sm text-gray-600 text-center max-w-xs leading-relaxed">
-            Your gut health journey starts here!
-          </p>
-        </div>
+        
 
         {/* Form Card */}
-        <div className="bg-white rounded-[2rem] shadow-2xl p-8">
+        <div className="rounded-[2rem] shadow-2xl p-8 bg-peach-light">
           <h2 className="text-3xl font-bold text-gray-900 mb-3">
             Sign Up
           </h2>
-          <p className="text-sm text-gray-600 mb-8 leading-relaxed">
-            Join thousands feeling better every day. Your gut health journey starts here!
-          </p>
+          <p className="text-sm text-gray-600 mb-8 leading-relaxed">Say hello to your happiest gut!</p>
 
           {/* Form */}
           <form onSubmit={handleSignUp} className="space-y-5">
