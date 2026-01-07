@@ -80,7 +80,7 @@ export default function AuthPage() {
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <img
-              src="/bloat-ai-logo.svg"
+              src="/assets/images/bloat-ai-logo.svg"
               alt="Bloat AI Logo"
               className="w-24 h-24 object-contain"
             />
