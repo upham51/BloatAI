@@ -6,6 +6,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
@@ -198,28 +199,8 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <PageTransition>
-        <div className="relative min-h-screen bg-gradient-to-br from-background via-lavender/5 to-mint/10">
-          {/* Decorative gradient blobs with animation */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary/10 to-lavender/10 rounded-full blur-3xl pointer-events-none"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute top-60 right-5 w-56 h-56 bg-gradient-to-br from-mint/15 to-peach/10 rounded-full blur-3xl pointer-events-none"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-40 left-1/2 w-64 h-64 bg-gradient-to-br from-coral/8 to-primary/8 rounded-full blur-3xl pointer-events-none"
-          />
-
-          <StaggerContainer className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5">
+        <AuroraBackground className="!min-h-screen">
+          <StaggerContainer className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5 w-full">
             {/* Header with time-based greeting */}
             <StaggerItem>
               <header className="pt-2 relative">
@@ -249,35 +230,33 @@ export default function DashboardPage() {
                 </h1>
               </div>
 
-                {/* Centered streak badge */}
-                {streak > 0 && (
+                {/* Centered streak badge - Always visible */}
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 200,
+                    damping: 15,
+                    delay: 0.3,
+                  }}
+                  className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-gradient-to-r from-coral/20 to-peach/20 border border-coral/30 shadow-md"
+                >
                   <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 200,
-                      damping: 15,
-                      delay: 0.3,
+                    animate={{
+                      scale: streak > 0 ? [1, 1.2, 1] : 1,
                     }}
-                    className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-gradient-to-r from-coral/20 to-peach/20 border border-coral/30 shadow-md"
+                    transition={{
+                      duration: 2,
+                      repeat: streak > 0 ? Infinity : 0,
+                      ease: 'easeInOut',
+                    }}
                   >
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.2, 1],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      }}
-                    >
-                      <Flame className="w-6 h-6 text-coral drop-shadow-sm" />
-                    </motion.div>
-                    <span className="text-xl font-bold text-coral">{streak}</span>
-                    <span className="text-base font-semibold text-coral/90">day streak</span>
+                    <Flame className="w-6 h-6 text-coral drop-shadow-sm" />
                   </motion.div>
-                )}
+                  <span className="text-xl font-bold text-coral">{streak}</span>
+                  <span className="text-base font-semibold text-coral/90">day streak</span>
+                </motion.div>
               </div>
             </header>
             </StaggerItem>
@@ -443,7 +422,7 @@ export default function DashboardPage() {
               </motion.div>
             </StaggerItem>
           </StaggerContainer>
-        </div>
+        </AuroraBackground>
       </PageTransition>
 
       {/* Onboarding Modal - shows for new users */}
