@@ -87,7 +87,7 @@ export default function AuthPage() {
           </div>
 
           {/* Green Bottom Section - Welcome Content */}
-          <div className="bg-sage px-8 pt-12 pb-12">
+          <div style={{ backgroundColor: 'hsl(160, 35%, 75%)' }} className="px-8 pt-12 pb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Welcome
             </h1>
@@ -121,7 +121,7 @@ export default function AuthPage() {
   if (view === 'signin') {
     return (
       <div className="min-h-screen bg-[#e8e5dc] flex items-center justify-center p-4">
-        <div className="w-full max-w-[380px] bg-sage rounded-[2rem] shadow-2xl p-8 animate-fade-in relative">
+        <div style={{ backgroundColor: 'hsl(160, 35%, 75%)' }} className="w-full max-w-[380px] rounded-[2rem] shadow-2xl p-8 animate-fade-in relative">
           {/* Back Button */}
           <button
             onClick={() => setView('welcome')}
@@ -220,7 +220,7 @@ export default function AuthPage() {
   // Sign Up Screen
   return (
     <div className="min-h-screen bg-[#e8e5dc] flex items-center justify-center p-4">
-      <div className="w-full max-w-[380px] bg-sage rounded-[2rem] shadow-2xl p-8 animate-fade-in relative">
+      <div style={{ backgroundColor: 'hsl(160, 35%, 75%)' }} className="w-full max-w-[380px] rounded-[2rem] shadow-2xl p-8 animate-fade-in relative">
         {/* Back Button */}
         <button
           onClick={() => setView('welcome')}
