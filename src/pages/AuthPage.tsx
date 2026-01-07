@@ -122,13 +122,7 @@ export default function AuthPage() {
           </div>
 
           {/* Logo Card */}
-          <div className="bg-white rounded-[2rem] shadow-2xl p-10 flex flex-col items-center justify-center">
-            
-            <h2 className="font-bold text-gray-900 text-center mb-3 text-4xl">
-              Welcome
-            </h2>
-            <p className="text-sm text-gray-600 text-center max-w-xs leading-relaxed">Say goodbye to the bloat!</p>
-          </div>
+          
 
           {/* Form Card */}
           <div className="rounded-[2rem] shadow-2xl p-8 bg-accent my-0">
