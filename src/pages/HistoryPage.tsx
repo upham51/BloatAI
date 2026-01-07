@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { EditMealModal } from '@/components/meals/EditMealModal';
 import { EditTitleModal } from '@/components/meals/EditTitleModal';
@@ -14,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTES } from '@/types';
 import { formatDistanceToNow, format, isAfter, subDays } from 'date-fns';
 import { formatTriggerDisplay } from '@/lib/triggerUtils';
+import { haptics } from '@/lib/haptics';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -113,6 +115,7 @@ export default function HistoryPage() {
 
   const handleRate = async (rating: number) => {
     if (!ratingEntry) return;
+    haptics.success();
     await updateRating(ratingEntry.id, rating);
     toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
     setRatingEntry(null);
@@ -258,37 +261,29 @@ export default function HistoryPage() {
 
           {/* Empty State */}
           {filteredEntries.length === 0 && (
-            <div 
-              className="premium-card text-center py-16 space-y-4 animate-slide-up opacity-0"
+            <div
+              className="animate-slide-up opacity-0"
               style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}
             >
-              <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center">
-                <span className="text-4xl">
-                  {filter === 'all' && '📝'}
-                  {filter === 'high-bloating' && '🎉'}
-                  {filter === 'this-week' && '📅'}
-                </span>
-              </div>
-              <div>
-                <h3 className="font-bold text-foreground text-lg">
-                  {filter === 'all' && 'No entries yet'}
-                  {filter === 'high-bloating' && 'No high bloating meals!'}
-                  {filter === 'this-week' && 'No meals this week'}
-                </h3>
-                <p className="text-muted-foreground text-sm mt-1">
-                  {filter === 'all' && 'Start logging meals to track your bloating patterns.'}
-                  {filter === 'high-bloating' && "Great news! You haven't had any high-bloating meals."}
-                  {filter === 'this-week' && 'Log some meals to see them here.'}
-                </p>
-              </div>
-              {filter === 'all' && (
-                <Button
-                  onClick={() => navigate('/add-entry')}
-                  className="mt-4 bg-primary text-primary-foreground rounded-full px-8 py-6 font-semibold shadow-md"
-                >
-                  Log Your First Meal
-                </Button>
-              )}
+              <EmptyState
+                icon={filter === 'all' ? '📝' : filter === 'high-bloating' ? '🎉' : '📅'}
+                title={
+                  filter === 'all'
+                    ? 'No entries yet'
+                    : filter === 'high-bloating'
+                    ? 'No high bloating meals!'
+                    : 'No meals this week'
+                }
+                description={
+                  filter === 'all'
+                    ? 'Start logging meals to track your bloating patterns.'
+                    : filter === 'high-bloating'
+                    ? "Great news! You haven't had any high-bloating meals."
+                    : 'Log some meals to see them here.'
+                }
+                actionLabel={filter === 'all' ? 'Log Your First Meal' : undefined}
+                onAction={filter === 'all' ? () => navigate('/add-entry') : undefined}
+              />
             </div>
           )}
         </div>
@@ -511,11 +506,13 @@ function InlineRating({ entryId }: { entryId: string }) {
   const { toast } = useToast();
   
   const handleRate = async (rating: number) => {
+    haptics.success();
     await updateRating(entryId, rating);
     toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
   };
 
   const handleSkip = async () => {
+    haptics.light();
     await skipRating(entryId);
     toast({ title: 'Rating skipped' });
   };
@@ -527,7 +524,10 @@ function InlineRating({ entryId }: { entryId: string }) {
         {[1, 2, 3, 4, 5].map((rating) => (
           <button
             key={rating}
-            onClick={() => handleRate(rating)}
+            onClick={() => {
+              haptics.light();
+              handleRate(rating);
+            }}
             className="flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-xl hover:bg-primary/10 transition-colors"
           >
             <span className="text-2xl">{RATING_EMOJIS[rating]}</span>
@@ -670,22 +670,22 @@ function EntryCard({
             </p>
           </div>
 
-          {/* Bloating Rating */}
+          {/* Bloating Rating - Dynamic Color Scoring */}
           {entry.bloating_rating && (
             <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
-              entry.bloating_rating <= 2 
-                ? 'bg-primary/15' 
-                : entry.bloating_rating >= 4 
-                  ? 'bg-coral/15' 
-                  : 'bg-muted/50'
+              entry.bloating_rating <= 2
+                ? 'bg-primary/15'
+                : entry.bloating_rating === 3
+                  ? 'bg-yellow-100'
+                  : 'bg-coral/15'
             }`}>
               <span className="text-lg">{RATING_EMOJIS[entry.bloating_rating]}</span>
               <span className={`text-xs font-bold ${
-                entry.bloating_rating <= 2 
-                  ? 'text-primary' 
-                  : entry.bloating_rating >= 4 
-                    ? 'text-coral' 
-                    : 'text-foreground'
+                entry.bloating_rating <= 2
+                  ? 'text-primary'
+                  : entry.bloating_rating === 3
+                    ? 'text-yellow-600'
+                    : 'text-coral'
               }`}>
                 {entry.bloating_rating}/5
               </span>

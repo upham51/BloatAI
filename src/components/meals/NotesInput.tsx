@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { QUICK_NOTES } from '@/types';
+import { haptics } from '@/lib/haptics';
 
 interface NotesInputProps {
   value: string;
@@ -10,6 +11,7 @@ interface NotesInputProps {
 
 export function NotesInput({ value, onChange, maxLength = 200 }: NotesInputProps) {
   const addQuickNote = (note: string) => {
+    haptics.light();
     const currentNotes = value.trim();
     if (currentNotes.toLowerCase().includes(note.toLowerCase())) {
       // Remove the note if it's already there
@@ -54,13 +56,19 @@ export function NotesInput({ value, onChange, maxLength = 200 }: NotesInputProps
             key={note.label}
             type="button"
             onClick={() => addQuickNote(note.label)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-all duration-200 ${
+            className={`px-4 py-2.5 text-sm font-semibold rounded-xl border-2 transition-all duration-200 active:scale-95 ${
               isNoteSelected(note.label)
-                ? 'border-primary bg-primary/15 text-primary'
-                : 'border-border/50 bg-card hover:border-primary/30 text-muted-foreground hover:text-foreground'
+                ? 'border-primary bg-primary text-primary-foreground shadow-md scale-105'
+                : 'border-border/50 bg-card hover:border-primary/50 hover:bg-primary/5 text-foreground'
             }`}
+            style={
+              isNoteSelected(note.label)
+                ? { boxShadow: '0 4px 12px hsl(var(--primary) / 0.25)' }
+                : undefined
+            }
           >
-            {note.emoji} {note.label}
+            <span className="text-base mr-2">{note.emoji}</span>
+            {note.label}
           </button>
         ))}
       </div>

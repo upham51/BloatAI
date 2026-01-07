@@ -4,8 +4,13 @@ import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, ChevronRight, Lig
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import InsightsLoader from '@/components/shared/InsightsLoader';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { RootCauseProfileCard } from '@/components/quiz/RootCauseProfileCard';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
+import { FoodSafetyList } from '@/components/insights/FoodSafetyList';
+import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
+import { MealComparison } from '@/components/insights/MealComparison';
+import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -192,40 +197,32 @@ export default function InsightsPage() {
         <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10">
           <div className="absolute top-20 left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute top-60 right-5 w-32 h-32 bg-lavender/20 rounded-full blur-3xl pointer-events-none" />
-          
+
           <div className="relative p-5 pt-8 max-w-lg mx-auto">
             <header className="mb-8">
               <h1 className="text-3xl font-bold text-foreground tracking-tight">Insights</h1>
               <p className="text-muted-foreground mt-1">Your personalized analysis</p>
             </header>
 
-            <div className="premium-card text-center py-16 space-y-4 animate-slide-up" style={{ animationFillMode: 'forwards' }}>
-              <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                <Sparkles className="w-10 h-10 text-primary" />
+            <EmptyState
+              IconComponent={Sparkles}
+              title="Insights Coming Soon!"
+              description={`Rate ${neededForInsights - completedCount} more meal${neededForInsights - completedCount !== 1 ? 's' : ''} to unlock your personalized analysis.`}
+              actionLabel="Log a Meal"
+              onAction={() => navigate('/add-entry')}
+            />
+
+            <div className="mt-6 premium-card p-4">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-muted-foreground">Progress</span>
+                <span className="font-bold text-foreground">{completedCount}/{neededForInsights}</span>
               </div>
-              <h2 className="text-xl font-bold text-foreground">Insights Coming Soon!</h2>
-              <p className="text-muted-foreground max-w-xs mx-auto">
-                Rate {neededForInsights - completedCount} more meal{neededForInsights - completedCount !== 1 ? 's' : ''} to unlock your personalized analysis.
-              </p>
-              <div className="max-w-xs mx-auto mt-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-muted-foreground">Progress</span>
-                  <span className="font-bold text-foreground">{completedCount}/{neededForInsights}</span>
-                </div>
-                <div className="h-3 bg-muted/50 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all duration-500 rounded-full"
-                    style={{ width: `${(completedCount / neededForInsights) * 100}%` }}
-                  />
-                </div>
+              <div className="h-3 bg-muted/50 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-500 rounded-full"
+                  style={{ width: `${(completedCount / neededForInsights) * 100}%` }}
+                />
               </div>
-              <Button 
-                onClick={() => navigate('/add-entry')}
-                className="mt-6 bg-primary text-primary-foreground rounded-full px-8 py-6 font-semibold shadow-lg hover:bg-primary/90"
-                style={{ boxShadow: '0 8px 24px hsl(var(--primary) / 0.35)' }}
-              >
-                Log a Meal
-              </Button>
             </div>
           </div>
         </div>
@@ -277,12 +274,12 @@ export default function InsightsPage() {
 
           {/* AI Summary Card - NEW */}
           {aiSummary && (
-            <div 
+            <div
               className="premium-card p-5 animate-slide-up opacity-0 border-2 border-primary/20"
               style={{ animationDelay: '75ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div 
+                <div
                   className="p-2.5 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10"
                   style={{
                     boxShadow: '0 4px 12px hsl(var(--primary) / 0.2), inset 0 1px 1px hsl(0 0% 100% / 0.2)'
@@ -317,7 +314,7 @@ export default function InsightsPage() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {aiSummary.alternatives.map((alt, index) => (
-                      <span 
+                      <span
                         key={index}
                         className="text-xs px-3 py-1.5 rounded-full bg-background/80 text-foreground border border-primary/20 font-medium"
                       >
@@ -335,6 +332,42 @@ export default function InsightsPage() {
               </div>
             </div>
           )}
+
+          {/* Recommendation Cards - Swipeable */}
+          {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
+            <div
+              className="animate-slide-up opacity-0"
+              style={{ animationDelay: '90ms', animationFillMode: 'forwards' }}
+            >
+              <RecommendationCards
+                topTriggers={insights.potentialTriggers.map((t) => t.category)}
+              />
+            </div>
+          )}
+
+          {/* Bloat Heatmap Calendar */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
+          >
+            <BloatHeatmap entries={entries} />
+          </div>
+
+          {/* Food Safety List (Traffic Light System) */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '115ms', animationFillMode: 'forwards' }}
+          >
+            <FoodSafetyList entries={entries} />
+          </div>
+
+          {/* Meal Comparison */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '125ms', animationFillMode: 'forwards' }}
+          >
+            <MealComparison entries={entries} />
+          </div>
 
           {/* Potential Triggers - The Star Section */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (

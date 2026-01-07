@@ -1,18 +1,20 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { FODMAPGuide } from '@/components/triggers/FODMAPGuide';
 import { TriggerSelectorModal } from '@/components/triggers/TriggerSelectorModal';
+import { TriggerInfoModal } from '@/components/shared/TriggerInfoModal';
+import { ScanningAnimation } from '@/components/shared/ScanningAnimation';
 import { NotesInput } from '@/components/meals/NotesInput';
 import { TextOnlyEntry } from '@/components/meals/TextOnlyEntry';
-import CounterLoader from '@/components/shared/CounterLoader';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { DetectedTrigger, validateTriggers, getTriggerCategory } from '@/types';
 import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
+import { haptics } from '@/lib/haptics';
 
 const RATING_LABELS: Record<number, string> = {
   1: 'None',
@@ -74,6 +76,7 @@ export default function AddEntryPage() {
   // Trigger selector modal & guide
   const [showTriggerModal, setShowTriggerModal] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [triggerInfoModal, setTriggerInfoModal] = useState<DetectedTrigger | null>(null);
 
   // Optional bloating rating
   const [bloatingRating, setBloatingRating] = useState<number | null>(null);
@@ -136,11 +139,13 @@ export default function AddEntryPage() {
       setPhotoAnalyzed(true);
 
       if (validTriggers.length > 0) {
+        haptics.success();
         toast({
           title: 'Photo analyzed!',
           description: `Detected ${validTriggers.length} potential trigger${validTriggers.length !== 1 ? 's' : ''}.`,
         });
       } else {
+        haptics.light();
         toast({
           title: 'Photo analyzed!',
           description: 'No common triggers detected.',
@@ -201,6 +206,7 @@ export default function AddEntryPage() {
   const handleSave = async () => {
     if (!isValid || !user) return;
 
+    haptics.medium();
     setIsSaving(true);
 
     try {
@@ -244,6 +250,7 @@ export default function AddEntryPage() {
         entry_method: 'photo',
       });
 
+      haptics.success();
       toast({
         title: 'Meal logged!',
         description: bloatingRating
@@ -354,11 +361,9 @@ export default function AddEntryPage() {
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent pointer-events-none" />
             
-            {/* Loading overlay with Counter Loader */}
+            {/* Scanning Animation */}
             {isAnalyzing && (
-              <div className="absolute inset-0 bg-card/95 backdrop-blur-xl flex items-center justify-center">
-                <CounterLoader />
-              </div>
+              <ScanningAnimation imageUrl={photoUrl} />
             )}
             
             {/* Creative meal title overlay */}
@@ -455,42 +460,53 @@ export default function AddEntryPage() {
 
                 {showGuide && <FODMAPGuide />}
 
-                {/* Beautiful Trigger Pills with Emoji Icons */}
+                {/* Beautiful Trigger Pills with Emoji Icons + Info Button */}
                 {detectedTriggers.length > 0 ? (
                   <div className="space-y-2.5">
                     {detectedTriggers.map((trigger, index) => {
                       const categoryInfo = getTriggerCategory(trigger.category);
                       const icon = getIconForTrigger(trigger.food || trigger.category);
-                      const displayName = trigger.food 
-                        ? abbreviateIngredient(trigger.food) 
+                      const displayName = trigger.food
+                        ? abbreviateIngredient(trigger.food)
                         : categoryInfo?.displayName || trigger.category;
-                      
+
                       return (
                         <div
                           key={index}
-                          className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/40 group transition-all duration-200 hover:-translate-y-0.5"
-                          style={{ 
+                          className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/40 group transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+                          style={{
                             boxShadow: '0 4px 12px -2px hsl(var(--foreground) / 0.08), 0 2px 6px -2px hsl(var(--foreground) / 0.04)'
+                          }}
+                          onClick={() => {
+                            haptics.light();
+                            setTriggerInfoModal(trigger);
                           }}
                         >
                           {/* Emoji Icon */}
                           <span className="text-3xl flex-shrink-0">{icon}</span>
-                          
+
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-foreground text-[15px]">
-                              {displayName}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-foreground text-[15px]">
+                                {displayName}
+                              </p>
+                              <Info className="w-3.5 h-3.5 text-primary/60" />
+                            </div>
                             {trigger.food && (
                               <p className="text-sm text-muted-foreground truncate">
                                 {categoryInfo?.displayName || trigger.category}
                               </p>
                             )}
                           </div>
-                          
+
                           {/* Remove button */}
                           <button
-                            onClick={() => removeTrigger(index)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              haptics.light();
+                              removeTrigger(index);
+                            }}
                             className="p-2 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 active:scale-90 opacity-0 group-hover:opacity-100"
                             aria-label="Remove trigger"
                           >
@@ -541,31 +557,47 @@ export default function AddEntryPage() {
                 <p className="text-xs text-muted-foreground ml-12 mb-5">Optional — We'll remind you in 90 min</p>
 
                 <div className="grid grid-cols-5 gap-2">
-                  {[1, 2, 3, 4, 5].map(rating => (
-                    <button
-                      key={rating}
-                      onClick={() => setBloatingRating(bloatingRating === rating ? null : rating)}
-                      className={`flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-2xl border-2 transition-all duration-200 ${
-                        bloatingRating === rating
-                          ? 'border-primary bg-primary text-primary-foreground scale-105'
-                          : 'border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30'
-                      }`}
-                      style={bloatingRating === rating ? {
-                        boxShadow: '0 8px 20px hsl(var(--primary) / 0.35)'
-                      } : undefined}
-                    >
-                      <span className={`text-2xl font-bold ${
-                        bloatingRating === rating ? '' : 'text-foreground'
-                      }`}>
-                        {rating}
-                      </span>
-                      <span className={`text-[10px] font-semibold uppercase tracking-wider ${
-                        bloatingRating === rating ? 'text-primary-foreground/80' : 'text-muted-foreground'
-                      }`}>
-                        {RATING_LABELS[rating]}
-                      </span>
-                    </button>
-                  ))}
+                  {[1, 2, 3, 4, 5].map(rating => {
+                    // Dynamic color scoring: 1-2 Green, 3 Amber, 4-5 Coral
+                    const getRatingColor = (r: number) => {
+                      if (r <= 2) return 'border-primary bg-primary text-primary-foreground';
+                      if (r === 3) return 'border-yellow-500 bg-yellow-500 text-white';
+                      return 'border-coral bg-coral text-white';
+                    };
+
+                    return (
+                      <button
+                        key={rating}
+                        onClick={() => {
+                          haptics.light();
+                          setBloatingRating(bloatingRating === rating ? null : rating);
+                        }}
+                        className={`flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-2xl border-2 transition-all duration-200 ${
+                          bloatingRating === rating
+                            ? `${getRatingColor(rating)} scale-105`
+                            : 'border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30'
+                        }`}
+                        style={bloatingRating === rating ? {
+                          boxShadow: rating <= 2
+                            ? '0 8px 20px hsl(var(--primary) / 0.35)'
+                            : rating === 3
+                            ? '0 8px 20px rgba(234, 179, 8, 0.35)'
+                            : '0 8px 20px hsl(var(--coral) / 0.35)'
+                        } : undefined}
+                      >
+                        <span className={`text-2xl font-bold ${
+                          bloatingRating === rating ? '' : 'text-foreground'
+                        }`}>
+                          {rating}
+                        </span>
+                        <span className={`text-[10px] font-semibold uppercase tracking-wider ${
+                          bloatingRating === rating ? 'opacity-90' : 'text-muted-foreground'
+                        }`}>
+                          {RATING_LABELS[rating]}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -608,6 +640,13 @@ export default function AddEntryPage() {
             isOpen={showTriggerModal}
             onClose={() => setShowTriggerModal(false)}
             onAdd={addTrigger}
+          />
+
+          {/* Trigger Info Modal */}
+          <TriggerInfoModal
+            trigger={triggerInfoModal}
+            isOpen={!!triggerInfoModal}
+            onClose={() => setTriggerInfoModal(null)}
           />
         </>
       )}
