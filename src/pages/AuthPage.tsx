@@ -75,42 +75,42 @@ export default function AuthPage() {
   // Welcome Screen
   if (view === 'welcome') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sage-light/30 via-mint/20 to-lavender-light/30 flex items-center justify-center p-4">
-        <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-2xl p-8 sm:p-12 animate-fade-in">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
+      <div className="min-h-screen bg-[#e8e5dc] flex items-center justify-center p-4">
+        <div className="w-full max-w-[380px] rounded-[2rem] shadow-2xl overflow-hidden animate-fade-in">
+          {/* White Top Section - Logo */}
+          <div className="bg-white pt-16 pb-8 px-8 flex justify-center">
             <img
               src="/bloat-ai-logo.svg"
               alt="Bloat AI Logo"
-              className="w-24 h-24 object-contain"
+              className="w-28 h-28 object-contain"
             />
           </div>
 
-          {/* Heading */}
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 text-center">
-            Welcome Back!
-          </h1>
+          {/* Green Bottom Section - Welcome Content */}
+          <div className="bg-sage px-8 pt-12 pb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Welcome
+            </h1>
 
-          {/* Subheading */}
-          <p className="text-base text-gray-600 mb-10 text-center leading-relaxed">
-            Your gut's best friend is here. Track what you eat, discover what bloats, and feel amazing again. Let's do this!
-          </p>
+            <p className="text-base text-gray-800 mb-10 leading-relaxed">
+              Your gut's best friend is here. Track what you eat, discover what bloats, and feel amazing again. Let's do this!
+            </p>
 
-          {/* Buttons */}
-          <div className="space-y-4">
-            <Button
-              onClick={() => setView('signin')}
-              className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-            >
-              Sign In
-            </Button>
-            <Button
-              onClick={() => setView('signup')}
-              variant="outline"
-              className="w-full h-14 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-900 rounded-full text-lg font-medium transition-all duration-300 hover:scale-[1.02]"
-            >
-              Sign Up
-            </Button>
+            {/* Buttons */}
+            <div className="space-y-3">
+              <Button
+                onClick={() => setView('signin')}
+                className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-base font-medium shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                Sign In
+              </Button>
+              <Button
+                onClick={() => setView('signup')}
+                className="w-full h-14 bg-white hover:bg-gray-50 text-gray-900 rounded-full text-base font-medium shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                Sign Up
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -120,21 +120,21 @@ export default function AuthPage() {
   // Sign In Screen
   if (view === 'signin') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sage/40 via-mint/30 to-lavender/30 flex items-center justify-center p-4">
-        <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-2xl p-8 sm:p-10 animate-fade-in relative">
+      <div className="min-h-screen bg-[#e8e5dc] flex items-center justify-center p-4">
+        <div className="w-full max-w-[380px] bg-sage rounded-[2rem] shadow-2xl p-8 animate-fade-in relative">
           {/* Back Button */}
           <button
             onClick={() => setView('welcome')}
-            className="absolute left-6 top-6 text-gray-600 hover:text-gray-900 transition-colors"
+            className="absolute left-6 top-6 text-gray-800 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
 
           {/* Register Link */}
-          <div className="text-right mb-6">
+          <div className="text-right mb-8">
             <button
               onClick={() => setView('signup')}
-              className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
             >
               Register
             </button>
@@ -146,12 +146,124 @@ export default function AuthPage() {
           </h2>
 
           {/* Subheading */}
-          <p className="text-sm text-gray-600 mb-8 leading-relaxed">
+          <p className="text-sm text-gray-800 mb-8 leading-relaxed">
             Ready to feel lighter? Your personalized bloat tracker is waiting. Let's get you back on track!
           </p>
 
-          {/* Form */}
-          <form onSubmit={handleSignIn} className="space-y-5">
+          {/* White Form Section */}
+          <div className="bg-white rounded-[1.5rem] p-6">
+            <form onSubmit={handleSignIn} className="space-y-4">
+              {/* Email Input */}
+              <div className="relative">
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-14 px-4 text-base rounded-2xl border-0 bg-gray-100 focus:bg-gray-50 placeholder:text-gray-400 transition-all"
+                  required
+                />
+              </div>
+
+              {/* Password Input */}
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-14 px-4 pr-12 text-base rounded-2xl border-0 bg-gray-100 focus:bg-gray-50 placeholder:text-gray-400 transition-all"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {/* Forgot Password */}
+              <div className="text-right pt-1">
+                <button
+                  type="button"
+                  className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
+              {/* Sign In Button */}
+              <Button
+                type="submit"
+                className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-base font-medium shadow-md hover:shadow-lg transition-all duration-300 mt-6"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Signing in...
+                  </span>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Sign Up Screen
+  return (
+    <div className="min-h-screen bg-[#e8e5dc] flex items-center justify-center p-4">
+      <div className="w-full max-w-[380px] bg-sage rounded-[2rem] shadow-2xl p-8 animate-fade-in relative">
+        {/* Back Button */}
+        <button
+          onClick={() => setView('welcome')}
+          className="absolute left-6 top-6 text-gray-800 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+
+        {/* Sign In Link */}
+        <div className="text-right mb-8">
+          <button
+            onClick={() => setView('signin')}
+            className="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
+          >
+            Sign In
+          </button>
+        </div>
+
+        {/* Heading */}
+        <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          Sign Up
+        </h2>
+
+        {/* Subheading */}
+        <p className="text-sm text-gray-800 mb-8 leading-relaxed">
+          Join thousands feeling better every day. Your gut health journey starts here!
+        </p>
+
+        {/* White Form Section */}
+        <div className="bg-white rounded-[1.5rem] p-6">
+          <form onSubmit={handleSignUp} className="space-y-4">
+            {/* Name Input */}
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Your Name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="h-14 px-4 text-base rounded-2xl border-0 bg-gray-100 focus:bg-gray-50 placeholder:text-gray-400 transition-all"
+                required
+              />
+            </div>
+
             {/* Email Input */}
             <div className="relative">
               <Input
@@ -159,7 +271,7 @@ export default function AuthPage() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-14 px-4 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
+                className="h-14 px-4 text-base rounded-2xl border-0 bg-gray-100 focus:bg-gray-50 placeholder:text-gray-400 transition-all"
                 required
               />
             </div>
@@ -168,10 +280,10 @@ export default function AuthPage() {
             <div className="relative">
               <Input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
+                placeholder="Password (min. 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-14 px-4 pr-12 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
+                className="h-14 px-4 pr-12 text-base rounded-2xl border-0 bg-gray-100 focus:bg-gray-50 placeholder:text-gray-400 transition-all"
                 required
                 minLength={6}
               />
@@ -184,141 +296,23 @@ export default function AuthPage() {
               </button>
             </div>
 
-            {/* Forgot Password */}
-            <div className="text-right">
-              <button
-                type="button"
-                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                Forgot Password?
-              </button>
-            </div>
-
-            {/* Sign In Button */}
+            {/* Sign Up Button */}
             <Button
               type="submit"
-              className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] mt-6"
+              className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-base font-medium shadow-md hover:shadow-lg transition-all duration-300 mt-6"
               disabled={isLoading}
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in...
+                  Creating account...
                 </span>
               ) : (
-                'Sign In'
+                'Sign Up'
               )}
             </Button>
           </form>
-
-          {/* Footer */}
-          <p className="text-xs text-gray-400 text-center mt-8">
-            By continuing, you agree to our Terms of Service and Privacy Policy
-          </p>
         </div>
-      </div>
-    );
-  }
-
-  // Sign Up Screen
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender/30 via-peach-light/20 to-sage-light/30 flex items-center justify-center p-4">
-      <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-2xl p-8 sm:p-10 animate-fade-in relative">
-        {/* Back Button */}
-        <button
-          onClick={() => setView('welcome')}
-          className="absolute left-6 top-6 text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-
-        {/* Sign In Link */}
-        <div className="text-right mb-6">
-          <button
-            onClick={() => setView('signin')}
-            className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            Sign In
-          </button>
-        </div>
-
-        {/* Heading */}
-        <h2 className="text-3xl font-bold text-gray-900 mb-3">
-          Sign Up
-        </h2>
-
-        {/* Subheading */}
-        <p className="text-sm text-gray-600 mb-8 leading-relaxed">
-          Join thousands feeling better every day. Your gut health journey starts here!
-        </p>
-
-        {/* Form */}
-        <form onSubmit={handleSignUp} className="space-y-5">
-          {/* Name Input */}
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Your Name"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="h-14 px-4 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
-              required
-            />
-          </div>
-
-          {/* Email Input */}
-          <div className="relative">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-14 px-4 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
-              required
-            />
-          </div>
-
-          {/* Password Input */}
-          <div className="relative">
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password (min. 6 characters)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-14 px-4 pr-12 text-base rounded-2xl border-gray-200 focus:border-sage bg-gray-50 focus:bg-white placeholder:text-gray-400 transition-all"
-              required
-              minLength={6}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-
-          {/* Sign Up Button */}
-          <Button
-            type="submit"
-            className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] mt-6"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creating account...
-              </span>
-            ) : (
-              'Sign Up'
-            )}
-          </Button>
-        </form>
-
-        {/* Footer */}
-        <p className="text-xs text-gray-400 text-center mt-8">
-          By continuing, you agree to our Terms of Service and Privacy Policy
-        </p>
       </div>
     </div>
   );
