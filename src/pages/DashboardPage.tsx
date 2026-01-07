@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
-import { Particles } from '@/components/ui/particles';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -188,15 +187,11 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="relative min-h-screen">
-        {/* Particles Background */}
-        <Particles
-          className="absolute inset-0"
-          quantity={100}
-          ease={50}
-          color="#8B7355"
-          refresh={false}
-        />
+      <div className="relative min-h-screen bg-gradient-to-br from-background via-lavender/5 to-mint/10">
+        {/* Decorative gradient blobs */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary/10 to-lavender/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-60 right-5 w-56 h-56 bg-gradient-to-br from-mint/15 to-peach/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-40 left-1/2 w-64 h-64 bg-gradient-to-br from-coral/8 to-primary/8 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5">
           {/* Header with time-based greeting */}
@@ -216,7 +211,7 @@ export default function DashboardPage() {
                 <span className="text-xl font-semibold text-muted-foreground tracking-tight">
                   {greeting},
                 </span>
-                <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent pb-1.5">
                   {firstName}
                 </h1>
               </div>

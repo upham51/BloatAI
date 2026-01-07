@@ -9,7 +9,6 @@ import { RootCauseProfileCard } from '@/components/quiz/RootCauseProfileCard';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { FoodSafetyList } from '@/components/insights/FoodSafetyList';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
-import { MealComparison } from '@/components/insights/MealComparison';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -359,14 +358,6 @@ export default function InsightsPage() {
             style={{ animationDelay: '115ms', animationFillMode: 'forwards' }}
           >
             <FoodSafetyList entries={entries} />
-          </div>
-
-          {/* Meal Comparison */}
-          <div
-            className="animate-slide-up opacity-0"
-            style={{ animationDelay: '125ms', animationFillMode: 'forwards' }}
-          >
-            <MealComparison entries={entries} />
           </div>
 
           {/* Potential Triggers - The Star Section */}
