@@ -389,6 +389,11 @@
 .stagger-3 { animation-delay: 0.3s; }
 .stagger-4 { animation-delay: 0.4s; }
 
+/* Delay utilities */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+
 /* Premium easing curves */
 .ease-premium {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
