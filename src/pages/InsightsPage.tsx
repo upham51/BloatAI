@@ -244,7 +244,7 @@ export default function InsightsPage() {
           {/* Header */}
           <header className="pt-2 animate-slide-up" style={{ animationFillMode: 'forwards' }}>
             <h1 className="text-3xl font-bold text-foreground tracking-tight">Your Insights</h1>
-            <p className="text-muted-foreground mt-1">Based on {insights?.totalMeals} meals logged</p>
+            <p className="text-muted-foreground mt-1">Based on {entries.length} meals logged</p>
           </header>
 
           {/* Root Cause Profile Card */}
@@ -263,7 +263,7 @@ export default function InsightsPage() {
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 w-fit mx-auto mb-3">
                 <Utensils className="w-6 h-6 text-primary" />
               </div>
-              <div className="text-3xl font-bold text-foreground">{insights?.totalMeals}</div>
+              <div className="text-3xl font-bold text-foreground">{entries.length}</div>
               <div className="text-sm text-muted-foreground mt-1">Total Meals</div>
             </div>
             <div className="premium-card p-5 text-center">
