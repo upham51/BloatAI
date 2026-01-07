@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageTransition } from '@/components/layout/PageTransition';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { EditMealModal } from '@/components/meals/EditMealModal';
@@ -148,7 +149,8 @@ export default function HistoryPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10">
+      <PageTransition>
+        <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10">
         {/* Decorative blobs */}
         <div className="absolute top-20 left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-60 right-5 w-32 h-32 bg-coral/10 rounded-full blur-3xl pointer-events-none" />
@@ -288,6 +290,7 @@ export default function HistoryPage() {
           )}
         </div>
       </div>
+      </PageTransition>
 
       {/* Rating Dialog */}
       <Dialog open={!!ratingEntry} onOpenChange={() => setRatingEntry(null)}>
