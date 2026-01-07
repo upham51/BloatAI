@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RatingScale } from '@/components/shared/RatingScale';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
+import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -187,24 +189,47 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="relative min-h-screen bg-gradient-to-br from-background via-lavender/5 to-mint/10">
-        {/* Decorative gradient blobs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary/10 to-lavender/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-60 right-5 w-56 h-56 bg-gradient-to-br from-mint/15 to-peach/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-40 left-1/2 w-64 h-64 bg-gradient-to-br from-coral/8 to-primary/8 rounded-full blur-3xl pointer-events-none" />
+      <PageTransition>
+        <div className="relative min-h-screen bg-gradient-to-br from-background via-lavender/5 to-mint/10">
+          {/* Decorative gradient blobs with animation */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary/10 to-lavender/10 rounded-full blur-3xl pointer-events-none"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute top-60 right-5 w-56 h-56 bg-gradient-to-br from-mint/15 to-peach/10 rounded-full blur-3xl pointer-events-none"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute bottom-40 left-1/2 w-64 h-64 bg-gradient-to-br from-coral/8 to-primary/8 rounded-full blur-3xl pointer-events-none"
+          />
 
-        <div className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5">
-          {/* Header with time-based greeting */}
-          <header className="pt-2 animate-slide-up relative" style={{ animationFillMode: 'forwards' }}>
-            {/* Settings button - absolute positioned in top right */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/profile')}
-              className="absolute top-2 right-0 w-11 h-11 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm"
-            >
-              <Settings className="w-5 h-5" />
-            </Button>
+          <StaggerContainer className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5">
+            {/* Header with time-based greeting */}
+            <StaggerItem>
+              <header className="pt-2 relative">
+                {/* Settings button - absolute positioned in top right */}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="absolute top-2 right-0"
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate('/profile')}
+                    className="w-11 h-11 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm transition-all duration-300"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Button>
+                </motion.div>
 
             <div className="flex flex-col gap-2.5 items-center text-center">
               <div className="flex flex-col gap-0.5">
@@ -216,23 +241,46 @@ export default function DashboardPage() {
                 </h1>
               </div>
 
-              {/* Centered streak badge */}
-              {streak > 0 && (
-                <div className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-gradient-to-r from-coral/20 to-peach/20 border border-coral/30 shadow-md">
-                  <Flame className="w-6 h-6 text-coral drop-shadow-sm" />
-                  <span className="text-xl font-bold text-coral">{streak}</span>
-                  <span className="text-base font-semibold text-coral/90">day streak</span>
-                </div>
-              )}
-            </div>
-          </header>
+                {/* Centered streak badge */}
+                {streak > 0 && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 200,
+                      damping: 15,
+                      delay: 0.3,
+                    }}
+                    className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-gradient-to-r from-coral/20 to-peach/20 border border-coral/30 shadow-md"
+                  >
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.2, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                    >
+                      <Flame className="w-6 h-6 text-coral drop-shadow-sm" />
+                    </motion.div>
+                    <span className="text-xl font-bold text-coral">{streak}</span>
+                    <span className="text-base font-semibold text-coral/90">day streak</span>
+                  </motion.div>
+                )}
+              </div>
+            </header>
+            </StaggerItem>
 
-          {/* Main Bloating & Meals Card */}
-          {completedCount >= 5 && (
-            <div
-              className="premium-card !bg-transparent p-6 animate-slide-up opacity-0 relative overflow-hidden"
-              style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
-            >
+            {/* Main Bloating & Meals Card */}
+            {completedCount >= 5 && (
+              <StaggerItem>
+                <motion.div
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="premium-card !bg-transparent p-6 relative overflow-hidden cursor-pointer"
+                >
               {/* Background Image */}
               <img
                 src={foodBackground}
@@ -271,20 +319,22 @@ export default function DashboardPage() {
 
                 {/* Subtext */}
                 <div className="text-xs text-muted-foreground text-center pt-3 border-t border-border/50">
-                  Based on last 7 days
+                    Based on last 7 days
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              </motion.div>
+              </StaggerItem>
+            )}
 
-          {/* Smaller Metric Cards Row */}
-          {completedCount >= 5 && (
-            <div
-              className="grid grid-cols-2 gap-3 animate-slide-up opacity-0"
-              style={{ animationDelay: '75ms', animationFillMode: 'forwards' }}
-            >
-              {/* Weekly Triggers Card */}
-              <div className="premium-card p-4">
+            {/* Smaller Metric Cards Row */}
+            {completedCount >= 5 && (
+              <StaggerItem>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Weekly Triggers Card */}
+                  <motion.div
+                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                    className="premium-card p-4 cursor-pointer"
+                  >
                 <h3 className="text-xs font-semibold text-muted-foreground mb-3">Top Triggers</h3>
                 {topTriggers.length > 0 ? (
                   <div className="space-y-2">
@@ -304,26 +354,28 @@ export default function DashboardPage() {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No triggers yet</p>
-                )}
-              </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No triggers yet</p>
+                  )}
+                </motion.div>
 
-              {/* Total Meals Card */}
-              <div className="premium-card p-4">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-3">Total Logged</h3>
-                <div className="text-4xl font-bold text-foreground mb-1">{entries.length}</div>
-                <p className="text-xs text-muted-foreground">Meals tracked</p>
+                {/* Total Meals Card */}
+                <motion.div
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="premium-card p-4 cursor-pointer"
+                >
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-3">Total Logged</h3>
+                  <div className="text-4xl font-bold text-foreground mb-1">{entries.length}</div>
+                  <p className="text-xs text-muted-foreground">Meals tracked</p>
+                </motion.div>
               </div>
-            </div>
-          )}
+              </StaggerItem>
+            )}
 
-          {/* Building insights state - show when some meals logged but not enough */}
-          {completedCount > 0 && completedCount < 5 && (
-            <div
-              className="premium-card p-6 animate-slide-up opacity-0 text-center"
-              style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
-            >
+            {/* Building insights state - show when some meals logged but not enough */}
+            {completedCount > 0 && completedCount < 5 && (
+              <StaggerItem>
+                <div className="premium-card p-6 text-center">
               <span className="text-4xl block mb-3">📊</span>
               <h3 className="font-bold text-foreground mb-2">Building Your Insights</h3>
               <p className="text-sm text-muted-foreground mb-4">
@@ -332,47 +384,59 @@ export default function DashboardPage() {
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
                 <div
                   className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: `${(completedCount / 5) * 100}%` }}
-                />
+                    style={{ width: `${(completedCount / 5) * 100}%` }}
+                  />
+                </div>
+                <Button
+                  onClick={() => navigate('/add-entry')}
+                  className="bg-primary text-primary-foreground rounded-full px-6"
+                >
+                  Log a Meal
+                </Button>
               </div>
-              <Button
-                onClick={() => navigate('/add-entry')}
-                className="bg-primary text-primary-foreground rounded-full px-6"
-              >
-                Log a Meal
-              </Button>
-            </div>
-          )}
+              </StaggerItem>
+            )}
 
-          {/* Pending Rating */}
-          {pendingEntry && (
-            <div
-              className="premium-card p-5 animate-scale-in"
-              style={{ animationDelay: '100ms' }}
-            >
+            {/* Pending Rating */}
+            {pendingEntry && (
+              <StaggerItem>
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="premium-card p-5"
+                >
               <p className="font-bold text-foreground mb-1">Rate your last meal</p>
               <p className="text-sm text-muted-foreground mb-4 line-clamp-1">{pendingEntry.meal_description}</p>
               <RatingScale value={null} onChange={handleRate} size="sm" />
-              <button onClick={handleSkip} className="text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
-                Skip for now
-              </button>
-            </div>
-          )}
+                <button onClick={handleSkip} className="text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
+                  Skip for now
+                </button>
+              </motion.div>
+              </StaggerItem>
+            )}
 
-          {/* Primary CTA */}
-          <Button
-            onClick={() => navigate('/add-entry')}
-            className="w-full h-16 rounded-3xl text-lg font-bold bg-primary text-primary-foreground relative overflow-hidden group animate-slide-up opacity-0"
-            style={{
-              animationDelay: '150ms',
-              animationFillMode: 'forwards',
-              boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
-            }}
-          >
-            <span className="text-lg font-bold relative z-10">Log New Meal</span>
-          </Button>
+            {/* Primary CTA */}
+            <StaggerItem>
+              <motion.div
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              >
+                <Button
+                  onClick={() => navigate('/add-entry')}
+                  className="w-full h-16 rounded-3xl text-lg font-bold bg-primary text-primary-foreground relative overflow-hidden group"
+                  style={{
+                    boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
+                  }}
+                >
+                  <span className="text-lg font-bold relative z-10">Log New Meal</span>
+                </Button>
+              </motion.div>
+            </StaggerItem>
+          </StaggerContainer>
         </div>
-      </div>
+      </PageTransition>
 
       {/* Onboarding Modal - shows for new users */}
       {user && (
