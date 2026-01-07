@@ -187,13 +187,9 @@ export default function AuthPage() {
 
         {/* Logo Card */}
         <div className="bg-white rounded-[2rem] shadow-2xl p-10 flex flex-col items-center justify-center">
-          <img src="/bloat-ai-logo.svg" alt="Bloat AI Logo" className="w-20 h-20 object-contain mb-6" />
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">
-            Join Us
-          </h2>
-          <p className="text-sm text-gray-600 text-center max-w-xs leading-relaxed">
-            Your gut health journey starts here!
-          </p>
+          <img src="/bloat-ai-logo.svg" alt="Bloat AI Logo" className="w-23 h-23 object-contain mb-6 " />
+          
+          
         </div>
 
         {/* Form Card */}
