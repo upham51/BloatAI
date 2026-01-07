@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
@@ -83,6 +83,15 @@ export default function AddEntryPage() {
 
   // Saving state
   const [isSaving, setIsSaving] = useState(false);
+
+  // Cleanup object URL on unmount or when photoUrl changes to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (photoUrl && photoUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(photoUrl);
+      }
+    };
+  }, [photoUrl]);
 
   // Form is valid when we have a photo and AI has analyzed it
   const isValid = photoUrl && photoAnalyzed && aiDescription.trim();
