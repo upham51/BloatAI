@@ -111,7 +111,7 @@ export default function AddEntryPage() {
   const openGallery = () => {
     if (fileInputRef.current) {
       fileInputRef.current.accept = 'image/*';
-      fileInputRef.current.capture = '';
+      fileInputRef.current.removeAttribute('capture');
       fileInputRef.current.click();
     }
   };
@@ -327,66 +327,132 @@ export default function AddEntryPage() {
       {/* Photo Mode - No Toggle */}
       {entryMode === 'photo' && !photoUrl ? (
         /* Premium Photo Upload UI */
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative">
-          {/* Decorative blobs */}
-          <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-lavender/30 rounded-full blur-3xl pointer-events-none" />
-          
-          {/* Back button */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+          {/* Animated gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-lavender/10 to-sage/5 animate-pulse" style={{ animationDuration: '4s' }} />
+
+          {/* Decorative 3D blobs with enhanced glow */}
+          <div className="absolute top-20 left-10 w-48 h-48 bg-gradient-to-br from-primary/30 to-primary/10 rounded-full blur-3xl pointer-events-none animate-float" style={{ animationDuration: '6s' }} />
+          <div className="absolute bottom-32 right-10 w-56 h-56 bg-gradient-to-br from-lavender/40 to-lavender/10 rounded-full blur-3xl pointer-events-none animate-float" style={{ animationDuration: '8s', animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-sage/20 to-transparent rounded-full blur-3xl pointer-events-none animate-pulse" style={{ animationDuration: '5s' }} />
+
+          {/* Premium back button with 3D effect */}
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-4 left-4 p-3 rounded-full bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg transition-all duration-200 hover:bg-card active:scale-95 z-10"
+            className="absolute top-6 left-6 p-4 rounded-2xl bg-gradient-to-br from-card via-card/95 to-card/90 backdrop-blur-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:-translate-y-1 active:scale-95 z-10 group"
+            style={{
+              boxShadow: '0 10px 40px -10px hsl(var(--foreground) / 0.3), 0 0 0 1px hsl(var(--background) / 0.1), inset 0 1px 0 0 hsl(var(--background) / 0.5)'
+            }}
           >
-            <X className="w-5 h-5 text-foreground" />
+            <X className="w-5 h-5 text-foreground transition-transform group-hover:rotate-90" />
           </button>
-          
-          {/* Content */}
-          <div className="relative z-10 text-center mb-10">
-            <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">Log Your Meal</h1>
-            <p className="text-muted-foreground">Snap a photo to analyze your food</p>
+
+          {/* Content with stagger animation */}
+          <div className="relative z-10 text-center mb-12 animate-fade-in">
+            <div className="inline-block mb-4 px-6 py-2 rounded-full bg-gradient-to-r from-primary/20 via-lavender/20 to-primary/20 backdrop-blur-sm border border-primary/30">
+              <p className="text-xs font-bold uppercase tracking-widest bg-gradient-to-r from-primary to-lavender bg-clip-text text-transparent">
+                AI-Powered Food Analysis
+              </p>
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-br from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent tracking-tight mb-3" style={{ textShadow: '0 2px 20px hsl(var(--foreground) / 0.1)' }}>
+              Log Your Meal
+            </h1>
+            <p className="text-base text-muted-foreground font-medium">Snap a photo to analyze your food</p>
           </div>
-          
-          <div className="relative z-10 flex gap-5">
-            {/* Camera Button */}
+
+          <div className="relative z-10 flex gap-6 mb-10">
+            {/* Camera Button with 3D effect */}
             <button
               onClick={openCamera}
               disabled={isAnalyzing}
-              className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
-              style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
+              className="group relative flex flex-col items-center gap-5 p-10 bg-gradient-to-br from-card via-card/98 to-card/95 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 transition-all duration-500 hover:scale-110 hover:-translate-y-3 active:scale-95 overflow-hidden"
+              style={{
+                boxShadow: '0 25px 50px -12px hsl(var(--primary) / 0.25), 0 0 0 1px hsl(var(--background) / 0.1), inset 0 2px 4px 0 hsl(var(--background) / 0.5), 0 10px 30px -10px hsl(var(--primary) / 0.3)',
+                transform: 'perspective(1000px) rotateX(2deg)'
+              }}
             >
-              <div className="p-5 rounded-2xl bg-primary transition-transform group-hover:scale-110">
-                <Camera className="w-8 h-8 text-primary-foreground" />
+              {/* Animated gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              {/* Icon container with 3D effect */}
+              <div className="relative p-6 rounded-3xl bg-gradient-to-br from-primary to-primary/90 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6" style={{ boxShadow: '0 15px 35px -5px hsl(var(--primary) / 0.5), inset 0 -2px 8px 0 rgba(0,0,0,0.2), inset 0 2px 4px 0 rgba(255,255,255,0.3)' }}>
+                <Camera className="w-10 h-10 text-primary-foreground drop-shadow-lg" />
               </div>
-              <span className="font-semibold text-foreground">Camera</span>
+
+              <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">Camera</span>
             </button>
 
-            {/* Gallery Button */}
+            {/* Gallery Button with 3D effect */}
             <button
               onClick={openGallery}
               disabled={isAnalyzing}
-              className="group flex flex-col items-center gap-4 p-8 bg-card/90 backdrop-blur-xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95"
-              style={{ boxShadow: '0 20px 40px -12px hsl(var(--foreground) / 0.15), 0 8px 20px -8px hsl(var(--foreground) / 0.1)' }}
+              className="group relative flex flex-col items-center gap-5 p-10 bg-gradient-to-br from-card via-card/98 to-card/95 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 transition-all duration-500 hover:scale-110 hover:-translate-y-3 active:scale-95 overflow-hidden"
+              style={{
+                boxShadow: '0 25px 50px -12px hsl(var(--lavender) / 0.25), 0 0 0 1px hsl(var(--background) / 0.1), inset 0 2px 4px 0 hsl(var(--background) / 0.5), 0 10px 30px -10px hsl(var(--lavender) / 0.3)',
+                transform: 'perspective(1000px) rotateX(2deg)'
+              }}
             >
-              <div className="p-5 rounded-2xl bg-lavender transition-transform group-hover:scale-110">
-                <ImageIcon className="w-8 h-8 text-secondary-foreground" />
+              {/* Animated gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-lavender/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              {/* Icon container with 3D effect */}
+              <div className="relative p-6 rounded-3xl bg-gradient-to-br from-lavender to-lavender/90 transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6" style={{ boxShadow: '0 15px 35px -5px hsl(var(--lavender) / 0.5), inset 0 -2px 8px 0 rgba(0,0,0,0.2), inset 0 2px 4px 0 rgba(255,255,255,0.3)' }}>
+                <ImageIcon className="w-10 h-10 text-secondary-foreground drop-shadow-lg" />
               </div>
-              <span className="font-semibold text-foreground">Gallery</span>
+
+              <span className="font-bold text-lg text-foreground group-hover:text-lavender transition-colors">Gallery</span>
             </button>
           </div>
-          
-          {/* Text Only Link - Below buttons */}
+
+          {/* Text Only Link with premium styling */}
           <button
             onClick={() => setEntryMode('text')}
-            className="relative z-10 mt-8 text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+            className="relative z-10 group flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-muted/50 to-muted/30 backdrop-blur-sm border border-border/50 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:bg-primary/5"
           >
-            <Pencil className="w-4 h-4" />
-            Or describe your meal with text
+            <Pencil className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            <span className="text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors">
+              Or describe your meal with text
+            </span>
           </button>
-          
-          {/* Tips */}
-          <p className="relative z-10 text-xs text-muted-foreground text-center mt-8 max-w-xs">
-            💡 Tip: Good lighting helps our AI detect ingredients more accurately
-          </p>
+
+          {/* Tips with enhanced styling */}
+          <div className="relative z-10 mt-10 flex items-start gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-primary/5 to-lavender/5 backdrop-blur-sm border border-primary/20 max-w-md">
+            <div className="flex-shrink-0 text-2xl">💡</div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <span className="font-semibold text-foreground">Pro tip:</span> Good lighting helps our AI detect ingredients more accurately
+            </p>
+          </div>
+
+          {/* Floating animation keyframes */}
+          <style>{`
+            @keyframes float {
+              0%, 100% {
+                transform: translateY(0px) scale(1);
+              }
+              50% {
+                transform: translateY(-20px) scale(1.05);
+              }
+            }
+
+            @keyframes fade-in {
+              from {
+                opacity: 0;
+                transform: translateY(20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+
+            .animate-float {
+              animation: float 6s ease-in-out infinite;
+            }
+
+            .animate-fade-in {
+              animation: fade-in 0.8s ease-out;
+            }
+          `}</style>
         </div>
       ) : entryMode === 'text' && !photoUrl ? (
         /* Text Only Mode */
