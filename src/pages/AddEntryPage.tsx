@@ -327,7 +327,7 @@ export default function AddEntryPage() {
 
       {/* Photo Mode - No Toggle */}
       {entryMode === 'photo' && !photoUrl ? (
-        /* Premium Photo Upload UI with Bento Grid Layout */}
+        /* Premium Photo Upload UI with Bento Grid Layout */
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
           <GrainTexture />
 

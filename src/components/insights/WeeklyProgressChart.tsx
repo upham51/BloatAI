@@ -27,6 +27,11 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
         isSameDay(new Date(e.created_at), day.date)
       );
 
+      // Count ALL meals for the day, not just completed ones
+      const allDayEntries = entries.filter(e =>
+        isSameDay(new Date(e.created_at), day.date)
+      );
+
       const avgBloating = dayEntries.length > 0
         ? dayEntries.reduce((sum, e) => sum + (e.bloating_rating || 0), 0) / dayEntries.length
         : null;
@@ -35,7 +40,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
         day: day.dateStr,
         fullDate: day.fullDate,
         bloating: avgBloating !== null ? Math.round(avgBloating * 10) / 10 : null,
-        count: dayEntries.length,
+        count: allDayEntries.length, // Use all entries count, not just completed
       };
     });
 
