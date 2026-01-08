@@ -100,8 +100,8 @@ export function validateMealDescription(description: string): { valid: boolean; 
     return { valid: false, error: 'Meal description must be at least 3 characters' };
   }
 
-  if (trimmed.length > 200) {
-    return { valid: false, error: 'Meal description is too long (max 200 characters)' };
+  if (trimmed.length > 1000) {
+    return { valid: false, error: 'Meal description is too long (max 1000 characters)' };
   }
 
   return { valid: true };
