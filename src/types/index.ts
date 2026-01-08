@@ -191,6 +191,7 @@ export const QUICK_NOTES = [
   { emoji: '🍴', label: 'Rushed eating' },
   { emoji: '😋', label: 'Very hungry' },
   { emoji: '🍽️', label: 'Restaurant' },
+  { emoji: '🩸', label: 'On your period' },
 ];
 
 // Insight types

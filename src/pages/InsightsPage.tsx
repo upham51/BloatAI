@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import InsightsLoader from '@/components/shared/InsightsLoader';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { RootCauseProfileCard } from '@/components/quiz/RootCauseProfileCard';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { FoodSafetyList } from '@/components/insights/FoodSafetyList';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
@@ -17,7 +16,6 @@ import { HealthScoreGauge } from '@/components/insights/HealthScoreGauge';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
-import { useRootCauseAssessment } from '@/hooks/useRootCauseAssessment';
 import { getTriggerCategory } from '@/types';
 import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
 import { generateComprehensiveInsight } from '@/lib/insightsAnalysis';
@@ -26,7 +24,6 @@ export default function InsightsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: userProfile } = useProfile(user?.id);
-  const { data: quizAssessment } = useRootCauseAssessment(user?.id);
   const { entries, getCompletedCount } = useMeals();
   const completedCount = getCompletedCount();
   const neededForInsights = 3;
@@ -52,8 +49,8 @@ export default function InsightsPage() {
 
   // Generate comprehensive insights using new analysis engine
   const insights = useMemo(() => {
-    return generateComprehensiveInsight(entries, quizAssessment);
-  }, [entries, completedCount, quizAssessment]);
+    return generateComprehensiveInsight(entries);
+  }, [entries, completedCount]);
 
   // Full-screen loading state
   if (isAnalyzing && hasEnoughData) {
@@ -124,13 +121,6 @@ export default function InsightsPage() {
             <h1 className="text-3xl font-bold text-foreground tracking-tight">Your Insights</h1>
             <p className="text-muted-foreground mt-1">Based on {completedCount} rated meals</p>
           </header>
-
-          {/* Root Cause Profile Card */}
-          {user && (
-            <div className="animate-slide-up opacity-0" style={{ animationDelay: '25ms', animationFillMode: 'forwards' }}>
-              <RootCauseProfileCard userId={user.id} userProfile={userProfile} />
-            </div>
-          )}
 
           {/* Quick Stats - Only 2 columns now */}
           <div 
@@ -208,99 +198,13 @@ export default function InsightsPage() {
             <BloatHeatmap entries={entries} />
           </div>
 
-          {/* Food Safety List (Traffic Light System) */}
+          {/* Food Insights (Combined Safety List + Potential Triggers) */}
           <div
             className="animate-slide-up opacity-0"
             style={{ animationDelay: '120ms', animationFillMode: 'forwards' }}
           >
-            <FoodSafetyList entries={entries} />
+            <FoodSafetyList entries={entries} potentialTriggers={insights?.potentialTriggers} />
           </div>
-
-          {/* Potential Triggers - The Star Section */}
-          {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
-            <div 
-              className="premium-card p-5 animate-slide-up opacity-0"
-              style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
-            >
-              <div className="flex items-center gap-3 mb-5">
-                <div 
-                  className="p-2.5 rounded-2xl"
-                  style={{
-                    background: 'linear-gradient(135deg, hsl(var(--coral) / 0.2), hsl(var(--peach) / 0.3))',
-                    boxShadow: '0 4px 12px hsl(var(--coral) / 0.2), inset 0 1px 1px hsl(0 0% 100% / 0.2)'
-                  }}
-                >
-                  <AlertTriangle className="w-5 h-5 text-coral" />
-                </div>
-                <div>
-                  <h2 className="font-bold text-foreground text-lg">Potential Triggers</h2>
-                  <p className="text-xs text-muted-foreground">Foods that may cause bloating</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {insights.potentialTriggers.map((trigger) => {
-                  const categoryInfo = getTriggerCategory(trigger.category);
-                  const icon = getIconForTrigger(trigger.category);
-                  return (
-                    <div 
-                      key={trigger.category}
-                      className="p-4 rounded-2xl bg-gradient-to-br from-background/80 to-muted/30 backdrop-blur-sm border border-border/50 transition-all duration-200 hover:scale-[1.01]"
-                      style={{
-                        boxShadow: '0 2px 8px -2px hsl(var(--foreground) / 0.06), 0 6px 20px -4px hsl(var(--foreground) / 0.08), inset 0 1px 1px hsl(0 0% 100% / 0.08)'
-                      }}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{icon}</span>
-                          <span className="font-bold text-foreground">
-                            {categoryInfo?.displayName || trigger.category}
-                          </span>
-                        </div>
-                        <span 
-                          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                            trigger.suspicionScore === 'high' 
-                              ? 'bg-coral/15 text-coral' 
-                              : 'bg-peach/20 text-coral/80'
-                          }`}
-                          style={{
-                            boxShadow: trigger.suspicionScore === 'high' 
-                              ? '0 2px 8px hsl(var(--coral) / 0.15)' 
-                              : '0 2px 8px hsl(var(--peach) / 0.15)'
-                          }}
-                        >
-                          {trigger.suspicionScore === 'high' ? '⚠️ Likely' : '🤔 Possible'}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Found in <span className="font-semibold text-foreground">{trigger.withHighBloating}</span> of your {insights.highBloatingCount} high-bloating meals
-                      </p>
-                      {trigger.topFoods.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-3">
-                          {trigger.topFoods.map(({ food }) => {
-                            const foodIcon = getIconForTrigger(food);
-                            const abbrevFood = abbreviateIngredient(food);
-                            return (
-                              <span 
-                                key={food}
-                                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/30"
-                                style={{
-                                  boxShadow: 'inset 0 1px 2px hsl(var(--foreground) / 0.03)'
-                                }}
-                              >
-                                <span>{foodIcon}</span>
-                                <span>{abbrevFood}</span>
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
 
           {/* Top Foods - with emoji icons */}
