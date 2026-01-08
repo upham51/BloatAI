@@ -6,7 +6,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { StarRating } from '@/components/shared/StarRating';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
-import { AuroraBackground } from '@/components/ui/aurora-background';
+import { AbstractBackground } from '@/components/ui/abstract-background';
 import { GrainTexture } from '@/components/ui/grain-texture';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
 import { motion } from 'framer-motion';
@@ -143,7 +143,7 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <PageTransition>
-        <AuroraBackground className="!min-h-screen">
+        <AbstractBackground className="!min-h-screen">
           <GrainTexture />
           <StaggerContainer className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5 w-full">
             {/* Header with time-based greeting */}
@@ -330,7 +330,7 @@ export default function DashboardPage() {
               </motion.div>
             </StaggerItem>
           </StaggerContainer>
-        </AuroraBackground>
+        </AbstractBackground>
       </PageTransition>
 
       {/* Onboarding Modal - shows for new users */}
