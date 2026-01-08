@@ -188,9 +188,8 @@ export const QUICK_NOTES = [
   { emoji: '😰', label: 'Stressed' },
   { emoji: '🌙', label: 'Ate late' },
   { emoji: '⚡', label: 'Rushed' },
-  { emoji: '🍴', label: 'Rushed eating' },
   { emoji: '😋', label: 'Very hungry' },
-  { emoji: '🍽️', label: 'Restaurant' },
+  { emoji: '🍽️', label: 'Overate' },
   { emoji: '🩸', label: 'On your period' },
 ];
 

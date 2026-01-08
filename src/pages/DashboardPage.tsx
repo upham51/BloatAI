@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Flame, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { StarRating } from '@/components/shared/StarRating';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { AbstractBackground } from '@/components/ui/abstract-background';
@@ -13,10 +12,17 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useProfile } from '@/hooks/useProfile';
-import { RATING_LABELS } from '@/types';
 import { format, subDays, isAfter, differenceInCalendarDays, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getTimeBasedGreeting } from '@/lib/quotes';
+
+const RATING_LABELS: Record<number, string> = {
+  1: 'None',
+  2: 'Mild',
+  3: 'Moderate',
+  4: 'Strong',
+  5: 'Severe',
+};
 
 // Food background images for the weekly average card
 const FOOD_BACKGROUNDS = [
@@ -303,10 +309,37 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground mb-4 line-clamp-1">
                 {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
               </p>
-              <StarRating value={null} onChange={handleRate} size="sm" />
-                <button onClick={handleSkip} className="text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
-                  Skip for now
-                </button>
+
+              {/* Number-based rating system */}
+              <div className="grid grid-cols-5 gap-2">
+                {[1, 2, 3, 4, 5].map(rating => {
+                  // Dynamic color scoring: 1-2 Green, 3 Amber, 4-5 Coral
+                  const getRatingColor = (r: number) => {
+                    if (r <= 2) return 'border-primary bg-primary text-primary-foreground';
+                    if (r === 3) return 'border-yellow-500 bg-yellow-500 text-white';
+                    return 'border-coral bg-coral text-white';
+                  };
+
+                  return (
+                    <button
+                      key={rating}
+                      onClick={() => handleRate(rating)}
+                      className="flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30 transition-all duration-200"
+                    >
+                      <span className="text-2xl font-bold text-foreground">
+                        {rating}
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        {RATING_LABELS[rating]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button onClick={handleSkip} className="text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
+                Skip for now
+              </button>
               </motion.div>
               </StaggerItem>
             )}
