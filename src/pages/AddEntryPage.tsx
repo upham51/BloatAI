@@ -16,6 +16,7 @@ import { DetectedTrigger, validateTriggers, getTriggerCategory } from '@/types';
 import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
 import { haptics } from '@/lib/haptics';
 import { validateMealDescription, retryWithBackoff } from '@/lib/bloatingUtils';
+import { GrainTexture } from '@/components/ui/grain-texture';
 
 const RATING_LABELS: Record<number, string> = {
   1: 'None',
@@ -326,118 +327,115 @@ export default function AddEntryPage() {
 
       {/* Photo Mode - No Toggle */}
       {entryMode === 'photo' && !photoUrl ? (
-        /* Premium Photo Upload UI */
+        /* Premium Photo Upload UI with Bento Grid Layout */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
-          {/* Animated gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-lavender/10 to-sage/5 animate-pulse" style={{ animationDuration: '4s' }} />
+          <GrainTexture />
 
-          {/* Decorative 3D blobs with enhanced glow */}
-          <div className="absolute top-20 left-10 w-48 h-48 bg-gradient-to-br from-primary/30 to-primary/10 rounded-full blur-3xl pointer-events-none animate-float" style={{ animationDuration: '6s' }} />
-          <div className="absolute bottom-32 right-10 w-56 h-56 bg-gradient-to-br from-lavender/40 to-lavender/10 rounded-full blur-3xl pointer-events-none animate-float" style={{ animationDuration: '8s', animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-sage/20 to-transparent rounded-full blur-3xl pointer-events-none animate-pulse" style={{ animationDuration: '5s' }} />
+          {/* Monochromatic minimalist background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-muted/5 to-background" />
 
-          {/* Premium back button with 3D effect */}
+          {/* Premium back button with subtle depth */}
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-6 left-6 p-4 rounded-2xl bg-gradient-to-br from-card via-card/95 to-card/90 backdrop-blur-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:-translate-y-1 active:scale-95 z-10 group"
+            className="absolute top-6 left-6 p-3.5 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/50 transition-all duration-300 hover:bg-card hover:-translate-y-0.5 active:scale-95 z-10 group"
             style={{
-              boxShadow: '0 10px 40px -10px hsl(var(--foreground) / 0.3), 0 0 0 1px hsl(var(--background) / 0.1), inset 0 1px 0 0 hsl(var(--background) / 0.5)'
+              boxShadow: '0 4px 12px -2px hsl(var(--foreground) / 0.08)'
             }}
           >
-            <X className="w-5 h-5 text-foreground transition-transform group-hover:rotate-90" />
+            <X className="w-5 h-5 text-foreground" />
           </button>
 
-          {/* Content with stagger animation */}
-          <div className="relative z-10 text-center mb-12 animate-fade-in">
-            <div className="inline-block mb-4 px-6 py-2 rounded-full bg-gradient-to-r from-primary/20 via-lavender/20 to-primary/20 backdrop-blur-sm border border-primary/30">
-              <p className="text-xs font-bold uppercase tracking-widest bg-gradient-to-r from-primary to-lavender bg-clip-text text-transparent">
-                AI-Powered Food Analysis
-              </p>
-            </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-br from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent tracking-tight mb-3" style={{ textShadow: '0 2px 20px hsl(var(--foreground) / 0.1)' }}>
-              Log Your Meal
+          {/* Content with refined typography */}
+          <div className="relative z-10 text-center mb-14 animate-fade-in">
+            <h1 className="text-[42px] font-black tracking-tight text-foreground mb-2 leading-[0.95]" style={{ letterSpacing: '-0.03em' }}>
+              What's on the menu?
             </h1>
-            <p className="text-base text-muted-foreground font-medium">Snap a photo to analyze your food</p>
+            <p className="text-base text-muted-foreground font-medium">AI will analyze ingredients to predict how you'll feel</p>
           </div>
 
-          <div className="relative z-10 flex gap-6 mb-10">
-            {/* Camera Button with 3D effect */}
+          {/* Bento Grid Layout - Camera as Primary Hero */}
+          <div className="relative z-10 w-full max-w-md space-y-4 mb-8">
+            {/* Primary Action: Camera (Large Hero Card) */}
             <button
               onClick={openCamera}
               disabled={isAnalyzing}
-              className="group relative flex flex-col items-center gap-5 p-10 bg-gradient-to-br from-card via-card/98 to-card/95 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 transition-all duration-500 hover:scale-110 hover:-translate-y-3 active:scale-95 overflow-hidden"
+              className="group relative w-full h-64 bg-card/40 backdrop-blur-2xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] overflow-hidden"
               style={{
-                boxShadow: '0 25px 50px -12px hsl(var(--primary) / 0.25), 0 0 0 1px hsl(var(--background) / 0.1), inset 0 2px 4px 0 hsl(var(--background) / 0.5), 0 10px 30px -10px hsl(var(--primary) / 0.3)',
-                transform: 'perspective(1000px) rotateX(2deg)'
+                boxShadow: '0 20px 60px -15px hsl(var(--foreground) / 0.15), inset 0 1px 0 0 hsl(var(--background) / 0.5)'
               }}
             >
-              {/* Animated gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* Frosted glass effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-card/60 via-card/40 to-card/60 backdrop-blur-xl" />
 
-              {/* Icon container with 3D effect */}
-              <div className="relative p-6 rounded-3xl bg-gradient-to-br from-primary to-primary/90 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6" style={{ boxShadow: '0 15px 35px -5px hsl(var(--primary) / 0.5), inset 0 -2px 8px 0 rgba(0,0,0,0.2), inset 0 2px 4px 0 rgba(255,255,255,0.3)' }}>
-                <Camera className="w-10 h-10 text-primary-foreground drop-shadow-lg" />
+              {/* Content */}
+              <div className="relative h-full flex flex-col items-center justify-center gap-5">
+                {/* Icon with glassmorphism */}
+                <div className="relative p-7 rounded-[1.75rem] bg-primary/10 backdrop-blur-sm border border-primary/20 transition-all duration-300 group-hover:scale-105" style={{ boxShadow: '0 8px 32px -8px hsl(var(--primary) / 0.3), inset 0 2px 4px 0 hsl(var(--background) / 0.3)' }}>
+                  <Camera className="w-12 h-12 text-primary" />
+                </div>
+
+                <div className="text-center">
+                  <span className="block font-bold text-2xl text-foreground mb-1 tracking-tight">Snap a Photo</span>
+                  <span className="text-sm text-muted-foreground">Most accurate analysis</span>
+                </div>
               </div>
-
-              <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">Camera</span>
             </button>
 
-            {/* Gallery Button with 3D effect */}
-            <button
-              onClick={openGallery}
-              disabled={isAnalyzing}
-              className="group relative flex flex-col items-center gap-5 p-10 bg-gradient-to-br from-card via-card/98 to-card/95 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 transition-all duration-500 hover:scale-110 hover:-translate-y-3 active:scale-95 overflow-hidden"
-              style={{
-                boxShadow: '0 25px 50px -12px hsl(var(--lavender) / 0.25), 0 0 0 1px hsl(var(--background) / 0.1), inset 0 2px 4px 0 hsl(var(--background) / 0.5), 0 10px 30px -10px hsl(var(--lavender) / 0.3)',
-                transform: 'perspective(1000px) rotateX(2deg)'
-              }}
-            >
-              {/* Animated gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-lavender/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            {/* Secondary Actions: Gallery & Text (Side by Side) */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Gallery */}
+              <button
+                onClick={openGallery}
+                disabled={isAnalyzing}
+                className="group relative h-40 bg-card/40 backdrop-blur-2xl rounded-[1.5rem] border border-border/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] overflow-hidden"
+                style={{
+                  boxShadow: '0 12px 40px -10px hsl(var(--foreground) / 0.1), inset 0 1px 0 0 hsl(var(--background) / 0.5)'
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-card/60 via-card/40 to-card/60 backdrop-blur-xl" />
 
-              {/* Icon container with 3D effect */}
-              <div className="relative p-6 rounded-3xl bg-gradient-to-br from-lavender to-lavender/90 transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6" style={{ boxShadow: '0 15px 35px -5px hsl(var(--lavender) / 0.5), inset 0 -2px 8px 0 rgba(0,0,0,0.2), inset 0 2px 4px 0 rgba(255,255,255,0.3)' }}>
-                <ImageIcon className="w-10 h-10 text-secondary-foreground drop-shadow-lg" />
-              </div>
+                <div className="relative h-full flex flex-col items-center justify-center gap-3">
+                  <div className="p-4 rounded-2xl bg-lavender/10 backdrop-blur-sm border border-lavender/20 transition-all duration-300 group-hover:scale-105" style={{ boxShadow: '0 4px 16px -4px hsl(var(--lavender) / 0.2)' }}>
+                    <ImageIcon className="w-7 h-7 text-lavender" />
+                  </div>
+                  <span className="font-semibold text-sm text-foreground tracking-tight">Gallery</span>
+                </div>
+              </button>
 
-              <span className="font-bold text-lg text-foreground group-hover:text-lavender transition-colors">Gallery</span>
-            </button>
+              {/* Text Entry */}
+              <button
+                onClick={() => setEntryMode('text')}
+                className="group relative h-40 bg-card/40 backdrop-blur-2xl rounded-[1.5rem] border border-border/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] overflow-hidden"
+                style={{
+                  boxShadow: '0 12px 40px -10px hsl(var(--foreground) / 0.1), inset 0 1px 0 0 hsl(var(--background) / 0.5)'
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-card/60 via-card/40 to-card/60 backdrop-blur-xl" />
+
+                <div className="relative h-full flex flex-col items-center justify-center gap-3">
+                  <div className="p-4 rounded-2xl bg-sage/10 backdrop-blur-sm border border-sage/20 transition-all duration-300 group-hover:scale-105" style={{ boxShadow: '0 4px 16px -4px hsl(var(--sage) / 0.2)' }}>
+                    <Pencil className="w-7 h-7 text-sage" />
+                  </div>
+                  <span className="font-semibold text-sm text-foreground tracking-tight">Text Entry</span>
+                </div>
+              </button>
+            </div>
           </div>
 
-          {/* Text Only Link with premium styling */}
-          <button
-            onClick={() => setEntryMode('text')}
-            className="relative z-10 group flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-muted/50 to-muted/30 backdrop-blur-sm border border-border/50 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:bg-primary/5"
-          >
-            <Pencil className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-            <span className="text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors">
-              Or describe your meal with text
-            </span>
-          </button>
-
-          {/* Tips with enhanced styling */}
-          <div className="relative z-10 mt-10 flex items-start gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-primary/5 to-lavender/5 backdrop-blur-sm border border-primary/20 max-w-md">
-            <div className="flex-shrink-0 text-2xl">💡</div>
+          {/* Clean tip section */}
+          <div className="relative z-10 flex items-start gap-2.5 max-w-md">
+            <span className="text-muted-foreground/50 text-sm flex-shrink-0">—</span>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              <span className="font-semibold text-foreground">Pro tip:</span> Good lighting helps our AI detect ingredients more accurately
+              Good lighting helps AI detect ingredients more accurately
             </p>
           </div>
 
           {/* Floating animation keyframes */}
           <style>{`
-            @keyframes float {
-              0%, 100% {
-                transform: translateY(0px) scale(1);
-              }
-              50% {
-                transform: translateY(-20px) scale(1.05);
-              }
-            }
-
             @keyframes fade-in {
               from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(10px);
               }
               to {
                 opacity: 1;
@@ -445,12 +443,8 @@ export default function AddEntryPage() {
               }
             }
 
-            .animate-float {
-              animation: float 6s ease-in-out infinite;
-            }
-
             .animate-fade-in {
-              animation: fade-in 0.8s ease-out;
+              animation: fade-in 0.6s ease-out;
             }
           `}</style>
         </div>

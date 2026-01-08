@@ -19,6 +19,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { getTriggerCategory } from '@/types';
 import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
 import { generateComprehensiveInsight } from '@/lib/insightsAnalysis';
+import { GrainTexture } from '@/components/ui/grain-texture';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
@@ -57,6 +58,7 @@ export default function InsightsPage() {
     return (
       <AppLayout>
         <div className="fixed inset-0 bg-background z-50 flex flex-col items-center justify-center">
+          <GrainTexture />
           <InsightsLoader />
           <p className="mt-6 text-lg font-semibold text-primary animate-pulse">
             Analyzing your insights
@@ -73,6 +75,7 @@ export default function InsightsPage() {
     return (
       <AppLayout>
         <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10">
+          <GrainTexture />
           <div className="absolute top-20 left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute top-60 right-5 w-32 h-32 bg-lavender/20 rounded-full blur-3xl pointer-events-none" />
 
@@ -111,6 +114,7 @@ export default function InsightsPage() {
   return (
     <AppLayout>
       <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10">
+        <GrainTexture />
         {/* Decorative blobs */}
         <div className="absolute top-20 left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-60 right-5 w-32 h-32 bg-coral/10 rounded-full blur-3xl pointer-events-none" />
