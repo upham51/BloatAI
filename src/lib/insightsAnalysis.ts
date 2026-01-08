@@ -357,12 +357,7 @@ function generateSummary(input: SummaryInput) {
 
     const hasDysbiosisIssues = input.quizHighRiskCategories.some(c => c.category === 'dysbiosis');
     if (hasDysbiosisIssues && input.potentialTriggers.length > 0) {
-      const fodmapTriggers = input.potentialTriggers.filter(t => t.category.startsWith('fodmaps'));
-      if (fodmapTriggers.length > 0) {
-        rootCauseConnections.push(
-          `Your root cause assessment shows ${input.quizHighRiskCategories.find(c => c.category === 'dysbiosis')?.level} microbial imbalance risk, which may explain your sensitivity to FODMAPs`
-        );
-      }
+      // FODMAP information removed per user request
     }
 
     // If no specific connections, mention top risk category

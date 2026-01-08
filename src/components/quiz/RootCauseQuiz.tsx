@@ -130,13 +130,13 @@ export function RootCauseQuiz({ isOpen, onClose, userId, userProfile, onComplete
       const aiReportActionSteps = generateActionSteps(scores, topCauses);
       const aiReportLongTerm = generateLongTermRecommendations(scores, topCauses);
 
-      // Calculate retake number using a subquery - single fast query
-      const { data: countData } = await (supabase as any)
+      // Calculate retake number - count existing assessments
+      const { count } = await (supabase as any)
         .from('root_cause_assessments')
-        .select('id', { count: 'exact', head: true })
+        .select('*', { count: 'exact', head: true })
         .eq('user_id', userId);
 
-      const retakeNumber = (countData?.length || 0) + 1;
+      const retakeNumber = (count || 0) + 1;
 
       // Prepare assessment data - ensure all fields are valid
       const assessmentData = {

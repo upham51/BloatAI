@@ -5,9 +5,10 @@ interface HealthScoreGaugeProps {
   avgBloating: number; // 0-5 scale
   totalMeals: number;
   lowBloatingCount: number;
+  highBloatingCount?: number;
 }
 
-export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount }: HealthScoreGaugeProps) {
+export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount, highBloatingCount = 0 }: HealthScoreGaugeProps) {
   const healthScore = useMemo(() => {
     // Convert average bloating (1-5) to health score (0-100)
     // Lower bloating = higher health score
@@ -49,7 +50,7 @@ export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount }: 
         level: 'Needs Attention',
         color: 'hsl(var(--coral))',
         bgColor: 'from-coral/20 to-coral/10',
-        message: 'Focus on identifying and avoiding your triggers.',
+        message: 'Keep tracking to identify patterns and improve.',
       };
     }
   }, [healthScore]);
@@ -143,6 +144,12 @@ export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount }: 
           <span className="text-muted-foreground">Comfortable Meals</span>
           <span className="font-semibold text-foreground">
             {lowBloatingCount}/{totalMeals} ({Math.round((lowBloatingCount / totalMeals) * 100)}%)
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Uncomfortable Meals</span>
+          <span className="font-semibold text-foreground">
+            {highBloatingCount}/{totalMeals} ({Math.round((highBloatingCount / totalMeals) * 100)}%)
           </span>
         </div>
       </div>

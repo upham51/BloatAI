@@ -58,9 +58,9 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
               data.suspicion === 'medium' ? 'text-peach' :
               'text-primary'
             }`}>
-              {data.suspicion === 'high' ? '⚠️ High' :
-               data.suspicion === 'medium' ? '🤔 Medium' :
-               '✓ Low'}
+              {data.suspicion === 'high' ? 'High' :
+               data.suspicion === 'medium' ? 'Medium' :
+               'Low'}
             </span>
           </div>
         </div>
