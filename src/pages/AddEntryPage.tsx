@@ -327,7 +327,7 @@ export default function AddEntryPage() {
 
       {/* Photo Mode - No Toggle */}
       {entryMode === 'photo' && !photoUrl ? (
-        /* Premium Photo Upload UI - Clean & Modern */}
+        /* Premium Photo Upload UI - Clean & Modern */
         <div className="flex-1 flex flex-col px-6 py-8 relative overflow-hidden">
           {/* Back button - Clean minimal design */}
           <button

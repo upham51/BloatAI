@@ -165,12 +165,12 @@ export default function DashboardPage() {
                   </Button>
                 </motion.div>
 
-            <div className="flex flex-col gap-2.5 items-center text-center">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xl font-semibold text-muted-foreground tracking-tight">
+            <div className="flex flex-col gap-2.5 items-center text-center px-14">
+              <div className="flex flex-col gap-0.5 w-full">
+                <span className="text-xl font-semibold text-muted-foreground tracking-tight whitespace-nowrap">
                   {greeting},
                 </span>
-                <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent pb-1.5">
+                <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent pb-1.5 truncate">
                   {firstName}
                 </h1>
               </div>

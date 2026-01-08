@@ -95,15 +95,16 @@ export function ScanningAnimation({ imageUrl, onComplete }: ScanningAnimationPro
           </div>
         </div>
       </div>
+      </div>
 
       {/* Bottom section - White area with AI Scanning status */}
       <div className="bg-background h-64 flex flex-col items-center justify-center px-6 space-y-5">
         {/* Loading skeleton for content area */}
         <div className="w-full max-w-md space-y-3 animate-pulse">
           {/* Title skeleton */}
-          <div className="h-4 bg-muted rounded-full w-3/4 mx-auto" />
-          <div className="h-3 bg-muted rounded-full w-full" />
-          <div className="h-3 bg-muted rounded-full w-5/6 mx-auto" />
+          <div className="h-4 bg-muted rounded-full w-3/4 mx-auto"></div>
+          <div className="h-3 bg-muted rounded-full w-full"></div>
+          <div className="h-3 bg-muted rounded-full w-5/6 mx-auto"></div>
         </div>
 
         {/* AI Scanning status */}
@@ -114,7 +115,7 @@ export function ScanningAnimation({ imageUrl, onComplete }: ScanningAnimationPro
               background: 'hsl(var(--primary))',
               boxShadow: '0 0 15px hsl(var(--primary) / 0.6)'
             }}
-          />
+          ></div>
           <h2 className="text-lg font-bold text-primary">
             AI Scanning
           </h2>
@@ -129,7 +130,7 @@ export function ScanningAnimation({ imageUrl, onComplete }: ScanningAnimationPro
                 width: `${scanPosition}%`,
                 boxShadow: '0 0 10px hsl(var(--primary) / 0.4)'
               }}
-            />
+            ></div>
           </div>
           <div className="flex items-center justify-center mt-2 gap-1">
             <span className="text-xl font-bold text-primary">
