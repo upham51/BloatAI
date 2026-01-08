@@ -50,15 +50,15 @@ export function NotesInput({ value, onChange, maxLength = 200 }: NotesInputProps
         <span className="text-xs text-muted-foreground">{value.length}/{maxLength}</span>
       </div>
       
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {QUICK_NOTES.map((note) => (
           <button
             key={note.label}
             type="button"
             onClick={() => addQuickNote(note.label)}
-            className={`px-4 py-2.5 text-sm font-semibold rounded-xl border-2 transition-all duration-200 active:scale-95 ${
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-xl border-2 transition-all duration-200 active:scale-95 ${
               isNoteSelected(note.label)
-                ? 'border-primary bg-primary text-primary-foreground shadow-md scale-105'
+                ? 'border-primary bg-primary text-primary-foreground shadow-md'
                 : 'border-border/50 bg-card hover:border-primary/50 hover:bg-primary/5 text-foreground'
             }`}
             style={
@@ -67,8 +67,8 @@ export function NotesInput({ value, onChange, maxLength = 200 }: NotesInputProps
                 : undefined
             }
           >
-            <span className="text-base mr-2">{note.emoji}</span>
-            {note.label}
+            <span className="text-lg">{note.emoji}</span>
+            <span className="truncate">{note.label}</span>
           </button>
         ))}
       </div>

@@ -109,7 +109,7 @@ Return ONLY valid JSON (no markdown, no code blocks):
     {"name": "Powdered sugar", "detail": "refined sugar", "is_trigger": true, "trigger_category": "refined-sugar"}
   ],
   "triggers": [
-    {"category": "fodmaps-fructans", "food": "wheat flour (pancakes)"},
+    {"category": "fodmaps-fructans", "food": "wheat flour"},
     {"category": "fodmaps-lactose", "food": "buttermilk"},
     {"category": "dairy", "food": "whipped cream"},
     {"category": "fodmaps-fructose", "food": "maple syrup"},
@@ -117,6 +117,14 @@ Return ONLY valid JSON (no markdown, no code blocks):
     {"category": "refined-sugar", "food": "powdered sugar"}
   ]
 }
+
+TRIGGER FOOD NAMING RULES:
+- Use complete, clear ingredient names (e.g., "honey glaze" not "glaze on")
+- Be specific but concise (e.g., "wheat bread" not "wheat flour in bread")
+- Avoid partial phrases or unclear terms
+- Use the actual ingredient name that causes the trigger
+- Examples: "onions", "milk", "honey", "wheat pasta", "fried chicken"
+- Bad examples: "glaze on", "with cream", "in sauce"
 
 VALID CATEGORY VALUES (use ONLY these exact strings):
 - "fodmaps-fructans" - Wheat, bread, pasta, onions, garlic, shallots

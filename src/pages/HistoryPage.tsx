@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { RatingScale } from '@/components/shared/RatingScale';
 import { EditMealModal } from '@/components/meals/EditMealModal';
 import { EditTitleModal } from '@/components/meals/EditTitleModal';
 import { MealPhoto } from '@/components/meals/MealPhoto';
@@ -298,13 +297,44 @@ export default function HistoryPage() {
       <Dialog open={!!ratingEntry} onOpenChange={() => setRatingEntry(null)}>
         <DialogContent className="max-w-sm mx-auto bg-card/95 backdrop-blur-xl border-border/50 rounded-3xl">
           <DialogHeader className="text-center">
-            <DialogTitle className="text-xl font-bold">Rate Your Meal</DialogTitle>
+            <DialogTitle className="text-xl font-bold">How bloated?</DialogTitle>
             <DialogDescription className="text-muted-foreground">
               How did <span className="font-medium text-foreground">{ratingEntry?.meal_description}</span> make you feel?
             </DialogDescription>
           </DialogHeader>
-          <div className="py-6">
-            <RatingScale value={null} onChange={handleRate} size="lg" />
+          <div className="py-6 px-2">
+            <div className="grid grid-cols-5 gap-2">
+              {[1, 2, 3, 4, 5].map(rating => {
+                // Dynamic color scoring: 1-2 Green, 3 Amber, 4-5 Coral
+                const getRatingColor = (r: number) => {
+                  if (r <= 2) return 'border-primary bg-primary text-primary-foreground';
+                  if (r === 3) return 'border-yellow-500 bg-yellow-500 text-white';
+                  return 'border-coral bg-coral text-white';
+                };
+
+                return (
+                  <button
+                    key={rating}
+                    onClick={() => handleRate(rating)}
+                    className={`flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-2xl border-2 transition-all duration-200 hover:scale-105 ${getRatingColor(rating)}`}
+                    style={{
+                      boxShadow: rating <= 2
+                        ? '0 8px 20px hsl(var(--primary) / 0.35)'
+                        : rating === 3
+                        ? '0 8px 20px rgba(234, 179, 8, 0.35)'
+                        : '0 8px 20px hsl(var(--coral) / 0.35)'
+                    }}
+                  >
+                    <span className="text-2xl font-bold">
+                      {rating}
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider opacity-90">
+                      {RATING_LABELS[rating]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <button onClick={handleSkip} className="w-full text-sm text-muted-foreground hover:text-foreground py-3 rounded-xl transition-colors hover:bg-muted/30">
             Skip for now
