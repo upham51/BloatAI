@@ -129,76 +129,142 @@ export function FoodSafetyList({ entries, potentialTriggers = [] }: FoodSafetyLi
     }
   };
 
+  // Separate foods by safety level for better organization
+  const foodsToAvoid = foodInsights.filter(f => f.safetyLevel === 'danger');
+  const safeFoods = foodInsights.filter(f => f.safetyLevel === 'safe');
+  const cautionFoods = foodInsights.filter(f => f.safetyLevel === 'caution');
+
   return (
-    <div className="premium-card p-6">
-      <div className="mb-6">
-        <h3 className="font-bold text-foreground text-lg">Your Food Insights</h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          Foods ranked by how they affect you
-        </p>
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 mb-6 text-xs">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-coral/10 border border-coral/30">
-          <div className="w-2 h-2 rounded-full bg-coral" />
-          <span className="text-foreground font-medium">Avoid</span>
+    <div className="premium-card p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-2.5 rounded-xl bg-gradient-to-br from-coral/20 to-mint/20">
+          <span className="text-xl">📊</span>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/30">
-          <div className="w-2 h-2 rounded-full bg-yellow-500" />
-          <span className="text-foreground font-medium">Caution</span>
-        </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-mint/10 border border-mint/30">
-          <div className="w-2 h-2 rounded-full bg-mint" />
-          <span className="text-foreground font-medium">Safe</span>
+        <div>
+          <h3 className="font-bold text-foreground text-lg">Your Food Insights</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Personalized based on your bloating patterns
+          </p>
         </div>
       </div>
 
-      {/* Food Grid - 2x2 layout */}
-      <div className="grid grid-cols-2 gap-3">
-        {foodInsights.map((item) => (
-          <div
-            key={item.food}
-            className={`relative p-4 rounded-2xl bg-gradient-to-br ${getBgGradient(item.safetyLevel)}
-              border-2 ${getBorderColor(item.safetyLevel)} backdrop-blur-sm
-              transition-all duration-300 hover:scale-105 hover:shadow-lg
-              flex flex-col items-center text-center gap-2`}
-          >
-            {/* Potential Trigger Badge */}
-            {item.isPotentialTrigger && (
-              <div className="absolute top-2 right-2">
-                <div className="w-2 h-2 rounded-full bg-coral animate-pulse" />
+      {/* Foods to AVOID Section - Most Important */}
+      {foodsToAvoid.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-1 w-1 rounded-full bg-coral animate-pulse" />
+            <h4 className="text-sm font-bold text-coral uppercase tracking-wide">
+              Foods to Avoid
+            </h4>
+          </div>
+          <div className="space-y-2.5">
+            {foodsToAvoid.slice(0, 4).map((item) => {
+              // Calculate bloating rate
+              const bloatRate = Math.round((item.count / foodInsights.reduce((sum, f) => sum + f.count, 0)) * 100);
+
+              return (
+                <div
+                  key={item.food}
+                  className="p-4 rounded-xl bg-coral/5 border border-coral/20 hover:border-coral/40 transition-all"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl mt-0.5">{item.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-foreground">{item.food}</span>
+                        {item.isPotentialTrigger && (
+                          <span className="px-2 py-0.5 rounded-full bg-coral/20 text-[10px] font-bold text-coral uppercase">
+                            Trigger
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Logged in <span className="font-semibold text-foreground">{item.count}</span> meal{item.count !== 1 ? 's' : ''} •
+                        Consistently causes high bloating
+                      </p>
+                      <p className="text-xs font-medium text-coral mt-1.5">
+                        ⚠️ Consider eliminating for 1-2 weeks to test
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Safe Foods Section - What Works */}
+      {safeFoods.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-1 w-1 rounded-full bg-mint" />
+            <h4 className="text-sm font-bold text-mint uppercase tracking-wide">
+              Safe for You
+            </h4>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {safeFoods.slice(0, 6).map((item) => (
+              <div
+                key={item.food}
+                className="p-3 rounded-xl bg-mint/5 border border-mint/20 hover:border-mint/40 transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{item.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-foreground text-sm truncate">
+                      {item.food}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {item.count}x • Low bloating
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
+            ))}
+          </div>
+          <p className="text-xs text-mint font-medium">
+            ✓ These foods consistently work well for you
+          </p>
+        </div>
+      )}
 
-            {/* Food Icon */}
-            <div className="text-4xl mb-1">
-              {item.icon}
-            </div>
-
-            {/* Food Name */}
-            <div className="font-semibold text-foreground text-sm leading-tight min-h-[2.5rem] flex items-center">
-              {item.food}
-            </div>
-
-            {/* Meal Count Badge */}
-            <div className="mt-auto">
-              <div className="px-3 py-1 rounded-full bg-background/60 backdrop-blur-sm border border-border/50">
-                <span className="text-xs font-bold text-foreground">{item.count}</span>
-                <span className="text-xs text-muted-foreground ml-1">
-                  {item.count === 1 ? 'meal' : 'meals'}
+      {/* Caution Foods - Monitor */}
+      {cautionFoods.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-1 w-1 rounded-full bg-yellow-500" />
+            <h4 className="text-sm font-bold text-yellow-600 uppercase tracking-wide">
+              Monitor Closely
+            </h4>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {cautionFoods.slice(0, 4).map((item) => (
+              <div
+                key={item.food}
+                className="px-3 py-2 rounded-full bg-yellow-500/5 border border-yellow-500/20 hover:border-yellow-500/40 transition-all"
+              >
+                <span className="text-sm font-medium text-foreground">
+                  {item.icon} {item.food}
+                </span>
+                <span className="text-xs text-muted-foreground ml-1.5">
+                  ({item.count})
                 </span>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+          <p className="text-xs text-muted-foreground">
+            Mixed results • Try in smaller portions or different preparations
+          </p>
+        </div>
+      )}
 
-      {/* Info Tip */}
-      <div className="mt-6 p-4 rounded-xl bg-muted/20 border border-border/30">
-        <p className="text-xs text-muted-foreground text-center">
-          <span className="font-semibold text-foreground">💡</span> Red dot indicates potential trigger.
-          Keep logging to refine your insights!
+      {/* Action Tip */}
+      <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+        <p className="text-xs text-foreground">
+          <span className="font-bold">💡 Action Plan:</span> Start by eliminating red-flagged foods,
+          stick to your safe foods, and keep logging to refine these insights.
         </p>
       </div>
     </div>
