@@ -315,7 +315,7 @@ export default function AddEntryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10 flex flex-col max-w-lg mx-auto">
+    <div className="min-h-screen bg-background flex flex-col max-w-lg mx-auto">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -327,115 +327,128 @@ export default function AddEntryPage() {
 
       {/* Photo Mode - No Toggle */}
       {entryMode === 'photo' && !photoUrl ? (
-        /* Premium Photo Upload UI with Bento Grid Layout */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
-          <GrainTexture />
-
-          {/* Monochromatic minimalist background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-background via-muted/5 to-background" />
-
-          {/* Premium back button with subtle depth */}
+        /* Premium Photo Upload UI - Clean & Modern */}
+        <div className="flex-1 flex flex-col px-6 py-8 relative overflow-hidden">
+          {/* Back button - Clean minimal design */}
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-6 left-6 p-3.5 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/50 transition-all duration-300 hover:bg-card hover:-translate-y-0.5 active:scale-95 z-10 group"
-            style={{
-              boxShadow: '0 4px 12px -2px hsl(var(--foreground) / 0.08)'
-            }}
+            className="absolute top-6 left-6 p-2.5 rounded-full bg-muted/80 backdrop-blur-sm transition-all duration-200 hover:bg-muted active:scale-95 z-10"
           >
             <X className="w-5 h-5 text-foreground" />
           </button>
 
-          {/* Content with refined typography */}
-          <div className="relative z-10 text-center mb-14 animate-fade-in">
-            <h1 className="text-[42px] font-black tracking-tight text-foreground mb-2 leading-[0.95]" style={{ letterSpacing: '-0.03em' }}>
-              What's on the menu?
+          {/* Header Section with stagger animation */}
+          <div className="mt-16 mb-12 animate-slide-down">
+            <h1 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
+              Log Your Meal
             </h1>
-            <p className="text-base text-muted-foreground font-medium">AI will analyze ingredients to predict how you'll feel</p>
-          </div>
-
-          {/* Bento Grid Layout - Camera as Primary Hero */}
-          <div className="relative z-10 w-full max-w-md space-y-4 mb-8">
-            {/* Primary Action: Camera (Large Hero Card) */}
-            <button
-              onClick={openCamera}
-              disabled={isAnalyzing}
-              className="group relative w-full h-64 bg-card/40 backdrop-blur-2xl rounded-[2rem] border border-border/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] overflow-hidden"
-              style={{
-                boxShadow: '0 20px 60px -15px hsl(var(--foreground) / 0.15), inset 0 1px 0 0 hsl(var(--background) / 0.5)'
-              }}
-            >
-              {/* Frosted glass effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-card/60 via-card/40 to-card/60 backdrop-blur-xl" />
-
-              {/* Content */}
-              <div className="relative h-full flex flex-col items-center justify-center gap-5">
-                {/* Icon with glassmorphism */}
-                <div className="relative p-7 rounded-[1.75rem] bg-primary/10 backdrop-blur-sm border border-primary/20 transition-all duration-300 group-hover:scale-105" style={{ boxShadow: '0 8px 32px -8px hsl(var(--primary) / 0.3), inset 0 2px 4px 0 hsl(var(--background) / 0.3)' }}>
-                  <Camera className="w-12 h-12 text-primary" />
-                </div>
-
-                <div className="text-center">
-                  <span className="block font-bold text-2xl text-foreground mb-1 tracking-tight">Snap a Photo</span>
-                  <span className="text-sm text-muted-foreground">Most accurate analysis</span>
-                </div>
-              </div>
-            </button>
-
-            {/* Secondary Actions: Gallery & Text (Side by Side) */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Gallery */}
-              <button
-                onClick={openGallery}
-                disabled={isAnalyzing}
-                className="group relative h-40 bg-card/40 backdrop-blur-2xl rounded-[1.5rem] border border-border/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] overflow-hidden"
-                style={{
-                  boxShadow: '0 12px 40px -10px hsl(var(--foreground) / 0.1), inset 0 1px 0 0 hsl(var(--background) / 0.5)'
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-card/60 via-card/40 to-card/60 backdrop-blur-xl" />
-
-                <div className="relative h-full flex flex-col items-center justify-center gap-3">
-                  <div className="p-4 rounded-2xl bg-lavender/10 backdrop-blur-sm border border-lavender/20 transition-all duration-300 group-hover:scale-105" style={{ boxShadow: '0 4px 16px -4px hsl(var(--lavender) / 0.2)' }}>
-                    <ImageIcon className="w-7 h-7 text-lavender" />
-                  </div>
-                  <span className="font-semibold text-sm text-foreground tracking-tight">Gallery</span>
-                </div>
-              </button>
-
-              {/* Text Entry */}
-              <button
-                onClick={() => setEntryMode('text')}
-                className="group relative h-40 bg-card/40 backdrop-blur-2xl rounded-[1.5rem] border border-border/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] overflow-hidden"
-                style={{
-                  boxShadow: '0 12px 40px -10px hsl(var(--foreground) / 0.1), inset 0 1px 0 0 hsl(var(--background) / 0.5)'
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-card/60 via-card/40 to-card/60 backdrop-blur-xl" />
-
-                <div className="relative h-full flex flex-col items-center justify-center gap-3">
-                  <div className="p-4 rounded-2xl bg-sage/10 backdrop-blur-sm border border-sage/20 transition-all duration-300 group-hover:scale-105" style={{ boxShadow: '0 4px 16px -4px hsl(var(--sage) / 0.2)' }}>
-                    <Pencil className="w-7 h-7 text-sage" />
-                  </div>
-                  <span className="font-semibold text-sm text-foreground tracking-tight">Text Entry</span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Clean tip section */}
-          <div className="relative z-10 flex items-start gap-2.5 max-w-md">
-            <span className="text-muted-foreground/50 text-sm flex-shrink-0">—</span>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Good lighting helps AI detect ingredients more accurately
+            <p className="text-base text-muted-foreground">
+              Snap a photo to analyze your food
             </p>
           </div>
 
-          {/* Floating animation keyframes */}
+          {/* Action Cards - Clean Card Design like MyFitnessPal */}
+          <div className="flex-1 flex flex-col justify-center space-y-4 max-w-md mx-auto w-full">
+            {/* Camera Card - Primary Action */}
+            <button
+              onClick={openCamera}
+              disabled={isAnalyzing}
+              className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up"
+              style={{ animationDelay: '100ms' }}
+            >
+              <div className="flex items-center gap-6">
+                {/* Icon */}
+                <div className="flex-shrink-0 w-20 h-20 rounded-2xl bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Camera className="w-9 h-9 text-emerald-600 dark:text-emerald-400" />
+                </div>
+
+                {/* Text */}
+                <div className="flex-1 text-left">
+                  <h3 className="text-xl font-bold text-foreground mb-1">Camera</h3>
+                  <p className="text-sm text-muted-foreground">Take a photo of your meal</p>
+                </div>
+
+                {/* Arrow indicator */}
+                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+
+            {/* Gallery Card */}
+            <button
+              onClick={openGallery}
+              disabled={isAnalyzing}
+              className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up"
+              style={{ animationDelay: '200ms' }}
+            >
+              <div className="flex items-center gap-6">
+                {/* Icon */}
+                <div className="flex-shrink-0 w-20 h-20 rounded-2xl bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <ImageIcon className="w-9 h-9 text-blue-600 dark:text-blue-400" />
+                </div>
+
+                {/* Text */}
+                <div className="flex-1 text-left">
+                  <h3 className="text-xl font-bold text-foreground mb-1">Gallery</h3>
+                  <p className="text-sm text-muted-foreground">Choose from your photos</p>
+                </div>
+
+                {/* Arrow indicator */}
+                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+
+            {/* Divider with text */}
+            <div className="flex items-center gap-4 py-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+              <div className="flex-1 h-px bg-border"></div>
+              <span className="text-xs text-muted-foreground font-medium">OR</span>
+              <div className="flex-1 h-px bg-border"></div>
+            </div>
+
+            {/* Text Entry Card */}
+            <button
+              onClick={() => setEntryMode('text')}
+              className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up"
+              style={{ animationDelay: '400ms' }}
+            >
+              <div className="flex items-center gap-6">
+                {/* Icon */}
+                <div className="flex-shrink-0 w-20 h-20 rounded-2xl bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Pencil className="w-9 h-9 text-purple-600 dark:text-purple-400" />
+                </div>
+
+                {/* Text */}
+                <div className="flex-1 text-left">
+                  <h3 className="text-xl font-bold text-foreground mb-1">Type It Out</h3>
+                  <p className="text-sm text-muted-foreground">Describe your meal with text</p>
+                </div>
+
+                {/* Arrow indicator */}
+                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+          </div>
+
+          {/* Pro Tip - Bottom */}
+          <div className="mt-auto pt-8 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-0.5">Pro tip</p>
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  Good lighting helps our AI detect ingredients more accurately
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Animation keyframes */}
           <style>{`
-            @keyframes fade-in {
+            @keyframes slide-down {
               from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(-20px);
               }
               to {
                 opacity: 1;
@@ -443,8 +456,24 @@ export default function AddEntryPage() {
               }
             }
 
-            .animate-fade-in {
-              animation: fade-in 0.6s ease-out;
+            @keyframes fade-in-up {
+              from {
+                opacity: 0;
+                transform: translateY(20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+
+            .animate-slide-down {
+              animation: slide-down 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .animate-fade-in-up {
+              animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+              animation-fill-mode: both;
             }
           `}</style>
         </div>
