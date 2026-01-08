@@ -545,7 +545,7 @@ export function getIconForTrigger(categoryOrFood: string): string {
   }
   
   // Check for whole-word matches only (avoid "steak" matching "tea")
-  const words = lower.split(/[\s\-\/]+/);
+  const words = lower.split(/[\s\-/]+/);
   for (const word of words) {
     if (TRIGGER_ICONS[word]) {
       return TRIGGER_ICONS[word];

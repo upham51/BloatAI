@@ -35,10 +35,10 @@ export function TriggerChipEditable({ trigger, onRemove }: TriggerChipEditablePr
             </span>
           )}
           {trigger.confidence > 0 && (
-            <span 
+            <span
               className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium w-fit"
-              style={{ 
-                backgroundColor: `${categoryInfo?.color}20` || 'hsl(var(--primary) / 0.1)',
+              style={{
+                backgroundColor: categoryInfo?.color ? `${categoryInfo.color}20` : 'hsl(var(--primary) / 0.1)',
                 color: categoryInfo?.color || 'hsl(var(--primary))'
               }}
             >
