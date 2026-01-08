@@ -301,7 +301,7 @@ export default function DashboardPage() {
                 >
               <p className="font-bold text-foreground mb-1">Rate your last meal</p>
               <p className="text-sm text-muted-foreground mb-4 line-clamp-1">
-                {pendingEntry.meal_title || pendingEntry.meal_description}
+                {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
               </p>
               <StarRating value={null} onChange={handleRate} size="sm" />
                 <button onClick={handleSkip} className="text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">

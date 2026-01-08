@@ -38,75 +38,71 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
   };
 
   return (
-    <div className="premium-card p-5 space-y-4">
+    <div className="premium-card p-6 space-y-5">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-sage/20">
-            <Heart className="w-5 h-5 text-primary" />
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-mint/30 to-sage/20">
+            <Heart className="w-5 h-5 text-mint" />
           </div>
           <div>
             <h3 className="font-bold text-foreground text-lg">
               Safe Alternatives
             </h3>
             <p className="text-xs text-muted-foreground">
-              Try these instead
+              Better choices for your gut
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground">{currentIndex + 1}</span>
-          <span>/</span>
-          <span>{recommendations.length}</span>
-        </div>
+        {recommendations.length > 1 && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/30">
+            <span className="font-bold text-foreground text-sm">{currentIndex + 1}</span>
+            <span className="text-xs text-muted-foreground">/</span>
+            <span className="text-xs text-muted-foreground">{recommendations.length}</span>
+          </div>
+        )}
       </div>
 
       {/* Swipeable Card */}
       <div className="relative">
-        <div
-          className="overflow-hidden rounded-2xl transition-all duration-300"
-          style={{
-            background: `linear-gradient(135deg, ${currentRec.color}15, ${currentRec.color}08)`,
-            border: `1.5px solid ${currentRec.color}30`,
-          }}
-        >
-          <div className="p-6 space-y-4">
-            {/* Header with sparkle */}
-            <div className="flex items-start justify-between">
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-lavender/10 via-mint/5 to-sage/10 border border-border/50 transition-all duration-300">
+          <div className="p-6 space-y-5">
+            {/* Header section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-xs font-bold uppercase tracking-wide text-primary">
+                  Instead of
+                </span>
+              </div>
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles
-                    className="w-4 h-4"
-                    style={{ color: currentRec.color }}
-                  />
-                  <span
-                    className="text-xs font-semibold uppercase tracking-wide"
-                    style={{ color: currentRec.color }}
-                  >
-                    Instead of
-                  </span>
-                </div>
-                <h4 className="text-xl font-bold text-foreground mb-1">
+                <h4 className="text-2xl font-bold text-foreground mb-2">
                   {currentRec.triggerName}
                 </h4>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {currentRec.examples}
                 </p>
               </div>
             </div>
 
+            {/* Divider */}
+            <div className="h-px bg-border/30" />
+
             {/* Alternative foods grid */}
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <span className="text-base">✨</span>
-                Try these:
-              </p>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">✨</span>
+                <p className="text-sm font-bold text-foreground">
+                  Try these instead:
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
                 {currentRec.alternatives.map((alt, i) => (
                   <div
                     key={i}
-                    className="p-3 rounded-xl bg-card/80 backdrop-blur-sm border border-border/50 transition-all hover:scale-105 hover:shadow-md group cursor-pointer"
+                    className="group p-4 rounded-xl bg-card border border-border/50 hover:border-mint/50 transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer"
                   >
-                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                    <span className="text-sm font-semibold text-foreground group-hover:text-mint transition-colors">
                       {alt}
                     </span>
                   </div>
@@ -114,40 +110,32 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
               </div>
             </div>
 
-            {/* CTA */}
-            <div className="pt-2">
-              <div className="p-3 rounded-xl bg-background/60 backdrop-blur-sm">
-                <p className="text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">
-                    💚 Pro tip:
-                  </span>{' '}
-                  Swap gradually, one food at a time, to identify what works best
-                  for you.
-                </p>
-              </div>
+            {/* Pro tip section */}
+            <div className="p-4 rounded-xl bg-mint/5 border border-mint/20">
+              <p className="text-xs leading-relaxed">
+                <span className="font-bold text-foreground">💚 Pro tip:</span>{' '}
+                <span className="text-muted-foreground">
+                  Swap gradually, one food at a time, to identify what works best for you.
+                </span>
+              </p>
             </div>
           </div>
 
-          {/* Decorative gradient edge */}
-          <div
-            className="h-1 w-full"
-            style={{
-              background: `linear-gradient(90deg, ${currentRec.color}, transparent)`,
-            }}
-          />
+          {/* Premium bottom accent bar */}
+          <div className="h-1 w-full bg-gradient-to-r from-mint via-sage to-lavender" />
         </div>
 
         {/* Navigation dots */}
         {recommendations.length > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-4">
+          <div className="flex items-center justify-center gap-2.5 mt-5">
             {recommendations.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentIndex(i)}
-                className={`h-2 rounded-full transition-all duration-300 ${
+                className={`rounded-full transition-all duration-300 ${
                   i === currentIndex
-                    ? 'w-6 bg-primary'
-                    : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                    ? 'w-8 h-2.5 bg-primary shadow-sm'
+                    : 'w-2.5 h-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50'
                 }`}
                 aria-label={`Go to recommendation ${i + 1}`}
               />
@@ -155,13 +143,13 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
           </div>
         )}
 
-        {/* Swipe arrows */}
+        {/* Swipe arrows - improved design */}
         {recommendations.length > 1 && (
           <>
             {currentIndex > 0 && (
               <button
                 onClick={() => handleSwipe('left')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 p-2 rounded-full bg-card border border-border shadow-lg hover:scale-110 transition-transform"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 p-3 rounded-full bg-card border-2 border-border/50 shadow-xl hover:scale-110 hover:border-primary/50 transition-all"
                 aria-label="Previous recommendation"
               >
                 <ChevronRight className="w-5 h-5 text-foreground rotate-180" />
@@ -170,7 +158,7 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
             {currentIndex < recommendations.length - 1 && (
               <button
                 onClick={() => handleSwipe('right')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 p-2 rounded-full bg-card border border-border shadow-lg hover:scale-110 transition-transform"
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 p-3 rounded-full bg-card border-2 border-border/50 shadow-xl hover:scale-110 hover:border-primary/50 transition-all"
                 aria-label="Next recommendation"
               >
                 <ChevronRight className="w-5 h-5 text-foreground" />

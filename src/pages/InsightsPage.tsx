@@ -11,7 +11,6 @@ import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { TriggerFrequencyChart } from '@/components/insights/TriggerFrequencyChart';
 import { BehavioralPatternsChart } from '@/components/insights/BehavioralPatternsChart';
-import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
 import { HealthScoreGauge } from '@/components/insights/HealthScoreGauge';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -163,15 +162,6 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* Weekly Progress Chart */}
-          <div
-            className="animate-slide-up opacity-0"
-            style={{ animationDelay: '90ms', animationFillMode: 'forwards' }}
-          >
-            <WeeklyProgressChart entries={entries} />
-          </div>
-
-
           {/* Trigger Frequency Chart */}
           {insights && insights.triggerFrequencies.length > 0 && (
             <div
@@ -182,22 +172,10 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* Recommendation Cards - Swipeable */}
-          {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
-            <div
-              className="animate-slide-up opacity-0"
-              style={{ animationDelay: '105ms', animationFillMode: 'forwards' }}
-            >
-              <RecommendationCards
-                topTriggers={insights.potentialTriggers.map((t) => t.category)}
-              />
-            </div>
-          )}
-
           {/* Bloat Heatmap Calendar */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '110ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '105ms', animationFillMode: 'forwards' }}
           >
             <BloatHeatmap entries={entries} />
           </div>
@@ -205,17 +183,16 @@ export default function InsightsPage() {
           {/* Food Insights (Combined Safety List + Potential Triggers) */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '120ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '110ms', animationFillMode: 'forwards' }}
           >
             <FoodSafetyList entries={entries} potentialTriggers={insights?.potentialTriggers} />
           </div>
 
-
           {/* Top Foods - with emoji icons */}
           {insights?.topFoods && insights.topFoods.length > 0 && (
-            <div 
+            <div
               className="premium-card p-5 animate-slide-up opacity-0"
-              style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '120ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-xl bg-gradient-to-br from-lavender/30 to-secondary/30">
@@ -231,7 +208,7 @@ export default function InsightsPage() {
                 {insights.topFoods.map((item, index) => {
                   const icon = getIconForTrigger(item.food);
                   return (
-                    <div 
+                    <div
                       key={item.food}
                       className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors"
                     >
@@ -247,10 +224,22 @@ export default function InsightsPage() {
             </div>
           )}
 
+          {/* Safe Alternatives - Swipeable (Moved below Most Logged Foods) */}
+          {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
+            <div
+              className="animate-slide-up opacity-0"
+              style={{ animationDelay: '130ms', animationFillMode: 'forwards' }}
+            >
+              <RecommendationCards
+                topTriggers={insights.potentialTriggers.map((t) => t.category)}
+              />
+            </div>
+          )}
+
           {/* Bloating Guide */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '275ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '140ms', animationFillMode: 'forwards' }}
           >
             <BloatingGuide />
           </div>
