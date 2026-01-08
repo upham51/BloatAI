@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Flame, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { RatingScale } from '@/components/shared/RatingScale';
+import { StarRating } from '@/components/shared/StarRating';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { AuroraBackground } from '@/components/ui/aurora-background';
+import { GrainTexture } from '@/components/ui/grain-texture';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -143,6 +144,7 @@ export default function DashboardPage() {
     <AppLayout>
       <PageTransition>
         <AuroraBackground className="!min-h-screen">
+          <GrainTexture />
           <StaggerContainer className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5 w-full">
             {/* Header with time-based greeting */}
             <StaggerItem>
@@ -298,8 +300,10 @@ export default function DashboardPage() {
                   className="premium-card p-5"
                 >
               <p className="font-bold text-foreground mb-1">Rate your last meal</p>
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-1">{pendingEntry.meal_description}</p>
-              <RatingScale value={null} onChange={handleRate} size="sm" />
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-1">
+                {pendingEntry.meal_title || pendingEntry.meal_description}
+              </p>
+              <StarRating value={null} onChange={handleRate} size="sm" />
                 <button onClick={handleSkip} className="text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
                   Skip for now
                 </button>

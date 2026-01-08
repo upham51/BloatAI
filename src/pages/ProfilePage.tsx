@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription, STRIPE_PLANS } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { GrainTexture } from '@/components/ui/grain-texture';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -55,6 +56,7 @@ export default function ProfilePage() {
   return (
     <AppLayout>
       <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10">
+        <GrainTexture />
         {/* Decorative blobs */}
         <div className="absolute top-20 left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-60 right-5 w-32 h-32 bg-lavender/20 rounded-full blur-3xl pointer-events-none" />

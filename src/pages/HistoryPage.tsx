@@ -17,6 +17,7 @@ import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTE
 import { formatDistanceToNow, format, isAfter, subDays } from 'date-fns';
 import { formatTriggerDisplay } from '@/lib/triggerUtils';
 import { haptics } from '@/lib/haptics';
+import { GrainTexture } from '@/components/ui/grain-texture';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -151,6 +152,7 @@ export default function HistoryPage() {
     <AppLayout>
       <PageTransition>
         <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10">
+        <GrainTexture />
         {/* Decorative blobs */}
         <div className="absolute top-20 left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-60 right-5 w-32 h-32 bg-coral/10 rounded-full blur-3xl pointer-events-none" />
