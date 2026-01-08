@@ -7,16 +7,15 @@ import { RatingScale } from '@/components/shared/RatingScale';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { AuroraBackground } from '@/components/ui/aurora-background';
+import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useProfile } from '@/hooks/useProfile';
-import { RATING_LABELS, getTriggerCategory } from '@/types';
+import { RATING_LABELS } from '@/types';
 import { format, subDays, isAfter, differenceInCalendarDays, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getTimeBasedGreeting } from '@/lib/quotes';
-import { getIconForTrigger } from '@/lib/triggerUtils';
-import { isHighBloating } from '@/lib/bloatingUtils';
 
 // Food background images for the weekly average card
 const FOOD_BACKGROUNDS = [
@@ -29,22 +28,6 @@ const FOOD_BACKGROUNDS = [
   '/assets/images/food-backgrounds/food-bg-7.webp',
   '/assets/images/food-backgrounds/food-bg-8.webp',
 ];
-
-// Trigger display names for the insights
-const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
-  'fodmaps-fructans': 'Wheat/Fructans',
-  'fodmaps-gos': 'Beans/GOS',
-  'fodmaps-lactose': 'Lactose',
-  'fodmaps-fructose': 'Fructose',
-  'fodmaps-polyols': 'Polyols',
-  'gluten': 'Gluten',
-  'dairy': 'Dairy',
-  'cruciferous': 'Cruciferous',
-  'high-fat': 'Fried/Fatty',
-  'carbonated': 'Carbonated',
-  'refined-sugar': 'Sugar',
-  'alcohol': 'Alcohol'
-};
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -123,45 +106,6 @@ export default function DashboardPage() {
 
   // Calculate completed meal count
   const completedCount = getCompletedCount();
-
-  // Weekly insights data - Top Triggers
-  const topTriggers = useMemo(() => {
-    const weekAgo = subDays(new Date(), 7);
-    const roughMeals = entries.filter(e =>
-      isAfter(new Date(e.created_at), weekAgo) &&
-      e.bloating_rating && e.bloating_rating >= 3 // Moderate or higher
-    );
-
-    const triggerStats: Record<string, {
-      category: string;
-      meal_count: number;
-      total_bloating: number;
-    }> = {};
-
-    roughMeals.forEach(meal => {
-      meal.detected_triggers?.forEach(trigger => {
-        if (!triggerStats[trigger.category]) {
-          triggerStats[trigger.category] = {
-            category: trigger.category,
-            meal_count: 0,
-            total_bloating: 0,
-          };
-        }
-        triggerStats[trigger.category].meal_count++;
-        triggerStats[trigger.category].total_bloating += meal.bloating_rating || 0;
-      });
-    });
-
-    return Object.values(triggerStats)
-      .map(t => ({
-        ...t,
-        avg_bloating: t.total_bloating / t.meal_count,
-        severity: (t.total_bloating / t.meal_count) >= 4 ? 'high' : (t.total_bloating / t.meal_count) >= 3 ? 'medium' : 'low',
-        display_name: CATEGORY_DISPLAY_NAMES[t.category] || getTriggerCategory(t.category)?.displayName?.split(' - ')[1] || t.category,
-      }))
-      .sort((a, b) => b.avg_bloating - a.avg_bloating || b.meal_count - a.meal_count)
-      .slice(0, 2);
-  }, [entries]);
 
   // Calculate today's meals
   const todaysMeals = useMemo(() => {
@@ -312,49 +256,10 @@ export default function DashboardPage() {
               </StaggerItem>
             )}
 
-            {/* Smaller Metric Cards Row */}
+            {/* Weekly Progress Chart */}
             {completedCount >= 5 && (
               <StaggerItem>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Weekly Triggers Card */}
-                  <motion.div
-                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                    className="premium-card p-4 cursor-pointer"
-                  >
-                <h3 className="text-xs font-semibold text-muted-foreground mb-3">Top Triggers</h3>
-                {topTriggers.length > 0 ? (
-                  <div className="space-y-2">
-                    {topTriggers.map((trigger) => (
-                      <div key={trigger.category} className="flex items-center gap-2">
-                        <span className="text-2xl flex-shrink-0">
-                          {getIconForTrigger(trigger.category)}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">
-                            {trigger.display_name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {trigger.avg_bloating.toFixed(1)}/5
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No triggers yet</p>
-                  )}
-                </motion.div>
-
-                {/* Total Meals Card */}
-                <motion.div
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="premium-card p-4 cursor-pointer"
-                >
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-3">Total Logged</h3>
-                  <div className="text-4xl font-bold text-foreground mb-1">{entries.length}</div>
-                  <p className="text-xs text-muted-foreground">Meals tracked</p>
-                </motion.div>
-              </div>
+                <WeeklyProgressChart entries={entries} />
               </StaggerItem>
             )}
 

@@ -1,16 +1,14 @@
 import { MealEntry } from '@/types';
-import { RootCauseAssessment } from '@/types/quiz';
 import { isHighBloating, isLowBloating } from './bloatingUtils';
 import { deduplicateFoods, getSafeAlternatives, validatePercentage } from './triggerUtils';
 import { getTriggerCategory } from '@/types';
-import { CATEGORY_DISPLAY_NAMES } from './quizScoring';
 
 // ============================================================
 // NOTES PATTERN ANALYSIS
 // ============================================================
 
 export interface NotesPattern {
-  type: 'stress' | 'timing' | 'rushing' | 'hunger' | 'restaurant';
+  type: 'stress' | 'timing' | 'rushing' | 'hunger' | 'restaurant' | 'period';
   label: string;
   keywords: string[];
   count: number;
@@ -25,6 +23,7 @@ const NOTE_PATTERNS: Omit<NotesPattern, 'count' | 'highBloatingCount' | 'correla
   { type: 'rushing', label: 'Rushed', keywords: ['rush', 'rushed', '⚡', 'hurry', 'hurried', '🍴', 'quick', 'fast'] },
   { type: 'hunger', label: 'Very Hungry', keywords: ['hungry', '😋', 'starving', 'very hungry', 'famished'] },
   { type: 'restaurant', label: 'Restaurant', keywords: ['restaurant', '🍽️', 'dining out', 'ate out'] },
+  { type: 'period', label: 'On Your Period', keywords: ['period', 'menstrual', '🩸', 'on your period', 'menstruation', 'cycle'] },
 ];
 
 export function analyzeNotesPatterns(entries: MealEntry[]): NotesPattern[] {
@@ -118,6 +117,7 @@ export function analyzeTriggerFrequency(entries: MealEntry[]): TriggerFrequency[
   });
 
   const triggerFrequencies = Object.entries(triggerMealCounts)
+    .filter(([category]) => !category.startsWith('fodmaps-')) // Exclude all FODMAP categories
     .map(([category, stats]) => {
       const mealCount = stats.mealsWithTrigger.size;
       const highBloatingCount = stats.highBloatingMealsWithTrigger.size;
@@ -165,16 +165,6 @@ export interface ComprehensiveInsight {
   // Notes patterns
   notesPatterns: NotesPattern[];
 
-  // Quiz integration
-  quizHighRiskCategories: Array<{
-    category: string;
-    displayName: string;
-    score: number;
-    maxScore: number;
-    level: string;
-  }>;
-  quizRedFlags: string[];
-
   // Comprehensive summary
   summary: {
     overview: string[];
@@ -185,8 +175,7 @@ export interface ComprehensiveInsight {
 }
 
 export function generateComprehensiveInsight(
-  entries: MealEntry[],
-  quiz: RootCauseAssessment | null | undefined
+  entries: MealEntry[]
 ): ComprehensiveInsight | null {
   const completedEntries = entries.filter(e => e.rating_status === 'completed');
 
@@ -231,26 +220,6 @@ export function generateComprehensiveInsight(
   // Notes patterns
   const notesPatterns = analyzeNotesPatterns(entries);
 
-  // Quiz analysis
-  const quizHighRiskCategories = quiz ? [
-    { key: 'aerophagia', displayName: CATEGORY_DISPLAY_NAMES.aerophagia, score: quiz.aerophagia_score, maxScore: 10 },
-    { key: 'motility', displayName: CATEGORY_DISPLAY_NAMES.motility, score: quiz.motility_score, maxScore: 11 },
-    { key: 'dysbiosis', displayName: CATEGORY_DISPLAY_NAMES.dysbiosis, score: quiz.dysbiosis_score, maxScore: 11 },
-    { key: 'brainGut', displayName: CATEGORY_DISPLAY_NAMES.brainGut, score: quiz.brain_gut_score, maxScore: 14 },
-    { key: 'hormonal', displayName: CATEGORY_DISPLAY_NAMES.hormonal, score: quiz.hormonal_score, maxScore: 6 },
-    { key: 'structural', displayName: CATEGORY_DISPLAY_NAMES.structural, score: quiz.structural_score, maxScore: 10 },
-    { key: 'lifestyle', displayName: CATEGORY_DISPLAY_NAMES.lifestyle, score: quiz.lifestyle_score, maxScore: 6 },
-  ].filter(cat => {
-    const percentage = (cat.score / cat.maxScore) * 100;
-    return percentage >= 50; // Moderate or High risk
-  }).map(cat => ({
-    category: cat.key,
-    displayName: cat.displayName,
-    score: cat.score,
-    maxScore: cat.maxScore,
-    level: (cat.score / cat.maxScore) * 100 >= 66 ? 'High' : 'Moderate',
-  })) : [];
-
   // Generate comprehensive summary
   const summary = generateSummary({
     totalMeals,
@@ -259,8 +228,6 @@ export function generateComprehensiveInsight(
     lowBloatingCount: lowBloatingMeals.length,
     potentialTriggers,
     notesPatterns,
-    quiz,
-    quizHighRiskCategories,
   });
 
   return {
@@ -273,8 +240,6 @@ export function generateComprehensiveInsight(
     potentialTriggers,
     topFoods,
     notesPatterns,
-    quizHighRiskCategories,
-    quizRedFlags: quiz?.red_flags || [],
     summary,
   };
 }
@@ -290,8 +255,6 @@ interface SummaryInput {
   lowBloatingCount: number;
   potentialTriggers: TriggerFrequency[];
   notesPatterns: NotesPattern[];
-  quiz: RootCauseAssessment | null | undefined;
-  quizHighRiskCategories: Array<{ category: string; displayName: string; level: string }>;
 }
 
 function generateSummary(input: SummaryInput) {
@@ -334,40 +297,7 @@ function generateSummary(input: SummaryInput) {
     });
   }
 
-  // Root cause connections (quiz + food triggers)
-  if (input.quiz && input.quizHighRiskCategories.length > 0) {
-    // Cross-reference quiz results with food patterns
-    const hasStressIssues = input.quizHighRiskCategories.some(c => c.category === 'brainGut');
-    const stressPattern = input.notesPatterns.find(p => p.type === 'stress');
-
-    if (hasStressIssues && stressPattern && stressPattern.count >= 2) {
-      rootCauseConnections.push(
-        `Your root cause assessment shows ${input.quizHighRiskCategories.find(c => c.category === 'brainGut')?.level} brain-gut connection issues, which aligns with ${stressPattern.count} stressed meals tracked`
-      );
-    }
-
-    const hasMotilityIssues = input.quizHighRiskCategories.some(c => c.category === 'motility');
-    const rushingPattern = input.notesPatterns.find(p => p.type === 'rushing');
-
-    if (hasMotilityIssues && rushingPattern && rushingPattern.count >= 2) {
-      rootCauseConnections.push(
-        `Your root cause assessment indicates ${input.quizHighRiskCategories.find(c => c.category === 'motility')?.level} motility concerns, and ${rushingPattern.count} meals were eaten rushed`
-      );
-    }
-
-    const hasDysbiosisIssues = input.quizHighRiskCategories.some(c => c.category === 'dysbiosis');
-    if (hasDysbiosisIssues && input.potentialTriggers.length > 0) {
-      // FODMAP information removed per user request
-    }
-
-    // If no specific connections, mention top risk category
-    if (rootCauseConnections.length === 0 && input.quizHighRiskCategories.length > 0) {
-      const topCategory = input.quizHighRiskCategories[0];
-      rootCauseConnections.push(
-        `Your root cause assessment identifies ${topCategory.displayName} as a ${topCategory.level} risk factor`
-      );
-    }
-  }
+  // Root cause connections (food triggers and behavioral patterns)
 
   // Top recommendations
   if (input.potentialTriggers.length > 0) {
@@ -394,15 +324,6 @@ function generateSummary(input: SummaryInput) {
       topRecommendations.push('Allow at least 20-30 minutes for meals to improve digestion and reduce bloating');
     } else if (topPattern.type === 'timing') {
       topRecommendations.push('Try eating your last meal at least 3 hours before bedtime');
-    }
-  }
-
-  if (input.quiz && input.quizHighRiskCategories.length > 0) {
-    const topQuizCategory = input.quizHighRiskCategories[0];
-    if (topQuizCategory.category === 'aerophagia') {
-      topRecommendations.push('Focus on eating slowly, chewing thoroughly, and avoiding talking while eating');
-    } else if (topQuizCategory.category === 'lifestyle') {
-      topRecommendations.push('Incorporate gentle movement after meals (10-15 min walk) to aid digestion');
     }
   }
 

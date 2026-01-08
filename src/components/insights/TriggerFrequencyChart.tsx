@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { TriggerFrequency } from '@/lib/insightsAnalysis';
 import { getTriggerCategory } from '@/types';
-import { getIconForTrigger } from '@/lib/triggerUtils';
 
 interface TriggerFrequencyChartProps {
   triggers: TriggerFrequency[];
@@ -18,7 +17,6 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
         name: categoryInfo?.displayName || trigger.category,
         percentage: trigger.percentage,
         count: trigger.count,
-        icon: getIconForTrigger(trigger.category),
         suspicion: trigger.suspicionScore,
         color: categoryInfo?.color || '#8B7FD4',
       };
@@ -38,8 +36,7 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
 
     return (
       <div className="premium-card p-3 border border-primary/20 shadow-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-2xl">{data.icon}</span>
+        <div className="mb-2">
           <span className="font-semibold text-foreground">{data.name}</span>
         </div>
         <div className="space-y-1 text-sm">
@@ -83,8 +80,7 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
           fontSize={13}
           fontWeight={500}
         >
-          <tspan x={-30} fontSize={18}>{data.icon}</tspan>
-          <tspan x={-10} dx={-5}>{payload.value.length > 15 ? payload.value.substring(0, 15) + '...' : payload.value}</tspan>
+          {payload.value.length > 20 ? payload.value.substring(0, 20) + '...' : payload.value}
         </text>
       </g>
     );
@@ -100,23 +96,18 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
 
   return (
     <div className="premium-card p-5">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-lavender/20">
-          <span className="text-xl">📊</span>
-        </div>
-        <div>
-          <h3 className="font-bold text-foreground text-lg">Trigger Frequency</h3>
-          <p className="text-xs text-muted-foreground">
-            How often each category appears in your meals
-          </p>
-        </div>
+      <div className="mb-6">
+        <h3 className="font-bold text-foreground text-lg">Trigger Frequency</h3>
+        <p className="text-xs text-muted-foreground">
+          How often each category appears in your meals
+        </p>
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
           data={chartData}
           layout="vertical"
-          margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+          margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
           onMouseMove={(state) => {
             if (state.isTooltipActive) {
               setActiveIndex(state.activeTooltipIndex ?? null);
