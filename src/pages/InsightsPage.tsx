@@ -153,102 +153,6 @@ export default function InsightsPage() {
             </div>
           </div>
 
-          {/* Comprehensive Analysis Card - REDESIGNED */}
-          {insights && (
-            <div
-              className="premium-card p-5 animate-slide-up opacity-0 border-2 border-primary/20"
-              style={{ animationDelay: '75ms', animationFillMode: 'forwards' }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="p-2.5 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10"
-                  style={{
-                    boxShadow: '0 4px 12px hsl(var(--primary) / 0.2), inset 0 1px 1px hsl(0 0% 100% / 0.2)'
-                  }}
-                >
-                  <Sparkles className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h2 className="font-bold text-foreground text-lg">Your Complete Analysis</h2>
-                  <p className="text-xs text-muted-foreground">Comprehensive insights from ALL your data</p>
-                </div>
-              </div>
-
-              {/* Overview Section */}
-              {insights.summary.overview.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-primary" />
-                    Overview
-                  </h3>
-                  <div className="space-y-2">
-                    {insights.summary.overview.map((item, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <span className="text-primary mt-0.5">•</span>
-                        <span className="text-sm text-muted-foreground">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Behavioral Insights Section */}
-              {insights.summary.behavioralInsights.length > 0 && (
-                <div className="mb-4 p-3 rounded-xl bg-gradient-to-br from-lavender/10 to-transparent border border-lavender/20">
-                  <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-lavender" />
-                    Behavioral Patterns
-                  </h3>
-                  <div className="space-y-1.5">
-                    {insights.summary.behavioralInsights.map((item, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <span className="text-lavender mt-0.5 text-xs">▸</span>
-                        <span className="text-sm text-muted-foreground">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Root Cause Connections Section */}
-              {insights.summary.rootCauseConnections.length > 0 && (
-                <div className="mb-4 p-3 rounded-xl bg-gradient-to-br from-mint/10 to-transparent border border-mint/20">
-                  <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-mint" />
-                    Root Cause Insights
-                  </h3>
-                  <div className="space-y-1.5">
-                    {insights.summary.rootCauseConnections.map((item, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <span className="text-mint mt-0.5 text-xs">▸</span>
-                        <span className="text-sm text-muted-foreground">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Top Recommendations Section */}
-              {insights.summary.topRecommendations.length > 0 && (
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-mint/5 border border-primary/20">
-                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-primary" />
-                    Action Steps
-                  </h3>
-                  <div className="space-y-2.5">
-                    {insights.summary.topRecommendations.map((item, index) => (
-                      <div key={index} className="flex items-start gap-2.5">
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
-                          <span className="text-xs font-bold text-primary">{index + 1}</span>
-                        </div>
-                        <span className="text-sm text-foreground font-medium">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Health Score Gauge */}
           {insights && (
@@ -260,6 +164,7 @@ export default function InsightsPage() {
                 avgBloating={insights.avgBloating}
                 totalMeals={insights.totalMeals}
                 lowBloatingCount={insights.lowBloatingCount}
+                highBloatingCount={insights.highBloatingCount}
               />
             </div>
           )}
@@ -272,15 +177,6 @@ export default function InsightsPage() {
             <WeeklyProgressChart entries={entries} />
           </div>
 
-          {/* Behavioral Patterns Radar Chart */}
-          {insights && insights.notesPatterns.length > 0 && (
-            <div
-              className="animate-slide-up opacity-0"
-              style={{ animationDelay: '95ms', animationFillMode: 'forwards' }}
-            >
-              <BehavioralPatternsChart patterns={insights.notesPatterns} />
-            </div>
-          )}
 
           {/* Trigger Frequency Chart */}
           {insights && insights.triggerFrequencies.length > 0 && (
@@ -442,35 +338,6 @@ export default function InsightsPage() {
               </div>
             </div>
           )}
-
-          {/* Tips Card */}
-          <div 
-            className="premium-card p-5 animate-slide-up opacity-0 bg-gradient-to-br from-primary/5 to-transparent"
-            style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}
-          >
-            <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              Tips for You
-            </h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
-                <li className="flex items-start gap-2">
-                  <ChevronRight className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <span>Try reducing <span className="font-semibold text-foreground">{getTriggerCategory(insights.potentialTriggers[0].category)?.displayName}</span> for a week</span>
-                </li>
-              )}
-              <li className="flex items-start gap-2">
-                <ChevronRight className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <span>Log more meals to improve insight accuracy</span>
-              </li>
-              {completedCount < entries.length && (
-                <li className="flex items-start gap-2">
-                  <ChevronRight className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <span>Rate your pending meals to track bloating patterns</span>
-                </li>
-              )}
-            </ul>
-          </div>
 
           {/* Bloating Guide */}
           <div
