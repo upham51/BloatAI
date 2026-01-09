@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, X, ArrowRight, ChevronDown, Plus, AlertCircle } from 'lucide-react';
+import { Search, X, ArrowRight, ChevronDown, Plus, AlertCircle, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { NotesInput } from './NotesInput';
 import { useMeals } from '@/contexts/MealContext';
@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { MealEntry, DetectedTrigger, RATING_LABELS, getTriggerCategory, TRIGGER_CATEGORIES } from '@/types';
 import { validateMealDescription } from '@/lib/bloatingUtils';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Select,
   SelectContent,
@@ -28,6 +29,7 @@ export function TextOnlyEntry() {
   const [notes, setNotes] = useState('');
   const [bloatingRating, setBloatingRating] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Get unique recent meals (last 30 days, unique by title)
   const recentMeals = useMemo(() => {
@@ -101,6 +103,63 @@ export function TextOnlyEntry() {
   const clearSelection = () => {
     setSelectedMeal(null);
     setSelectedTriggers([]);
+  };
+
+  const handleAICategorizeTriggers = async () => {
+    const mealText = manualMealTitle.trim();
+
+    if (!mealText) {
+      toast({
+        variant: 'destructive',
+        title: 'No meal entered',
+        description: 'Please enter a meal name first.',
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-meal-text', {
+        body: { mealText }
+      });
+
+      if (error) throw error;
+
+      if (data?.triggers && Array.isArray(data.triggers)) {
+        // Add new triggers, avoiding duplicates
+        const newTriggers = data.triggers.filter((newTrigger: DetectedTrigger) =>
+          !selectedTriggers.some(existing => existing.category === newTrigger.category)
+        );
+
+        if (newTriggers.length > 0) {
+          setSelectedTriggers(prev => [...prev, ...newTriggers]);
+          toast({
+            title: 'Triggers detected!',
+            description: `Found ${newTriggers.length} potential trigger${newTriggers.length !== 1 ? 's' : ''}.`,
+          });
+        } else {
+          toast({
+            title: 'No new triggers found',
+            description: 'All detected triggers are already added.',
+          });
+        }
+      } else if (data?.triggers?.length === 0) {
+        toast({
+          title: 'No triggers detected',
+          description: 'This meal appears to be low in common triggers!',
+        });
+      }
+    } catch (error) {
+      console.error('AI categorization error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to analyze',
+        description: 'Please try again or add triggers manually.',
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleSave = async () => {
@@ -291,10 +350,31 @@ export function TextOnlyEntry() {
             className="rounded-xl"
           />
 
+          {/* AI Categorization Button */}
+          {manualMealTitle.trim() && (
+            <button
+              onClick={handleAICategorizeTriggers}
+              disabled={isAnalyzing}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-purple-500 text-white font-medium hover:from-violet-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAnalyzing ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Analyzing...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  <span>AI Categorize Triggers</span>
+                </>
+              )}
+            </button>
+          )}
+
           {/* Trigger Selection - Dropdown Style */}
           <div className="space-y-3">
             <p className="text-xs font-semibold text-muted-foreground">
-              Select potential triggers (optional):
+              {selectedTriggers.length > 0 ? 'Detected triggers:' : 'Or add triggers manually:'}
             </p>
             
             {/* Selected Triggers */}
@@ -362,12 +442,12 @@ export function TextOnlyEntry() {
               </SelectContent>
             </Select>
 
-            {/* Warning for no triggers */}
-            {!selectedMeal && selectedTriggers.length === 0 && manualMealTitle.trim().length > 0 && (
-              <div className="flex items-start gap-2 p-3 rounded-xl bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900">
-                <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                  <span className="font-semibold">Tip:</span> Adding triggers helps us identify patterns and provide better insights.
+            {/* Helpful hint */}
+            {!selectedMeal && selectedTriggers.length === 0 && manualMealTitle.trim().length > 0 && !isAnalyzing && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/20 dark:to-purple-950/20 border border-violet-200 dark:border-violet-900">
+                <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-violet-800 dark:text-violet-200">
+                  <span className="font-semibold">Try AI categorization!</span> Click the button above to automatically detect triggers in your meal.
                 </p>
               </div>
             )}
