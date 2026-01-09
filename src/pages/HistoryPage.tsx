@@ -117,16 +117,34 @@ export default function HistoryPage() {
   const handleRate = async (rating: number) => {
     if (!ratingEntry) return;
     haptics.success();
-    await updateRating(ratingEntry.id, rating);
-    toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
-    setRatingEntry(null);
+    try {
+      await updateRating(ratingEntry.id, rating);
+      toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+      setRatingEntry(null);
+    } catch (error) {
+      console.error('Failed to save rating:', error);
+      toast({
+        title: 'Failed to save rating',
+        description: 'Please try again or check your connection.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleSkip = async () => {
     if (!ratingEntry) return;
-    await skipRating(ratingEntry.id);
-    toast({ title: 'Rating skipped' });
-    setRatingEntry(null);
+    try {
+      await skipRating(ratingEntry.id);
+      toast({ title: 'Rating skipped' });
+      setRatingEntry(null);
+    } catch (error) {
+      console.error('Failed to skip rating:', error);
+      toast({
+        title: 'Failed to skip rating',
+        description: 'Please try again or check your connection.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleSaveNotes = async () => {
@@ -542,14 +560,32 @@ function InlineRating({ entryId }: { entryId: string }) {
   
   const handleRate = async (rating: number) => {
     haptics.success();
-    await updateRating(entryId, rating);
-    toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+    try {
+      await updateRating(entryId, rating);
+      toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+    } catch (error) {
+      console.error('Failed to save rating:', error);
+      toast({
+        title: 'Failed to save rating',
+        description: 'Please try again or check your connection.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleSkip = async () => {
     haptics.light();
-    await skipRating(entryId);
-    toast({ title: 'Rating skipped' });
+    try {
+      await skipRating(entryId);
+      toast({ title: 'Rating skipped' });
+    } catch (error) {
+      console.error('Failed to skip rating:', error);
+      toast({
+        title: 'Failed to skip rating',
+        description: 'Please try again or check your connection.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
