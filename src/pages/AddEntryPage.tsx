@@ -338,8 +338,8 @@ export default function AddEntryPage() {
           </button>
 
           {/* Header Section with stagger animation */}
-          <div className="mt-16 mb-12 animate-slide-down">
-            <h1 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
+          <div className="mt-12 mb-8 animate-slide-down">
+            <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">
               Log Your Meal
             </h1>
             <p className="text-base text-muted-foreground">
@@ -348,23 +348,23 @@ export default function AddEntryPage() {
           </div>
 
           {/* Action Cards - Clean Card Design like MyFitnessPal */}
-          <div className="flex-1 flex flex-col justify-center space-y-4 max-w-md mx-auto w-full">
+          <div className="flex-1 flex flex-col justify-center space-y-3 max-w-md mx-auto w-full">
             {/* Camera Card - Primary Action */}
             <button
               onClick={openCamera}
               disabled={isAnalyzing}
-              className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up"
+              className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up"
               style={{ animationDelay: '100ms' }}
             >
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4">
                 {/* Icon */}
-                <div className="flex-shrink-0 w-20 h-20 rounded-2xl bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                  <Camera className="w-9 h-9 text-emerald-600 dark:text-emerald-400" />
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Camera className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
                 </div>
 
                 {/* Text */}
                 <div className="flex-1 text-left">
-                  <h3 className="text-xl font-bold text-foreground mb-1">Camera</h3>
+                  <h3 className="text-lg font-bold text-foreground mb-0.5">Camera</h3>
                   <p className="text-sm text-muted-foreground">Take a photo of your meal</p>
                 </div>
 
@@ -377,18 +377,18 @@ export default function AddEntryPage() {
             <button
               onClick={openGallery}
               disabled={isAnalyzing}
-              className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up"
+              className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up"
               style={{ animationDelay: '200ms' }}
             >
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4">
                 {/* Icon */}
-                <div className="flex-shrink-0 w-20 h-20 rounded-2xl bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                  <ImageIcon className="w-9 h-9 text-blue-600 dark:text-blue-400" />
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <ImageIcon className="w-7 h-7 text-blue-600 dark:text-blue-400" />
                 </div>
 
                 {/* Text */}
                 <div className="flex-1 text-left">
-                  <h3 className="text-xl font-bold text-foreground mb-1">Gallery</h3>
+                  <h3 className="text-lg font-bold text-foreground mb-0.5">Gallery</h3>
                   <p className="text-sm text-muted-foreground">Choose from your photos</p>
                 </div>
 
@@ -398,7 +398,7 @@ export default function AddEntryPage() {
             </button>
 
             {/* Divider with text */}
-            <div className="flex items-center gap-4 py-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+            <div className="flex items-center gap-4 py-3 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
               <div className="flex-1 h-px bg-border"></div>
               <span className="text-xs text-muted-foreground font-medium">OR</span>
               <div className="flex-1 h-px bg-border"></div>
@@ -407,18 +407,18 @@ export default function AddEntryPage() {
             {/* Text Entry Card */}
             <button
               onClick={() => setEntryMode('text')}
-              className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up"
+              className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up"
               style={{ animationDelay: '400ms' }}
             >
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4">
                 {/* Icon */}
-                <div className="flex-shrink-0 w-20 h-20 rounded-2xl bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                  <Pencil className="w-9 h-9 text-purple-600 dark:text-purple-400" />
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Pencil className="w-7 h-7 text-purple-600 dark:text-purple-400" />
                 </div>
 
                 {/* Text */}
                 <div className="flex-1 text-left">
-                  <h3 className="text-xl font-bold text-foreground mb-1">Type It Out</h3>
+                  <h3 className="text-lg font-bold text-foreground mb-0.5">Type It Out</h3>
                   <p className="text-sm text-muted-foreground">Describe your meal with text</p>
                 </div>
 
@@ -429,10 +429,10 @@ export default function AddEntryPage() {
           </div>
 
           {/* Pro Tip - Bottom */}
-          <div className="mt-auto pt-8 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
-            <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+          <div className="mt-auto pt-6 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+            <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
+              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-0.5">Pro tip</p>

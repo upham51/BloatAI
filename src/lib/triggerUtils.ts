@@ -489,6 +489,8 @@ const INGREDIENT_TRANSFORMATIONS: Record<string, string> = {
   'brown rice': 'Rice',
   'white rice': 'Rice',
   'basmati rice': 'Rice',
+  'black forbidden rice': 'Black Forbidden Rice',
+  'forbidden rice': 'Forbidden Rice',
 };
 
 /**
