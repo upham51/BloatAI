@@ -90,7 +90,7 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
       {/* Header */}
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground">
-          Bloat Calendar - {format(new Date(), 'MMMM yyyy')}
+          Bloat Calendar for {format(new Date(), 'MMMM yyyy')}
         </h2>
       </div>
 
@@ -178,38 +178,18 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
       </div>
 
       {/* Legend */}
-      <div className="space-y-2 pt-2 border-t border-border/50">
-        <h4 className="text-xs font-semibold text-muted-foreground text-center">
-          Bloating Levels
-        </h4>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/10 border border-primary/30">
-            <div className="w-6 h-6 rounded-md bg-primary/80 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs">😊</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground leading-tight">Minimal</p>
-              <p className="text-2xs text-muted-foreground leading-tight">Feeling Good</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-yellow-400/10 border border-yellow-400/30">
-            <div className="w-6 h-6 rounded-md bg-yellow-400 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs">😐</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground leading-tight">Moderate</p>
-              <p className="text-2xs text-muted-foreground leading-tight">Some Discomfort</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-coral/10 border border-coral/30">
-            <div className="w-6 h-6 rounded-md bg-coral flex items-center justify-center flex-shrink-0">
-              <span className="text-xs">😣</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground leading-tight">Significant</p>
-              <p className="text-2xs text-muted-foreground leading-tight">Uncomfortable</p>
-            </div>
-          </div>
+      <div className="flex items-center justify-center gap-6 pt-4">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-primary/80" />
+          <span className="text-sm text-muted-foreground">Minimal</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-yellow-400" />
+          <span className="text-sm text-muted-foreground">Moderate</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-coral" />
+          <span className="text-sm text-muted-foreground">Significant</span>
         </div>
       </div>
     </div>
