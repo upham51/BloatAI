@@ -1,3 +1,5 @@
+import { getTriggerCategory } from '@/types';
+
 // Trigger icon mapping based on category
 export const TRIGGER_ICONS: Record<string, string> = {
   // FODMAP categories
@@ -609,12 +611,16 @@ export function formatTriggerDisplay(
   triggers: Array<{ category: string; food?: string }>
 ): FormattedTrigger[] {
   if (!triggers || triggers.length === 0) return [];
-  
+
   return triggers.map(trigger => {
-    const displayName = trigger.food || trigger.category;
+    // Get the trigger category info
+    const categoryInfo = getTriggerCategory(trigger.category);
+    // Use the shortened display name (e.g., "Fructans" instead of "FODMAPs - Fructans")
+    const displayName = categoryInfo?.displayName?.split(' - ')[1] || categoryInfo?.displayName || trigger.category;
+
     return {
       icon: getIconForTrigger(trigger.category),
-      name: abbreviateIngredient(displayName),
+      name: displayName,
       category: trigger.category,
     };
   });
