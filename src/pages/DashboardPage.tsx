@@ -149,7 +149,8 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <PageTransition>
-        <AbstractBackground className="!min-h-screen">
+        <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10">
+          <AbstractBackground />
           <GrainTexture />
           <StaggerContainer className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5 w-full">
             {/* Header with time-based greeting */}
@@ -159,57 +160,61 @@ export default function DashboardPage() {
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="absolute top-2 right-0"
+                  className="absolute top-0 right-0"
                 >
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => navigate('/profile')}
-                    className="w-11 h-11 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm transition-all duration-300"
+                    className="w-10 h-10 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm transition-all duration-300"
                   >
                     <Settings className="w-5 h-5" />
                   </Button>
                 </motion.div>
 
-            <div className="flex flex-col gap-2.5 items-center text-center px-14">
-              <div className="flex flex-col gap-0.5 w-full">
-                <span className="text-xl font-semibold text-muted-foreground tracking-tight whitespace-nowrap">
-                  {greeting},
-                </span>
-                <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent pb-1.5 truncate">
-                  {firstName}
-                </h1>
-              </div>
+                {/* Main header content - side by side layout */}
+                <div className="flex items-center justify-between gap-3 pr-12">
+                  {/* Left side: Greeting + Name */}
+                  <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                    <span className="text-base font-medium text-muted-foreground tracking-tight">
+                      {greeting},
+                    </span>
+                    <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent truncate">
+                      {firstName}
+                    </h1>
+                  </div>
 
-                {/* Centered streak badge - Always visible */}
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 200,
-                    damping: 15,
-                    delay: 0.3,
-                  }}
-                  className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-gradient-to-r from-coral/20 to-peach/20 border border-coral/30 shadow-md"
-                >
+                  {/* Right side: Streak badge */}
                   <motion.div
-                    animate={{
-                      scale: streak > 0 ? [1, 1.2, 1] : 1,
-                    }}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
                     transition={{
-                      duration: 2,
-                      repeat: streak > 0 ? Infinity : 0,
-                      ease: 'easeInOut',
+                      type: 'spring',
+                      stiffness: 200,
+                      damping: 15,
+                      delay: 0.3,
                     }}
+                    className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-gradient-to-r from-coral/20 to-peach/20 border border-coral/30 shadow-md flex-shrink-0"
                   >
-                    <Flame className="w-6 h-6 text-coral drop-shadow-sm" />
+                    <motion.div
+                      animate={{
+                        scale: streak > 0 ? [1, 1.2, 1] : 1,
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: streak > 0 ? Infinity : 0,
+                        ease: 'easeInOut',
+                      }}
+                    >
+                      <Flame className="w-5 h-5 text-coral drop-shadow-sm" />
+                    </motion.div>
+                    <div className="flex flex-col items-center leading-tight">
+                      <span className="text-lg font-bold text-coral">{streak}</span>
+                      <span className="text-[10px] font-semibold text-coral/90 uppercase tracking-wide">day streak</span>
+                    </div>
                   </motion.div>
-                  <span className="text-xl font-bold text-coral">{streak}</span>
-                  <span className="text-base font-semibold text-coral/90">day streak</span>
-                </motion.div>
-              </div>
-            </header>
+                </div>
+              </header>
             </StaggerItem>
 
             {/* Main Bloating & Meals Card */}
@@ -363,7 +368,7 @@ export default function DashboardPage() {
               </motion.div>
             </StaggerItem>
           </StaggerContainer>
-        </AbstractBackground>
+        </div>
       </PageTransition>
 
       {/* Onboarding Modal - shows for new users */}
