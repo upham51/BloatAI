@@ -13,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { DetectedTrigger, validateTriggers, getTriggerCategory } from '@/types';
-import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
+import { getIconForTrigger, abbreviateIngredient, deduplicateTriggers } from '@/lib/triggerUtils';
 import { haptics } from '@/lib/haptics';
 import { validateMealDescription, retryWithBackoff } from '@/lib/bloatingUtils';
 import { GrainTexture } from '@/components/ui/grain-texture';
@@ -165,14 +165,16 @@ export default function AddEntryPage() {
       // Safely validate triggers - handle malformed or missing data
       const triggers = Array.isArray(data?.triggers) ? data.triggers : [];
       const validTriggers = validateTriggers(triggers);
-      setDetectedTriggers(validTriggers);
+      // Deduplicate triggers to avoid showing redundant items (e.g., "French Toast" and "Bread" both as fructans)
+      const deduplicatedTriggers = deduplicateTriggers(validTriggers);
+      setDetectedTriggers(deduplicatedTriggers);
       setPhotoAnalyzed(true);
 
-      if (validTriggers.length > 0) {
+      if (deduplicatedTriggers.length > 0) {
         haptics.success();
         toast({
           title: 'Photo analyzed!',
-          description: `Detected ${validTriggers.length} potential trigger${validTriggers.length !== 1 ? 's' : ''}.`,
+          description: `Detected ${deduplicatedTriggers.length} potential trigger${deduplicatedTriggers.length !== 1 ? 's' : ''}.`,
         });
       } else {
         haptics.light();

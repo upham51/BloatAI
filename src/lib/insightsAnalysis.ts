@@ -117,7 +117,6 @@ export function analyzeTriggerFrequency(entries: MealEntry[]): TriggerFrequency[
   });
 
   const triggerFrequencies = Object.entries(triggerMealCounts)
-    .filter(([category]) => !category.startsWith('fodmaps-')) // Exclude all FODMAP categories
     .map(([category, stats]) => {
       const mealCount = stats.mealsWithTrigger.size;
       const highBloatingCount = stats.highBloatingMealsWithTrigger.size;

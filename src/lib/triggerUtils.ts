@@ -676,6 +676,79 @@ export function deduplicateFoods(
 }
 
 /**
+ * Deduplicate triggers by removing redundant triggers in the same category.
+ * For example, if both "French Toast" and "Bread" are detected as fructans,
+ * keep only one (prefer the more specific/complete dish name).
+ * Also removes triggers with identical normalized food names.
+ */
+export function deduplicateTriggers(
+  triggers: Array<{ category: string; food: string }>
+): Array<{ category: string; food: string }> {
+  if (!triggers || triggers.length === 0) return [];
+
+  // Group triggers by category
+  const byCategory: Record<string, Array<{ category: string; food: string }>> = {};
+
+  for (const trigger of triggers) {
+    if (!byCategory[trigger.category]) {
+      byCategory[trigger.category] = [];
+    }
+    byCategory[trigger.category].push(trigger);
+  }
+
+  // Deduplicate within each category
+  const deduplicated: Array<{ category: string; food: string }> = [];
+
+  for (const [category, categoryTriggers] of Object.entries(byCategory)) {
+    if (categoryTriggers.length === 1) {
+      deduplicated.push(categoryTriggers[0]);
+      continue;
+    }
+
+    // Check for duplicate normalized names
+    const seen = new Set<string>();
+    const unique: Array<{ category: string; food: string; normalized: string }> = [];
+
+    for (const trigger of categoryTriggers) {
+      const normalized = abbreviateIngredient(trigger.food).toLowerCase();
+      if (!seen.has(normalized)) {
+        seen.add(normalized);
+        unique.push({ ...trigger, normalized });
+      }
+    }
+
+    // If still multiple triggers in the same category, prefer the more specific one
+    // (longer food name = more specific, e.g., "French Toast" > "Bread")
+    if (unique.length > 1) {
+      // Check if one food name contains another (e.g., "French Toast" contains "toast"/"bread")
+      // In that case, keep the more specific one
+      const filtered = unique.filter(trigger => {
+        const lowerFood = trigger.food.toLowerCase();
+        // Keep this trigger if no other trigger in this category has a name that contains this one
+        const isContainedByAnother = unique.some(other => {
+          if (other === trigger) return false;
+          const otherFood = other.food.toLowerCase();
+          // Check if the other food is longer and more specific
+          return otherFood.length > lowerFood.length &&
+                 (otherFood.includes(lowerFood) ||
+                  // Check for common ingredient relationships
+                  (lowerFood === 'bread' && (otherFood.includes('toast') || otherFood.includes('sandwich'))) ||
+                  (lowerFood === 'milk' && otherFood.includes('latte')) ||
+                  (lowerFood === 'wheat' && otherFood.includes('bread')));
+        });
+        return !isContainedByAnother;
+      });
+
+      deduplicated.push(...filtered.map(({ category, food }) => ({ category, food })));
+    } else {
+      deduplicated.push(...unique.map(({ category, food }) => ({ category, food })));
+    }
+  }
+
+  return deduplicated;
+}
+
+/**
  * Validate percentage to ensure it's between 0-100
  */
 export function validatePercentage(value: number): number {

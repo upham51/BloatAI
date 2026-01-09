@@ -135,18 +135,24 @@ TRIGGER FOOD NAMING RULES:
 - Bad examples: "glaze on", "with cream", "in sauce", "broccoli florets", "cauliflower florets"
 
 VALID CATEGORY VALUES (use ONLY these exact strings):
-- "fodmaps-fructans" - Wheat, bread, pasta, onions, garlic, shallots
-- "fodmaps-gos" - Beans, lentils, chickpeas, hummus
+- "fodmaps-fructans" - Wheat products (bread, pasta, tortillas, crackers, baked goods, wheat noodles), onions, garlic, shallots, leeks
+- "fodmaps-gos" - Beans, lentils, chickpeas, hummus, legumes
 - "fodmaps-lactose" - Milk, cream, soft cheese, yogurt, ice cream, butter
-- "fodmaps-fructose" - Apples, honey, mango, agave, high-fructose corn syrup
-- "fodmaps-polyols" - Sugar-free items, stone fruits (peaches, plums), mushrooms
-- "gluten" - Wheat, barley, rye, bread, pasta, beer, soy sauce
-- "dairy" - All milk products including cheese, cream, butter
-- "cruciferous" - Broccoli, cabbage, cauliflower, Brussels sprouts, kale
-- "high-fat" - Fried foods, fatty meats, heavy cream, oils, butter
-- "carbonated" - Soda, sparkling water, beer
+- "fodmaps-fructose" - Apples, honey, mango, agave, high-fructose corn syrup, certain fruits
+- "fodmaps-polyols" - Sugar-free items with sweeteners (sorbitol, mannitol), stone fruits (peaches, plums, cherries), mushrooms, cauliflower
+- "gluten" - ONLY use for: barley, rye, beer (NOT wheat products - those are fodmaps-fructans)
+- "dairy" - All milk products including hard cheese, cream, butter (separate from lactose category)
+- "cruciferous" - Broccoli, cabbage, Brussels sprouts, kale, bok choy
+- "high-fat" - Fried foods, fatty meats, heavy cream, oils, butter, greasy foods
+- "carbonated" - Soda, sparkling water, fizzy drinks
 - "refined-sugar" - Candy, pastries, white sugar, syrups, desserts
 - "alcohol" - Beer, wine, spirits, cocktails
+
+IMPORTANT CATEGORIZATION RULES:
+- Wheat-based foods (bread, pasta, flour products) should ALWAYS be categorized as "fodmaps-fructans", NOT "gluten"
+- Only use "gluten" for barley, rye, or beer (which contain gluten but are not wheat-based)
+- Hard cheeses are "dairy", soft cheeses/milk/yogurt are "fodmaps-lactose"
+- When in doubt between overlapping categories, prefer the more specific FODMAP category
 
 IMPORTANT:
 - Be thorough with ingredient detection, but prefer SIMPLE BASE NAMES
