@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { MealEntry } from '@/types';
-import { getIconForTrigger } from '@/lib/triggerUtils';
+import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
 import { isHighBloating, isLowBloating, HIGH_BLOATING_THRESHOLD } from '@/lib/bloatingUtils';
 import { TriggerFrequency } from '@/lib/insightsAnalysis';
 
@@ -31,7 +31,8 @@ export function FoodSafetyList({ entries, potentialTriggers = [] }: FoodSafetyLi
 
     completedEntries.forEach((entry) => {
       entry.detected_triggers?.forEach((trigger) => {
-        const foodName = trigger.food || trigger.category;
+        const rawFoodName = trigger.food || trigger.category;
+        const foodName = abbreviateIngredient(rawFoodName);
         if (!foodStats[foodName]) {
           foodStats[foodName] = { bloatScores: [], count: 0 };
         }

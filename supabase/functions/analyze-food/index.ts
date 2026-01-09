@@ -66,7 +66,7 @@ serve(async (req) => {
               },
               {
                 type: 'text',
-                text: `You are an expert food analyst. Analyze this meal photo EXHAUSTIVELY. Identify EVERY visible ingredient, component, and food item.
+                text: `You are an expert food analyst. Analyze this meal photo thoroughly and identify all visible ingredients using simple, clear base names.
 
 Your task:
 1. Create a memorable, short meal title (2-4 words MAXIMUM) following the pattern: [Adjective] + [Main Dish] + [Optional: Style/Bowl/Stack/Plate]
@@ -109,22 +109,30 @@ Return ONLY valid JSON (no markdown, no code blocks):
     {"name": "Powdered sugar", "detail": "refined sugar", "is_trigger": true, "trigger_category": "refined-sugar"}
   ],
   "triggers": [
-    {"category": "fodmaps-fructans", "food": "wheat flour"},
-    {"category": "fodmaps-lactose", "food": "buttermilk"},
-    {"category": "dairy", "food": "whipped cream"},
+    {"category": "fodmaps-fructans", "food": "wheat bread"},
+    {"category": "fodmaps-lactose", "food": "milk"},
+    {"category": "dairy", "food": "cream"},
     {"category": "fodmaps-fructose", "food": "maple syrup"},
     {"category": "high-fat", "food": "bacon"},
-    {"category": "refined-sugar", "food": "powdered sugar"}
+    {"category": "refined-sugar", "food": "sugar"}
   ]
 }
 
 TRIGGER FOOD NAMING RULES:
-- Use complete, clear ingredient names (e.g., "honey glaze" not "glaze on")
-- Be specific but concise (e.g., "wheat bread" not "wheat flour in bread")
+- ALWAYS use SIMPLE, BASE ingredient names - not overly specific varieties or cuts
+- Prefer the common ingredient name that people use in everyday conversation
+- Strip unnecessary descriptors like preparation methods, cuts, colors, or varieties
+- Examples of CORRECT naming:
+  ✓ "broccoli" (NOT "broccoli florets", "steamed broccoli", "fresh broccoli")
+  ✓ "onion" (NOT "red onion", "yellow onion", "diced onion")
+  ✓ "rice" (NOT "forbidden rice", "jasmine rice", "white rice")
+  ✓ "chicken" (NOT "grilled chicken breast", "organic chicken")
+  ✓ "cheese" (NOT "aged cheddar cheese", "shredded cheese")
+  ✓ "yogurt" (NOT "greek yogurt", "vanilla yogurt")
+  ✓ "beef" (NOT "grass-fed ribeye", "wagyu beef")
+- Use category when appropriate: "wheat bread" is acceptable, "milk" not "whole milk"
 - Avoid partial phrases or unclear terms
-- Use the actual ingredient name that causes the trigger
-- Examples: "onions", "milk", "honey", "wheat pasta", "fried chicken"
-- Bad examples: "glaze on", "with cream", "in sauce"
+- Bad examples: "glaze on", "with cream", "in sauce", "broccoli florets", "cauliflower florets"
 
 VALID CATEGORY VALUES (use ONLY these exact strings):
 - "fodmaps-fructans" - Wheat, bread, pasta, onions, garlic, shallots
@@ -141,11 +149,12 @@ VALID CATEGORY VALUES (use ONLY these exact strings):
 - "alcohol" - Beer, wine, spirits, cocktails
 
 IMPORTANT:
-- Be EXHAUSTIVE with ingredient detection
-- Include compound ingredients (e.g., if pizza, list: wheat crust, tomato sauce, cheese, toppings)
+- Be thorough with ingredient detection, but prefer SIMPLE BASE NAMES
+- Include compound ingredients (e.g., if pizza, list: "wheat bread", "tomato sauce", "cheese", "pepperoni")
+- Use base ingredient names: "broccoli" not "broccoli florets", "rice" not "jasmine rice"
 - List each trigger separately even if multiple items share a category
 - Only include foods you can actually see or reasonably infer
-- If unsure about an ingredient, include it to be safe`
+- When in doubt between specific variety vs. base name, ALWAYS choose the base name`
               }
             ]
           }
