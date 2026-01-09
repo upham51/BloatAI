@@ -534,18 +534,47 @@ export function abbreviateIngredient(ingredient: string): string {
 }
 
 /**
+ * Get category-based fallback emoji for unknown foods
+ */
+function getCategoryFallbackIcon(categoryOrFood: string): string {
+  const lower = categoryOrFood.toLowerCase();
+
+  // FODMAP categories
+  if (lower.includes('fructan') || lower.includes('wheat') || lower.includes('gluten')) return '🌾';
+  if (lower.includes('lactose') || lower.includes('dairy') || lower.includes('milk')) return '🥛';
+  if (lower.includes('fructose') || lower.includes('sugar')) return '🍯';
+  if (lower.includes('polyol')) return '🍬';
+  if (lower.includes('gos') || lower.includes('bean') || lower.includes('legume')) return '🫘';
+
+  // Food categories
+  if (lower.includes('cruciferous') || lower.includes('vegetable') || lower.includes('greens')) return '🥬';
+  if (lower.includes('protein') || lower.includes('meat')) return '🥩';
+  if (lower.includes('fish') || lower.includes('seafood')) return '🐟';
+  if (lower.includes('fat') || lower.includes('fried') || lower.includes('oil')) return '🍟';
+  if (lower.includes('carbonated') || lower.includes('soda')) return '🫧';
+  if (lower.includes('alcohol') || lower.includes('wine') || lower.includes('beer')) return '🍷';
+  if (lower.includes('fruit')) return '🍎';
+  if (lower.includes('grain') || lower.includes('rice') || lower.includes('pasta')) return '🍚';
+  if (lower.includes('sauce') || lower.includes('condiment')) return '🥫';
+  if (lower.includes('spice') || lower.includes('herb')) return '🌿';
+
+  // Default
+  return '🍽️';
+}
+
+/**
  * Get emoji icon for a trigger category or food
  */
 export function getIconForTrigger(categoryOrFood: string): string {
   if (!categoryOrFood) return '🍽️';
-  
+
   const lower = categoryOrFood.toLowerCase().trim();
-  
+
   // Check for exact match first
   if (TRIGGER_ICONS[lower]) {
     return TRIGGER_ICONS[lower];
   }
-  
+
   // Check for whole-word matches only (avoid "steak" matching "tea")
   const words = lower.split(/[\s\-/]+/);
   for (const word of words) {
@@ -553,7 +582,7 @@ export function getIconForTrigger(categoryOrFood: string): string {
       return TRIGGER_ICONS[word];
     }
   }
-  
+
   // Check if any key is a whole word within the input
   for (const [key, icon] of Object.entries(TRIGGER_ICONS)) {
     // Only match if key appears as a complete word
@@ -562,9 +591,9 @@ export function getIconForTrigger(categoryOrFood: string): string {
       return icon;
     }
   }
-  
-  // Default icon
-  return '🍽️';
+
+  // Use category-based fallback instead of generic plate
+  return getCategoryFallbackIcon(lower);
 }
 
 /**
