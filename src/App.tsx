@@ -10,7 +10,9 @@ import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
-import AuthPage from "./pages/AuthPage";
+import WelcomePage from "./pages/WelcomePage";
+import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
 import DashboardPage from "./pages/DashboardPage";
 import AddEntryPage from "./pages/AddEntryPage";
 import HistoryPage from "./pages/HistoryPage";
@@ -109,7 +111,9 @@ function AppRoutes() {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PublicRoute><AuthPage /></PublicRoute>} />
+        <Route path="/" element={<PublicRoute><WelcomePage /></PublicRoute>} />
+        <Route path="/signin" element={<PublicRoute><SignInPage /></PublicRoute>} />
+        <Route path="/signup" element={<PublicRoute><SignUpPage /></PublicRoute>} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/dashboard" element={<ProtectedRoute><SubscriptionGate><DashboardPage /></SubscriptionGate></ProtectedRoute>} />
         <Route path="/add-entry" element={<ProtectedRoute><SubscriptionGate><AddEntryPage /></SubscriptionGate></ProtectedRoute>} />
