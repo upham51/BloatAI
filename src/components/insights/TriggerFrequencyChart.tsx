@@ -10,11 +10,38 @@ interface TriggerFrequencyChartProps {
 export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
+  // Helper function to format trigger names
+  const formatTriggerName = (displayName: string) => {
+    // Check if it's a FODMAP trigger (contains " - ")
+    if (displayName.includes(' - ')) {
+      const parts = displayName.split(' - ');
+      const category = parts[0]; // e.g., "FODMAPs"
+      const specificType = parts[1]; // e.g., "Fructans"
+      return {
+        main: specificType,
+        category: category,
+        isFODMAP: true
+      };
+    }
+    // For non-FODMAP triggers, just return the name as-is
+    return {
+      main: displayName,
+      category: null,
+      isFODMAP: false
+    };
+  };
+
   const chartData = useMemo(() => {
     return triggers.slice(0, 5).map(trigger => {
       const categoryInfo = getTriggerCategory(trigger.category);
+      const displayName = categoryInfo?.displayName || trigger.category;
+      const formatted = formatTriggerName(displayName);
+
       return {
-        name: categoryInfo?.displayName || trigger.category,
+        name: formatted.main,
+        fullName: displayName,
+        category: formatted.category,
+        isFODMAP: formatted.isFODMAP,
         percentage: trigger.percentage,
         count: trigger.count,
         suspicion: trigger.suspicionScore,
@@ -38,6 +65,11 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
       <div className="premium-card p-3 border border-primary/20 shadow-lg">
         <div className="mb-2">
           <span className="font-semibold text-foreground">{data.name}</span>
+          {data.isFODMAP && (
+            <span className="text-xs text-muted-foreground ml-1.5">
+              ({data.category})
+            </span>
+          )}
         </div>
         <div className="space-y-1 text-sm">
           <div className="flex justify-between gap-3">
@@ -69,6 +101,10 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
     const data = chartData[payload.index];
     if (!data) return null;
 
+    // Format: "Fructans (FODMAPs)" or just "Gluten"
+    const mainText = data.name;
+    const categoryText = data.isFODMAP ? ` (${data.category})` : '';
+
     return (
       <g transform={`translate(${x},${y})`}>
         <text
@@ -76,11 +112,23 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
           y={0}
           dy={4}
           textAnchor="end"
-          fill="hsl(var(--foreground))"
           fontSize={13}
-          fontWeight={500}
         >
-          {payload.value.length > 20 ? payload.value.substring(0, 20) + '...' : payload.value}
+          <tspan
+            fill="hsl(var(--foreground))"
+            fontWeight={500}
+          >
+            {mainText}
+          </tspan>
+          {categoryText && (
+            <tspan
+              fill="hsl(var(--muted-foreground))"
+              fontWeight={400}
+              fontSize={11}
+            >
+              {categoryText}
+            </tspan>
+          )}
         </text>
       </g>
     );
