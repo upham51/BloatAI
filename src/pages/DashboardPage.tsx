@@ -214,18 +214,18 @@ export default function DashboardPage() {
                 </motion.div>
 
                 {/* Main header content - side by side layout */}
-                <div className="flex items-center justify-between gap-3 pr-12">
+                <div className="flex items-center justify-between gap-4 pr-12">
                   {/* Left side: Greeting + Name */}
-                  <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                    <span className="text-base font-medium text-muted-foreground tracking-tight">
+                  <div className="flex flex-col gap-1 min-w-0 flex-1">
+                    <span className="text-lg font-medium text-muted-foreground/80 tracking-tight">
                       {greeting},
                     </span>
-                    <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent truncate">
+                    <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground to-primary/80 bg-clip-text text-transparent truncate leading-tight">
                       {firstName}
                     </h1>
                   </div>
 
-                  {/* Right side: Streak badge */}
+                  {/* Right side: Streak badge - subtle and smaller */}
                   <motion.div
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -235,11 +235,11 @@ export default function DashboardPage() {
                       damping: 15,
                       delay: 0.3,
                     }}
-                    className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-gradient-to-r from-coral/20 to-peach/20 border border-coral/30 shadow-md flex-shrink-0"
+                    className="flex items-center gap-1.5 px-2.5 py-2 rounded-full bg-gradient-to-r from-coral/15 to-peach/15 border border-coral/20 shadow-sm flex-shrink-0"
                   >
                     <motion.div
                       animate={{
-                        scale: streak > 0 ? [1, 1.2, 1] : 1,
+                        scale: streak > 0 ? [1, 1.15, 1] : 1,
                       }}
                       transition={{
                         duration: 2,
@@ -247,11 +247,11 @@ export default function DashboardPage() {
                         ease: 'easeInOut',
                       }}
                     >
-                      <Flame className="w-5 h-5 text-coral drop-shadow-sm" />
+                      <Flame className="w-4 h-4 text-coral/80 drop-shadow-sm" />
                     </motion.div>
                     <div className="flex flex-col items-center leading-tight">
-                      <span className="text-lg font-bold text-coral">{streak}</span>
-                      <span className="text-[10px] font-semibold text-coral/90 uppercase tracking-wide">day streak</span>
+                      <span className="text-base font-bold text-coral">{streak}</span>
+                      <span className="text-[9px] font-medium text-coral/70 uppercase tracking-wide">days</span>
                     </div>
                   </motion.div>
                 </div>
