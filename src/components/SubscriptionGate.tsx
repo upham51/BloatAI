@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Loader2 } from 'lucide-react';
 
 interface SubscriptionGateProps {
@@ -7,9 +7,10 @@ interface SubscriptionGateProps {
 }
 
 export function SubscriptionGate({ children }: SubscriptionGateProps) {
-  const { hasAccess, isLoading } = useSubscription();
+  const { hasAccess, isInitialLoad } = useSubscription();
 
-  if (isLoading) {
+  // Only show loading on the very first check, not on page navigations
+  if (isInitialLoad) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
