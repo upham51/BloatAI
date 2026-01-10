@@ -11,17 +11,8 @@ interface WeeklyProgressChartProps {
 export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
   const { chartData, trend, avgBloating } = useMemo(() => {
     const today = startOfDay(new Date());
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
-      const date = subDays(today, 6 - i);
-      return {
-        date,
-        dateStr: format(date, 'EEE'),
-        fullDate: format(date, 'MMM d'),
-      };
-    });
 
-    // Filter entries that have bloating ratings (regardless of status)
-    // This ensures data shows up even if there's a status inconsistency
+    // Filter entries that have bloating ratings
     const completedEntries = entries.filter(e =>
       e.bloating_rating !== null &&
       e.bloating_rating !== undefined &&
@@ -29,7 +20,35 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       e.bloating_rating <= 5
     );
 
-    const data = last7Days.map(day => {
+    // Find the earliest date with data
+    const datesWithData = completedEntries.map(e => startOfDay(new Date(e.created_at)));
+
+    if (datesWithData.length === 0) {
+      return { chartData: [], trend: 'neutral' as const, avgBloating: 0 };
+    }
+
+    const earliestDate = new Date(Math.min(...datesWithData.map(d => d.getTime())));
+
+    // Calculate days from earliest to today
+    const daysSinceFirst = Math.floor((today.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Show minimum 3 days, maximum 7 days (sliding window)
+    const daysToShow = Math.min(Math.max(daysSinceFirst + 1, 3), 7);
+
+    // If we have more than 7 days of history, show only the last 7
+    const startDate = daysSinceFirst >= 7 ? subDays(today, 6) : earliestDate;
+
+    // Create array of days to display
+    const displayDays = Array.from({ length: daysToShow }, (_, i) => {
+      const date = subDays(today, daysToShow - 1 - i);
+      return {
+        date,
+        dateStr: format(date, 'EEE'),
+        fullDate: format(date, 'MMM d'),
+      };
+    });
+
+    const data = displayDays.map(day => {
       const dayEntries = completedEntries.filter(e =>
         isSameDay(new Date(e.created_at), day.date)
       );
@@ -47,7 +66,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
         day: day.dateStr,
         fullDate: day.fullDate,
         bloating: avgBloating !== null ? Math.round(avgBloating * 10) / 10 : null,
-        count: allDayEntries.length, // Use all entries count, not just completed
+        count: allDayEntries.length,
       };
     });
 
@@ -214,11 +233,19 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
             fill={`url(#${getTrendGradientId()})`}
             animationDuration={1500}
             animationBegin={100}
-            dot={{
-              r: 4,
-              fill: getTrendColor(),
-              strokeWidth: 2,
-              stroke: 'hsl(var(--background))',
+            dot={(props: any) => {
+              // Only show dot if there's actual data
+              if (props.payload.bloating === null) return null;
+              return (
+                <circle
+                  cx={props.cx}
+                  cy={props.cy}
+                  r={4}
+                  fill={getTrendColor()}
+                  strokeWidth={2}
+                  stroke="hsl(var(--background))"
+                />
+              );
             }}
             activeDot={{
               r: 6,
