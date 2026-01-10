@@ -130,8 +130,8 @@ export default function DashboardPage() {
     return uniqueDays.size;
   }, [entries]);
 
-  // Show insights when user has enough data: at least 5 rated meals across at least 3 different days
-  const hasEnoughDataForInsights = completedCount >= 5 && daysWithData >= 3;
+  // Show insights when user has data across at least 3 different days
+  const hasEnoughDataForInsights = daysWithData >= 3;
 
   // Calculate today's meals
   const todaysMeals = useMemo(() => {
@@ -324,15 +324,12 @@ export default function DashboardPage() {
               <span className="text-4xl block mb-3">📊</span>
               <h3 className="font-bold text-foreground mb-2">Building Your Insights</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                {completedCount < 5
-                  ? `Log ${5 - completedCount} more meal${5 - completedCount !== 1 ? 's' : ''} with bloating ratings to unlock insights`
-                  : `Log meals across ${3 - daysWithData} more day${3 - daysWithData !== 1 ? 's' : ''} to see meaningful trends`
-                }
+                Log meals with bloating ratings across {3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''} to see your weekly trends
               </p>
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
                 <div
                   className="h-full bg-primary rounded-full transition-all"
-                    style={{ width: `${Math.min((completedCount / 5) * 50 + (daysWithData / 3) * 50, 100)}%` }}
+                    style={{ width: `${(daysWithData / 3) * 100}%` }}
                   />
                 </div>
                 <Button
