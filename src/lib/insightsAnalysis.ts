@@ -341,3 +341,496 @@ function generateSummary(input: SummaryInput) {
     topRecommendations: topRecommendations.slice(0, 3), // Limit to top 3
   };
 }
+
+// ============================================================
+// ADVANCED INSIGHTS FOR COMPREHENSIVE CARD
+// ============================================================
+
+export interface TriggerConfidenceLevel {
+  category: string;
+  confidence: 'high' | 'investigating' | 'needsData';
+  occurrences: number;
+  avgBloatingWith: number;
+  avgBloatingWithout: number;
+  topFoods: string[];
+  percentage: number;
+}
+
+export interface CombinationInsight {
+  triggers: string[];
+  occurrences: number;
+  avgBloatingTogether: number;
+  avgBloatingSeparate: number;
+  isWorseTogether: boolean;
+}
+
+export interface WeeklyComparison {
+  thisWeekAvgBloating: number;
+  overallAvgBloating: number;
+  thisWeekHighBloatingRate: number;
+  overallHighBloatingRate: number;
+  trend: 'improving' | 'worsening' | 'stable';
+  newPatterns: string[];
+}
+
+export interface SuccessMetrics {
+  currentAvgBloating: number;
+  previousPeriodAvgBloating: number;
+  improvementPercentage: number;
+  currentStreak: number;
+  longestStreak: number;
+  comfortableMealRate: number;
+  triggerAvoidanceRate: number;
+}
+
+export interface TestingRecommendation {
+  type: 'reintroduce' | 'eliminate' | 'confirm';
+  food: string;
+  reason: string;
+  daysAvoided?: number;
+  priority: 'high' | 'medium' | 'low';
+}
+
+export interface ComprehensiveAdvancedInsights {
+  triggerConfidence: TriggerConfidenceLevel[];
+  combinations: CombinationInsight[];
+  weeklyComparison: WeeklyComparison;
+  successMetrics: SuccessMetrics;
+  testingRecommendations: TestingRecommendation[];
+  predictedBloating?: number;
+}
+
+// Analyze trigger confidence levels
+export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenceLevel[] {
+  const completedEntries = entries.filter(e => e.rating_status === 'completed');
+  if (completedEntries.length === 0) return [];
+
+  const triggerStats: Record<string, {
+    occurrences: number;
+    bloatingScores: number[];
+    foods: Set<string>;
+  }> = {};
+
+  const mealsWithoutTrigger: Record<string, number[]> = {};
+
+  // Collect trigger stats
+  completedEntries.forEach(entry => {
+    const triggersInMeal = new Set<string>();
+
+    entry.detected_triggers?.forEach(trigger => {
+      triggersInMeal.add(trigger.category);
+
+      if (!triggerStats[trigger.category]) {
+        triggerStats[trigger.category] = {
+          occurrences: 0,
+          bloatingScores: [],
+          foods: new Set(),
+        };
+      }
+
+      if (entry.bloating_rating) {
+        triggerStats[trigger.category].bloatingScores.push(entry.bloating_rating);
+      }
+
+      if (trigger.food) {
+        triggerStats[trigger.category].foods.add(trigger.food);
+      }
+    });
+
+    // Track meals without each trigger
+    Object.keys(triggerStats).forEach(category => {
+      if (!triggersInMeal.has(category) && entry.bloating_rating) {
+        if (!mealsWithoutTrigger[category]) {
+          mealsWithoutTrigger[category] = [];
+        }
+        mealsWithoutTrigger[category].push(entry.bloating_rating);
+      }
+    });
+  });
+
+  // Count occurrences (unique meals)
+  completedEntries.forEach(entry => {
+    const counted = new Set<string>();
+    entry.detected_triggers?.forEach(trigger => {
+      if (!counted.has(trigger.category)) {
+        triggerStats[trigger.category].occurrences++;
+        counted.add(trigger.category);
+      }
+    });
+  });
+
+  const results: TriggerConfidenceLevel[] = Object.entries(triggerStats).map(([category, stats]) => {
+    const avgWith = stats.bloatingScores.length > 0
+      ? stats.bloatingScores.reduce((a, b) => a + b, 0) / stats.bloatingScores.length
+      : 0;
+
+    const withoutScores = mealsWithoutTrigger[category] || [];
+    const avgWithout = withoutScores.length > 0
+      ? withoutScores.reduce((a, b) => a + b, 0) / withoutScores.length
+      : 0;
+
+    let confidence: 'high' | 'investigating' | 'needsData';
+    if (stats.occurrences >= 5 && avgWith >= 3) {
+      confidence = 'high';
+    } else if (stats.occurrences >= 2 && stats.occurrences < 5) {
+      confidence = 'investigating';
+    } else {
+      confidence = 'needsData';
+    }
+
+    return {
+      category,
+      confidence,
+      occurrences: stats.occurrences,
+      avgBloatingWith: Math.round(avgWith * 10) / 10,
+      avgBloatingWithout: Math.round(avgWithout * 10) / 10,
+      topFoods: Array.from(stats.foods).slice(0, 3),
+      percentage: Math.round((stats.occurrences / completedEntries.length) * 100),
+    };
+  });
+
+  return results.sort((a, b) => {
+    // Sort by confidence first, then by occurrences
+    const confidenceOrder = { high: 0, investigating: 1, needsData: 2 };
+    const confidenceDiff = confidenceOrder[a.confidence] - confidenceOrder[b.confidence];
+    return confidenceDiff !== 0 ? confidenceDiff : b.occurrences - a.occurrences;
+  });
+}
+
+// Analyze food combinations
+export function analyzeCombinations(entries: MealEntry[]): CombinationInsight[] {
+  const completedEntries = entries.filter(e => e.rating_status === 'completed');
+  if (completedEntries.length < 5) return [];
+
+  const combinationStats: Record<string, {
+    occurrences: number;
+    bloatingScores: number[];
+  }> = {};
+
+  const singleTriggerStats: Record<string, number[]> = {};
+
+  completedEntries.forEach(entry => {
+    const triggers = entry.detected_triggers?.map(t => t.category) || [];
+
+    if (triggers.length >= 2 && entry.bloating_rating) {
+      // Sort to ensure consistent combination keys
+      const sorted = [...triggers].sort();
+
+      // Check pairs
+      for (let i = 0; i < sorted.length - 1; i++) {
+        for (let j = i + 1; j < sorted.length; j++) {
+          const key = `${sorted[i]}+${sorted[j]}`;
+
+          if (!combinationStats[key]) {
+            combinationStats[key] = { occurrences: 0, bloatingScores: [] };
+          }
+
+          combinationStats[key].occurrences++;
+          combinationStats[key].bloatingScores.push(entry.bloating_rating);
+        }
+      }
+    }
+
+    // Track single trigger meals
+    if (triggers.length === 1 && entry.bloating_rating) {
+      const trigger = triggers[0];
+      if (!singleTriggerStats[trigger]) {
+        singleTriggerStats[trigger] = [];
+      }
+      singleTriggerStats[trigger].push(entry.bloating_rating);
+    }
+  });
+
+  const combinations: CombinationInsight[] = [];
+
+  Object.entries(combinationStats).forEach(([key, stats]) => {
+    if (stats.occurrences < 2) return; // Need at least 2 occurrences
+
+    const [trigger1, trigger2] = key.split('+');
+    const avgTogether = stats.bloatingScores.reduce((a, b) => a + b, 0) / stats.bloatingScores.length;
+
+    // Calculate average when eaten separately
+    const scores1 = singleTriggerStats[trigger1] || [];
+    const scores2 = singleTriggerStats[trigger2] || [];
+    const allSeparateScores = [...scores1, ...scores2];
+
+    const avgSeparate = allSeparateScores.length > 0
+      ? allSeparateScores.reduce((a, b) => a + b, 0) / allSeparateScores.length
+      : 0;
+
+    const isWorseTogether = avgTogether > avgSeparate && (avgTogether - avgSeparate) >= 1;
+
+    if (isWorseTogether || avgTogether >= 3.5) {
+      combinations.push({
+        triggers: [trigger1, trigger2],
+        occurrences: stats.occurrences,
+        avgBloatingTogether: Math.round(avgTogether * 10) / 10,
+        avgBloatingSeparate: Math.round(avgSeparate * 10) / 10,
+        isWorseTogether,
+      });
+    }
+  });
+
+  return combinations.sort((a, b) => b.avgBloatingTogether - a.avgBloatingTogether).slice(0, 3);
+}
+
+// Weekly vs Overall comparison
+export function analyzeWeeklyComparison(entries: MealEntry[]): WeeklyComparison {
+  const completedEntries = entries.filter(e => e.rating_status === 'completed');
+
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const thisWeekEntries = completedEntries.filter(e => new Date(e.created_at) > weekAgo);
+  const olderEntries = completedEntries.filter(e => new Date(e.created_at) <= weekAgo);
+
+  const thisWeekScores = thisWeekEntries
+    .map(e => e.bloating_rating)
+    .filter((r): r is number => r !== null);
+
+  const overallScores = completedEntries
+    .map(e => e.bloating_rating)
+    .filter((r): r is number => r !== null);
+
+  const thisWeekAvg = thisWeekScores.length > 0
+    ? thisWeekScores.reduce((a, b) => a + b, 0) / thisWeekScores.length
+    : 0;
+
+  const overallAvg = overallScores.length > 0
+    ? overallScores.reduce((a, b) => a + b, 0) / overallScores.length
+    : 0;
+
+  const thisWeekHighRate = thisWeekEntries.length > 0
+    ? (thisWeekEntries.filter(e => isHighBloating(e.bloating_rating)).length / thisWeekEntries.length) * 100
+    : 0;
+
+  const overallHighRate = completedEntries.length > 0
+    ? (completedEntries.filter(e => isHighBloating(e.bloating_rating)).length / completedEntries.length) * 100
+    : 0;
+
+  let trend: 'improving' | 'worsening' | 'stable' = 'stable';
+  const difference = thisWeekAvg - overallAvg;
+  if (difference < -0.5) trend = 'improving';
+  else if (difference > 0.5) trend = 'worsening';
+
+  // Detect new patterns this week
+  const newPatterns: string[] = [];
+  const thisWeekTriggers = new Set<string>();
+  const olderTriggers = new Set<string>();
+
+  thisWeekEntries.forEach(e => {
+    e.detected_triggers?.forEach(t => thisWeekTriggers.add(t.category));
+  });
+
+  olderEntries.forEach(e => {
+    e.detected_triggers?.forEach(t => olderTriggers.add(t.category));
+  });
+
+  thisWeekTriggers.forEach(trigger => {
+    const thisWeekCount = thisWeekEntries.filter(e =>
+      e.detected_triggers?.some(t => t.category === trigger)
+    ).length;
+
+    const olderCount = olderEntries.filter(e =>
+      e.detected_triggers?.some(t => t.category === trigger)
+    ).length;
+
+    // New trigger or significant increase
+    if ((olderCount === 0 && thisWeekCount >= 2) ||
+        (olderCount > 0 && thisWeekCount >= olderCount * 2 && thisWeekCount >= 3)) {
+      const triggerInfo = getTriggerCategory(trigger);
+      newPatterns.push(triggerInfo?.displayName || trigger);
+    }
+  });
+
+  return {
+    thisWeekAvgBloating: Math.round(thisWeekAvg * 10) / 10,
+    overallAvgBloating: Math.round(overallAvg * 10) / 10,
+    thisWeekHighBloatingRate: Math.round(thisWeekHighRate),
+    overallHighBloatingRate: Math.round(overallHighRate),
+    trend,
+    newPatterns: newPatterns.slice(0, 2),
+  };
+}
+
+// Success metrics calculation
+export function calculateSuccessMetrics(entries: MealEntry[]): SuccessMetrics {
+  const completedEntries = entries.filter(e => e.rating_status === 'completed');
+
+  const now = new Date();
+  const last14Days = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+  const previous14Days = new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000);
+
+  const recent = completedEntries.filter(e => new Date(e.created_at) > last14Days);
+  const previous = completedEntries.filter(e => {
+    const date = new Date(e.created_at);
+    return date > previous14Days && date <= last14Days;
+  });
+
+  const recentScores = recent.map(e => e.bloating_rating).filter((r): r is number => r !== null);
+  const previousScores = previous.map(e => e.bloating_rating).filter((r): r is number => r !== null);
+
+  const currentAvg = recentScores.length > 0
+    ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length
+    : 0;
+
+  const previousAvg = previousScores.length > 0
+    ? previousScores.reduce((a, b) => a + b, 0) / previousScores.length
+    : currentAvg;
+
+  const improvement = previousAvg > 0
+    ? ((previousAvg - currentAvg) / previousAvg) * 100
+    : 0;
+
+  // Calculate streak (consecutive days avoiding high triggers)
+  const sortedByDate = [...completedEntries].sort((a, b) =>
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+
+  let currentStreak = 0;
+  let longestStreak = 0;
+  let tempStreak = 0;
+
+  sortedByDate.forEach(entry => {
+    if (isLowBloating(entry.bloating_rating)) {
+      tempStreak++;
+      if (tempStreak > longestStreak) longestStreak = tempStreak;
+    } else {
+      if (tempStreak > 0 && currentStreak === 0) {
+        currentStreak = tempStreak;
+      }
+      tempStreak = 0;
+    }
+  });
+
+  if (tempStreak > 0 && currentStreak === 0) currentStreak = tempStreak;
+
+  const comfortableMeals = completedEntries.filter(e => isLowBloating(e.bloating_rating)).length;
+  const comfortableRate = completedEntries.length > 0
+    ? (comfortableMeals / completedEntries.length) * 100
+    : 0;
+
+  // Get high confidence triggers
+  const triggerConfidence = analyzeTriggerConfidence(entries);
+  const highConfidenceTriggers = triggerConfidence
+    .filter(t => t.confidence === 'high')
+    .map(t => t.category);
+
+  // Calculate avoidance rate
+  const recentWithHighTriggers = recent.filter(e =>
+    e.detected_triggers?.some(t => highConfidenceTriggers.includes(t.category))
+  ).length;
+
+  const avoidanceRate = recent.length > 0
+    ? ((recent.length - recentWithHighTriggers) / recent.length) * 100
+    : 0;
+
+  return {
+    currentAvgBloating: Math.round(currentAvg * 10) / 10,
+    previousPeriodAvgBloating: Math.round(previousAvg * 10) / 10,
+    improvementPercentage: Math.round(improvement),
+    currentStreak,
+    longestStreak,
+    comfortableMealRate: Math.round(comfortableRate),
+    triggerAvoidanceRate: Math.round(avoidanceRate),
+  };
+}
+
+// Generate testing recommendations
+export function generateTestingRecommendations(entries: MealEntry[]): TestingRecommendation[] {
+  const completedEntries = entries.filter(e => e.rating_status === 'completed');
+  if (completedEntries.length < 5) return [];
+
+  const recommendations: TestingRecommendation[] = [];
+  const triggerConfidence = analyzeTriggerConfidence(entries);
+
+  const now = new Date();
+  const foodLastSeen: Record<string, Date> = {};
+
+  // Track when each food was last eaten
+  completedEntries.forEach(entry => {
+    entry.detected_triggers?.forEach(trigger => {
+      const food = trigger.food || trigger.category;
+      const entryDate = new Date(entry.created_at);
+
+      if (!foodLastSeen[food] || entryDate > foodLastSeen[food]) {
+        foodLastSeen[food] = entryDate;
+      }
+    });
+  });
+
+  // Check for reintroduction opportunities
+  Object.entries(foodLastSeen).forEach(([food, lastDate]) => {
+    const daysAvoided = Math.floor((now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysAvoided >= 10 && daysAvoided <= 30) {
+      // Find if this food had high bloating before
+      const entriesWithFood = completedEntries.filter(e =>
+        e.detected_triggers?.some(t => (t.food || t.category) === food)
+      );
+
+      const hadHighBloating = entriesWithFood.some(e => isHighBloating(e.bloating_rating));
+
+      if (hadHighBloating && entriesWithFood.length >= 2) {
+        recommendations.push({
+          type: 'reintroduce',
+          food,
+          reason: `You've avoided ${food} for ${daysAvoided} days. Reintroduce to confirm if it's still a trigger.`,
+          daysAvoided,
+          priority: daysAvoided >= 14 ? 'high' : 'medium',
+        });
+      }
+    }
+  });
+
+  // Check for confirmation needed
+  triggerConfidence.forEach(trigger => {
+    if (trigger.confidence === 'investigating' && trigger.occurrences >= 3) {
+      recommendations.push({
+        type: 'confirm',
+        food: trigger.category,
+        reason: `${trigger.category} appeared ${trigger.occurrences} times. Continue tracking to confirm if it's a trigger.`,
+        priority: 'medium',
+      });
+    }
+  });
+
+  // Suggest elimination for high confidence triggers still being eaten
+  const recentTriggers = triggerConfidence.filter(t => t.confidence === 'high');
+  recentTriggers.forEach(trigger => {
+    const recentEntries = completedEntries.slice(0, 10);
+    const stillEating = recentEntries.some(e =>
+      e.detected_triggers?.some(t => t.category === trigger.category)
+    );
+
+    if (stillEating) {
+      recommendations.push({
+        type: 'eliminate',
+        food: trigger.category,
+        reason: `${trigger.category} is a confirmed trigger (${trigger.avgBloatingWith}/5 avg). Try eliminating for 2 weeks.`,
+        priority: 'high',
+      });
+    }
+  });
+
+  return recommendations
+    .sort((a, b) => {
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    })
+    .slice(0, 3);
+}
+
+// Generate comprehensive advanced insights
+export function generateAdvancedInsights(entries: MealEntry[]): ComprehensiveAdvancedInsights | null {
+  const completedEntries = entries.filter(e => e.rating_status === 'completed');
+  if (completedEntries.length < 3) return null;
+
+  return {
+    triggerConfidence: analyzeTriggerConfidence(entries),
+    combinations: analyzeCombinations(entries),
+    weeklyComparison: analyzeWeeklyComparison(entries),
+    successMetrics: calculateSuccessMetrics(entries),
+    testingRecommendations: generateTestingRecommendations(entries),
+  };
+}
