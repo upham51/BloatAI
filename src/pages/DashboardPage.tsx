@@ -123,9 +123,13 @@ export default function DashboardPage() {
   // Calculate average bloating for the week
   const weeklyBloating = useMemo(() => {
     const weekAgo = subDays(new Date(), 7);
+    // Use same filter as chart: valid bloating rating (1-5)
     const weekMeals = entries.filter(e =>
       isAfter(new Date(e.created_at), weekAgo) &&
-      e.bloating_rating !== null && e.bloating_rating !== undefined
+      e.bloating_rating !== null &&
+      e.bloating_rating !== undefined &&
+      e.bloating_rating >= 1 &&
+      e.bloating_rating <= 5
     );
 
     if (weekMeals.length === 0) return 0;
@@ -136,14 +140,32 @@ export default function DashboardPage() {
 
   const handleRate = async (rating: number) => {
     if (!pendingEntry) return;
-    await updateRating(pendingEntry.id, rating);
-    toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+    try {
+      await updateRating(pendingEntry.id, rating);
+      toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+    } catch (error) {
+      console.error('Failed to save rating:', error);
+      toast({
+        title: 'Failed to save rating',
+        description: 'Please try again or check your connection.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleSkip = async () => {
     if (!pendingEntry) return;
-    await skipRating(pendingEntry.id);
-    toast({ title: 'Rating skipped' });
+    try {
+      await skipRating(pendingEntry.id);
+      toast({ title: 'Rating skipped' });
+    } catch (error) {
+      console.error('Failed to skip rating:', error);
+      toast({
+        title: 'Failed to skip rating',
+        description: 'Please try again or check your connection.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

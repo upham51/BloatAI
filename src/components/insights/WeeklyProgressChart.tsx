@@ -20,7 +20,14 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       };
     });
 
-    const completedEntries = entries.filter(e => e.rating_status === 'completed' && e.bloating_rating);
+    // Filter entries that have bloating ratings (regardless of status)
+    // This ensures data shows up even if there's a status inconsistency
+    const completedEntries = entries.filter(e =>
+      e.bloating_rating !== null &&
+      e.bloating_rating !== undefined &&
+      e.bloating_rating >= 1 &&
+      e.bloating_rating <= 5
+    );
 
     const data = last7Days.map(day => {
       const dayEntries = completedEntries.filter(e =>
