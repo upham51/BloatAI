@@ -15,7 +15,7 @@ export const AbstractBackground = ({
     <main>
       <div
         className={cn(
-          "relative flex flex-col h-[100vh] items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 text-slate-950 transition-bg",
+          "relative min-h-screen bg-background text-foreground transition-bg",
           className
         )}
         {...props}
