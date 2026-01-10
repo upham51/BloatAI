@@ -231,8 +231,8 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
             stroke={getTrendColor()}
             strokeWidth={2}
             fill={`url(#${getTrendGradientId()})`}
-            animationDuration={1500}
-            animationBegin={100}
+            animationDuration={3500}
+            animationBegin={200}
             dot={(props: any) => {
               // Only show dot if there's actual data
               if (props.payload.bloating === null) return null;

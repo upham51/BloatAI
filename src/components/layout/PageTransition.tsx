@@ -17,7 +17,7 @@ export const PageTransition = ({ children, className = '' }: PageTransitionProps
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{
-        duration: 0.4,
+        duration: 1.2,
         ease: [0.22, 1, 0.36, 1], // Custom cubic bezier for luxury feel
       }}
       className={className}
@@ -38,8 +38,8 @@ export const StaggerContainer = ({ children, className = '' }: PageTransitionPro
       variants={{
         visible: {
           transition: {
-            staggerChildren: 0.08,
-            delayChildren: 0.1,
+            staggerChildren: 0.2,
+            delayChildren: 0.3,
           },
         },
       }}
@@ -62,7 +62,7 @@ export const StaggerItem = ({ children, className = '' }: PageTransitionProps) =
           opacity: 1,
           y: 0,
           transition: {
-            duration: 0.5,
+            duration: 1.5,
             ease: [0.22, 1, 0.36, 1],
           },
         },
@@ -84,7 +84,7 @@ export const ScaleTransition = ({ children, className = '' }: PageTransitionProp
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{
-        duration: 0.3,
+        duration: 1.0,
         ease: [0.22, 1, 0.36, 1],
       }}
       className={className}
@@ -104,7 +104,7 @@ export const SlideTransition = ({ children, className = '' }: PageTransitionProp
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
       transition={{
-        duration: 0.4,
+        duration: 1.2,
         ease: [0.22, 1, 0.36, 1],
       }}
       className={className}

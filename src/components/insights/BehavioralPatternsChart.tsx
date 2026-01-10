@@ -133,8 +133,8 @@ export function BehavioralPatternsChart({ patterns }: BehavioralPatternsChartPro
             fill="url(#radarGradient)"
             fillOpacity={0.6}
             strokeWidth={2}
-            animationDuration={1500}
-            animationBegin={200}
+            animationDuration={3500}
+            animationBegin={300}
             dot={{
               r: 4,
               fill: 'hsl(var(--lavender))',
