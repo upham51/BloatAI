@@ -40,10 +40,8 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       };
     });
 
-    // Track last known bloating value to carry forward for days with no data
-    let lastKnownBloating: number | null = null;
-
-    const data = displayDays.map(day => {
+    // First pass: collect actual data for each day
+    const rawData = displayDays.map(day => {
       const dayEntries = completedEntries.filter(e =>
         isSameDay(new Date(e.created_at), day.date)
       );
@@ -57,23 +55,35 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
         ? dayEntries.reduce((sum, e) => sum + (e.bloating_rating || 0), 0) / dayEntries.length
         : null;
 
-      // If we have data for this day, update last known value
-      // If no data, carry forward the last known value to keep line visible
-      const bloatingValue = avgBloating !== null
-        ? Math.round(avgBloating * 10) / 10
-        : lastKnownBloating;
-
-      if (avgBloating !== null) {
-        lastKnownBloating = Math.round(avgBloating * 10) / 10;
-      }
-
       return {
         day: day.dateStr,
         fullDate: day.fullDate,
-        bloating: bloatingValue,
-        hasData: avgBloating !== null, // Track whether this day has actual data
+        bloating: avgBloating !== null ? Math.round(avgBloating * 10) / 10 : null,
+        hasData: avgBloating !== null,
         count: allDayEntries.length,
       };
+    });
+
+    // Second pass: fill in gaps by carrying forward/backward
+    // First, find the first day with actual data to use for backward fill
+    const firstDataIndex = rawData.findIndex(d => d.hasData);
+    const firstValue = firstDataIndex >= 0 ? rawData[firstDataIndex].bloating : null;
+
+    // Fill in data with smart carry-forward/backward logic
+    let lastKnownBloating: number | null = firstValue;
+    const data = rawData.map((day, index) => {
+      if (day.hasData) {
+        lastKnownBloating = day.bloating;
+        return day;
+      } else {
+        // If we're before the first data point, use first value (backward fill)
+        // Otherwise use last known value (forward fill)
+        const bloatingValue = index < firstDataIndex ? firstValue : lastKnownBloating;
+        return {
+          ...day,
+          bloating: bloatingValue,
+        };
+      }
     });
 
     // Calculate trend (comparing first half vs second half of week)

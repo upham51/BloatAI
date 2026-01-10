@@ -193,7 +193,7 @@ export default function DashboardPage() {
         <div className="min-h-screen relative">
           <AbstractBackground />
           <GrainTexture />
-          <StaggerContainer className="relative z-10 px-5 pt-2 pb-32 max-w-lg mx-auto space-y-5 w-full">
+          <StaggerContainer className="relative z-10 px-5 pt-0 pb-28 max-w-lg mx-auto space-y-4 w-full">
             {/* Header with time-based greeting */}
             <StaggerItem>
               <header className="relative">
@@ -213,47 +213,14 @@ export default function DashboardPage() {
                   </Button>
                 </motion.div>
 
-                {/* Main header content - side by side layout */}
-                <div className="flex items-center justify-between gap-4 pr-12">
-                  {/* Left side: Greeting + Name */}
-                  <div className="flex flex-col gap-1 min-w-0 flex-1">
-                    <span className="text-lg font-medium text-muted-foreground/80 tracking-tight">
-                      {greeting},
-                    </span>
-                    <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground to-primary/80 bg-clip-text text-transparent truncate leading-tight">
-                      {firstName}
-                    </h1>
-                  </div>
-
-                  {/* Right side: Streak badge - subtle and smaller */}
-                  <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 200,
-                      damping: 15,
-                      delay: 0.3,
-                    }}
-                    className="flex items-center gap-1.5 px-2.5 py-2 rounded-full bg-gradient-to-r from-coral/15 to-peach/15 border border-coral/20 shadow-sm flex-shrink-0"
-                  >
-                    <motion.div
-                      animate={{
-                        scale: streak > 0 ? [1, 1.15, 1] : 1,
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: streak > 0 ? Infinity : 0,
-                        ease: 'easeInOut',
-                      }}
-                    >
-                      <Flame className="w-4 h-4 text-coral/80 drop-shadow-sm" />
-                    </motion.div>
-                    <div className="flex flex-col items-center leading-tight">
-                      <span className="text-base font-bold text-coral">{streak}</span>
-                      <span className="text-[9px] font-medium text-coral/70 uppercase tracking-wide">days</span>
-                    </div>
-                  </motion.div>
+                {/* Centered greeting */}
+                <div className="flex flex-col items-center text-center gap-1 px-12">
+                  <span className="text-lg font-medium text-muted-foreground/80 tracking-tight">
+                    {greeting},
+                  </span>
+                  <h1 className="text-6xl font-black tracking-tight bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent leading-tight">
+                    {firstName}
+                  </h1>
                 </div>
               </header>
             </StaggerItem>
@@ -277,34 +244,41 @@ export default function DashboardPage() {
 
               {/* Content (relative to stack on top of background) */}
               <div className="relative z-10">
-                <h2 className="text-sm font-semibold text-muted-foreground mb-4">Weekly Average</h2>
-
                 {/* Main metric display */}
-                <div className="flex items-center justify-between mb-6">
-                  {/* Bloating Score */}
-                  <div className="flex-1">
-                    <div className="text-5xl font-bold text-foreground mb-1 drop-shadow-sm">
-                      {weeklyBloating.toFixed(1)}
+                <div className="flex items-center justify-between">
+                  {/* Day Streak */}
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="flex items-center gap-2 mb-2">
+                      <motion.div
+                        animate={{
+                          scale: streak > 0 ? [1, 1.15, 1] : 1,
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: streak > 0 ? Infinity : 0,
+                          ease: 'easeInOut',
+                        }}
+                      >
+                        <Flame className="w-6 h-6 text-coral drop-shadow-sm" />
+                      </motion.div>
+                      <div className="text-5xl font-bold text-coral drop-shadow-sm">
+                        {streak}
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground font-medium">Bloating Score</div>
+                    <div className="text-sm text-muted-foreground font-medium">Day Streak</div>
                   </div>
 
                   {/* Divider */}
                   <div className="w-px h-16 bg-border mx-4" />
 
                   {/* Today's Meals */}
-                  <div className="flex-1 text-right">
-                    <div className="text-5xl font-bold text-foreground mb-1 drop-shadow-sm">
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="text-5xl font-bold text-foreground mb-2 drop-shadow-sm">
                       {todaysMeals}
                     </div>
                     <div className="text-sm text-muted-foreground font-medium">Meals Today</div>
                   </div>
                 </div>
-
-                {/* Subtext */}
-                <div className="text-xs text-muted-foreground text-center pt-3 border-t border-border/50">
-                    Based on last 7 days
-                  </div>
                 </div>
               </motion.div>
               </StaggerItem>
