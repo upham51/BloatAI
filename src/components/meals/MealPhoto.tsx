@@ -51,10 +51,10 @@ export function MealPhoto({
     return () => {
       observer.disconnect();
     };
-  }, [lazy, priority, shouldLoad]);
+  }, [lazy, priority]);
 
-  // Show skeleton while URL is loading OR image is loading
-  const showSkeleton = urlLoading || (!imageLoaded && signedUrl);
+  // Show skeleton while URL is loading
+  const showSkeleton = urlLoading;
 
   if (showSkeleton) {
     return (
