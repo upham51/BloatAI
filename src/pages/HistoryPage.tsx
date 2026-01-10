@@ -104,6 +104,37 @@ export default function HistoryPage() {
     return filtered;
   }, [entries, filter]);
 
+  // Group entries by date for cleaner organization
+  const groupedEntries = useMemo(() => {
+    const groups: { label: string; entries: MealEntry[] }[] = [];
+    const today = new Date();
+    const yesterday = subDays(today, 1);
+    const weekAgo = subDays(today, 7);
+
+    const todayEntries = filteredEntries.filter(e =>
+      format(new Date(e.created_at), 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
+    );
+    const yesterdayEntries = filteredEntries.filter(e =>
+      format(new Date(e.created_at), 'yyyy-MM-dd') === format(yesterday, 'yyyy-MM-dd')
+    );
+    const thisWeekEntries = filteredEntries.filter(e => {
+      const entryDate = new Date(e.created_at);
+      return isAfter(entryDate, weekAgo) &&
+             format(entryDate, 'yyyy-MM-dd') !== format(today, 'yyyy-MM-dd') &&
+             format(entryDate, 'yyyy-MM-dd') !== format(yesterday, 'yyyy-MM-dd');
+    });
+    const earlierEntries = filteredEntries.filter(e =>
+      !isAfter(new Date(e.created_at), weekAgo)
+    );
+
+    if (todayEntries.length > 0) groups.push({ label: 'Today', entries: todayEntries });
+    if (yesterdayEntries.length > 0) groups.push({ label: 'Yesterday', entries: yesterdayEntries });
+    if (thisWeekEntries.length > 0) groups.push({ label: 'This Week', entries: thisWeekEntries });
+    if (earlierEntries.length > 0) groups.push({ label: 'Earlier', entries: earlierEntries });
+
+    return groups;
+  }, [filteredEntries]);
+
   const handleDelete = async (id: string, description: string) => {
     if (!confirm('Delete this entry? This cannot be undone.')) return;
 
@@ -175,109 +206,123 @@ export default function HistoryPage() {
         <div className="absolute top-60 right-5 w-32 h-32 bg-coral/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative p-5 pb-32 max-w-lg mx-auto space-y-5">
-          {/* Header */}
-          <header className="pt-2 animate-slide-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
+          {/* Header - Centered & Elevated */}
+          <header className="text-center pt-6 pb-4 animate-slide-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
             <h1 className="text-3xl font-bold text-foreground tracking-tight">History</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground/60 mt-1.5">
               {entries.length} meal{entries.length !== 1 ? 's' : ''} logged
             </p>
           </header>
 
-          {/* Quick Stats Banner */}
+          {/* Compact Stats - Side by side with icons */}
           {entries.length >= 3 && (
-            <div 
-              className="premium-card p-3 flex gap-3 animate-slide-up opacity-0"
+            <div
+              className="flex gap-2 animate-slide-up opacity-0"
               style={{ animationDelay: '25ms', animationFillMode: 'forwards' }}
             >
-              <div className="flex-1 text-center">
-                <p className="text-xs text-muted-foreground">Avg This Week</p>
-                <p className="text-lg font-bold text-foreground flex items-center justify-center gap-1">
-                  {stats.weeklyAvg > 0 ? (
-                    <>
-                      <span className="text-base">{stats.weeklyAvg <= 2 ? '😊' : stats.weeklyAvg >= 4 ? '😣' : '😐'}</span>
-                      {stats.weeklyAvg.toFixed(1)}/5
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground text-sm">No data</span>
-                  )}
-                </p>
-              </div>
-              <div className="w-px bg-border" />
-              <div className="flex-1 text-center">
-                <p className="text-xs text-muted-foreground">Top Trigger</p>
-                {stats.topTrigger ? (
-                  <div className="flex items-center justify-center gap-1.5 mt-0.5">
-                    <span 
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: getTriggerCategory(stats.topTrigger.category)?.color }}
-                    />
-                    <span className="text-sm font-bold text-foreground truncate">
-                      {getTriggerCategory(stats.topTrigger.category)?.displayName?.split(' - ')[1] || 
-                       getTriggerCategory(stats.topTrigger.category)?.displayName}
-                    </span>
+              <div className="flex-1 premium-card p-2.5">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-primary flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xs text-muted-foreground/70">Week Avg</p>
+                    <p className="text-sm font-bold text-foreground">
+                      {stats.weeklyAvg > 0 ? `${stats.weeklyAvg.toFixed(1)}/5` : 'N/A'}
+                    </p>
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">None yet</p>
-                )}
+                </div>
+              </div>
+              <div className="flex-1 premium-card p-2.5">
+                <div className="flex items-center gap-2">
+                  <Flame className="w-4 h-4 text-coral flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xs text-muted-foreground/70">Top Trigger</p>
+                    {stats.topTrigger ? (
+                      <p className="text-sm font-bold text-foreground truncate">
+                        {getTriggerCategory(stats.topTrigger.category)?.displayName?.split(' - ')[1] ||
+                         getTriggerCategory(stats.topTrigger.category)?.displayName || 'None'}
+                      </p>
+                    ) : (
+                      <p className="text-sm font-bold text-muted-foreground">None</p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Filter Tabs */}
-          <div 
-            className="premium-card p-1.5 flex gap-1.5 animate-slide-up opacity-0" 
+          {/* Filter Pills - Minimal Style */}
+          <div
+            className="flex gap-1 justify-center animate-slide-up opacity-0"
             style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
           >
             <button
               onClick={() => setFilter('all')}
-              className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
+              className={`py-2 px-3 rounded-full text-xs font-semibold transition-all duration-200 ${
                 filter === 'all'
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               All ({entries.length})
             </button>
             <button
               onClick={() => setFilter('high-bloating')}
-              className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
+              className={`py-2 px-3 rounded-full text-xs font-semibold transition-all duration-200 ${
                 filter === 'high-bloating'
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <span className="flex items-center justify-center gap-1">
-                <Flame className="w-3 h-3" />
+              <span className="flex items-center gap-1">
                 High ({stats.highBloatingCount})
               </span>
             </button>
             <button
               onClick={() => setFilter('this-week')}
-              className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
+              className={`py-2 px-3 rounded-full text-xs font-semibold transition-all duration-200 ${
                 filter === 'this-week'
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               This Week ({stats.thisWeekCount})
             </button>
           </div>
 
-          {/* Entry List */}
-          <div className="space-y-4">
-            {filteredEntries.map((entry, index) => (
-              <EntryCard
-                key={entry.id}
-                entry={entry}
-                userAvg={userAvg}
-                onRate={() => setRatingEntry(entry)}
-                onEdit={() => setEditEntry(entry)}
-                onDelete={() => handleDelete(entry.id, entry.meal_description)}
-                onViewDetails={() => handleOpenDetails(entry)}
-                onEditTitle={() => setEditTitleEntry(entry)}
-                delay={100 + index * 50}
-                isFirstPhoto={index === 0 && !!entry.photo_url}
-              />
+          {/* Entry List - Grouped by Date */}
+          <div className="space-y-6">
+            {groupedEntries.map((group, groupIndex) => (
+              <div key={group.label} className="space-y-3">
+                {/* Date Header */}
+                <div
+                  className="flex items-center gap-3 animate-slide-up opacity-0"
+                  style={{ animationDelay: `${100 + groupIndex * 30}ms`, animationFillMode: 'forwards' }}
+                >
+                  <div className="h-px bg-border flex-1" />
+                  <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {group.label}
+                  </h2>
+                  <div className="h-px bg-border flex-1" />
+                </div>
+
+                {/* Entries in this group */}
+                <div className="space-y-2.5">
+                  {group.entries.map((entry, entryIndex) => (
+                    <EntryCard
+                      key={entry.id}
+                      entry={entry}
+                      userAvg={userAvg}
+                      onRate={() => setRatingEntry(entry)}
+                      onEdit={() => setEditEntry(entry)}
+                      onDelete={() => handleDelete(entry.id, entry.meal_description)}
+                      onViewDetails={() => handleOpenDetails(entry)}
+                      onEditTitle={() => setEditTitleEntry(entry)}
+                      delay={120 + groupIndex * 30 + entryIndex * 40}
+                      isFirstPhoto={groupIndex === 0 && entryIndex === 0 && !!entry.photo_url}
+                    />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
 
@@ -706,95 +751,96 @@ function EntryCard({
         )}
 
         {/* Main Content - Right Side (Flexible) */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between gap-1.5">
-          {/* Top Row: Title + Menu */}
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          {/* Title Row with Menu */}
           <div className="flex items-start justify-between gap-2">
-            <button
-              onClick={onEditTitle}
-              className="flex items-center gap-1.5 group min-w-0 flex-1"
-            >
-              <span className="text-lg flex-shrink-0">{displayEmoji}</span>
-              <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors truncate">
-                {displayTitle}
-              </span>
-              <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-            </button>
+            <div className="flex-1 min-w-0">
+              <button
+                onClick={onEditTitle}
+                className="group w-full text-left"
+              >
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-base flex-shrink-0">{displayEmoji}</span>
+                  <span className="font-bold text-foreground text-sm group-hover:text-primary transition-colors truncate">
+                    {displayTitle}
+                  </span>
+                  <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                </div>
+              </button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="flex-shrink-0 h-7 w-7 rounded-lg hover:bg-muted/50">
-                  <MoreVertical className="w-3.5 h-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="rounded-xl">
-                <DropdownMenuItem onClick={onEdit} className="rounded-lg">
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onDelete} className="text-destructive rounded-lg">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              {/* Timestamp below title */}
+              <p className="text-2xs text-muted-foreground/60 mt-0.5">
+                {format(new Date(entry.created_at), 'MMM d, h:mm a')}
+              </p>
+            </div>
 
-          {/* Middle Row: Time + Rating */}
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
-              <Clock className="w-3 h-3" />
-              {format(new Date(entry.created_at), 'MMM d, h:mm a')}
-            </p>
-
-            {/* Bloating Rating - Compact */}
-            {entry.bloating_rating && (
-              <div className={`flex items-center gap-1 px-2 py-1 rounded-lg flex-shrink-0 ${
-                entry.bloating_rating <= 2
-                  ? 'bg-primary/15'
-                  : entry.bloating_rating === 3
-                    ? 'bg-yellow-100'
-                    : 'bg-coral/15'
-              }`}>
-                <span className="text-base">{RATING_EMOJIS[entry.bloating_rating]}</span>
-                <span className={`text-xs font-bold ${
+            {/* Rating + Menu in top right */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {entry.bloating_rating && (
+                <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${
                   entry.bloating_rating <= 2
-                    ? 'text-primary'
+                    ? 'bg-primary/10'
                     : entry.bloating_rating === 3
-                      ? 'text-yellow-600'
-                      : 'text-coral'
+                      ? 'bg-yellow-50'
+                      : 'bg-coral/10'
                 }`}>
-                  {entry.bloating_rating}/5
-                </span>
-              </div>
-            )}
+                  <span className="text-sm">{RATING_EMOJIS[entry.bloating_rating]}</span>
+                  <span className={`text-xs font-bold ${
+                    entry.bloating_rating <= 2
+                      ? 'text-primary'
+                      : entry.bloating_rating === 3
+                        ? 'text-yellow-600'
+                        : 'text-coral'
+                  }`}>
+                    {entry.bloating_rating}
+                  </span>
+                </div>
+              )}
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md hover:bg-muted/50">
+                    <MoreVertical className="w-3 h-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="rounded-xl">
+                  <DropdownMenuItem onClick={onEdit} className="rounded-lg">
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onDelete} className="text-destructive rounded-lg">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
-          {/* Bottom Row: Triggers */}
+          {/* Triggers - Minimal colored dots with labels */}
           {entry.detected_triggers && entry.detected_triggers.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {formatTriggerDisplay(entry.detected_triggers).slice(0, 3).map((trigger, i) => (
-                <span
-                  key={i}
-                  className="flex items-center gap-1 text-xs"
-                >
-                  <span className="text-sm">{trigger.icon}</span>
-                  <span className="text-muted-foreground">{trigger.name}</span>
-                </span>
-              ))}
-              {entry.detected_triggers.length > 3 && (
-                <span className="text-xs text-muted-foreground">
-                  +{entry.detected_triggers.length - 3}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {entry.detected_triggers.slice(0, 2).map((trigger, i) => {
+                const categoryInfo = getTriggerCategory(trigger.category);
+                return (
+                  <span
+                    key={i}
+                    className="flex items-center gap-1 text-2xs text-muted-foreground"
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: categoryInfo?.color }}
+                    />
+                    {trigger.food || categoryInfo?.displayName?.split(' - ')[1] || categoryInfo?.displayName}
+                  </span>
+                );
+              })}
+              {entry.detected_triggers.length > 2 && (
+                <span className="text-2xs text-muted-foreground/70">
+                  +{entry.detected_triggers.length - 2} more
                 </span>
               )}
             </div>
-          )}
-
-          {/* Notes Preview - Single Line */}
-          {entry.notes && (
-            <p className="text-2xs text-muted-foreground italic truncate flex items-center gap-1">
-              <FileText className="w-3 h-3 flex-shrink-0" />
-              {entry.notes}
-            </p>
           )}
         </div>
       </div>
