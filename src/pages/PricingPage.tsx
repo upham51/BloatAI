@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, Shield, Sparkles, CreditCard, ArrowRight, Leaf, Loader2 } from 'lucide-react';
+import { Check, Shield, Sparkles, CreditCard, ArrowRight, Leaf, Loader2, LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription, STRIPE_PLANS } from '@/hooks/useSubscription';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,7 +20,7 @@ export default function PricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<'annual' | 'monthly'>('annual');
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { hasAccess, isLoading, isCheckingOut, startCheckout, plan, refreshSubscription } = useSubscription();
   const [searchParams] = useSearchParams();
 
@@ -54,8 +54,17 @@ export default function PricingPage() {
       navigate('/auth');
       return;
     }
-    
+
     await startCheckout(billingPeriod);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: 'Signed out',
+      description: 'You can sign in with a different account now.',
+    });
+    navigate('/auth');
   };
 
   const selectedPlan = billingPeriod === 'annual' ? STRIPE_PLANS.annual : STRIPE_PLANS.monthly;
@@ -71,10 +80,19 @@ export default function PricingPage() {
 
       <div className="relative z-10 min-h-screen flex flex-col px-4 py-8 max-w-lg mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
             ← Back
           </button>
+          {user && (
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-sm">Switch Account</span>
+            </button>
+          )}
         </div>
 
         {/* Title */}
