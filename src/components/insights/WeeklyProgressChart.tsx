@@ -48,6 +48,9 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       };
     });
 
+    // Track last known bloating value to carry forward for days with no data
+    let lastKnownBloating: number | null = null;
+
     const data = displayDays.map(day => {
       const dayEntries = completedEntries.filter(e =>
         isSameDay(new Date(e.created_at), day.date)
@@ -62,10 +65,21 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
         ? dayEntries.reduce((sum, e) => sum + (e.bloating_rating || 0), 0) / dayEntries.length
         : null;
 
+      // If we have data for this day, update last known value
+      // If no data, carry forward the last known value to keep line visible
+      const bloatingValue = avgBloating !== null
+        ? Math.round(avgBloating * 10) / 10
+        : lastKnownBloating;
+
+      if (avgBloating !== null) {
+        lastKnownBloating = Math.round(avgBloating * 10) / 10;
+      }
+
       return {
         day: day.dateStr,
         fullDate: day.fullDate,
-        bloating: avgBloating !== null ? Math.round(avgBloating * 10) / 10 : null,
+        bloating: bloatingValue,
+        hasData: avgBloating !== null, // Track whether this day has actual data
         count: allDayEntries.length,
       };
     });
@@ -115,12 +129,17 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
         <div className="space-y-1 text-sm">
           <div className="flex justify-between gap-3">
             <span className="text-muted-foreground">Avg Bloating:</span>
-            <span className="font-bold text-primary">{data.bloating}/5</span>
+            <span className="font-bold text-primary">{data.bloating}/5{!data.hasData && ' *'}</span>
           </div>
           <div className="flex justify-between gap-3">
             <span className="text-muted-foreground">Meals Logged:</span>
             <span className="font-medium text-foreground">{data.count}</span>
           </div>
+          {!data.hasData && (
+            <div className="text-xs text-muted-foreground pt-1 border-t border-border/50 mt-2">
+              * Estimated from previous day
+            </div>
+          )}
         </div>
       </div>
     );
@@ -234,16 +253,22 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
             animationDuration={3500}
             animationBegin={200}
             dot={(props: any) => {
-              // Only show dot if there's actual data
+              // Only show dot if there's a bloating value
               if (props.payload.bloating === null) return null;
+
+              // Show different style for days with actual data vs carried forward
+              const hasActualData = props.payload.hasData;
+
               return (
                 <circle
                   cx={props.cx}
                   cy={props.cy}
-                  r={4}
-                  fill={getTrendColor()}
+                  r={hasActualData ? 4 : 3}
+                  fill={hasActualData ? getTrendColor() : 'transparent'}
                   strokeWidth={2}
-                  stroke="hsl(var(--background))"
+                  stroke={getTrendColor()}
+                  strokeDasharray={hasActualData ? '0' : '2,2'}
+                  opacity={hasActualData ? 1 : 0.6}
                 />
               );
             }}
