@@ -675,140 +675,131 @@ function EntryCard({
   const isPending = entry.rating_status === 'pending';
   const isHighBloating = entry.bloating_rating && entry.bloating_rating >= 4;
   const isAboveAvg = entry.bloating_rating && userAvg > 0 && entry.bloating_rating > userAvg + 0.5;
-  
+
   const displayTitle = entry.custom_title || entry.meal_title || getQuickMealTitle(entry);
   const displayEmoji = entry.meal_emoji || '🍽️';
 
   return (
-    <div 
+    <div
       className={`premium-card overflow-hidden animate-slide-up opacity-0 ${
         isPending ? 'ring-2 ring-coral/30 ring-offset-1 ring-offset-background' : ''
       }`}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
-      {/* Title Row at Top - Compact */}
-      <div className="px-3 pt-3 pb-1.5 flex items-center justify-between">
-        <button 
-          onClick={onEditTitle}
-          className="flex items-center gap-1.5 group min-w-0"
-        >
-          <span className="text-lg">{displayEmoji}</span>
-          <span className="font-bold text-foreground text-sm group-hover:text-primary transition-colors truncate">
-            {displayTitle}
-          </span>
-          <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-        </button>
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="flex-shrink-0 h-7 w-7 rounded-lg hover:bg-muted/50">
-              <MoreVertical className="w-3.5 h-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="rounded-xl">
-            <DropdownMenuItem onClick={onEdit} className="rounded-lg">
-              <Edit3 className="w-4 h-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} className="text-destructive rounded-lg">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      {/* Main Content - Larger Image First */}
-      <div className="p-3 space-y-3">
-        {/* Large Photo */}
+      {/* Horizontal Card Layout - Image Left, Content Right */}
+      <div className="flex gap-3 p-3">
+        {/* Small Photo - Left Side (Fixed Size) */}
         {entry.photo_url ? (
           <MealPhoto
             photoUrl={entry.photo_url}
             onClick={onViewDetails}
-            className="w-full aspect-[4/3] rounded-xl object-cover shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+            className="w-20 h-20 rounded-xl object-cover shadow-sm cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
             priority={isFirstPhoto}
           />
         ) : (
-          <div 
+          <div
             onClick={onViewDetails}
-            className="w-full aspect-[4/3] rounded-xl bg-muted/30 flex items-center justify-center text-4xl cursor-pointer hover:opacity-80 transition-opacity"
+            className="w-20 h-20 rounded-xl bg-muted/30 flex items-center justify-center text-2xl cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
           >
             {entry.entry_method === 'text' ? '✍️' : '🍽️'}
           </div>
         )}
 
-        {/* Info Row */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
+        {/* Main Content - Right Side (Flexible) */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between gap-1.5">
+          {/* Top Row: Title + Menu */}
+          <div className="flex items-start justify-between gap-2">
+            <button
+              onClick={onEditTitle}
+              className="flex items-center gap-1.5 group min-w-0 flex-1"
+            >
+              <span className="text-lg flex-shrink-0">{displayEmoji}</span>
+              <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors truncate">
+                {displayTitle}
+              </span>
+              <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+            </button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="flex-shrink-0 h-7 w-7 rounded-lg hover:bg-muted/50">
+                  <MoreVertical className="w-3.5 h-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-xl">
+                <DropdownMenuItem onClick={onEdit} className="rounded-lg">
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onDelete} className="text-destructive rounded-lg">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Middle Row: Time + Rating */}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
               <Clock className="w-3 h-3" />
               {format(new Date(entry.created_at), 'MMM d, h:mm a')}
             </p>
-          </div>
 
-          {/* Bloating Rating - Dynamic Color Scoring */}
-          {entry.bloating_rating && (
-            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
-              entry.bloating_rating <= 2
-                ? 'bg-primary/15'
-                : entry.bloating_rating === 3
-                  ? 'bg-yellow-100'
-                  : 'bg-coral/15'
-            }`}>
-              <span className="text-lg">{RATING_EMOJIS[entry.bloating_rating]}</span>
-              <span className={`text-xs font-bold ${
+            {/* Bloating Rating - Compact */}
+            {entry.bloating_rating && (
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-lg flex-shrink-0 ${
                 entry.bloating_rating <= 2
-                  ? 'text-primary'
+                  ? 'bg-primary/15'
                   : entry.bloating_rating === 3
-                    ? 'text-yellow-600'
-                    : 'text-coral'
+                    ? 'bg-yellow-100'
+                    : 'bg-coral/15'
               }`}>
-                {entry.bloating_rating}/5
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Triggers with Icon + Name */}
-        {entry.detected_triggers && entry.detected_triggers.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {formatTriggerDisplay(entry.detected_triggers).slice(0, 6).map((trigger, i) => (
-              <span
-                key={i}
-                className="flex items-center gap-1 text-sm"
-              >
-                <span className="text-base">{trigger.icon}</span>
-                <span className="text-muted-foreground text-xs">{trigger.name}</span>
-              </span>
-            ))}
-            {entry.detected_triggers.length > 6 && (
-              <span className="text-xs text-muted-foreground">
-                +{entry.detected_triggers.length - 6} more
-              </span>
+                <span className="text-base">{RATING_EMOJIS[entry.bloating_rating]}</span>
+                <span className={`text-xs font-bold ${
+                  entry.bloating_rating <= 2
+                    ? 'text-primary'
+                    : entry.bloating_rating === 3
+                      ? 'text-yellow-600'
+                      : 'text-coral'
+                }`}>
+                  {entry.bloating_rating}/5
+                </span>
+              </div>
             )}
           </div>
-        )}
 
-        {/* Above Average Warning */}
-        {isAboveAvg && (
-          <div className="flex items-center gap-1.5 text-xs text-coral">
-            <TrendingUp className="w-3 h-3" />
-            <span>{Math.round(((entry.bloating_rating! - userAvg) / userAvg) * 100)}% above your average</span>
-          </div>
-        )}
+          {/* Bottom Row: Triggers */}
+          {entry.detected_triggers && entry.detected_triggers.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {formatTriggerDisplay(entry.detected_triggers).slice(0, 3).map((trigger, i) => (
+                <span
+                  key={i}
+                  className="flex items-center gap-1 text-xs"
+                >
+                  <span className="text-sm">{trigger.icon}</span>
+                  <span className="text-muted-foreground">{trigger.name}</span>
+                </span>
+              ))}
+              {entry.detected_triggers.length > 3 && (
+                <span className="text-xs text-muted-foreground">
+                  +{entry.detected_triggers.length - 3}
+                </span>
+              )}
+            </div>
+          )}
 
-        {/* Notes Display - Compact */}
-        {entry.notes && (
-          <div className="mt-2 p-2 rounded-lg bg-muted/30 flex items-start gap-1.5">
-            <FileText className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-            <p className="text-2xs text-muted-foreground italic leading-relaxed line-clamp-2">
+          {/* Notes Preview - Single Line */}
+          {entry.notes && (
+            <p className="text-2xs text-muted-foreground italic truncate flex items-center gap-1">
+              <FileText className="w-3 h-3 flex-shrink-0" />
               {entry.notes}
             </p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Inline Rating */}
+      {/* Inline Rating (Full Width Below) */}
       {!entry.bloating_rating && isPending && (
         <InlineRating entryId={entry.id} />
       )}
