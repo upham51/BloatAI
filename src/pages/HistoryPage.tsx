@@ -276,6 +276,7 @@ export default function HistoryPage() {
                 onViewDetails={() => handleOpenDetails(entry)}
                 onEditTitle={() => setEditTitleEntry(entry)}
                 delay={100 + index * 50}
+                isFirstPhoto={index === 0 && !!entry.photo_url}
               />
             ))}
           </div>
@@ -406,9 +407,10 @@ export default function HistoryPage() {
             <div className="px-4 pb-8 space-y-5 overflow-y-auto">
               {/* Photo */}
               {detailsEntry.photo_url && (
-                <MealPhoto 
-                  photoUrl={detailsEntry.photo_url} 
+                <MealPhoto
+                  photoUrl={detailsEntry.photo_url}
                   className="w-full aspect-video object-cover rounded-2xl shadow-md"
+                  priority={true}
                 />
               )}
               
@@ -658,6 +660,7 @@ function EntryCard({
   onViewDetails,
   onEditTitle,
   delay = 0,
+  isFirstPhoto = false,
 }: {
   entry: MealEntry;
   userAvg: number;
@@ -667,6 +670,7 @@ function EntryCard({
   onViewDetails: () => void;
   onEditTitle: () => void;
   delay?: number;
+  isFirstPhoto?: boolean;
 }) {
   const isPending = entry.rating_status === 'pending';
   const isHighBloating = entry.bloating_rating && entry.bloating_rating >= 4;
@@ -722,6 +726,7 @@ function EntryCard({
             photoUrl={entry.photo_url}
             onClick={onViewDetails}
             className="w-full aspect-[4/3] rounded-xl object-cover shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+            priority={isFirstPhoto}
           />
         ) : (
           <div 
