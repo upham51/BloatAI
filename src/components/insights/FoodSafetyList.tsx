@@ -231,18 +231,23 @@ export function FoodSafetyList({ entries, potentialTriggers = [] }: FoodSafetyLi
               Monitor Closely
             </h4>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             {cautionFoods.slice(0, 4).map((item) => (
               <div
                 key={item.food}
-                className="px-3 py-2 rounded-full bg-yellow-500/5 border border-yellow-500/20 hover:border-yellow-500/40 transition-all"
+                className="p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/20 hover:border-yellow-500/40 transition-all"
               >
-                <span className="text-sm font-medium text-foreground">
-                  {item.icon} {item.food}
-                </span>
-                <span className="text-xs text-muted-foreground ml-1.5">
-                  ({item.count})
-                </span>
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl mt-0.5">{item.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-foreground">{item.food}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Logged in <span className="font-semibold text-foreground">{item.count}</span> meal{item.count !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
