@@ -114,6 +114,25 @@ export default function DashboardPage() {
   // Calculate completed meal count
   const completedCount = getCompletedCount();
 
+  // Calculate number of unique days with rated meals for meaningful insights
+  const daysWithData = useMemo(() => {
+    const ratedMeals = entries.filter(e =>
+      e.bloating_rating !== null &&
+      e.bloating_rating !== undefined &&
+      e.bloating_rating >= 1 &&
+      e.bloating_rating <= 5
+    );
+
+    const uniqueDays = new Set(
+      ratedMeals.map(e => format(new Date(e.created_at), 'yyyy-MM-dd'))
+    );
+
+    return uniqueDays.size;
+  }, [entries]);
+
+  // Show insights when user has enough data: at least 5 rated meals across at least 3 different days
+  const hasEnoughDataForInsights = completedCount >= 5 && daysWithData >= 3;
+
   // Calculate today's meals
   const todaysMeals = useMemo(() => {
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -171,7 +190,7 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <PageTransition>
-        <div className="min-h-screen bg-gradient-to-br from-background via-lavender/10 to-mint/10">
+        <div className="min-h-screen relative">
           <AbstractBackground />
           <GrainTexture />
           <StaggerContainer className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5 w-full">
@@ -240,7 +259,7 @@ export default function DashboardPage() {
             </StaggerItem>
 
             {/* Main Bloating & Meals Card */}
-            {completedCount >= 5 && (
+            {hasEnoughDataForInsights && (
               <StaggerItem>
                 <motion.div
                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
@@ -292,25 +311,28 @@ export default function DashboardPage() {
             )}
 
             {/* Weekly Progress Chart */}
-            {completedCount >= 5 && (
+            {hasEnoughDataForInsights && (
               <StaggerItem>
                 <WeeklyProgressChart entries={entries} />
               </StaggerItem>
             )}
 
             {/* Building insights state - show when some meals logged but not enough */}
-            {completedCount > 0 && completedCount < 5 && (
+            {!hasEnoughDataForInsights && completedCount > 0 && (
               <StaggerItem>
                 <div className="premium-card p-6 text-center">
               <span className="text-4xl block mb-3">📊</span>
               <h3 className="font-bold text-foreground mb-2">Building Your Insights</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Log {5 - completedCount} more meal{5 - completedCount !== 1 ? 's' : ''} with bloating ratings to see your triggers
+                {completedCount < 5
+                  ? `Log ${5 - completedCount} more meal${5 - completedCount !== 1 ? 's' : ''} with bloating ratings to unlock insights`
+                  : `Log meals across ${3 - daysWithData} more day${3 - daysWithData !== 1 ? 's' : ''} to see meaningful trends`
+                }
               </p>
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
                 <div
                   className="h-full bg-primary rounded-full transition-all"
-                    style={{ width: `${(completedCount / 5) * 100}%` }}
+                    style={{ width: `${Math.min((completedCount / 5) * 50 + (daysWithData / 3) * 50, 100)}%` }}
                   />
                 </div>
                 <Button
