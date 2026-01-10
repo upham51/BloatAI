@@ -45,12 +45,12 @@ export default function InsightsPage() {
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [entries.length]); // Re-run when entries change
+  }, [completedCount]); // Re-run when completed entries change (includes new ratings)
 
   // Generate comprehensive insights using new analysis engine
   const insights = useMemo(() => {
     return generateComprehensiveInsight(entries);
-  }, [entries, completedCount]);
+  }, [entries]); // Recompute whenever entries array changes
 
   // Full-screen loading state
   if (isAnalyzing && hasEnoughData) {
