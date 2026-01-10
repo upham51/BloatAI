@@ -21,14 +21,20 @@ export function MealPhoto({
   lazy = true
 }: MealPhotoProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(!lazy || priority);
   const imgRef = useRef<HTMLImageElement>(null);
 
   const { url: signedUrl, isLoading: urlLoading } = useSignedUrl(photoUrl);
 
   // Lazy loading with Intersection Observer
+  // Fixed: Ensure observer is set up AFTER img element is rendered
   useEffect(() => {
+    // Skip if not lazy loading, or if priority, or if we should already load
     if (!lazy || priority || shouldLoad) return;
+
+    // Skip if img ref not yet available (skeleton still showing)
+    if (!imgRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -40,18 +46,16 @@ export function MealPhoto({
         });
       },
       {
-        rootMargin: '50px', // Start loading 50px before entering viewport
+        rootMargin: '200px', // Start loading earlier for better UX
       }
     );
 
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-    }
+    observer.observe(imgRef.current);
 
     return () => {
       observer.disconnect();
     };
-  }, [lazy, priority]);
+  }, [lazy, priority, shouldLoad, urlLoading]); // Include urlLoading to re-run when skeleton disappears
 
   // Show skeleton while URL is loading
   const showSkeleton = urlLoading;
@@ -67,8 +71,19 @@ export function MealPhoto({
     );
   }
 
-  if (!signedUrl) {
-    return null;
+  // Error state - show placeholder
+  if (imageError || !signedUrl) {
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-center bg-muted/30 text-muted-foreground",
+          className
+        )}
+        onClick={onClick}
+      >
+        <span className="text-2xl">📷</span>
+      </div>
+    );
   }
 
   return (
@@ -76,9 +91,13 @@ export function MealPhoto({
       ref={imgRef}
       src={shouldLoad ? signedUrl : undefined}
       alt={alt}
-      className={className}
+      className={cn(
+        className,
+        !shouldLoad && 'invisible' // Hide image until it should load
+      )}
       onClick={onClick}
       onLoad={() => setImageLoaded(true)}
+      onError={() => setImageError(true)}
       loading={priority ? 'eager' : 'lazy'}
     />
   );
