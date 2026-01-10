@@ -122,8 +122,8 @@ export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount, hi
                 healthScore >= 41 ? 'url(#orangeZone)' :
                 'url(#redZone)'
               }
-              animationDuration={1500}
-              animationBegin={100}
+              animationDuration={3500}
+              animationBegin={200}
             />
           </RadialBarChart>
         </ResponsiveContainer>

@@ -166,8 +166,8 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
           <Bar
             dataKey="percentage"
             radius={[0, 8, 8, 0]}
-            animationDuration={1200}
-            animationBegin={0}
+            animationDuration={3500}
+            animationBegin={200}
           >
             {chartData.map((entry, index) => (
               <Cell
