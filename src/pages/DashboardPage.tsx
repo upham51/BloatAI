@@ -193,10 +193,10 @@ export default function DashboardPage() {
         <div className="min-h-screen relative">
           <AbstractBackground />
           <GrainTexture />
-          <StaggerContainer className="relative z-10 p-5 pb-32 max-w-lg mx-auto space-y-5 w-full">
+          <StaggerContainer className="relative z-10 px-5 pt-2 pb-32 max-w-lg mx-auto space-y-5 w-full">
             {/* Header with time-based greeting */}
             <StaggerItem>
-              <header className="pt-2 relative">
+              <header className="relative">
                 {/* Settings button - absolute positioned in top right */}
                 <motion.div
                   whileHover={{ scale: 1.05 }}
