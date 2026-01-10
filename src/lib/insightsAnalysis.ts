@@ -206,9 +206,12 @@ export function generateComprehensiveInsight(
   const allFoods: Map<string, number> = new Map();
   completedEntries.forEach(entry => {
     entry.detected_triggers?.forEach(trigger => {
-      if (trigger.food) {
-        const current = allFoods.get(trigger.food) || 0;
-        allFoods.set(trigger.food, current + 1);
+      // Use food name if available, otherwise fall back to category
+      // This ensures consistency with FoodSafetyList and prevents counting discrepancies
+      const foodName = trigger.food || trigger.category;
+      if (foodName) {
+        const current = allFoods.get(foodName) || 0;
+        allFoods.set(foodName, current + 1);
       }
     });
   });
