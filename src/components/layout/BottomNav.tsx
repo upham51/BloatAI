@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { Leaf, Plus, Compass, BarChart3, User } from 'lucide-react';
+import { Plus, Compass, BarChart3, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { GutIcon } from '@/components/icons/GutIcon';
 
 const navItems = [
-  { to: '/dashboard', icon: Leaf, label: 'Home' },
+  { to: '/dashboard', icon: GutIcon, label: 'Home' },
   { to: '/history', icon: Compass, label: 'History' },
   { to: '/add-entry', icon: Plus, label: 'Log', isCenter: true },
   { to: '/insights', icon: BarChart3, label: 'Insights' },

@@ -27,18 +27,10 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       return { chartData: [], trend: 'neutral' as const, avgBloating: 0 };
     }
 
-    const earliestDate = new Date(Math.min(...datesWithData.map(d => d.getTime())));
+    // Always show full 7-day week (last 7 days) to ensure Sunday is included
+    const daysToShow = 7;
 
-    // Calculate days from earliest to today
-    const daysSinceFirst = Math.floor((today.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    // Show minimum 3 days, maximum 7 days (sliding window)
-    const daysToShow = Math.min(Math.max(daysSinceFirst + 1, 3), 7);
-
-    // If we have more than 7 days of history, show only the last 7
-    const startDate = daysSinceFirst >= 7 ? subDays(today, 6) : earliestDate;
-
-    // Create array of days to display
+    // Create array of days to display - always show last 7 days
     const displayDays = Array.from({ length: daysToShow }, (_, i) => {
       const date = subDays(today, daysToShow - 1 - i);
       return {
@@ -172,41 +164,28 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
 
   return (
     <div className="premium-card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-mint/20">
-            <span className="text-xl">📈</span>
+      {/* Header with title and weekly average */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-mint/20">
+            <span className="text-lg">📈</span>
           </div>
           <div>
-            <h3 className="font-bold text-foreground text-lg">Weekly Progress</h3>
-            <p className="text-xs text-muted-foreground">
+            <h3 className="font-bold text-foreground text-base">Weekly Progress</h3>
+            <p className="text-[11px] text-muted-foreground">
               Your bloating trend over 7 days
             </p>
           </div>
         </div>
 
-        {/* Trend Indicator */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30">
-          {trend === 'down' ? (
-            <>
-              <TrendingDown className="w-4 h-4 text-mint" />
-              <span className="text-sm font-semibold text-mint">Improving</span>
-            </>
-          ) : trend === 'up' ? (
-            <>
-              <TrendingUp className="w-4 h-4 text-coral" />
-              <span className="text-sm font-semibold text-coral">Worsening</span>
-            </>
-          ) : (
-            <>
-              <Minus className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Stable</span>
-            </>
-          )}
+        {/* Weekly Average Card - Compact */}
+        <div className="flex flex-col items-end gap-0.5 px-3 py-1.5 rounded-xl bg-gradient-to-br from-muted/50 to-muted/30 border border-border/50">
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Average</span>
+          <span className="text-xl font-bold text-foreground">{avgBloating}<span className="text-sm text-muted-foreground">/5</span></span>
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={200}>
+      <ResponsiveContainer width="100%" height={220}>
         <AreaChart
           data={chartData}
           margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
@@ -282,11 +261,6 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
           />
         </AreaChart>
       </ResponsiveContainer>
-
-      <div className="mt-4 flex items-center justify-between p-3 rounded-xl bg-muted/30">
-        <span className="text-sm text-muted-foreground">Weekly Average</span>
-        <span className="text-lg font-bold text-foreground">{avgBloating}/5</span>
-      </div>
     </div>
   );
 }
