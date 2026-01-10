@@ -53,8 +53,8 @@ export function MealPhoto({
     };
   }, [lazy, priority]);
 
-  // Show skeleton while URL is loading
-  const showSkeleton = urlLoading;
+  // Show skeleton while URL is loading or waiting for lazy load trigger
+  const showSkeleton = urlLoading || (!shouldLoad && signedUrl);
 
   if (showSkeleton) {
     return (
