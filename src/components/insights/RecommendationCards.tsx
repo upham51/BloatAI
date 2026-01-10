@@ -75,11 +75,11 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
                   Instead of
                 </span>
               </div>
-              <div>
-                <h4 className="text-2xl font-bold text-foreground mb-2">
+              <div className="flex items-start gap-3">
+                <h4 className="text-2xl font-bold text-foreground">
                   {currentRec.triggerName}
                 </h4>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mt-1.5">
                   {currentRec.examples}
                 </p>
               </div>
