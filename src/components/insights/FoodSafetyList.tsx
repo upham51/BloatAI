@@ -159,39 +159,30 @@ export function FoodSafetyList({ entries, potentialTriggers = [] }: FoodSafetyLi
               Foods to Avoid
             </h4>
           </div>
-          <div className="space-y-2.5">
-            {foodsToAvoid.slice(0, 4).map((item) => {
-              // Calculate bloating rate
-              const bloatRate = Math.round((item.count / foodInsights.reduce((sum, f) => sum + f.count, 0)) * 100);
-
-              return (
-                <div
-                  key={item.food}
-                  className="p-4 rounded-xl bg-coral/5 border border-coral/20 hover:border-coral/40 transition-all"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="text-2xl mt-0.5">{item.icon}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-foreground">{item.food}</span>
-                        {item.isPotentialTrigger && (
-                          <span className="px-2 py-0.5 rounded-full bg-coral/20 text-[10px] font-bold text-coral uppercase">
-                            Trigger
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Logged in <span className="font-semibold text-foreground">{item.count}</span> meal{item.count !== 1 ? 's' : ''} •
-                        Consistently causes high bloating
-                      </p>
-                      <p className="text-xs font-medium text-coral mt-1.5">
-                        ⚠️ Consider eliminating for 1-2 weeks to test
-                      </p>
+          <div className="grid grid-cols-2 gap-2.5">
+            {foodsToAvoid.slice(0, 4).map((item) => (
+              <div
+                key={item.food}
+                className="p-4 rounded-xl bg-coral/5 border border-coral/20 hover:border-coral/40 transition-all"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl mt-0.5">{item.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-foreground">{item.food}</span>
+                      {item.isPotentialTrigger && (
+                        <span className="px-2 py-0.5 rounded-full bg-coral/20 text-[10px] font-bold text-coral uppercase">
+                          Trigger
+                        </span>
+                      )}
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Logged in <span className="font-semibold text-foreground">{item.count}</span> meal{item.count !== 1 ? 's' : ''}
+                    </p>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       )}
