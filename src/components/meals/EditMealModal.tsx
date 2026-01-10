@@ -128,9 +128,10 @@ export function EditMealModal({ entry, open, onClose }: EditMealModalProps) {
             {/* Photo Preview */}
             {entry.photo_url && (
               <div className="rounded-2xl overflow-hidden">
-                <MealPhoto 
-                  photoUrl={entry.photo_url} 
+                <MealPhoto
+                  photoUrl={entry.photo_url}
                   className="w-full h-40 object-cover"
+                  priority={true}
                 />
               </div>
             )}
