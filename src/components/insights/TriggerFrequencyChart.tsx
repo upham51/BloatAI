@@ -32,7 +32,7 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
   };
 
   const chartData = useMemo(() => {
-    return triggers.map(trigger => {
+    return triggers.slice(0, 5).map(trigger => {
       const categoryInfo = getTriggerCategory(trigger.category);
       const displayName = categoryInfo?.displayName || trigger.category;
       const formatted = formatTriggerName(displayName);
@@ -142,9 +142,6 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
     );
   }
 
-  // Calculate dynamic height based on number of triggers (minimum 300px, ~60px per trigger)
-  const chartHeight = Math.max(300, chartData.length * 60);
-
   return (
     <div className="premium-card p-5">
       <div className="mb-6">
@@ -154,7 +151,7 @@ export function TriggerFrequencyChart({ triggers }: TriggerFrequencyChartProps) 
         </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={chartHeight}>
+      <ResponsiveContainer width="100%" height={300}>
         <BarChart
           data={chartData}
           layout="vertical"

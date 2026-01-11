@@ -25,7 +25,7 @@ interface ChartDataItem {
 export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTriggerAnalysisProps) {
   const [expandedTrigger, setExpandedTrigger] = useState<string | null>(null);
 
-  // Prepare chart data - Show only top 3 highest impact triggers
+  // Prepare chart data
   const chartData = useMemo(() => {
     return triggerConfidence
       .filter(t => t.confidence === 'high' || t.confidence === 'investigating')
@@ -53,8 +53,7 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
           confidence: trigger.confidence,
         } as ChartDataItem;
       })
-      .sort((a, b) => b.impactScore - a.impactScore) // Sort by impact
-      .slice(0, 3); // Limit to top 3 highest impact triggers
+      .sort((a, b) => b.impactScore - a.impactScore); // Sort by impact
   }, [triggerConfidence]);
 
   if (chartData.length === 0) {
@@ -103,8 +102,8 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
         </div>
       </div>
 
-      {/* Horizontal Bar Chart - Compact for Top 3 */}
-      <div className="h-[240px]">
+      {/* Horizontal Bar Chart */}
+      <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
