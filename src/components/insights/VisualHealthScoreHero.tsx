@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { AnimatedStomachCharacter } from './AnimatedStomachCharacter';
+import { CircularScoreRing } from './CircularScoreRing';
 
 interface VisualHealthScoreHeroProps {
   avgBloating: number; // 0-5 scale
@@ -28,62 +29,78 @@ export function VisualHealthScoreHero({
     return Math.round(Math.max(0, Math.min(100, composite)));
   }, [avgBloating, totalMeals, lowBloatingCount]);
 
-  const { level, ringColor, textColor } = useMemo(() => {
+  const { level, stateLabel, insight, textColor } = useMemo(() => {
     if (healthScore >= 70) {
       return {
-        level: 'Excellent',
-        ringColor: '#10b981', // Green
-        textColor: 'text-primary',
+        level: 'Optimal',
+        stateLabel: 'Excellent Health',
+        insight: 'Your digestion is functioning optimally',
+        textColor: 'text-emerald-600',
       };
-    } else if (healthScore >= 41) {
+    } else if (healthScore >= 31) {
       return {
-        level: 'Good Progress',
-        ringColor: '#f97316', // Orange
-        textColor: 'text-peach',
+        level: 'Moderate',
+        stateLabel: 'Good Progress',
+        insight: 'Your digestion is under moderate strain',
+        textColor: 'text-amber-600',
       };
     } else {
       return {
-        level: 'Keep Going',
-        ringColor: '#ef4444', // Red
-        textColor: 'text-coral',
+        level: 'Strained',
+        stateLabel: 'Needs Attention',
+        insight: 'Your digestion needs focused care',
+        textColor: 'text-red-600',
       };
     }
   }, [healthScore]);
 
   return (
-    <div className="premium-card p-8 shadow-sm rounded-xl">
-      {/* Title */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Your Bloat Health Score</h1>
-        <p className="text-sm text-muted-foreground mt-1">Your digestive wellness at a glance</p>
+    <div
+      className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-100/50 p-8 transition-all duration-500"
+      style={{
+        boxShadow: '0 8px 32px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.03)',
+      }}
+    >
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+          Your Bloat Health Score
+        </h1>
+        <p className="text-sm text-gray-600 mt-2 font-medium">
+          {insight}
+        </p>
       </div>
 
-      {/* Animated Stomach Character */}
-      <div className="relative mb-6">
-        <AnimatedStomachCharacter healthScore={healthScore} ringColor={ringColor} />
+      {/* Circular Score Visualization with Character */}
+      <div className="flex flex-col items-center justify-center mb-8">
+        <CircularScoreRing score={healthScore} size={280} strokeWidth={8}>
+          <AnimatedStomachCharacter healthScore={healthScore} />
+        </CircularScoreRing>
+      </div>
 
-        {/* Score Display Below Character */}
-        <div className="flex flex-col items-center justify-center mt-4">
-          <div
-            className="text-7xl font-bold mb-2 transition-all duration-500"
-            style={{ color: ringColor }}
-          >
+      {/* Score and State Display */}
+      <div className="flex flex-col items-center justify-center space-y-3 mb-6">
+        <div className="flex items-baseline gap-2">
+          <span className={`text-6xl font-bold tracking-tight ${textColor} transition-all duration-500`}>
             {healthScore}
-          </div>
-          <div className="text-sm text-muted-foreground font-medium mb-1">out of 100</div>
-          <div
-            className={`text-base font-semibold ${textColor}`}
-          >
-            {level}
-          </div>
+          </span>
+          <span className="text-lg text-gray-400 font-medium">/100</span>
+        </div>
+        <div className={`text-base font-semibold tracking-wide ${textColor} uppercase`}>
+          {level}
+        </div>
+        <div className="text-sm text-gray-500">
+          {stateLabel}
         </div>
       </div>
 
-      {/* Simple description below */}
-      <div className="text-center">
-        <p className="text-xs text-muted-foreground">
-          Based on {totalMeals} rated meals • {lowBloatingCount} comfortable • {highBloatingCount} challenging
-        </p>
+      {/* Stats Summary */}
+      <div className="flex items-center justify-center gap-4 text-xs text-gray-500 pt-4 border-t border-gray-100">
+        <span className="font-medium">{totalMeals} meals tracked</span>
+        <span className="text-gray-300">•</span>
+        <span className="font-medium">{lowBloatingCount} comfortable</span>
+        <span className="text-gray-300">•</span>
+        <span className="font-medium">{highBloatingCount} challenging</span>
       </div>
     </div>
   );
