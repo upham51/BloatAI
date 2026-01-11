@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import * as Collapsible from '@radix-ui/react-collapsible';
-import { ChevronDown, ChevronUp, Target, AlertCircle } from 'lucide-react';
+import { Target, AlertCircle } from 'lucide-react';
 import { TriggerConfidenceLevel } from '@/lib/insightsAnalysis';
 import { getTriggerCategory } from '@/types';
 
@@ -110,7 +109,7 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
           <Target className="w-5 h-5 text-coral" />
         </div>
         <div className="flex-1">
-          <h2 className="font-bold text-foreground text-xl">Trigger Analysis</h2>
+          <h2 className="font-bold text-foreground text-xl">Top Bloat Triggers</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Click a bar to see detailed insights
           </p>
@@ -163,57 +162,45 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
       </div>
 
       {/* Impact-based Legend */}
-      <div className="space-y-2 pt-2 border-t border-border/30">
-        <div className="flex items-center justify-center gap-3 text-xs flex-wrap">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-[#4CAF50]" />
-            <span className="text-muted-foreground">Low</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-[#9BC53D]" />
-            <span className="text-muted-foreground">Moderate-Low</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-[#FFC857]" />
-            <span className="text-muted-foreground">Moderate</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-[#F4A261]" />
-            <span className="text-muted-foreground">Elevated</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-[#E76F51]" />
-            <span className="text-muted-foreground">High</span>
-          </div>
+      <div className="flex items-center justify-center gap-3 text-xs pt-2 border-t border-border/30 flex-wrap">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-[#4CAF50]" />
+          <span className="text-muted-foreground">Low</span>
         </div>
-        <p className="text-center text-xs text-muted-foreground">
-          Colors show impact severity • <span className="font-semibold">●</span> = High confidence • <span className="opacity-50">○</span> = Investigating
-        </p>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-[#9BC53D]" />
+          <span className="text-muted-foreground">Moderate-Low</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-[#FFC857]" />
+          <span className="text-muted-foreground">Moderate</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-[#F4A261]" />
+          <span className="text-muted-foreground">Elevated</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-[#E76F51]" />
+          <span className="text-muted-foreground">High</span>
+        </div>
       </div>
 
-      {/* Collapsible Details */}
-      <div className="space-y-3 pt-2">
-        {chartData.map((trigger) => (
-          <Collapsible.Root
-            key={trigger.id}
-            open={expandedTrigger === trigger.id}
-            onOpenChange={() => handleBarClick(trigger)}
-          >
-            <Collapsible.Trigger className="w-full">
-              <div className={`
-                flex items-center justify-between p-4 rounded-lg
-                transition-all cursor-pointer
-                ${expandedTrigger === trigger.id
-                  ? 'bg-gradient-to-r from-coral/10 to-transparent border border-coral/30'
-                  : 'bg-muted/10 border border-transparent hover:border-border/50'
-                }
-              `}>
+      {/* Selected Trigger Details */}
+      {expandedTrigger && (() => {
+        const trigger = chartData.find(t => t.id === expandedTrigger);
+        if (!trigger) return null;
+
+        return (
+          <div className="pt-2 border-t border-border/30">
+            <div className="p-4 rounded-lg bg-gradient-to-r from-coral/10 to-transparent border border-coral/30 space-y-3">
+              {/* Header */}
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-1 h-12 rounded-full"
                     style={{ backgroundColor: trigger.color }}
                   />
-                  <div className="text-left">
+                  <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-foreground text-sm">{trigger.displayName}</h3>
                       <div
@@ -228,95 +215,84 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-right mr-2">
-                    <div className="text-xs text-muted-foreground">Impact</div>
-                    <div className="text-lg font-bold" style={{ color: trigger.color }}>
-                      {trigger.impactScore}
-                    </div>
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground">Impact</div>
+                  <div className="text-lg font-bold" style={{ color: trigger.color }}>
+                    {trigger.impactScore}
                   </div>
-                  {expandedTrigger === trigger.id ? (
-                    <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                  )}
                 </div>
               </div>
-            </Collapsible.Trigger>
 
-            <Collapsible.Content className="overflow-hidden data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
-              <div className="p-4 mt-2 rounded-lg bg-muted/5 border border-border/30 space-y-3">
-                {/* Bloating Comparison */}
-                <div className="space-y-2">
+              {/* Bloating Comparison */}
+              <div className="space-y-2 pt-2 border-t border-border/30">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  Bloating Comparison
+                </h4>
+
+                {/* With Trigger */}
+                <div>
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span className="text-muted-foreground">With {trigger.displayName}</span>
+                    <span className="font-bold text-coral">{trigger.avgBloatingWith}/5</span>
+                  </div>
+                  <div className="w-full bg-muted/20 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-full bg-coral rounded-full transition-all duration-500"
+                      style={{ width: `${(trigger.avgBloatingWith / 5) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Without Trigger */}
+                <div>
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span className="text-muted-foreground">Without {trigger.displayName}</span>
+                    <span className="font-bold text-primary">{trigger.avgBloatingWithout}/5</span>
+                  </div>
+                  <div className="w-full bg-muted/20 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-500"
+                      style={{ width: `${(trigger.avgBloatingWithout / 5) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Foods */}
+              {trigger.topFoods.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-border/30">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Bloating Comparison
+                    Common Foods
                   </h4>
-
-                  {/* With Trigger */}
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">With {trigger.displayName}</span>
-                      <span className="font-bold text-coral">{trigger.avgBloatingWith}/5</span>
-                    </div>
-                    <div className="w-full bg-muted/20 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="h-full bg-coral rounded-full transition-all duration-500"
-                        style={{ width: `${(trigger.avgBloatingWith / 5) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Without Trigger */}
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">Without {trigger.displayName}</span>
-                      <span className="font-bold text-primary">{trigger.avgBloatingWithout}/5</span>
-                    </div>
-                    <div className="w-full bg-muted/20 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-500"
-                        style={{ width: `${(trigger.avgBloatingWithout / 5) * 100}%` }}
-                      />
-                    </div>
+                  <div className="flex flex-wrap gap-2">
+                    {trigger.topFoods.map((food, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1.5 rounded-full bg-coral/10 text-coral text-xs font-medium border border-coral/20"
+                      >
+                        {food}
+                      </span>
+                    ))}
                   </div>
                 </div>
+              )}
 
-                {/* Top Foods */}
-                {trigger.topFoods.length > 0 && (
-                  <div className="space-y-2 pt-2 border-t border-border/30">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      Common Foods
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {trigger.topFoods.map((food, i) => (
-                        <span
-                          key={i}
-                          className="px-3 py-1.5 rounded-full bg-coral/10 text-coral text-xs font-medium border border-coral/20"
-                        >
-                          {food}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Confidence Badge */}
-                <div className="pt-2 border-t border-border/30">
-                  <span className={`
-                    px-3 py-1.5 rounded-full text-xs font-bold uppercase
-                    ${trigger.confidence === 'high'
-                      ? 'bg-coral/20 text-coral'
-                      : 'bg-peach/20 text-peach'
-                    }
-                  `}>
-                    {trigger.confidence === 'high' ? 'High Confidence' : 'Investigating'}
-                  </span>
-                </div>
+              {/* Confidence Badge */}
+              <div className="pt-2 border-t border-border/30">
+                <span className={`
+                  px-3 py-1.5 rounded-full text-xs font-bold uppercase
+                  ${trigger.confidence === 'high'
+                    ? 'bg-coral/20 text-coral'
+                    : 'bg-peach/20 text-peach'
+                  }
+                `}>
+                  {trigger.confidence === 'high' ? 'High Confidence' : 'Investigating'}
+                </span>
               </div>
-            </Collapsible.Content>
-          </Collapsible.Root>
-        ))}
-      </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
