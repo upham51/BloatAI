@@ -51,39 +51,28 @@ export function VisualHealthScoreHero({
   }, [healthScore]);
 
   return (
-    <div className="premium-card p-8 shadow-sm rounded-xl">
-      {/* Title */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Your Bloat Health Score</h1>
-        <p className="text-sm text-muted-foreground mt-1">Your digestive wellness at a glance</p>
-      </div>
-
-      {/* Animated Stomach Character */}
-      <div className="relative mb-6">
+    <div className="premium-card p-6 shadow-sm rounded-xl">
+      {/* Animated Stomach Character - Main Focus */}
+      <div className="relative flex flex-col items-center">
         <AnimatedStomachCharacter healthScore={healthScore} ringColor={ringColor} />
 
-        {/* Score Display Below Character */}
-        <div className="flex flex-col items-center justify-center mt-4">
+        {/* Clean Score Display */}
+        <div className="flex items-baseline gap-2 mt-4">
           <div
-            className="text-7xl font-bold mb-2 transition-all duration-500"
+            className="text-6xl font-bold transition-all duration-500"
             style={{ color: ringColor }}
           >
             {healthScore}
           </div>
-          <div className="text-sm text-muted-foreground font-medium mb-1">out of 100</div>
-          <div
-            className={`text-base font-semibold ${textColor}`}
-          >
-            {level}
-          </div>
+          <div className="text-2xl text-muted-foreground font-medium">/100</div>
         </div>
-      </div>
 
-      {/* Simple description below */}
-      <div className="text-center">
-        <p className="text-xs text-muted-foreground">
-          Based on {totalMeals} rated meals • {lowBloatingCount} comfortable • {highBloatingCount} challenging
-        </p>
+        {/* Status Text */}
+        <div
+          className={`text-lg font-semibold mt-2 ${textColor}`}
+        >
+          {level}
+        </div>
       </div>
     </div>
   );
