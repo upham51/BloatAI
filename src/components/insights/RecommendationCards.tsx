@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ChevronRight, Heart, Sparkles } from 'lucide-react';
-import { getSafeAlternatives } from '@/lib/triggerUtils';
+import { ChevronRight, Heart, Sparkles, ShoppingBag } from 'lucide-react';
+import { getSafeAlternativesDetailed, type SafeAlternativeItem } from '@/lib/triggerUtils';
 import { getTriggerCategory } from '@/types';
 
 interface RecommendationCardsProps {
@@ -16,12 +16,14 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
 
   const recommendations = topTriggers.slice(0, 3).map((triggerId) => {
     const category = getTriggerCategory(triggerId);
-    const alternatives = getSafeAlternatives(triggerId);
+    const alternativesData = getSafeAlternativesDetailed(triggerId);
 
     return {
       triggerId,
       triggerName: category?.displayName || triggerId,
-      alternatives: alternatives.slice(0, 6),
+      alternatives: alternativesData?.alternatives.slice(0, 6) || [],
+      keyBrands: alternativesData?.keyBrands || [],
+      protip: alternativesData?.protip || 'Swap gradually, one food at a time, to identify what works best for you.',
       color: category?.color || '#7FB069',
       examples: category?.examples || '',
     };
@@ -97,25 +99,52 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-2.5">
-                {currentRec.alternatives.map((alt, i) => (
+                {currentRec.alternatives.map((alt: SafeAlternativeItem, i: number) => (
                   <div
                     key={i}
                     className="group p-4 rounded-xl bg-card border border-border/50 hover:border-mint/50 transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer"
                   >
-                    <span className="text-sm font-semibold text-foreground group-hover:text-mint transition-colors">
-                      {alt}
-                    </span>
+                    <div className="space-y-1">
+                      <span className="text-sm font-semibold text-foreground group-hover:text-mint transition-colors block">
+                        {alt.name}
+                      </span>
+                      {alt.portion && (
+                        <span className="text-xs text-primary font-medium block">
+                          {alt.portion}
+                        </span>
+                      )}
+                      {alt.notes && (
+                        <span className="text-xs text-muted-foreground block">
+                          {alt.notes}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Key brands section - only show if brands exist */}
+            {currentRec.keyBrands.length > 0 && (
+              <div className="p-4 rounded-xl bg-lavender/5 border border-lavender/20">
+                <div className="flex items-start gap-2">
+                  <ShoppingBag className="w-4 h-4 text-lavender mt-0.5 flex-shrink-0" />
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-foreground">Recommended Brands:</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {currentRec.keyBrands.join(', ')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Pro tip section */}
             <div className="p-4 rounded-xl bg-mint/5 border border-mint/20">
               <p className="text-xs leading-relaxed">
                 <span className="font-bold text-foreground">💚 Pro tip:</span>{' '}
                 <span className="text-muted-foreground">
-                  Swap gradually, one food at a time, to identify what works best for you.
+                  {currentRec.protip}
                 </span>
               </p>
             </div>

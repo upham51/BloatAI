@@ -634,24 +634,221 @@ export function formatTriggerDisplay(
   });
 }
 
-// Safe food alternatives for common triggers
+// ============================================================
+// SAFE ALTERNATIVES - Comprehensive FODMAP-friendly options
+// Based on Monash University research and clinical validation
+// ============================================================
+
+export interface SafeAlternativeItem {
+  name: string;
+  portion?: string;
+  notes?: string;
+}
+
+export interface TriggerAlternativesData {
+  alternatives: SafeAlternativeItem[];
+  keyBrands?: string[];
+  protip: string;
+}
+
+// Comprehensive safe alternatives mapping for all 12 trigger categories
+const SAFE_ALTERNATIVES_DETAILED: Record<string, TriggerAlternativesData> = {
+  'grains': {
+    alternatives: [
+      { name: 'Sourdough bread', portion: '2 slices', notes: 'Long fermented' },
+      { name: 'Gluten-free bread', notes: 'Rice/corn-based' },
+      { name: 'Chickpea pasta', portion: '1 cup', notes: 'Highest protein' },
+      { name: 'Rice pasta', notes: 'Easy to digest' },
+      { name: 'White rice', notes: 'Unlimited' },
+      { name: 'Quinoa', notes: 'Unlimited' },
+      { name: 'Garlic-infused oil', notes: 'For flavor' },
+      { name: 'Scallions', notes: 'Green parts only' },
+    ],
+    keyBrands: ['Udi\'s', 'Simple Kneads', 'Barilla GF', 'Dr. Schar'],
+    protip: 'Sourdough\'s fermentation naturally breaks down fructans, making it easier to digest than regular bread.',
+  },
+  'beans': {
+    alternatives: [
+      { name: 'Edamame', portion: '½ cup', notes: 'Lowest FODMAP, 9g protein' },
+      { name: 'Canned lentils', portion: '¼ cup', notes: 'Rinse well' },
+      { name: 'Canned chickpeas', portion: '¼ cup', notes: 'Rinse well' },
+      { name: 'Firm tofu', notes: 'Unlimited, 10g protein per serving' },
+      { name: 'Tempeh', portion: '100g', notes: 'Fermented soy' },
+      { name: 'Eggs', notes: 'Unlimited protein' },
+    ],
+    keyBrands: [],
+    protip: 'Canned beans have 60-70% fewer FODMAPs than dried. Always rinse thoroughly to remove the liquid.',
+  },
+  'dairy': {
+    alternatives: [
+      { name: 'Cashew milk', notes: 'Bloat score: 1 (best)' },
+      { name: 'Almond milk', notes: 'Bloat score: 2' },
+      { name: 'Coconut milk', notes: 'Bloat score: 3' },
+      { name: 'Lactose-free milk', notes: 'Real dairy, no lactose' },
+      { name: 'Hard cheeses', notes: 'Cheddar, parmesan - very low lactose' },
+      { name: 'Lactose-free yogurt', notes: 'Good for probiotics' },
+    ],
+    keyBrands: ['Lactaid', 'Fairlife', 'Green Valley'],
+    protip: 'Hard aged cheeses like cheddar and parmesan have almost no lactose. The longer the aging, the better!',
+  },
+  'fruit': {
+    alternatives: [
+      { name: 'Blueberries', portion: '1 cup', notes: 'Antioxidant-rich' },
+      { name: 'Strawberries', portion: '10 berries', notes: 'Low FODMAP' },
+      { name: 'Raspberries', portion: '⅓ cup', notes: 'High fiber' },
+      { name: 'Oranges', portion: '1 orange', notes: 'Vitamin C' },
+      { name: 'Kiwi', portion: '2 kiwis', notes: 'Digestive enzymes' },
+      { name: 'Grapes', notes: 'Unlimited' },
+      { name: 'Pineapple', portion: '1 cup', notes: 'Anti-inflammatory' },
+      { name: 'Cantaloupe', portion: '¾ cup', notes: 'Hydrating' },
+    ],
+    keyBrands: [],
+    protip: 'Avoid apples, pears, mango, and watermelon - they\'re high in fructose and can cause bloating.',
+  },
+  'sweeteners': {
+    alternatives: [
+      { name: 'Maple syrup', notes: 'Natural, low FODMAP' },
+      { name: 'White/brown sugar', notes: 'Table sugar is safe' },
+      { name: 'Rice malt syrup', notes: 'Fructose-free' },
+      { name: 'Stevia', portion: '2 tsp', notes: 'Zero calorie' },
+      { name: 'Glucose', notes: 'Pure glucose' },
+    ],
+    keyBrands: [],
+    protip: 'Avoid all sugar alcohols (sorbitol, xylitol, mannitol, erythritol) - they\'re major bloating triggers.',
+  },
+  'gluten': {
+    alternatives: [
+      { name: 'White rice', notes: 'Unlimited, easily digested' },
+      { name: 'Quinoa', notes: 'Complete protein' },
+      { name: 'Oats', notes: 'Certified GF oats' },
+      { name: 'Gluten-free bread', notes: 'Check for low FODMAP' },
+      { name: 'Sourdough', portion: '2 slices', notes: 'Fermentation breaks down gluten' },
+      { name: 'Rice pasta', notes: 'Great pasta alternative' },
+      { name: 'Corn tortillas', notes: 'Naturally GF' },
+    ],
+    keyBrands: ['Udi\'s', 'Canyon Bakehouse', 'Schär'],
+    protip: 'Gluten-free doesn\'t always mean low FODMAP. Check labels for onion, garlic, honey, and high-FODMAP flours.',
+  },
+  'veggies': {
+    alternatives: [
+      { name: 'Bell peppers', notes: 'All colors, unlimited' },
+      { name: 'Carrots', notes: 'Unlimited, great raw or cooked' },
+      { name: 'Zucchini', notes: 'Unlimited, versatile' },
+      { name: 'Cucumber', notes: 'Hydrating, unlimited' },
+      { name: 'Spinach', notes: 'Nutrient-dense, unlimited' },
+      { name: 'Eggplant', notes: 'Unlimited' },
+      { name: 'Sweet potatoes', notes: 'Complex carbs' },
+      { name: 'Tomatoes', notes: 'Unlimited' },
+      { name: 'Bok choy', notes: 'Asian greens' },
+      { name: 'Kale', notes: 'Superfood' },
+    ],
+    keyBrands: [],
+    protip: 'Cruciferous veggies like broccoli and cabbage are okay in small amounts (¾ cup), but unlimited bell peppers, carrots, and zucchini are safer bets.',
+  },
+  'fatty-food': {
+    alternatives: [
+      { name: 'Grilled chicken breast', notes: 'Lean protein' },
+      { name: 'Baked salmon', notes: 'Omega-3s, bake instead of fry' },
+      { name: 'Air-fried options', notes: 'Less oil, same crunch' },
+      { name: 'Turkey', notes: 'Lean protein' },
+      { name: 'Cod or tilapia', notes: 'White fish, very lean' },
+      { name: 'Firm tofu', notes: 'Plant-based protein' },
+      { name: 'Olive oil', notes: 'Small amounts for cooking' },
+    ],
+    keyBrands: [],
+    protip: 'High fat slows digestion, causing food to ferment longer in your gut. Bake, grill, or air-fry instead of deep-frying.',
+  },
+  'carbonated': {
+    alternatives: [
+      { name: 'Still water', notes: 'Best hydration' },
+      { name: 'Peppermint tea', notes: 'Soothes digestion' },
+      { name: 'Ginger tea', notes: 'Anti-inflammatory' },
+      { name: 'Rooibos tea', notes: 'Caffeine-free' },
+      { name: 'Lactose-free milk', notes: 'Calcium source' },
+      { name: 'Almond milk', notes: 'Dairy-free' },
+      { name: 'Cranberry juice', notes: 'Low FODMAP in moderation' },
+      { name: 'Infused water', notes: 'Cucumber, mint, lemon' },
+    ],
+    keyBrands: [],
+    protip: 'The CO₂ gas in carbonated drinks causes bloating for many people, even if the drink itself is low FODMAP.',
+  },
+  'sugar': {
+    alternatives: [
+      { name: 'Dark chocolate', portion: '30g', notes: '70%+ cocoa' },
+      { name: 'Lactose-free ice cream', notes: 'Real ice cream, no lactose' },
+      { name: 'Plain potato chips', notes: 'Check ingredients' },
+      { name: 'Popcorn', portion: '7 cups', notes: 'Air-popped or light oil' },
+      { name: 'Rice crackers', notes: 'With peanut butter' },
+      { name: 'Fresh fruit', notes: 'Low FODMAP options' },
+      { name: 'Maple syrup treats', notes: 'Homemade with safe sweeteners' },
+    ],
+    keyBrands: ['Walker\'s GF shortbread', 'Made Good cookies (check ingredients)'],
+    protip: 'Satisfy your sweet tooth with dark chocolate or lactose-free ice cream. Homemade treats with maple syrup are great too!',
+  },
+  'alcohol': {
+    alternatives: [
+      { name: 'Red wine', portion: '5 oz', notes: 'Low FODMAP' },
+      { name: 'White wine', portion: '5 oz', notes: 'Low FODMAP' },
+      { name: 'Sparkling wine', portion: '5 oz', notes: 'May cause some bloating' },
+      { name: 'Vodka', portion: '1 shot', notes: 'Mix with cranberry juice' },
+      { name: 'Gin', portion: '1 shot', notes: 'Try a gin & soda' },
+      { name: 'Whiskey', portion: '1 shot', notes: 'Neat or on rocks' },
+      { name: 'Tequila', portion: '1 shot', notes: 'Margarita with fresh lime' },
+    ],
+    keyBrands: [],
+    protip: 'Avoid regular beer (high FODMAPs) and rum (high fructose). Stick to wine or distilled spirits with low FODMAP mixers.',
+  },
+  'processed': {
+    alternatives: [
+      { name: 'Plain potato chips', notes: 'Check for onion/garlic powder' },
+      { name: 'Popcorn', notes: 'Air-popped, lightly salted' },
+      { name: 'Rice crackers', notes: 'Simple ingredients' },
+      { name: 'Corn tortilla chips', notes: 'Plain, unseasoned' },
+      { name: 'Hard-boiled eggs', notes: 'Protein-packed snack' },
+      { name: 'Cheese cubes', notes: 'Hard cheeses' },
+      { name: 'FODY Foods snacks', notes: 'Certified low FODMAP' },
+      { name: 'Skinny Pop', notes: 'Clean popcorn' },
+    ],
+    keyBrands: ['FODY Foods', 'Skinny Pop', 'Nature Valley PB bars'],
+    protip: 'Check labels for hidden triggers: onion/garlic powder, honey, agave, HFCS, inulin, and sugar alcohols.',
+  },
+};
+
+// Legacy simple alternatives array for backward compatibility
 const SAFE_ALTERNATIVES: Record<string, string[]> = {
-  'grains': ['garlic-infused oil', 'green part of scallions', 'chives', 'rice'],
-  'beans': ['canned lentils (rinsed)', 'firm tofu', 'tempeh'],
-  'dairy': ['lactose-free milk', 'hard cheeses', 'almond milk', 'oat milk'],
-  'fruit': ['blueberries', 'strawberries', 'oranges', 'grapes'],
-  'sweeteners': ['maple syrup', 'rice malt syrup', 'glucose'],
-  'gluten': ['rice', 'quinoa', 'gluten-free bread', 'sourdough (long ferment)'],
-  'veggies': ['carrots', 'zucchini', 'bell peppers', 'spinach', 'cucumber'],
-  'fatty-food': ['grilled proteins', 'baked alternatives', 'air-fried options'],
-  'carbonated': ['still water', 'herbal tea', 'infused water'],
-  'sugar': ['maple syrup', 'stevia', 'fresh fruit'],
-  'alcohol': ['mocktails', 'sparkling water with lime', 'kombucha'],
-  'processed': ['whole foods', 'fresh ingredients', 'homemade meals'],
+  'grains': ['sourdough (2 slices)', 'gluten-free bread', 'rice pasta', 'quinoa', 'garlic-infused oil', 'scallions (green parts)'],
+  'beans': ['edamame (½ cup)', 'canned lentils (¼ cup, rinsed)', 'firm tofu', 'tempeh', 'eggs'],
+  'dairy': ['cashew milk', 'almond milk', 'lactose-free milk', 'hard cheeses', 'coconut milk'],
+  'fruit': ['blueberries (1 cup)', 'strawberries (10)', 'oranges', 'grapes', 'kiwi', 'pineapple (1 cup)'],
+  'sweeteners': ['maple syrup', 'white/brown sugar', 'rice malt syrup', 'stevia (2 tsp)'],
+  'gluten': ['rice', 'quinoa', 'gluten-free bread', 'sourdough (2 slices)', 'oats', 'corn tortillas'],
+  'veggies': ['bell peppers', 'carrots', 'zucchini', 'cucumber', 'spinach', 'eggplant', 'sweet potatoes', 'tomatoes'],
+  'fatty-food': ['grilled chicken', 'baked salmon', 'air-fried options', 'turkey', 'white fish', 'tofu'],
+  'carbonated': ['still water', 'peppermint tea', 'ginger tea', 'rooibos tea', 'infused water', 'almond milk'],
+  'sugar': ['dark chocolate (30g)', 'lactose-free ice cream', 'popcorn (7 cups)', 'rice crackers', 'fresh fruit'],
+  'alcohol': ['red/white wine (5 oz)', 'vodka (1 shot)', 'gin (1 shot)', 'whiskey (1 shot)', 'tequila (1 shot)'],
+  'processed': ['plain potato chips', 'popcorn', 'rice crackers', 'corn tortilla chips', 'hard-boiled eggs', 'FODY Foods'],
 };
 
 /**
- * Get safe alternatives for a trigger category
+ * Get detailed safe alternatives data for a trigger category
+ */
+export function getSafeAlternativesDetailed(category: string): TriggerAlternativesData | null {
+  const lower = category.toLowerCase();
+  if (SAFE_ALTERNATIVES_DETAILED[lower]) {
+    return SAFE_ALTERNATIVES_DETAILED[lower];
+  }
+  for (const [key, data] of Object.entries(SAFE_ALTERNATIVES_DETAILED)) {
+    if (lower.includes(key) || key.includes(lower)) {
+      return data;
+    }
+  }
+  return null;
+}
+
+/**
+ * Get safe alternatives for a trigger category (simple string array)
+ * @deprecated Use getSafeAlternativesDetailed for richer data
  */
 export function getSafeAlternatives(category: string): string[] {
   const lower = category.toLowerCase();
