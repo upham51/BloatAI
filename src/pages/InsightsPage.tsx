@@ -12,6 +12,7 @@ import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { TriggerFrequencyChart } from '@/components/insights/TriggerFrequencyChart';
 import { BehavioralPatternsChart } from '@/components/insights/BehavioralPatternsChart';
 import { HealthScoreGauge } from '@/components/insights/HealthScoreGauge';
+import { CategoryInsightsChart } from '@/components/insights/CategoryInsightsChart';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -176,6 +177,14 @@ export default function InsightsPage() {
               />
             </div>
           )}
+
+          {/* Category Insights Chart - All categories with beautiful visualization */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '450ms', animationFillMode: 'forwards' }}
+          >
+            <CategoryInsightsChart entries={entries} />
+          </div>
 
           {/* Trigger Frequency Chart */}
           {insights && insights.triggerFrequencies.length > 0 && (
