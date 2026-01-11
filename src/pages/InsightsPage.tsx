@@ -5,12 +5,10 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import InsightsLoader from '@/components/shared/InsightsLoader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
-import { FoodSafetyList } from '@/components/insights/FoodSafetyList';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
-import { FoodCombinationsGrid } from '@/components/insights/FoodCombinationsGrid';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -147,13 +145,15 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 3. FOOD COMBINATIONS - Visual Grid */}
-          {advancedInsights && advancedInsights.combinations.length > 0 && (
+          {/* 3. SAFE ALTERNATIVES - Recommendations */}
+          {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
               style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
             >
-              <FoodCombinationsGrid combinations={advancedInsights.combinations} />
+              <RecommendationCards
+                topTriggers={insights.potentialTriggers.map((t) => t.category)}
+              />
             </div>
           )}
 
@@ -165,19 +165,11 @@ export default function InsightsPage() {
             <BloatHeatmap entries={entries} />
           </div>
 
-          {/* 5. FOOD INSIGHTS (Safe vs. Triggers) */}
-          <div
-            className="animate-slide-up opacity-0"
-            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
-          >
-            <FoodSafetyList entries={entries} potentialTriggers={insights?.potentialTriggers} />
-          </div>
-
-          {/* 6. TOP FOODS - Most logged */}
+          {/* 5. TOP FOODS - Most logged */}
           {insights?.topFoods && insights.topFoods.length > 0 && (
             <div
               className="premium-card p-6 shadow-sm rounded-xl animate-slide-up opacity-0"
-              style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-lavender/30 to-secondary/30">
@@ -209,22 +201,10 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 7. SAFE ALTERNATIVES - Recommendations */}
-          {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
-            <div
-              className="animate-slide-up opacity-0"
-              style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}
-            >
-              <RecommendationCards
-                topTriggers={insights.potentialTriggers.map((t) => t.category)}
-              />
-            </div>
-          )}
-
-          {/* 8. BLOATING GUIDE */}
+          {/* 6. BLOATING GUIDE */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
           >
             <BloatingGuide />
           </div>
