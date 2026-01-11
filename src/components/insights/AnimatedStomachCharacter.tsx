@@ -33,38 +33,31 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
     return () => clearInterval(wiggleInterval);
   }, []);
 
-  // Eye style based on mood
-  const getEyeStyle = () => {
-    if (isBlinking) return { scaleY: 0.1 };
-    if (isBad) return { scaleY: 0.6 }; // Tired/sad eyes
-    return { scaleY: 1 }; // Normal eyes
-  };
-
   // Mouth path based on mood
   const getMouthPath = () => {
     if (isGood) {
       // Big happy smile
-      return "M 40 60 Q 60 75 80 60";
+      return "M 45 65 Q 60 72 75 65";
     } else if (isMedium) {
       // Neutral/slight smile
-      return "M 40 65 Q 60 68 80 65";
+      return "M 45 67 Q 60 70 75 67";
     } else {
       // Sad frown
-      return "M 40 70 Q 60 60 80 70";
+      return "M 45 72 Q 60 65 75 72";
     }
   };
 
   // Bloated effect for bad scores
-  const stomachScale = isBad ? 1.15 : 1;
+  const stomachWidth = isBad ? 1.15 : 1;
   const bloatAnimation = isBad ? 'bloat-pulse' : 'float';
 
   return (
     <div className="relative w-full h-64 flex items-center justify-center">
       {/* Animated SVG Stomach */}
       <svg
-        width="280"
-        height="280"
-        viewBox="0 0 120 120"
+        width="300"
+        height="300"
+        viewBox="0 0 120 140"
         className={`${bloatAnimation} wiggle`}
         style={{
           filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.15))',
@@ -72,136 +65,159 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
         }}
         key={animationTrigger}
       >
-        {/* Stomach body - organic curved shape */}
-        <g transform={`scale(${stomachScale})`} style={{ transformOrigin: '60px 60px' }}>
-          {/* Main stomach shape */}
+        {/* Stomach body - realistic J-shaped stomach */}
+        <g transform={`scale(${stomachWidth}, 1)`} style={{ transformOrigin: '60px 70px' }}>
+          {/* Main stomach J-shape */}
           <path
             d="
-              M 60 20
-              C 80 20, 95 35, 95 55
-              C 95 65, 92 75, 85 82
-              C 80 87, 70 92, 60 95
-              C 50 92, 40 87, 35 82
-              C 28 75, 25 65, 25 55
-              C 25 35, 40 20, 60 20
+              M 55 25
+              C 50 25, 45 28, 43 33
+              L 40 45
+              C 38 52, 35 58, 35 65
+              C 35 75, 40 85, 48 92
+              C 52 96, 56 100, 60 102
+              C 64 104, 70 105, 75 103
+              C 82 100, 88 95, 92 88
+              C 95 82, 96 75, 96 68
+              C 96 60, 94 52, 90 45
+              C 88 40, 85 35, 82 32
+              C 75 25, 68 22, 60 22
+              C 58 22, 56 23, 55 25
               Z
             "
             fill={ringColor}
             opacity="0.9"
             className="stomach-body"
+            strokeWidth="3"
+            stroke={ringColor}
+            strokeOpacity="0.3"
           />
 
           {/* Inner highlight for depth */}
           <path
             d="
-              M 60 25
-              C 75 25, 88 38, 88 52
-              C 88 60, 85 68, 80 74
-              C 75 79, 67 83, 60 85
-              C 53 83, 45 79, 40 74
-              C 35 68, 32 60, 32 52
-              C 32 38, 45 25, 60 25
+              M 55 30
+              C 52 32, 48 35, 46 40
+              L 44 50
+              C 42 56, 40 62, 40 68
+              C 40 76, 44 84, 50 90
+              C 54 94, 58 97, 62 98
+              C 66 99, 70 99, 74 97
+              C 79 94, 84 90, 87 84
+              C 90 79, 91 73, 91 68
+              C 91 61, 89 54, 86 48
+              C 84 43, 82 38, 79 35
+              C 74 30, 68 27, 60 27
+              C 58 28, 56 29, 55 30
               Z
             "
             fill="white"
-            opacity="0.15"
+            opacity="0.2"
           />
 
           {/* Bloat lines when score is bad */}
           {isBad && (
             <>
               <path
-                d="M 35 50 Q 60 48 85 50"
+                d="M 42 55 Q 60 53 88 55"
                 stroke={ringColor}
                 strokeWidth="1.5"
                 fill="none"
                 opacity="0.4"
-                strokeDasharray="2,2"
+                strokeDasharray="3,3"
               />
               <path
-                d="M 35 65 Q 60 63 85 65"
+                d="M 42 70 Q 60 68 90 70"
                 stroke={ringColor}
                 strokeWidth="1.5"
                 fill="none"
                 opacity="0.4"
-                strokeDasharray="2,2"
+                strokeDasharray="3,3"
+              />
+              <path
+                d="M 48 85 Q 60 83 88 85"
+                stroke={ringColor}
+                strokeWidth="1.5"
+                fill="none"
+                opacity="0.4"
+                strokeDasharray="3,3"
               />
             </>
           )}
 
           {/* Left eye */}
-          <g transform="translate(45, 45)">
+          <g transform="translate(50, 55)">
             {/* Eye white */}
             <ellipse
               cx="0"
               cy="0"
-              rx="6"
-              ry="7"
-              fill="white"
-              opacity="0.95"
-            />
-            {/* Pupil */}
-            <ellipse
-              cx="0"
-              cy="1"
-              rx="3"
-              ry="4"
+              rx="5"
+              ry={isBlinking ? 0.5 : 6}
               fill="#1a1a1a"
-              style={{
-                transform: `scaleY(${getEyeStyle().scaleY})`,
-                transformOrigin: 'center',
-                transition: 'transform 0.15s ease-out',
-              }}
+              className="eye-transition"
             />
-            {/* Shine */}
-            <circle
-              cx="-1"
-              cy="-1"
-              r="1.5"
-              fill="white"
-              opacity="0.8"
-            />
+            {!isBlinking && (
+              <>
+                {/* Pupil */}
+                <ellipse
+                  cx="0"
+                  cy="0.5"
+                  rx="3"
+                  ry={isBad ? 2.5 : 4}
+                  fill="#1a1a1a"
+                  className="eye-transition"
+                />
+                {/* Shine */}
+                <circle
+                  cx="-1"
+                  cy="-1"
+                  r="1.5"
+                  fill="white"
+                  opacity="0.9"
+                />
+              </>
+            )}
           </g>
 
           {/* Right eye */}
-          <g transform="translate(75, 45)">
+          <g transform="translate(78, 55)">
             {/* Eye white */}
             <ellipse
               cx="0"
               cy="0"
-              rx="6"
-              ry="7"
-              fill="white"
-              opacity="0.95"
-            />
-            {/* Pupil */}
-            <ellipse
-              cx="0"
-              cy="1"
-              rx="3"
-              ry="4"
+              rx="5"
+              ry={isBlinking ? 0.5 : 6}
               fill="#1a1a1a"
-              style={{
-                transform: `scaleY(${getEyeStyle().scaleY})`,
-                transformOrigin: 'center',
-                transition: 'transform 0.15s ease-out',
-              }}
+              className="eye-transition"
             />
-            {/* Shine */}
-            <circle
-              cx="-1"
-              cy="-1"
-              r="1.5"
-              fill="white"
-              opacity="0.8"
-            />
+            {!isBlinking && (
+              <>
+                {/* Pupil */}
+                <ellipse
+                  cx="0"
+                  cy="0.5"
+                  rx="3"
+                  ry={isBad ? 2.5 : 4}
+                  fill="#1a1a1a"
+                  className="eye-transition"
+                />
+                {/* Shine */}
+                <circle
+                  cx="-1"
+                  cy="-1"
+                  r="1.5"
+                  fill="white"
+                  opacity="0.9"
+                />
+              </>
+            )}
           </g>
 
           {/* Eyebrows - more expressive based on mood */}
           {isGood && (
             <>
               <path
-                d="M 38 38 Q 45 35 52 37"
+                d="M 43 48 Q 50 45 57 47"
                 stroke="#1a1a1a"
                 strokeWidth="2"
                 fill="none"
@@ -209,7 +225,7 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
                 opacity="0.6"
               />
               <path
-                d="M 68 37 Q 75 35 82 38"
+                d="M 71 47 Q 78 45 85 48"
                 stroke="#1a1a1a"
                 strokeWidth="2"
                 fill="none"
@@ -222,22 +238,20 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
           {isBad && (
             <>
               <path
-                d="M 38 40 Q 45 38 52 39"
+                d="M 43 50 Q 50 48 57 49"
                 stroke="#1a1a1a"
                 strokeWidth="2"
                 fill="none"
                 strokeLinecap="round"
                 opacity="0.6"
-                className="sad-brow"
               />
               <path
-                d="M 68 39 Q 75 38 82 40"
+                d="M 71 49 Q 78 48 85 50"
                 stroke="#1a1a1a"
                 strokeWidth="2"
                 fill="none"
                 strokeLinecap="round"
                 opacity="0.6"
-                className="sad-brow"
               />
             </>
           )}
@@ -257,16 +271,16 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
           {isGood && (
             <>
               <ellipse
-                cx="35"
-                cy="58"
+                cx="38"
+                cy="65"
                 rx="5"
                 ry="3"
                 fill="#ff6b9d"
                 opacity="0.3"
               />
               <ellipse
-                cx="85"
-                cy="58"
+                cx="90"
+                cy="65"
                 rx="5"
                 ry="3"
                 fill="#ff6b9d"
@@ -279,10 +293,10 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
           {isBad && (
             <>
               <ellipse
-                cx="30"
-                cy="40"
-                rx="2"
-                ry="3"
+                cx="35"
+                cy="48"
+                rx="2.5"
+                ry="3.5"
                 fill="#87ceeb"
                 opacity="0.6"
                 className="sweat-drop"
@@ -338,12 +352,12 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
           transition: all 0.3s ease-out;
         }
 
-        .sweat-drop {
-          animation: sweat-drop 1.5s ease-in infinite;
+        .eye-transition {
+          transition: ry 0.15s ease-out;
         }
 
-        .sad-brow {
-          transform-origin: center;
+        .sweat-drop {
+          animation: sweat-drop 1.5s ease-in infinite;
         }
       `}</style>
     </div>
