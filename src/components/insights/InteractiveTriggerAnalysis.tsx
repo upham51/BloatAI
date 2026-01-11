@@ -25,6 +25,15 @@ interface ChartDataItem {
 export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTriggerAnalysisProps) {
   const [expandedTrigger, setExpandedTrigger] = useState<string | null>(null);
 
+  // Impact-based color mapping for medical-grade appearance
+  const getImpactColor = (score: number): string => {
+    if (score <= 15) return '#4CAF50';   // Green - low impact
+    if (score <= 30) return '#9BC53D';   // Yellow-green - moderate low
+    if (score <= 45) return '#FFC857';   // Yellow - moderate
+    if (score <= 60) return '#F4A261';   // Orange - elevated
+    return '#E76F51';                    // Red - high impact
+  };
+
   // Prepare chart data
   const chartData = useMemo(() => {
     return triggerConfidence
@@ -35,10 +44,8 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
         // Calculate impact score (frequency × severity)
         const impactScore = trigger.occurrences * trigger.avgBloatingWith;
 
-        // Determine color based on confidence
-        const color = trigger.confidence === 'high'
-          ? '#ef4444' // Red for high confidence
-          : '#f97316'; // Orange for investigating
+        // Determine color based on impact score (not confidence)
+        const color = getImpactColor(impactScore);
 
         return {
           id: trigger.category,
@@ -76,12 +83,20 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
 
     return (
       <div className="premium-card p-3 border border-primary/20 shadow-lg">
-        <div className="text-sm font-semibold text-foreground mb-1">{data.displayName}</div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="text-sm font-semibold text-foreground">{data.displayName}</div>
+          <div
+            className={`w-2 h-2 rounded-full ${
+              data.confidence === 'high' ? 'bg-foreground' : 'bg-foreground/30'
+            }`}
+            title={data.confidence === 'high' ? 'High confidence' : 'Investigating'}
+          />
+        </div>
         <div className="text-xs text-muted-foreground">
-          Impact Score: <span className="font-bold text-primary">{data.impactScore}</span>
+          Impact Score: <span className="font-bold" style={{ color: data.color }}>{data.impactScore}</span>
         </div>
         <div className="text-xs text-muted-foreground mt-1">
-          Click to see details
+          {data.confidence === 'high' ? 'High confidence trigger' : 'Still investigating'} • Click for details
         </div>
       </div>
     );
@@ -147,16 +162,33 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
         </ResponsiveContainer>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-center gap-4 text-xs pt-2 border-t border-border/30">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-[#ef4444]" />
-          <span className="text-muted-foreground">High Confidence</span>
+      {/* Impact-based Legend */}
+      <div className="space-y-2 pt-2 border-t border-border/30">
+        <div className="flex items-center justify-center gap-3 text-xs flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-[#4CAF50]" />
+            <span className="text-muted-foreground">Low</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-[#9BC53D]" />
+            <span className="text-muted-foreground">Moderate-Low</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-[#FFC857]" />
+            <span className="text-muted-foreground">Moderate</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-[#F4A261]" />
+            <span className="text-muted-foreground">Elevated</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-[#E76F51]" />
+            <span className="text-muted-foreground">High</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-[#f97316]" />
-          <span className="text-muted-foreground">Investigating</span>
-        </div>
+        <p className="text-center text-xs text-muted-foreground">
+          Colors show impact severity • <span className="font-semibold">●</span> = High confidence • <span className="opacity-50">○</span> = Investigating
+        </p>
       </div>
 
       {/* Collapsible Details */}
@@ -182,7 +214,15 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                     style={{ backgroundColor: trigger.color }}
                   />
                   <div className="text-left">
-                    <h3 className="font-bold text-foreground text-sm">{trigger.displayName}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-foreground text-sm">{trigger.displayName}</h3>
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          trigger.confidence === 'high' ? 'bg-foreground' : 'bg-foreground/30'
+                        }`}
+                        title={trigger.confidence === 'high' ? 'High confidence' : 'Investigating'}
+                      />
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {trigger.occurrences}x logged • {trigger.percentage}% of meals
                     </p>
