@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts';
+import { AnimatedStomachCharacter } from './AnimatedStomachCharacter';
 
 interface VisualHealthScoreHeroProps {
   avgBloating: number; // 0-5 scale
@@ -50,14 +50,6 @@ export function VisualHealthScoreHero({
     }
   }, [healthScore]);
 
-  const chartData = [
-    {
-      name: 'Health Score',
-      value: healthScore,
-      fill: ringColor,
-    },
-  ];
-
   return (
     <div className="premium-card p-8 shadow-sm rounded-xl">
       {/* Title */}
@@ -66,45 +58,12 @@ export function VisualHealthScoreHero({
         <p className="text-sm text-muted-foreground mt-1">Your digestive wellness at a glance</p>
       </div>
 
-      {/* Radial Chart - The North Star */}
+      {/* Animated Stomach Character */}
       <div className="relative mb-6">
-        <ResponsiveContainer width="100%" height={240}>
-          <RadialBarChart
-            cx="50%"
-            cy="50%"
-            innerRadius="70%"
-            outerRadius="100%"
-            data={chartData}
-            startAngle={180}
-            endAngle={0}
-          >
-            <defs>
-              <linearGradient id="scoreGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor={ringColor} stopOpacity={0.8} />
-                <stop offset="100%" stopColor={ringColor} stopOpacity={1} />
-              </linearGradient>
-            </defs>
+        <AnimatedStomachCharacter healthScore={healthScore} ringColor={ringColor} />
 
-            <PolarAngleAxis
-              type="number"
-              domain={[0, 100]}
-              angleAxisId={0}
-              tick={false}
-            />
-
-            <RadialBar
-              background={{ fill: 'hsl(var(--muted))', opacity: 0.15 }}
-              dataKey="value"
-              cornerRadius={10}
-              fill="url(#scoreGradient)"
-              animationDuration={2000}
-              animationBegin={100}
-            />
-          </RadialBarChart>
-        </ResponsiveContainer>
-
-        {/* Center Score Display */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        {/* Score Display Below Character */}
+        <div className="flex flex-col items-center justify-center mt-4">
           <div
             className="text-7xl font-bold mb-2 transition-all duration-500"
             style={{ color: ringColor }}
