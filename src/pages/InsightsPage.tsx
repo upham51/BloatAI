@@ -10,7 +10,6 @@ import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
-import { FoodCombinationsGrid } from '@/components/insights/FoodCombinationsGrid';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -147,44 +146,34 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 3. FOOD COMBINATIONS - Visual Grid */}
-          {advancedInsights && advancedInsights.combinations.length > 0 && (
-            <div
-              className="animate-slide-up opacity-0"
-              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
-            >
-              <FoodCombinationsGrid combinations={advancedInsights.combinations} />
-            </div>
-          )}
-
-          {/* 4. BLOAT HEATMAP CALENDAR */}
+          {/* 3. BLOAT HEATMAP CALENDAR */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
           >
             <BloatHeatmap entries={entries} />
           </div>
 
-          {/* 5. FOOD INSIGHTS (Safe vs. Triggers) */}
+          {/* 4. FOOD INSIGHTS (Safe vs. Triggers) */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}
           >
             <FoodSafetyList entries={entries} potentialTriggers={insights?.potentialTriggers} />
           </div>
 
-          {/* 6. TOP FOODS - Most logged */}
+          {/* 5. TOP FOODS - What You're Eating Most */}
           {insights?.topFoods && insights.topFoods.length > 0 && (
             <div
               className="premium-card p-6 shadow-sm rounded-xl animate-slide-up opacity-0"
-              style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-lavender/30 to-secondary/30">
                   <span className="text-xl">🍽️</span>
                 </div>
                 <div>
-                  <h2 className="font-bold text-foreground text-xl">Most Logged Foods</h2>
+                  <h2 className="font-bold text-foreground text-xl">What You're Eating Most</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">Your eating patterns</p>
                 </div>
               </div>
@@ -192,6 +181,26 @@ export default function InsightsPage() {
               <div className="space-y-2">
                 {insights.topFoods.map((item) => {
                   const icon = getIconForTrigger(item.food);
+
+                  // Calculate average bloating for this food
+                  const foodEntries = entries.filter(e =>
+                    e.rating_status === 'completed' &&
+                    e.bloating_rating &&
+                    e.detected_triggers?.some(t => (t.food || t.category) === item.food)
+                  );
+                  const avgBloating = foodEntries.length > 0
+                    ? foodEntries.reduce((sum, e) => sum + (e.bloating_rating || 0), 0) / foodEntries.length
+                    : 0;
+
+                  // Determine impact badge color and label
+                  const getImpactBadge = (avg: number) => {
+                    if (avg <= 2) return { color: 'bg-mint text-mint', bg: 'bg-mint/10', label: 'Safe', textColor: 'text-mint' };
+                    if (avg <= 3) return { color: 'bg-yellow-500 text-yellow-600', bg: 'bg-yellow-500/10', label: 'Monitor', textColor: 'text-yellow-600' };
+                    return { color: 'bg-coral text-coral', bg: 'bg-coral/10', label: 'Trigger', textColor: 'text-coral' };
+                  };
+
+                  const impactBadge = getImpactBadge(avgBloating);
+
                   return (
                     <div
                       key={item.food}
@@ -201,7 +210,12 @@ export default function InsightsPage() {
                         {icon}
                       </div>
                       <span className="flex-1 font-medium text-foreground">{item.food}</span>
-                      <span className="text-sm font-semibold text-muted-foreground">{item.count}x</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${impactBadge.bg} ${impactBadge.textColor} border border-current/20`}>
+                          {impactBadge.label}
+                        </span>
+                        <span className="text-sm font-semibold text-muted-foreground">{item.count}x</span>
+                      </div>
                     </div>
                   );
                 })}
@@ -209,11 +223,11 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 7. SAFE ALTERNATIVES - Recommendations */}
+          {/* 6. SAFE ALTERNATIVES - Recommendations */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
             >
               <RecommendationCards
                 topTriggers={insights.potentialTriggers.map((t) => t.category)}
@@ -221,10 +235,10 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 8. BLOATING GUIDE */}
+          {/* 7. BLOATING GUIDE */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}
           >
             <BloatingGuide />
           </div>
