@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface AnimatedStomachCharacterProps {
   healthScore: number; // 0-100
@@ -8,6 +8,8 @@ interface AnimatedStomachCharacterProps {
 export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedStomachCharacterProps) {
   const [currentVideo, setCurrentVideo] = useState<string>('');
   const [videoError, setVideoError] = useState<boolean>(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Determine which video to show based on score
   useEffect(() => {
@@ -27,6 +29,59 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
     setCurrentVideo(videoPath);
     setVideoError(false);
   }, [healthScore]);
+
+  // Process video to remove white background
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    if (!video || !canvas) return;
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    let animationFrameId: number;
+
+    const processFrame = () => {
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // Remove white pixels (chroma key effect for white)
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+
+          // Check if pixel is close to white (adjust threshold as needed)
+          const threshold = 200; // Lower = more aggressive white removal
+          if (r > threshold && g > threshold && b > threshold) {
+            // Make pixel transparent
+            data[i + 3] = 0;
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      animationFrameId = requestAnimationFrame(processFrame);
+    };
+
+    video.addEventListener('play', () => {
+      processFrame();
+    });
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [currentVideo]);
 
   const handleVideoError = () => {
     setVideoError(true);
@@ -51,30 +106,36 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
 
   return (
     <div className="relative w-full h-64 flex items-center justify-center">
-      {/* Video Container with dark background for multiply blend */}
+      {/* Video Container */}
       <div
-        className="relative w-[300px] h-[300px] flex items-center justify-center rounded-full"
+        className="relative w-[300px] h-[300px] flex items-center justify-center"
         style={{
-          background: 'linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)',
+          filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.15))',
         }}
       >
         {!videoError ? (
-          <video
-            key={currentVideo}
-            autoPlay
-            loop
-            muted
-            playsInline
-            onError={handleVideoError}
-            className="w-full h-full object-contain"
-            style={{
-              mixBlendMode: 'multiply',
-              filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.15))',
-            }}
-          >
-            <source src={currentVideo} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          <div className="relative w-full h-full">
+            {/* Hidden video element */}
+            <video
+              ref={videoRef}
+              key={currentVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              onError={handleVideoError}
+              className="hidden"
+            >
+              <source src={currentVideo} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+
+            {/* Canvas to display processed video */}
+            <canvas
+              ref={canvasRef}
+              className="w-full h-full object-contain"
+            />
+          </div>
         ) : (
           // Fallback placeholder when video is not available
           <div className="flex flex-col items-center justify-center gap-4">
