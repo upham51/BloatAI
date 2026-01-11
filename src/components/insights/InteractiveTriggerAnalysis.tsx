@@ -26,11 +26,11 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
 
   // Impact-based color mapping for medical-grade appearance
   const getImpactColor = (score: number): string => {
-    if (score <= 15) return '#4CAF50';   // Green - low impact
-    if (score <= 30) return '#9BC53D';   // Yellow-green - moderate low
-    if (score <= 45) return '#FFC857';   // Yellow - moderate
-    if (score <= 60) return '#F4A261';   // Orange - elevated
-    return '#E76F51';                    // Red - high impact
+    if (score <= 50) return '#4CAF50';    // Green - low impact
+    if (score <= 150) return '#9BC53D';   // Yellow-green - moderate low
+    if (score <= 250) return '#FFC857';   // Yellow - moderate
+    if (score <= 350) return '#F4A261';   // Orange - elevated
+    return '#E76F51';                     // Red - high impact
   };
 
   // Prepare chart data
