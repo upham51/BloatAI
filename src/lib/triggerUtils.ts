@@ -2,20 +2,19 @@ import { getTriggerCategory } from '@/types';
 
 // Trigger icon mapping based on category
 export const TRIGGER_ICONS: Record<string, string> = {
-  // FODMAP categories
-  'fodmaps-fructans': '🧅',
-  'fodmaps-gos': '🫘',
-  'fodmaps-lactose': '🥛',
-  'fodmaps-fructose': '🍎',
-  'fodmaps-polyols': '🍬',
-  // Other categories
-  'gluten': '🌾',
+  // Simplified categories
+  'grains': '🌾',
+  'beans': '🫘',
   'dairy': '🥛',
-  'cruciferous': '🥦',
-  'high-fat': '🍟',
+  'fruit': '🍎',
+  'sweeteners': '🍬',
+  'gluten': '🌾',
+  'veggies': '🥦',
+  'fatty-food': '🍟',
   'carbonated': '🫧',
-  'refined-sugar': '🍭',
+  'sugar': '🍭',
   'alcohol': '🍷',
+  'processed': '📦',
 
   // Proteins
   'protein': '🥩',
@@ -549,7 +548,7 @@ function getCategoryFallbackIcon(categoryOrFood: string): string {
   if (lower.includes('gos') || lower.includes('bean') || lower.includes('legume')) return '🫘';
 
   // Food categories
-  if (lower.includes('cruciferous') || lower.includes('vegetable') || lower.includes('greens')) return '🥬';
+  if (lower.includes('veggies') || lower.includes('vegetable') || lower.includes('greens')) return '🥬';
   if (lower.includes('protein') || lower.includes('meat')) return '🥩';
   if (lower.includes('fish') || lower.includes('seafood')) return '🐟';
   if (lower.includes('fat') || lower.includes('fried') || lower.includes('oil')) return '🍟';
@@ -615,11 +614,20 @@ export function formatTriggerDisplay(
   return triggers.map(trigger => {
     // Get the trigger category info
     const categoryInfo = getTriggerCategory(trigger.category);
-    // Use the shortened display name (e.g., "Fructans" instead of "FODMAPs - Fructans")
-    const displayName = categoryInfo?.displayName?.split(' - ')[1] || categoryInfo?.displayName || trigger.category;
+    let displayName = categoryInfo?.displayName || trigger.category;
+
+    // Special handling for onion and garlic - show as "Onion (Fructans)" or "Garlic (Fructans)"
+    if (trigger.food) {
+      const foodLower = trigger.food.toLowerCase();
+      if (foodLower.includes('onion') && trigger.category === 'grains') {
+        displayName = 'Onion (Fructans)';
+      } else if (foodLower.includes('garlic') && trigger.category === 'grains') {
+        displayName = 'Garlic (Fructans)';
+      }
+    }
 
     return {
-      icon: getIconForTrigger(trigger.category),
+      icon: getIconForTrigger(trigger.food || trigger.category),
       name: displayName,
       category: trigger.category,
     };
@@ -628,19 +636,18 @@ export function formatTriggerDisplay(
 
 // Safe food alternatives for common triggers
 const SAFE_ALTERNATIVES: Record<string, string[]> = {
-  'fodmaps-fructans': ['garlic-infused oil', 'green part of scallions', 'chives', 'asafoetida'],
-  'fodmaps-gos': ['canned lentils (rinsed)', 'firm tofu', 'tempeh'],
-  'fodmaps-lactose': ['lactose-free milk', 'hard cheeses', 'almond milk', 'oat milk'],
-  'fodmaps-fructose': ['blueberries', 'strawberries', 'oranges', 'grapes'],
-  'fodmaps-polyols': ['maple syrup', 'rice malt syrup', 'glucose'],
+  'grains': ['garlic-infused oil', 'green part of scallions', 'chives', 'rice'],
+  'beans': ['canned lentils (rinsed)', 'firm tofu', 'tempeh'],
+  'dairy': ['lactose-free milk', 'hard cheeses', 'almond milk', 'oat milk'],
+  'fruit': ['blueberries', 'strawberries', 'oranges', 'grapes'],
+  'sweeteners': ['maple syrup', 'rice malt syrup', 'glucose'],
   'gluten': ['rice', 'quinoa', 'gluten-free bread', 'sourdough (long ferment)'],
-  'dairy': ['lactose-free milk', 'almond milk', 'oat milk', 'coconut yogurt'],
-  'cruciferous': ['carrots', 'zucchini', 'bell peppers', 'spinach', 'cucumber'],
-  'high-fat': ['grilled proteins', 'baked alternatives', 'air-fried options'],
+  'veggies': ['carrots', 'zucchini', 'bell peppers', 'spinach', 'cucumber'],
+  'fatty-food': ['grilled proteins', 'baked alternatives', 'air-fried options'],
   'carbonated': ['still water', 'herbal tea', 'infused water'],
-  'refined-sugar': ['maple syrup', 'stevia', 'fresh fruit'],
+  'sugar': ['maple syrup', 'stevia', 'fresh fruit'],
   'alcohol': ['mocktails', 'sparkling water with lime', 'kombucha'],
-  'spicy': ['herbs like basil', 'mild paprika', 'turmeric'],
+  'processed': ['whole foods', 'fresh ingredients', 'homemade meals'],
 };
 
 /**

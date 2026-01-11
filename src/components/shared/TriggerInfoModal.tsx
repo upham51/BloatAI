@@ -18,47 +18,42 @@ export function TriggerInfoModal({ trigger, isOpen, onClose }: TriggerInfoModalP
   // Get plain English explanation for each trigger type
   const getPlainEnglishInfo = (categoryId: string) => {
     const info: Record<string, { what: string; why: string; commonFoods: string[] }> = {
-      'fodmaps-fructans': {
-        what: 'Short-chain carbohydrates that are hard to digest',
+      'grains': {
+        what: 'Grain-based foods containing fructans (short-chain carbs)',
         why: 'These ferment in your gut, producing gas and bloating',
-        commonFoods: ['Wheat bread', 'Pasta', 'Onions', 'Garlic', 'Rye', 'Barley'],
+        commonFoods: ['Wheat bread', 'Pasta', 'Onions', 'Garlic', 'Crackers'],
       },
-      'fodmaps-gos': {
-        what: 'Galacto-oligosaccharides - complex sugars in legumes',
+      'beans': {
+        what: 'Legumes containing complex sugars (GOS)',
         why: 'Your body lacks enzymes to break these down, causing gas',
         commonFoods: ['Beans', 'Lentils', 'Chickpeas', 'Soybeans', 'Split peas'],
       },
-      'fodmaps-lactose': {
-        what: 'Milk sugar that requires the enzyme lactase to digest',
-        why: 'Many people lack enough lactase, leading to bloating',
-        commonFoods: ['Milk', 'Ice cream', 'Soft cheese', 'Yogurt', 'Cream'],
+      'dairy': {
+        what: 'All products made from animal milk',
+        why: 'Contains lactose and proteins that can irritate the gut',
+        commonFoods: ['Milk', 'Cheese', 'Yogurt', 'Ice cream', 'Butter', 'Cream'],
       },
-      'fodmaps-fructose': {
-        what: 'Fruit sugar that can be hard to absorb',
+      'fruit': {
+        what: 'Fruits high in fructose sugar',
         why: 'Excess fructose draws water into your intestines',
         commonFoods: ['Apples', 'Pears', 'Mango', 'Honey', 'Watermelon', 'Agave'],
       },
-      'fodmaps-polyols': {
-        what: 'Sugar alcohols used as sweeteners',
+      'sweeteners': {
+        what: 'Sugar alcohols and artificial sweeteners',
         why: "They're poorly absorbed and pull water into your gut",
-        commonFoods: ['Sugar-free gum', 'Mushrooms', 'Cauliflower', 'Peaches', 'Plums'],
+        commonFoods: ['Sugar-free gum', 'Peaches', 'Plums', 'Diet candy'],
       },
       'gluten': {
-        what: 'Protein found in wheat and related grains',
+        what: 'Protein found in barley, rye, and related grains',
         why: 'Can cause inflammation and digestive distress in sensitive people',
-        commonFoods: ['Wheat', 'Barley', 'Rye', 'Beer', 'Most breads', 'Pasta'],
+        commonFoods: ['Barley', 'Rye', 'Beer', 'Malt'],
       },
-      'dairy': {
-        what: 'All products made from animal milk',
-        why: 'Contains proteins and sugars that can irritate the gut',
-        commonFoads: ['Milk', 'Cheese', 'Butter', 'Yogurt', 'Ice cream', 'Cream'],
-      },
-      'cruciferous': {
-        what: 'Vegetables in the cabbage family',
+      'veggies': {
+        what: 'Cruciferous and high-fiber vegetables',
         why: 'High in fiber and sulfur compounds that produce gas',
         commonFoods: ['Broccoli', 'Cabbage', 'Brussels sprouts', 'Kale', 'Cauliflower'],
       },
-      'high-fat': {
+      'fatty-food': {
         what: 'Foods cooked in oil or naturally high in fat',
         why: 'Takes longer to digest, slowing down your whole digestive system',
         commonFoods: ['Fried chicken', 'French fries', 'Fatty meats', 'Greasy burgers'],
@@ -68,15 +63,20 @@ export function TriggerInfoModal({ trigger, isOpen, onClose }: TriggerInfoModalP
         why: 'The bubbles release gas directly into your digestive system',
         commonFoods: ['Soda', 'Sparkling water', 'Beer', 'Champagne', 'Energy drinks'],
       },
-      'refined-sugar': {
+      'sugar': {
         what: 'Processed sugars with no nutritional value',
         why: 'Feeds bad bacteria in your gut, causing fermentation',
-        commonFoods: ['Candy', 'Pastries', 'White bread', 'Cookies', 'Sugary cereals'],
+        commonFoods: ['Candy', 'Pastries', 'Cookies', 'Sugary cereals'],
       },
       'alcohol': {
         what: 'Fermented beverages containing ethanol',
         why: 'Irritates gut lining and disrupts digestive enzymes',
         commonFoods: ['Beer', 'Wine', 'Spirits', 'Cocktails', 'Hard seltzers'],
+      },
+      'processed': {
+        what: 'Highly processed packaged foods',
+        why: 'Contains additives and preservatives that can irritate the gut',
+        commonFoods: ['Packaged snacks', 'Cereals', 'Processed meats', 'Instant meals'],
       },
     };
 

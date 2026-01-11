@@ -100,21 +100,21 @@ Return ONLY valid JSON (no markdown, no code blocks):
   "creative_title": "Sweet Pancake Stack",
   "meal_description": "Fluffy buttermilk pancakes topped with fresh strawberries, blueberries, and whipped cream, drizzled with maple syrup and dusted with powdered sugar. Served with a side of crispy bacon.",
   "ingredients": [
-    {"name": "Pancakes", "detail": "wheat-based", "is_trigger": true, "trigger_category": "fodmaps-fructans"},
-    {"name": "Buttermilk", "detail": "dairy", "is_trigger": true, "trigger_category": "fodmaps-lactose"},
+    {"name": "Pancakes", "detail": "wheat-based", "is_trigger": true, "trigger_category": "grains"},
+    {"name": "Buttermilk", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy"},
     {"name": "Whipped cream", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy"},
-    {"name": "Maple syrup", "detail": "contains fructose", "is_trigger": true, "trigger_category": "fodmaps-fructose"},
-    {"name": "Bacon", "detail": "fatty meat", "is_trigger": true, "trigger_category": "high-fat"},
+    {"name": "Maple syrup", "detail": "contains fructose", "is_trigger": true, "trigger_category": "fruit"},
+    {"name": "Bacon", "detail": "fatty meat", "is_trigger": true, "trigger_category": "fatty-food"},
     {"name": "Strawberries", "detail": "low FODMAP fruit", "is_trigger": false, "trigger_category": null},
-    {"name": "Powdered sugar", "detail": "refined sugar", "is_trigger": true, "trigger_category": "refined-sugar"}
+    {"name": "Powdered sugar", "detail": "refined sugar", "is_trigger": true, "trigger_category": "sugar"}
   ],
   "triggers": [
-    {"category": "fodmaps-fructans", "food": "wheat bread"},
-    {"category": "fodmaps-lactose", "food": "milk"},
+    {"category": "grains", "food": "wheat bread"},
+    {"category": "dairy", "food": "milk"},
     {"category": "dairy", "food": "cream"},
-    {"category": "fodmaps-fructose", "food": "maple syrup"},
-    {"category": "high-fat", "food": "bacon"},
-    {"category": "refined-sugar", "food": "sugar"}
+    {"category": "fruit", "food": "maple syrup"},
+    {"category": "fatty-food", "food": "bacon"},
+    {"category": "sugar", "food": "sugar"}
   ]
 }
 
@@ -135,24 +135,24 @@ TRIGGER FOOD NAMING RULES:
 - Bad examples: "glaze on", "with cream", "in sauce", "broccoli florets", "cauliflower florets"
 
 VALID CATEGORY VALUES (use ONLY these exact strings):
-- "fodmaps-fructans" - Wheat products (bread, pasta, tortillas, crackers, baked goods, wheat noodles), onions, garlic, shallots, leeks
-- "fodmaps-gos" - Beans, lentils, chickpeas, hummus, legumes
-- "fodmaps-lactose" - Milk, cream, soft cheese, yogurt, ice cream, butter
-- "fodmaps-fructose" - Apples, honey, mango, agave, high-fructose corn syrup, certain fruits
-- "fodmaps-polyols" - Sugar-free items with sweeteners (sorbitol, mannitol), stone fruits (peaches, plums, cherries), mushrooms, cauliflower
-- "gluten" - ONLY use for: barley, rye, beer (NOT wheat products - those are fodmaps-fructans)
-- "dairy" - All milk products including hard cheese, cream, butter (separate from lactose category)
-- "cruciferous" - Broccoli, cabbage, Brussels sprouts, kale, bok choy
-- "high-fat" - Fried foods, fatty meats, heavy cream, oils, butter, greasy foods
+- "grains" - Wheat products (bread, pasta, tortillas, crackers, baked goods, wheat noodles), onions, garlic, shallots, leeks
+- "beans" - Beans, lentils, chickpeas, hummus, legumes
+- "dairy" - Milk, cream, cheese (all types), yogurt, ice cream, butter
+- "fruit" - Apples, honey, mango, agave, high-fructose corn syrup, pears, certain fruits
+- "sweeteners" - Sugar-free items with sweeteners (sorbitol, mannitol), stone fruits (peaches, plums, cherries)
+- "gluten" - ONLY use for: barley, rye, beer (NOT wheat products - those are grains)
+- "veggies" - Broccoli, cabbage, Brussels sprouts, kale, bok choy, cauliflower, mushrooms
+- "fatty-food" - Fried foods, fatty meats, heavy cream, oils, butter, greasy foods
 - "carbonated" - Soda, sparkling water, fizzy drinks
-- "refined-sugar" - Candy, pastries, white sugar, syrups, desserts
+- "sugar" - Candy, pastries, white sugar, syrups, desserts
 - "alcohol" - Beer, wine, spirits, cocktails
+- "processed" - Packaged snacks, cereals, processed foods
 
 IMPORTANT CATEGORIZATION RULES:
-- Wheat-based foods (bread, pasta, flour products) should ALWAYS be categorized as "fodmaps-fructans", NOT "gluten"
+- Wheat-based foods (bread, pasta, flour products) should ALWAYS be categorized as "grains", NOT "gluten"
 - Only use "gluten" for barley, rye, or beer (which contain gluten but are not wheat-based)
-- Hard cheeses are "dairy", soft cheeses/milk/yogurt are "fodmaps-lactose"
-- When in doubt between overlapping categories, prefer the more specific FODMAP category
+- All dairy products (milk, cheese, yogurt) should be categorized as "dairy"
+- When in doubt between overlapping categories, prefer the most specific category
 
 IMPORTANT:
 - Be thorough with ingredient detection, but prefer SIMPLE BASE NAMES
@@ -235,8 +235,8 @@ IMPORTANT:
 
     // Validate trigger categories
     const validCategories = [
-      'fodmaps-fructans', 'fodmaps-gos', 'fodmaps-lactose', 'fodmaps-fructose', 'fodmaps-polyols',
-      'gluten', 'dairy', 'cruciferous', 'high-fat', 'carbonated', 'refined-sugar', 'alcohol'
+      'grains', 'beans', 'dairy', 'fruit', 'sweeteners',
+      'gluten', 'veggies', 'fatty-food', 'carbonated', 'sugar', 'alcohol', 'processed'
     ];
     
     result.triggers = result.triggers.filter((trigger: any) => {

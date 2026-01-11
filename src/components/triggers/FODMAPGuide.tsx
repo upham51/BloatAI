@@ -1,8 +1,10 @@
 import { TRIGGER_CATEGORIES } from '@/types';
 
 export function FODMAPGuide() {
-  const fodmapCategories = TRIGGER_CATEGORIES.filter(c => c.id.startsWith('fodmaps'));
-  const otherCategories = TRIGGER_CATEGORIES.filter(c => !c.id.startsWith('fodmaps'));
+  // FODMAP-related categories (simplified names)
+  const fodmapIds = ['grains', 'beans', 'dairy', 'fruit', 'sweeteners'];
+  const fodmapCategories = TRIGGER_CATEGORIES.filter(c => fodmapIds.includes(c.id));
+  const otherCategories = TRIGGER_CATEGORIES.filter(c => !fodmapIds.includes(c.id));
 
   return (
     <div className="mb-4 space-y-3 max-h-64 overflow-y-auto pr-1 scrollbar-hide">
