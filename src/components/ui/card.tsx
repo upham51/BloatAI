@@ -10,6 +10,7 @@ const cardVariants = cva(
       variant: {
         default: "border-border",
         elevated: "border-border shadow-soft hover:shadow-medium",
+        premium: "border-gray-100/50 bg-gradient-to-br from-white to-gray-50/30 backdrop-blur-xl rounded-3xl",
         pending: "border-2 border-coral bg-coral/5",
         success: "border-2 border-primary bg-primary/5",
         muted: "border-border bg-muted/50",
@@ -26,13 +27,24 @@ export interface CardProps
     VariantProps<typeof cardVariants> {}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(cardVariants({ variant, className }))}
-      {...props}
-    />
-  )
+  ({ className, variant, style, ...props }, ref) => {
+    const isPremium = variant === "premium";
+    const premiumStyle = isPremium
+      ? {
+          boxShadow: '0 20px 60px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.02)',
+          ...style,
+        }
+      : style;
+
+    return (
+      <div
+        ref={ref}
+        className={cn(cardVariants({ variant, className }))}
+        style={premiumStyle}
+        {...props}
+      />
+    );
+  }
 );
 Card.displayName = "Card";
 
