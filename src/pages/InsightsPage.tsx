@@ -12,6 +12,7 @@ import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { TriggerFrequencyChart } from '@/components/insights/TriggerFrequencyChart';
 import { BehavioralPatternsChart } from '@/components/insights/BehavioralPatternsChart';
 import { HealthScoreGauge } from '@/components/insights/HealthScoreGauge';
+import { CategoryInsightsChart } from '@/components/insights/CategoryInsightsChart';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -162,11 +163,19 @@ export default function InsightsPage() {
             </div>
           )}
 
+          {/* Category Insights Chart - All categories with beautiful visualization */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '450ms', animationFillMode: 'forwards' }}
+          >
+            <CategoryInsightsChart entries={entries} />
+          </div>
+
           {/* Trigger Frequency Chart */}
           {insights && insights.triggerFrequencies.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '450ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
             >
               <TriggerFrequencyChart triggers={insights.triggerFrequencies} />
             </div>
@@ -175,7 +184,7 @@ export default function InsightsPage() {
           {/* Bloat Heatmap Calendar */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '750ms', animationFillMode: 'forwards' }}
           >
             <BloatHeatmap entries={entries} />
           </div>
@@ -183,7 +192,7 @@ export default function InsightsPage() {
           {/* Food Insights (Combined Safety List + Potential Triggers) */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '750ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '900ms', animationFillMode: 'forwards' }}
           >
             <FoodSafetyList entries={entries} potentialTriggers={insights?.potentialTriggers} />
           </div>
@@ -192,7 +201,7 @@ export default function InsightsPage() {
           {insights?.topFoods && insights.topFoods.length > 0 && (
             <div
               className="premium-card p-5 animate-slide-up opacity-0"
-              style={{ animationDelay: '900ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '1050ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-xl bg-gradient-to-br from-lavender/30 to-secondary/30">
@@ -228,7 +237,7 @@ export default function InsightsPage() {
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '1050ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '1200ms', animationFillMode: 'forwards' }}
             >
               <RecommendationCards
                 topTriggers={insights.potentialTriggers.map((t) => t.category)}
@@ -239,7 +248,7 @@ export default function InsightsPage() {
           {/* Bloating Guide */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '1200ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '1350ms', animationFillMode: 'forwards' }}
           >
             <BloatingGuide />
           </div>
