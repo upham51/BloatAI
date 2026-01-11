@@ -51,11 +51,11 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
 
   return (
     <div className="relative w-full h-64 flex items-center justify-center">
-      {/* Video Container */}
+      {/* Video Container with dark background for multiply blend */}
       <div
-        className="relative w-[300px] h-[300px] flex items-center justify-center"
+        className="relative w-[300px] h-[300px] flex items-center justify-center rounded-full"
         style={{
-          filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.15))',
+          background: 'linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)',
         }}
       >
         {!videoError ? (
@@ -69,6 +69,7 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
             className="w-full h-full object-contain"
             style={{
               mixBlendMode: 'multiply',
+              filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.15))',
             }}
           >
             <source src={currentVideo} type="video/mp4" />
