@@ -10,7 +10,7 @@ interface CircularScoreRingProps {
 export function CircularScoreRing({
   score,
   size = 280,
-  strokeWidth = 16,
+  strokeWidth = 32,
   children
 }: CircularScoreRingProps) {
   const [animatedScore, setAnimatedScore] = useState(0);
@@ -105,10 +105,10 @@ export function CircularScoreRing({
             <stop offset="100%" stopColor="#d1d5db" />
           </linearGradient>
 
-          {/* Drop shadow filter for 3D effect */}
+          {/* Drop shadow filter for 3D effect with stronger glow */}
           <filter id="progress-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-            <feOffset dx="0" dy="2" result="offsetblur"/>
+            <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+            <feOffset dx="0" dy="4" result="offsetblur"/>
             <feFlood floodColor={colors.glowColor}/>
             <feComposite in2="offsetblur" operator="in"/>
             <feMerge>
@@ -117,11 +117,11 @@ export function CircularScoreRing({
             </feMerge>
           </filter>
 
-          {/* Inner shadow for track (recessed channel) */}
+          {/* Inner shadow for track (recessed channel) - deeper */}
           <filter id="track-inset" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-            <feOffset dx="0" dy="1" result="offsetblur"/>
-            <feFlood floodColor="rgba(0,0,0,0.15)"/>
+            <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+            <feOffset dx="0" dy="2" result="offsetblur"/>
+            <feFlood floodColor="rgba(0,0,0,0.2)"/>
             <feComposite in2="offsetblur" operator="in"/>
             <feMerge>
               <feMergeNode/>
@@ -153,7 +153,7 @@ export function CircularScoreRing({
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
-          opacity={0.6}
+          opacity={0.7}
           style={{
             transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
@@ -166,7 +166,7 @@ export function CircularScoreRing({
           r={radius}
           fill="none"
           stroke={`url(#${gradientId})`}
-          strokeWidth={strokeWidth - 2}
+          strokeWidth={strokeWidth - 4}
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
@@ -180,14 +180,14 @@ export function CircularScoreRing({
         <circle
           cx={size / 2}
           cy={size / 2}
-          r={radius + 2}
+          r={radius + 4}
           fill="none"
-          stroke="rgba(255, 255, 255, 0.3)"
-          strokeWidth={3}
+          stroke="rgba(255, 255, 255, 0.4)"
+          strokeWidth={6}
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
-          opacity={0.8}
+          opacity={0.9}
           style={{
             transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
