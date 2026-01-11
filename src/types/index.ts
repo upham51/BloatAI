@@ -34,57 +34,51 @@ export interface TriggerCategory {
 
 export const TRIGGER_CATEGORIES: TriggerCategory[] = [
   {
-    id: 'fodmaps-fructans',
-    displayName: 'FODMAPs - Fructans',
+    id: 'grains',
+    displayName: 'Grains',
     examples: 'Wheat, bread, onions, garlic',
     color: '#FF6B6B'
   },
   {
-    id: 'fodmaps-gos',
-    displayName: 'FODMAPs - GOS',
+    id: 'beans',
+    displayName: 'Beans',
     examples: 'Beans, lentils, chickpeas',
     color: '#FF8E53'
   },
   {
-    id: 'fodmaps-lactose',
-    displayName: 'FODMAPs - Lactose',
-    examples: 'Milk, soft cheese, yogurt',
+    id: 'dairy',
+    displayName: 'Dairy',
+    examples: 'Milk, cheese, yogurt',
     color: '#FFA07A'
   },
   {
-    id: 'fodmaps-fructose',
-    displayName: 'FODMAPs - Fructose',
-    examples: 'Apples, honey, mango',
+    id: 'fruit',
+    displayName: 'Fruit',
+    examples: 'Apples, mango, pears',
     color: '#FFB347'
   },
   {
-    id: 'fodmaps-polyols',
-    displayName: 'FODMAPs - Polyols',
-    examples: 'Sugar-free gum, stone fruits',
+    id: 'sweeteners',
+    displayName: 'Sweeteners',
+    examples: 'Sugar-free gum, candy',
     color: '#FFCC5C'
   },
   {
     id: 'gluten',
     displayName: 'Gluten',
-    examples: 'Wheat, barley, rye, beer',
+    examples: 'Wheat, barley, rye',
     color: '#95E1D3'
   },
   {
-    id: 'dairy',
-    displayName: 'Dairy',
-    examples: 'All milk products',
-    color: '#A8E6CF'
-  },
-  {
-    id: 'cruciferous',
-    displayName: 'Cruciferous',
-    examples: 'Broccoli, cabbage, Brussels sprouts',
+    id: 'veggies',
+    displayName: 'Veggies',
+    examples: 'Broccoli, cabbage',
     color: '#7FB069'
   },
   {
-    id: 'high-fat',
-    displayName: 'High-Fat/Fried',
-    examples: 'Fried foods, fatty meats',
+    id: 'fatty-food',
+    displayName: 'Fatty Food',
+    examples: 'Fried foods, greasy meat',
     color: '#C77DFF'
   },
   {
@@ -94,16 +88,22 @@ export const TRIGGER_CATEGORIES: TriggerCategory[] = [
     color: '#9D84B7'
   },
   {
-    id: 'refined-sugar',
-    displayName: 'Refined Sugar',
-    examples: 'Candy, pastries, white bread',
+    id: 'sugar',
+    displayName: 'Sugar',
+    examples: 'Candy, pastries',
     color: '#E0ACD5'
   },
   {
     id: 'alcohol',
     displayName: 'Alcohol',
-    examples: 'Beer, wine, spirits',
+    examples: 'Beer, wine',
     color: '#F3B0C3'
+  },
+  {
+    id: 'processed',
+    displayName: 'Processed',
+    examples: 'Packaged snacks, cereals',
+    color: '#FFB6D9'
   }
 ];
 
@@ -165,21 +165,21 @@ export interface MealEntry {
 
 // Common triggers for manual text entry
 export const COMMON_TRIGGERS = [
-  { id: 'wheat', name: 'Wheat/Bread', category: 'fodmaps-fructans' },
-  { id: 'onions', name: 'Onions', category: 'fodmaps-fructans' },
-  { id: 'garlic', name: 'Garlic', category: 'fodmaps-fructans' },
-  { id: 'beans', name: 'Beans/Lentils', category: 'fodmaps-gos' },
-  { id: 'milk', name: 'Milk', category: 'fodmaps-lactose' },
-  { id: 'yogurt', name: 'Yogurt', category: 'fodmaps-lactose' },
+  { id: 'wheat', name: 'Wheat/Bread', category: 'grains' },
+  { id: 'onions', name: 'Onions', category: 'grains' },
+  { id: 'garlic', name: 'Garlic', category: 'grains' },
+  { id: 'beans', name: 'Beans/Lentils', category: 'beans' },
+  { id: 'milk', name: 'Milk', category: 'dairy' },
+  { id: 'yogurt', name: 'Yogurt', category: 'dairy' },
   { id: 'cheese', name: 'Cheese', category: 'dairy' },
-  { id: 'apples', name: 'Apples', category: 'fodmaps-fructose' },
-  { id: 'pears', name: 'Pears', category: 'fodmaps-fructose' },
-  { id: 'watermelon', name: 'Watermelon', category: 'fodmaps-fructose' },
-  { id: 'mushrooms', name: 'Mushrooms', category: 'fodmaps-polyols' },
-  { id: 'cauliflower', name: 'Cauliflower', category: 'fodmaps-polyols' },
-  { id: 'fried', name: 'Fried Food', category: 'high-fat' },
+  { id: 'apples', name: 'Apples', category: 'fruit' },
+  { id: 'pears', name: 'Pears', category: 'fruit' },
+  { id: 'watermelon', name: 'Watermelon', category: 'fruit' },
+  { id: 'mushrooms', name: 'Mushrooms', category: 'sweeteners' },
+  { id: 'cauliflower', name: 'Cauliflower', category: 'sweeteners' },
+  { id: 'fried', name: 'Fried Food', category: 'fatty-food' },
   { id: 'soda', name: 'Soda/Fizzy Drinks', category: 'carbonated' },
-  { id: 'candy', name: 'Candy/Sweets', category: 'refined-sugar' },
+  { id: 'candy', name: 'Candy/Sweets', category: 'sugar' },
   { id: 'alcohol', name: 'Alcohol', category: 'alcohol' }
 ];
 

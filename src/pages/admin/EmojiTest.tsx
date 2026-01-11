@@ -48,7 +48,7 @@ export default function EmojiTest() {
     filteredMappings.forEach((mapping) => {
       const [key] = mapping;
 
-      if (key.startsWith('fodmaps-')) {
+      if (['grains', 'beans', 'dairy', 'fruit', 'sweeteners'].includes(key)) {
         groups['FODMAP Categories'].push(mapping);
       } else if (['protein', 'meat', 'steak', 'beef', 'pork', 'bacon', 'ham', 'chicken', 'turkey', 'duck', 'fish', 'salmon', 'tuna', 'shrimp', 'seafood', 'shellfish', 'crab', 'lobster', 'egg', 'tofu', 'tempeh', 'prosciutto', 'pancetta', 'chorizo', 'salami', 'pepperoni', 'pastrami', 'corned beef', 'brisket', 'ribs', 'tenderloin', 'filet', 'sirloin', 'ribeye', 't-bone', 'porterhouse', 'lamb', 'veal', 'venison', 'trout', 'cod', 'halibut', 'sea bass', 'snapper', 'tilapia', 'catfish', 'mahi mahi', 'swordfish', 'anchovies', 'sardines', 'mackerel', 'octopus', 'squid', 'calamari', 'clams', 'mussels', 'oysters', 'scallops'].includes(key)) {
         groups['Proteins'].push(mapping);
@@ -78,8 +78,8 @@ export default function EmojiTest() {
         groups['Prepared Foods'].push(mapping);
       } else if (['grilled', 'grill marks', 'charred', 'seared', 'blackened', 'smoked', 'braised', 'roasted', 'baked', 'broiled', 'pan-fried', 'deep-fried', 'sautéed', 'stir-fried', 'poached', 'steamed', 'boiled', 'blanched', 'caramelized', 'glazed', 'pickled', 'fermented', 'cured', 'marinated', 'brined', 'confit', 'tempura', 'crispy', 'crunchy', 'tender', 'juicy', 'flaky', 'garnish', 'drizzle', 'topped', 'stuffed', 'breaded', 'crusted', 'raw', 'rare', 'medium rare', 'medium', 'well done', 'au gratin', 'en croute', 'flambe', 'julienned', 'diced', 'minced', 'sliced', 'chopped', 'shredded', 'grated', 'whipped', 'mashed', 'puréed', 'seasoned', 'spiced', 'zested', 'infused', 'emulsion', 'roux', 'stock', 'broth', 'bouillon', 'marinade', 'brine', 'rub', 'crust', 'coating', 'batter', 'dough', 'pastry', 'phyllo', 'puff pastry', 'shortcrust', 'tart', 'galette', 'crumble', 'crisp', 'cobbler', 'mousse', 'custard', 'crème', 'flan', 'pudding', 'panna cotta', 'tiramisu', 'cheesecake', 'torte', 'gelato', 'sorbet', 'sherbet', 'granita', 'parfait', 'sundae'].includes(key)) {
         groups['Cooking Techniques & Preparations'].push(mapping);
-      } else if (['gluten', 'dairy', 'cruciferous', 'high-fat', 'carbonated', 'refined-sugar', 'alcohol'].includes(key)) {
-        groups['FODMAP Categories'].push(mapping);
+      } else if (['gluten', 'veggies', 'fatty-food', 'carbonated', 'sugar', 'alcohol', 'processed'].includes(key)) {
+        groups['Other Trigger Categories'].push(mapping);
       } else {
         groups['Other'].push(mapping);
       }

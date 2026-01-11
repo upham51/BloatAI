@@ -77,13 +77,13 @@ describe('insightsAnalysis', () => {
       const entries = [
         createMockEntry({
           detected_triggers: [
-            { category: 'fodmaps-fructans', food: 'wheat', confidence: 0.9 },
+            { category: 'grains', food: 'wheat', confidence: 0.9 },
           ],
           bloating_rating: 5,
         }),
         createMockEntry({
           detected_triggers: [
-            { category: 'fodmaps-fructans', food: 'onion', confidence: 0.8 },
+            { category: 'grains', food: 'onion', confidence: 0.8 },
           ],
           bloating_rating: 4,
         }),
@@ -98,7 +98,7 @@ describe('insightsAnalysis', () => {
       const frequencies = analyzeTriggerFrequency(entries);
 
       expect(frequencies).toHaveLength(2);
-      expect(frequencies[0].category).toBe('fodmaps-fructans');
+      expect(frequencies[0].category).toBe('grains');
       expect(frequencies[0].count).toBe(2);
       expect(frequencies[0].percentage).toBe(67); // 2/3 * 100
       expect(frequencies[0].suspicionScore).toBe('high'); // 2 high bloating meals
@@ -150,12 +150,12 @@ describe('insightsAnalysis', () => {
       const entries = [
         createMockEntry({
           notes: 'Stressed 😰',
-          detected_triggers: [{ category: 'fodmaps-fructans', food: 'wheat', confidence: 0.9 }],
+          detected_triggers: [{ category: 'grains', food: 'wheat', confidence: 0.9 }],
           bloating_rating: 5,
         }),
         createMockEntry({
           notes: 'Stressed',
-          detected_triggers: [{ category: 'fodmaps-fructans', food: 'onion', confidence: 0.8 }],
+          detected_triggers: [{ category: 'grains', food: 'onion', confidence: 0.8 }],
           bloating_rating: 4,
         }),
         createMockEntry({
@@ -209,11 +209,11 @@ describe('insightsAnalysis', () => {
     it('should provide action recommendations', () => {
       const entries = [
         createMockEntry({
-          detected_triggers: [{ category: 'fodmaps-fructans', food: 'wheat', confidence: 0.9 }],
+          detected_triggers: [{ category: 'grains', food: 'wheat', confidence: 0.9 }],
           bloating_rating: 5,
         }),
         createMockEntry({
-          detected_triggers: [{ category: 'fodmaps-fructans', food: 'onion', confidence: 0.8 }],
+          detected_triggers: [{ category: 'grains', food: 'onion', confidence: 0.8 }],
           bloating_rating: 4,
         }),
         createMockEntry({
