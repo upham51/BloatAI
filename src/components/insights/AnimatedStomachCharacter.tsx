@@ -67,6 +67,9 @@ export function AnimatedStomachCharacter({ healthScore, ringColor }: AnimatedSto
             playsInline
             onError={handleVideoError}
             className="w-full h-full object-contain"
+            style={{
+              mixBlendMode: 'multiply',
+            }}
           >
             <source src={currentVideo} type="video/mp4" />
             Your browser does not support the video tag.
