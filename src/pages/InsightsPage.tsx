@@ -121,6 +121,12 @@ export default function InsightsPage() {
         <div className="absolute top-60 right-5 w-32 h-32 bg-coral/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative p-6 pb-32 max-w-2xl mx-auto space-y-8">
+          {/* Header */}
+          <header className="mb-2">
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">Insights</h1>
+            <p className="text-muted-foreground mt-1">Your personalized analysis</p>
+          </header>
+
           {/* 1. HERO SECTION - Bloat Health Score */}
           {insights && (
             <div
