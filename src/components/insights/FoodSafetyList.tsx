@@ -136,14 +136,14 @@ export function FoodSafetyList({ entries, potentialTriggers = [] }: FoodSafetyLi
   const cautionFoods = foodInsights.filter(f => f.safetyLevel === 'caution');
 
   return (
-    <div className="premium-card p-6 space-y-6">
+    <div className="premium-card p-6 shadow-sm rounded-xl space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="p-2.5 rounded-xl bg-gradient-to-br from-coral/20 to-mint/20">
           <span className="text-xl">📊</span>
         </div>
         <div>
-          <h3 className="font-bold text-foreground text-lg">Your Food Insights</h3>
+          <h3 className="font-bold text-foreground text-xl">Your Food Insights</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             Personalized based on your bloating patterns
           </p>

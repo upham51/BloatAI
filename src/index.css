@@ -653,3 +653,34 @@
 .animate-float {
   animation: float 2s ease-in-out infinite;
 }
+
+/* Collapsible animations for Radix UI */
+@keyframes slideDownCollapsible {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpCollapsible {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDownCollapsible 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.animate-slideUp {
+  animation: slideUpCollapsible 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
