@@ -9,7 +9,6 @@ import { FoodSafetyList } from '@/components/insights/FoodSafetyList';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
-import { KeyStatsRow } from '@/components/insights/KeyStatsRow';
 import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
 import { FoodCombinationsGrid } from '@/components/insights/FoodCombinationsGrid';
 import { useMeals } from '@/contexts/MealContext';
@@ -138,61 +137,47 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 2. KEY STATS ROW - 3 minimal cards */}
-          {advancedInsights && (
-            <div
-              className="animate-slide-up opacity-0"
-              style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
-            >
-              <KeyStatsRow
-                ratedMeals={completedCount}
-                currentStreak={advancedInsights.successMetrics.currentStreak}
-                improvementPercentage={advancedInsights.successMetrics.improvementPercentage}
-              />
-            </div>
-          )}
-
-          {/* 3. TRIGGERS SECTION - Interactive Horizontal Bar Chart */}
+          {/* 2. TRIGGERS SECTION - Interactive Horizontal Bar Chart */}
           {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
             >
               <InteractiveTriggerAnalysis triggerConfidence={advancedInsights.triggerConfidence} />
             </div>
           )}
 
-          {/* 4. FOOD COMBINATIONS - Visual Grid */}
+          {/* 3. FOOD COMBINATIONS - Visual Grid */}
           {advancedInsights && advancedInsights.combinations.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
             >
               <FoodCombinationsGrid combinations={advancedInsights.combinations} />
             </div>
           )}
 
-          {/* 5. BLOAT HEATMAP CALENDAR */}
+          {/* 4. BLOAT HEATMAP CALENDAR */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}
           >
             <BloatHeatmap entries={entries} />
           </div>
 
-          {/* 6. FOOD INSIGHTS (Safe vs. Triggers) */}
+          {/* 5. FOOD INSIGHTS (Safe vs. Triggers) */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
           >
             <FoodSafetyList entries={entries} potentialTriggers={insights?.potentialTriggers} />
           </div>
 
-          {/* 7. TOP FOODS - Most logged */}
+          {/* 6. TOP FOODS - Most logged */}
           {insights?.topFoods && insights.topFoods.length > 0 && (
             <div
               className="premium-card p-6 shadow-sm rounded-xl animate-slide-up opacity-0"
-              style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-lavender/30 to-secondary/30">
@@ -224,11 +209,11 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 8. SAFE ALTERNATIVES - Recommendations */}
+          {/* 7. SAFE ALTERNATIVES - Recommendations */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}
             >
               <RecommendationCards
                 topTriggers={insights.potentialTriggers.map((t) => t.category)}
@@ -236,10 +221,10 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 9. BLOATING GUIDE */}
+          {/* 8. BLOATING GUIDE */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '900ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}
           >
             <BloatingGuide />
           </div>
