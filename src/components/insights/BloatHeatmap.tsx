@@ -86,13 +86,18 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
   const gridStartDay = firstDayOfMonth ? firstDayOfMonth.getDay() : 0;
 
   return (
-    <div className="premium-card p-5">
+    <div className="premium-card p-6 shadow-sm rounded-xl">
       {/* Header */}
-      <div className="mb-4">
-        <h3 className="font-bold text-foreground text-lg">Bloat Calendar - {format(new Date(), 'MMMM yyyy')}</h3>
-        <p className="text-xs text-muted-foreground">
-          Track your daily bloating patterns
-        </p>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10">
+          <span className="text-xl">📅</span>
+        </div>
+        <div>
+          <h3 className="font-bold text-foreground text-xl">Bloat Calendar</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {format(new Date(), 'MMMM yyyy')} • Daily bloating patterns
+          </p>
+        </div>
       </div>
 
       {/* Stats */}

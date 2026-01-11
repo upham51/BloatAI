@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, AlertTriangle, Sparkles, Utensils, Flame, ChevronRight, Lightbulb, Heart, Brain, Clock, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Sparkles, Utensils } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import InsightsLoader from '@/components/shared/InsightsLoader';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -9,18 +8,16 @@ import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { FoodSafetyList } from '@/components/insights/FoodSafetyList';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
-import { TriggerFrequencyChart } from '@/components/insights/TriggerFrequencyChart';
-import { BehavioralPatternsChart } from '@/components/insights/BehavioralPatternsChart';
-import { HealthScoreGauge } from '@/components/insights/HealthScoreGauge';
-import { CategoryInsightsChart } from '@/components/insights/CategoryInsightsChart';
+import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
+import { KeyStatsRow } from '@/components/insights/KeyStatsRow';
+import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
+import { FoodCombinationsGrid } from '@/components/insights/FoodCombinationsGrid';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
-import { getTriggerCategory } from '@/types';
-import { getIconForTrigger, abbreviateIngredient } from '@/lib/triggerUtils';
+import { getIconForTrigger } from '@/lib/triggerUtils';
 import { generateComprehensiveInsight, generateAdvancedInsights } from '@/lib/insightsAnalysis';
 import { GrainTexture } from '@/components/ui/grain-texture';
-import { ComprehensiveInsightsCard } from '@/components/insights/ComprehensiveInsightsCard';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
@@ -124,52 +121,15 @@ export default function InsightsPage() {
         {/* Decorative blobs */}
         <div className="absolute top-20 left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-60 right-5 w-32 h-32 bg-coral/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="relative p-5 pb-32 max-w-lg mx-auto space-y-5">
-          {/* Header */}
-          <header className="pt-2 animate-slide-up" style={{ animationFillMode: 'forwards' }}>
-            <h1 className="text-3xl font-bold text-foreground tracking-tight">Your Insights</h1>
-            <p className="text-muted-foreground mt-1">Based on {completedCount} rated meals</p>
-          </header>
 
-          {/* Quick Stats - Only 2 columns now */}
-          <div
-            className="grid grid-cols-2 gap-4 animate-slide-up opacity-0"
-            style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}
-          >
-            <div className="premium-card p-5 text-center">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 w-fit mx-auto mb-3">
-                <Utensils className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-foreground">{completedCount}</div>
-              <div className="text-sm text-muted-foreground mt-1">Rated Meals</div>
-            </div>
-            <div className="premium-card p-5 text-center">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-coral/20 to-peach/20 w-fit mx-auto mb-3">
-                <Flame className="w-6 h-6 text-coral" />
-              </div>
-              <div className="text-3xl font-bold text-foreground">{insights?.highBloatingCount}</div>
-              <div className="text-sm text-muted-foreground mt-1">High Bloating</div>
-            </div>
-          </div>
-
-          {/* Comprehensive Insights Card - Hero Component */}
-          {advancedInsights && (
-            <div
-              className="animate-slide-up opacity-0"
-              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
-            >
-              <ComprehensiveInsightsCard insights={advancedInsights} />
-            </div>
-          )}
-
-          {/* Health Score Gauge */}
+        <div className="relative p-6 pb-32 max-w-2xl mx-auto space-y-8">
+          {/* 1. HERO SECTION - Bloat Health Score */}
           {insights && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '450ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
             >
-              <HealthScoreGauge
+              <VisualHealthScoreHero
                 avgBloating={insights.avgBloating}
                 totalMeals={insights.totalMeals}
                 lowBloatingCount={insights.lowBloatingCount}
@@ -178,69 +138,85 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* Category Insights Chart - All categories with beautiful visualization */}
-          <div
-            className="animate-slide-up opacity-0"
-            style={{ animationDelay: '450ms', animationFillMode: 'forwards' }}
-          >
-            <CategoryInsightsChart entries={entries} />
-          </div>
-
-          {/* Trigger Frequency Chart */}
-          {insights && insights.triggerFrequencies.length > 0 && (
+          {/* 2. KEY STATS ROW - 3 minimal cards */}
+          {advancedInsights && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
             >
-              <TriggerFrequencyChart triggers={insights.triggerFrequencies} />
+              <KeyStatsRow
+                ratedMeals={completedCount}
+                currentStreak={advancedInsights.successMetrics.currentStreak}
+                improvementPercentage={advancedInsights.successMetrics.improvementPercentage}
+              />
             </div>
           )}
 
-          {/* Bloat Heatmap Calendar */}
+          {/* 3. TRIGGERS SECTION - Interactive Horizontal Bar Chart */}
+          {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
+            <div
+              className="animate-slide-up opacity-0"
+              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
+            >
+              <InteractiveTriggerAnalysis triggerConfidence={advancedInsights.triggerConfidence} />
+            </div>
+          )}
+
+          {/* 4. FOOD COMBINATIONS - Visual Grid */}
+          {advancedInsights && advancedInsights.combinations.length > 0 && (
+            <div
+              className="animate-slide-up opacity-0"
+              style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}
+            >
+              <FoodCombinationsGrid combinations={advancedInsights.combinations} />
+            </div>
+          )}
+
+          {/* 5. BLOAT HEATMAP CALENDAR */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '750ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
           >
             <BloatHeatmap entries={entries} />
           </div>
 
-          {/* Food Insights (Combined Safety List + Potential Triggers) */}
+          {/* 6. FOOD INSIGHTS (Safe vs. Triggers) */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '900ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
           >
             <FoodSafetyList entries={entries} potentialTriggers={insights?.potentialTriggers} />
           </div>
 
-          {/* Top Foods - with emoji icons */}
+          {/* 7. TOP FOODS - Most logged */}
           {insights?.topFoods && insights.topFoods.length > 0 && (
             <div
-              className="premium-card p-5 animate-slide-up opacity-0"
-              style={{ animationDelay: '1050ms', animationFillMode: 'forwards' }}
+              className="premium-card p-6 shadow-sm rounded-xl animate-slide-up opacity-0"
+              style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-lavender/30 to-secondary/30">
-                  <span className="text-lg">🍽️</span>
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-lavender/30 to-secondary/30">
+                  <span className="text-xl">🍽️</span>
                 </div>
                 <div>
-                  <h2 className="font-bold text-foreground text-lg">Most Logged Foods</h2>
-                  <p className="text-xs text-muted-foreground">Your eating patterns</p>
+                  <h2 className="font-bold text-foreground text-xl">Most Logged Foods</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Your eating patterns</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                {insights.topFoods.map((item, index) => {
+                {insights.topFoods.map((item) => {
                   const icon = getIconForTrigger(item.food);
                   return (
                     <div
                       key={item.food}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-all"
                     >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lavender/50 to-secondary/30 flex items-center justify-center text-lg">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lavender/50 to-secondary/30 flex items-center justify-center text-lg">
                         {icon}
                       </div>
                       <span className="flex-1 font-medium text-foreground">{item.food}</span>
-                      <span className="text-sm text-muted-foreground">{item.count}x</span>
+                      <span className="text-sm font-semibold text-muted-foreground">{item.count}x</span>
                     </div>
                   );
                 })}
@@ -248,11 +224,11 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* Safe Alternatives - Swipeable (Moved below Most Logged Foods) */}
+          {/* 8. SAFE ALTERNATIVES - Recommendations */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
-              style={{ animationDelay: '1200ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}
             >
               <RecommendationCards
                 topTriggers={insights.potentialTriggers.map((t) => t.category)}
@@ -260,10 +236,10 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* Bloating Guide */}
+          {/* 9. BLOATING GUIDE */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '1350ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '900ms', animationFillMode: 'forwards' }}
           >
             <BloatingGuide />
           </div>
