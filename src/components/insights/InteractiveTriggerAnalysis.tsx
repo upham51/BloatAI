@@ -11,7 +11,8 @@ interface InteractiveTriggerAnalysisProps {
 interface ChartDataItem {
   id: string;
   displayName: string;
-  bloatPercentage: number;
+  impactScore: number; // The bloat impact score (avgWith - avgWithout)
+  bloatPercentage: number; // For display purposes
   color: string;
   occurrences: number;
   avgBloatingWith: number;
@@ -19,6 +20,7 @@ interface ChartDataItem {
   topFoods: string[];
   percentage: number;
   confidence: 'high' | 'investigating' | 'needsData';
+  confidencePercentage: number;
 }
 
 export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTriggerAnalysisProps) {
@@ -26,16 +28,20 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    // Include ALL categories, calculate bloat percentage
+    // Include ALL categories, calculate bloat percentage using Impact Score
     const allCategories = triggerConfidence.map(trigger => {
       const categoryInfo = getTriggerCategory(trigger.category);
-      // Calculate bloat percentage: (avgBloatingWith / 5) * 100
-      // This represents the % chance of bloating based on the average rating
-      const bloatPercentage = Math.round((trigger.avgBloatingWith / 5) * 100);
+
+      // Impact Score: (avgBloatingWith - avgBloatingWithout)
+      // Normalized to 0-100 scale for display: (impactScore / 5) * 100
+      // This shows the DIFFERENTIAL impact this trigger has on bloating
+      const impactScore = trigger.impactScore;
+      const bloatPercentage = Math.max(0, Math.round((impactScore / 5) * 100));
 
       return {
         id: trigger.category,
         displayName: categoryInfo?.displayName || trigger.category,
+        impactScore,
         bloatPercentage,
         color: '', // Will be assigned below
         occurrences: trigger.occurrences,
@@ -44,22 +50,23 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
         topFoods: trigger.topFoods,
         percentage: trigger.percentage,
         confidence: trigger.confidence,
+        confidencePercentage: trigger.confidencePercentage,
       } as ChartDataItem;
     })
-    .sort((a, b) => b.bloatPercentage - a.bloatPercentage); // Sort by bloat % (highest first)
+    .sort((a, b) => b.impactScore - a.impactScore); // Sort by impact score (highest first)
 
-    // Assign colors based on bloat percentage thresholds
-    // This ensures consistent coloring across all users based on severity
+    // Assign colors based on impact score thresholds
+    // This ensures consistent coloring based on actual impact differential
     allCategories.forEach((item) => {
-      // High risk: 70%+ bloat chance (Red)
-      if (item.bloatPercentage >= 70) {
+      // High impact: 2.0+ differential (Red)
+      if (item.impactScore >= 2.0) {
         item.color = '#EF5350'; // Red
       }
-      // Moderate risk: 50-69% bloat chance (Orange)
-      else if (item.bloatPercentage >= 50) {
+      // Moderate impact: 1.0-1.9 differential (Orange)
+      else if (item.impactScore >= 1.0) {
         item.color = '#FFA726'; // Orange
       }
-      // Low risk: Below 50% bloat chance (Teal)
+      // Low/negative impact: Below 1.0 differential (Teal)
       else {
         item.color = '#26A69A'; // Teal
       }
@@ -89,8 +96,10 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
     return (
       <div className="premium-card p-3 border border-primary/20 shadow-lg">
         <div className="text-sm font-semibold text-foreground mb-1">{data.displayName}</div>
-        <div className="text-xs text-muted-foreground">
-          {data.confidence === 'high' ? 'High confidence trigger' : 'Still investigating'} • Click for details
+        <div className="text-xs text-muted-foreground space-y-1">
+          <div>Impact: +{data.impactScore.toFixed(1)} bloating differential</div>
+          <div>{data.confidencePercentage}% confidence ({data.occurrences} meals)</div>
+          <div className="text-[10px] opacity-70">Click for details</div>
         </div>
       </div>
     );
@@ -112,7 +121,7 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
       </div>
 
       {/* Horizontal Bar Chart */}
-      <div className="h-[300px]">
+      <div className="h-[480px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
@@ -188,7 +197,7 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                 <div className="flex-1">
                   <h3 className="font-bold text-foreground text-sm">{trigger.displayName}</h3>
                   <p className="text-xs text-muted-foreground">
-                    {trigger.occurrences}x logged • {trigger.percentage}% of meals
+                    {trigger.occurrences}x logged • {trigger.percentage}% of meals • {trigger.confidencePercentage}% confidence
                   </p>
                 </div>
                 {/* Confidence Badge - Top Right */}
@@ -265,11 +274,13 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                   {/* Risk Description */}
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      {trigger.avgBloatingWith >= 3.5
-                        ? `High probability of bloating when consuming ${trigger.displayName.toLowerCase()}.`
-                        : trigger.avgBloatingWith >= 2.5
-                        ? `Moderate bloating risk with ${trigger.displayName.toLowerCase()}.`
-                        : `Low to moderate bloating risk.`}
+                      {trigger.impactScore >= 2.0
+                        ? `${trigger.displayName} increases bloating by ${trigger.impactScore.toFixed(1)} points on average. Strong correlation detected.`
+                        : trigger.impactScore >= 1.0
+                        ? `Moderate bloating risk with ${trigger.displayName.toLowerCase()}. Impact: +${trigger.impactScore.toFixed(1)} points.`
+                        : trigger.impactScore > 0
+                        ? `Low impact detected. ${trigger.displayName} adds ${trigger.impactScore.toFixed(1)} points to bloating.`
+                        : `No negative impact detected. May actually help reduce bloating.`}
                     </p>
                   </div>
                 </div>

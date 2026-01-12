@@ -349,9 +349,11 @@ function generateSummary(input: SummaryInput) {
 export interface TriggerConfidenceLevel {
   category: string;
   confidence: 'high' | 'investigating' | 'needsData';
+  confidencePercentage: number; // 0-100, based on sample size
   occurrences: number;
   avgBloatingWith: number;
   avgBloatingWithout: number;
+  impactScore: number; // avgBloatingWith - avgBloatingWithout
   topFoods: string[];
   percentage: number;
 }
@@ -413,6 +415,20 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
 
   const mealsWithoutTrigger: Record<string, number[]> = {};
 
+  // Initialize stats for ALL categories (including those not yet logged)
+  TRIGGER_CATEGORIES.forEach(categoryInfo => {
+    if (!triggerStats[categoryInfo.id]) {
+      triggerStats[categoryInfo.id] = {
+        occurrences: 0,
+        bloatingScores: [],
+        foods: new Set(),
+      };
+    }
+    if (!mealsWithoutTrigger[categoryInfo.id]) {
+      mealsWithoutTrigger[categoryInfo.id] = [];
+    }
+  });
+
   // Collect trigger stats
   completedEntries.forEach(entry => {
     const triggersInMeal = new Set<string>();
@@ -437,13 +453,13 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
       }
     });
 
-    // Track meals without each trigger
-    Object.keys(triggerStats).forEach(category => {
-      if (!triggersInMeal.has(category) && entry.bloating_rating) {
-        if (!mealsWithoutTrigger[category]) {
-          mealsWithoutTrigger[category] = [];
+    // Track meals without each trigger (for ALL categories)
+    TRIGGER_CATEGORIES.forEach(categoryInfo => {
+      if (!triggersInMeal.has(categoryInfo.id) && entry.bloating_rating) {
+        if (!mealsWithoutTrigger[categoryInfo.id]) {
+          mealsWithoutTrigger[categoryInfo.id] = [];
         }
-        mealsWithoutTrigger[category].push(entry.bloating_rating);
+        mealsWithoutTrigger[categoryInfo.id].push(entry.bloating_rating);
       }
     });
   });
@@ -464,20 +480,8 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
     const category = categoryInfo.id;
     const stats = triggerStats[category];
 
-    // If category hasn't been logged, return default values
-    if (!stats) {
-      return {
-        category,
-        confidence: 'needsData' as const,
-        occurrences: 0,
-        avgBloatingWith: 0,
-        avgBloatingWithout: 0,
-        topFoods: [],
-        percentage: 0,
-      };
-    }
-
-    const avgWith = stats.bloatingScores.length > 0
+    // Calculate averages
+    const avgWith = stats && stats.bloatingScores.length > 0
       ? stats.bloatingScores.reduce((a, b) => a + b, 0) / stats.bloatingScores.length
       : 0;
 
@@ -486,10 +490,18 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
       ? withoutScores.reduce((a, b) => a + b, 0) / withoutScores.length
       : 0;
 
+    // Calculate Impact Score: (avgBloatingWith - avgBloatingWithout)
+    const impactScore = avgWith - avgWithout;
+
+    // Calculate confidence percentage: MIN(occurrences / 5, 1.0) * 100
+    const occurrences = stats?.occurrences || 0;
+    const confidencePercentage = Math.min(occurrences / 5, 1.0) * 100;
+
+    // Determine confidence level based on sample size and impact
     let confidence: 'high' | 'investigating' | 'needsData';
-    if (stats.occurrences >= 5 && avgWith >= 3) {
+    if (occurrences >= 5 && avgWith >= 3) {
       confidence = 'high';
-    } else if (stats.occurrences >= 2 && stats.occurrences < 5) {
+    } else if (occurrences >= 2 && occurrences < 5) {
       confidence = 'investigating';
     } else {
       confidence = 'needsData';
@@ -498,19 +510,22 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
     return {
       category,
       confidence,
-      occurrences: stats.occurrences,
+      confidencePercentage: Math.round(confidencePercentage),
+      occurrences,
       avgBloatingWith: Math.round(avgWith * 10) / 10,
       avgBloatingWithout: Math.round(avgWithout * 10) / 10,
-      topFoods: Array.from(stats.foods).slice(0, 3),
-      percentage: Math.round((stats.occurrences / completedEntries.length) * 100),
+      impactScore: Math.round(impactScore * 10) / 10,
+      topFoods: stats ? Array.from(stats.foods).slice(0, 3) : [],
+      percentage: completedEntries.length > 0
+        ? Math.round((occurrences / completedEntries.length) * 100)
+        : 0,
     };
   });
 
   return results.sort((a, b) => {
-    // Sort by confidence first, then by occurrences
-    const confidenceOrder = { high: 0, investigating: 1, needsData: 2 };
-    const confidenceDiff = confidenceOrder[a.confidence] - confidenceOrder[b.confidence];
-    return confidenceDiff !== 0 ? confidenceDiff : b.occurrences - a.occurrences;
+    // Sort by impact score (highest impact first)
+    // This ensures the most problematic triggers appear at the top
+    return b.impactScore - a.impactScore;
   });
 }
 
