@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
-import { AbstractBackground } from '@/components/ui/abstract-background';
-import { GrainTexture } from '@/components/ui/grain-texture';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -191,9 +189,7 @@ export default function DashboardPage() {
     <AppLayout>
       <PageTransition>
         <div className="min-h-screen relative">
-          <AbstractBackground />
-          <GrainTexture />
-          <StaggerContainer className="relative z-10 px-5 pt-6 pb-28 max-w-lg mx-auto space-y-4 w-full">
+          <StaggerContainer className="relative z-10 px-5 pt-2 pb-28 max-w-lg mx-auto space-y-4 w-full">
             {/* Header with time-based greeting */}
             <StaggerItem>
               <header className="relative">
@@ -364,24 +360,6 @@ export default function DashboardPage() {
               </StaggerItem>
             )}
 
-            {/* Primary CTA */}
-            <StaggerItem>
-              <motion.div
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              >
-                <Button
-                  onClick={() => navigate('/add-entry')}
-                  className="w-full h-16 rounded-3xl text-lg font-bold bg-primary text-primary-foreground relative overflow-hidden group"
-                  style={{
-                    boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
-                  }}
-                >
-                  <span className="text-lg font-bold relative z-10">Log New Meal</span>
-                </Button>
-              </motion.div>
-            </StaggerItem>
           </StaggerContainer>
         </div>
       </PageTransition>
