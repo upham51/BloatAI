@@ -84,7 +84,7 @@ export function VisualHealthScoreHero({
 
       {/* Circular Score Visualization with Character */}
       <div className="flex flex-col items-center justify-center mb-10">
-        <CircularScoreRing score={healthScore} size={320} strokeWidth={18}>
+        <CircularScoreRing score={healthScore} size={340} strokeWidth={36}>
           <AnimatedStomachCharacter healthScore={healthScore} />
         </CircularScoreRing>
       </div>
@@ -108,9 +108,6 @@ export function VisualHealthScoreHero({
           }}
         >
           {level}
-        </div>
-        <div className="text-base text-gray-500 font-medium">
-          {stateLabel}
         </div>
       </div>
 
