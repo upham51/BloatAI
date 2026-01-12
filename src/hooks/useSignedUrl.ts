@@ -5,8 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
  * Hook to generate a signed URL for a private storage file
  * Returns the signed URL if the path is a storage path, otherwise returns the original URL
  * Also returns a loading state to enable skeleton/loading UI
+ *
+ * @param photoUrl - The photo URL to sign
+ * @param options - Optional image transformation options
  */
-export function useSignedUrl(photoUrl: string | null): { url: string | null; isLoading: boolean } {
+export function useSignedUrl(
+  photoUrl: string | null,
+  options?: { width?: number; quality?: number }
+): { url: string | null; isLoading: boolean } {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -47,7 +53,13 @@ export function useSignedUrl(photoUrl: string | null): { url: string | null; isL
       try {
         const { data, error } = await supabase.storage
           .from('meal-photos')
-          .createSignedUrl(filePath, 3600); // 1 hour expiry
+          .createSignedUrl(filePath, 3600, {
+            transform: options ? {
+              width: options.width,
+              quality: options.quality,
+              resize: 'cover' as const
+            } : undefined
+          }); // 1 hour expiry
 
         if (error) {
           console.error('Error generating signed URL:', error);
@@ -65,7 +77,7 @@ export function useSignedUrl(photoUrl: string | null): { url: string | null; isL
     };
 
     generateSignedUrl();
-  }, [photoUrl]);
+  }, [photoUrl, options?.width, options?.quality]);
 
   return { url: signedUrl, isLoading };
 }

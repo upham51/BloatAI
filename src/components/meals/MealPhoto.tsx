@@ -10,6 +10,7 @@ interface MealPhotoProps {
   onClick?: () => void;
   priority?: boolean; // For first image in list
   lazy?: boolean; // Enable lazy loading (default true)
+  thumbnail?: boolean; // Use thumbnail optimization (300px, quality 80)
 }
 
 export function MealPhoto({
@@ -18,14 +19,17 @@ export function MealPhoto({
   className = '',
   onClick,
   priority = false,
-  lazy = true
+  lazy = true,
+  thumbnail = false
 }: MealPhotoProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(!lazy || priority);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const { url: signedUrl, isLoading: urlLoading } = useSignedUrl(photoUrl);
+  // Apply thumbnail optimization for list views
+  const transformOptions = thumbnail ? { width: 300, quality: 80 } : undefined;
+  const { url: signedUrl, isLoading: urlLoading } = useSignedUrl(photoUrl, transformOptions);
 
   // Lazy loading with Intersection Observer
   // Fixed: Ensure observer is set up AFTER img element is rendered
@@ -57,16 +61,17 @@ export function MealPhoto({
     };
   }, [lazy, priority, shouldLoad, urlLoading]); // Include urlLoading to re-run when skeleton disappears
 
-  // Show skeleton while URL is loading
-  const showSkeleton = urlLoading;
+  // Show blur-up placeholder while URL is loading
+  const showPlaceholder = urlLoading || (!imageLoaded && shouldLoad && signedUrl);
 
-  if (showSkeleton) {
+  if (showPlaceholder && urlLoading) {
     return (
-      <Skeleton
+      <div
         className={cn(
-          "w-full",
+          "bg-gradient-to-br from-muted/50 to-muted/30 backdrop-blur-sm animate-pulse",
           className
         )}
+        onClick={onClick}
       />
     );
   }
@@ -87,18 +92,25 @@ export function MealPhoto({
   }
 
   return (
-    <img
-      ref={imgRef}
-      src={shouldLoad ? signedUrl : undefined}
-      alt={alt}
-      className={cn(
-        className,
-        !shouldLoad && 'invisible' // Hide image until it should load
+    <div className={cn("relative overflow-hidden", className)} onClick={onClick}>
+      {/* Blur-up placeholder shown while image loads */}
+      {!imageLoaded && shouldLoad && signedUrl && (
+        <div className="absolute inset-0 bg-gradient-to-br from-muted/50 to-muted/30 backdrop-blur-sm animate-pulse" />
       )}
-      onClick={onClick}
-      onLoad={() => setImageLoaded(true)}
-      onError={() => setImageError(true)}
-      loading={priority ? 'eager' : 'lazy'}
-    />
+
+      <img
+        ref={imgRef}
+        src={shouldLoad ? signedUrl : undefined}
+        alt={alt}
+        className={cn(
+          "w-full h-full object-cover transition-opacity duration-300",
+          !shouldLoad && 'invisible', // Hide image until it should load
+          imageLoaded ? 'opacity-100' : 'opacity-0' // Fade in when loaded
+        )}
+        onLoad={() => setImageLoaded(true)}
+        onError={() => setImageError(true)}
+        loading={priority ? 'eager' : 'lazy'}
+      />
+    </div>
   );
 }
