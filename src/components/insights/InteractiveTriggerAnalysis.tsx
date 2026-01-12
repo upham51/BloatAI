@@ -28,15 +28,16 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    // Include ALL categories, calculate bloat percentage using Impact Score
+    // Include ALL logged categories and ensure they all show visible bars
     const allCategories = triggerConfidence.map(trigger => {
       const categoryInfo = getTriggerCategory(trigger.category);
 
       // Impact Score: (avgBloatingWith - avgBloatingWithout)
-      // Normalized to 0-100 scale for display: (impactScore / 5) * 100
-      // This shows the DIFFERENTIAL impact this trigger has on bloating
+      // Use absolute value for bar length to ensure ALL triggers are visible
+      // Minimum bar size of 5% to ensure even zero-impact triggers show up
       const impactScore = trigger.impactScore;
-      const bloatPercentage = Math.max(0, Math.round((impactScore / 5) * 100));
+      const absImpact = Math.abs(impactScore);
+      const bloatPercentage = Math.max(5, Math.round((absImpact / 5) * 100));
 
       return {
         id: trigger.category,
@@ -56,17 +57,22 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
     .sort((a, b) => b.impactScore - a.impactScore); // Sort by impact score (highest first)
 
     // Assign colors based on impact score thresholds
-    // This ensures consistent coloring based on actual impact differential
+    // Red/Orange for triggers that increase bloating (harmful)
+    // Teal/Green for triggers that decrease or don't affect bloating (helpful/neutral)
     allCategories.forEach((item) => {
-      // High impact: 2.0+ differential (Red)
+      // High positive impact: 2.0+ differential (Red - Bad trigger)
       if (item.impactScore >= 2.0) {
         item.color = '#EF5350'; // Red
       }
-      // Moderate impact: 1.0-1.9 differential (Orange)
+      // Moderate positive impact: 1.0-1.9 differential (Orange - Moderate trigger)
       else if (item.impactScore >= 1.0) {
         item.color = '#FFA726'; // Orange
       }
-      // Low/negative impact: Below 1.0 differential (Teal)
+      // Low positive impact: 0.5-0.9 differential (Light Orange - Mild trigger)
+      else if (item.impactScore >= 0.5) {
+        item.color = '#FFB74D'; // Light Orange
+      }
+      // Near-zero or negative impact: Below 0.5 differential (Teal - Safe/Helpful)
       else {
         item.color = '#26A69A'; // Teal
       }
@@ -119,31 +125,6 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
           </p>
         </div>
       </div>
-
-      {/* Top 3 Triggers Explanation */}
-      {chartData.length >= 3 && (
-        <div className="space-y-3 p-4 rounded-lg bg-gradient-to-r from-coral/5 to-transparent border border-coral/20">
-          <h3 className="text-sm font-semibold text-foreground">Why These Are Your Top 3 Triggers:</h3>
-          {chartData.slice(0, 3).map((trigger, index) => (
-            <div key={trigger.id} className="flex gap-3 text-xs">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-coral/20 text-coral font-bold flex items-center justify-center">
-                {index + 1}
-              </div>
-              <div className="flex-1 text-muted-foreground">
-                <span className="font-semibold text-foreground">{trigger.displayName}</span>
-                {' '}
-                {trigger.impactScore >= 2.0
-                  ? `increases your bloating by ${trigger.impactScore.toFixed(1)} points on average (from ${trigger.avgBloatingWithout.toFixed(1)} without to ${trigger.avgBloatingWith.toFixed(1)} with). Strong trigger detected across ${trigger.occurrences} meals.`
-                  : trigger.impactScore >= 1.0
-                  ? `raises your bloating by ${trigger.impactScore.toFixed(1)} points (from ${trigger.avgBloatingWithout.toFixed(1)} to ${trigger.avgBloatingWith.toFixed(1)}). Moderate impact seen in ${trigger.occurrences} meals.`
-                  : trigger.impactScore > 0
-                  ? `has a mild impact of +${trigger.impactScore.toFixed(1)} points (from ${trigger.avgBloatingWithout.toFixed(1)} to ${trigger.avgBloatingWith.toFixed(1)}). Logged ${trigger.occurrences} times.`
-                  : `shows minimal or no negative impact. Your bloating is actually ${Math.abs(trigger.impactScore).toFixed(1)} points lower with this trigger (from ${trigger.avgBloatingWithout.toFixed(1)} to ${trigger.avgBloatingWith.toFixed(1)}).`}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Horizontal Bar Chart */}
       <div className="h-[480px]">
