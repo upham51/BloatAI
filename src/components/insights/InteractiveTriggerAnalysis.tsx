@@ -24,13 +24,13 @@ interface ChartDataItem {
 export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTriggerAnalysisProps) {
   const [expandedTrigger, setExpandedTrigger] = useState<string | null>(null);
 
-  // Impact-based color mapping for medical-grade appearance
+  // Impact-based color mapping - "Traffic Light" style
   const getImpactColor = (score: number): string => {
-    if (score <= 50) return '#4CAF50';    // Green - low impact
-    if (score <= 150) return '#9BC53D';   // Yellow-green - moderate low
-    if (score <= 250) return '#FFC857';   // Yellow - moderate
-    if (score <= 350) return '#F4A261';   // Orange - elevated
-    return '#E76F51';                     // Red - high impact
+    if (score <= 50) return '#26A69A';    // Teal/Sage Green - safe/low impact
+    if (score <= 150) return '#66BB6A';   // Light Green - moderate-low
+    if (score <= 250) return '#FFA726';   // Amber/Orange - moderate
+    if (score <= 350) return '#FF7043';   // Deep Orange - elevated
+    return '#EF5350';                     // Soft Red/Coral - danger/high impact
   };
 
   // Prepare chart data
@@ -161,26 +161,26 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
         </ResponsiveContainer>
       </div>
 
-      {/* Impact-based Legend */}
+      {/* Impact-based Legend - Traffic Light Style */}
       <div className="flex items-center justify-center gap-3 text-xs pt-2 border-t border-border/30 flex-wrap">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-[#4CAF50]" />
+          <div className="w-3 h-3 rounded-sm bg-[#26A69A]" />
           <span className="text-muted-foreground">Low</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-[#9BC53D]" />
+          <div className="w-3 h-3 rounded-sm bg-[#66BB6A]" />
           <span className="text-muted-foreground">Moderate-Low</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-[#FFC857]" />
+          <div className="w-3 h-3 rounded-sm bg-[#FFA726]" />
           <span className="text-muted-foreground">Moderate</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-[#F4A261]" />
+          <div className="w-3 h-3 rounded-sm bg-[#FF7043]" />
           <span className="text-muted-foreground">Elevated</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-[#E76F51]" />
+          <div className="w-3 h-3 rounded-sm bg-[#EF5350]" />
           <span className="text-muted-foreground">High</span>
         </div>
       </div>
@@ -223,37 +223,66 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                 </div>
               </div>
 
-              {/* Bloating Comparison */}
-              <div className="space-y-2 pt-2 border-t border-border/30">
+              {/* Risk Gauge */}
+              <div className="space-y-3 pt-2 border-t border-border/30">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Bloating Comparison
+                  Trigger Risk
                 </h4>
 
-                {/* With Trigger */}
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">With {trigger.displayName}</span>
-                    <span className="font-bold text-coral">{trigger.avgBloatingWith}/5</span>
+                <div className="flex items-center gap-6">
+                  {/* Circular Risk Gauge */}
+                  <div className="relative flex items-center justify-center">
+                    <svg className="w-24 h-24 -rotate-90">
+                      {/* Background circle */}
+                      <circle
+                        cx="48"
+                        cy="48"
+                        r="40"
+                        fill="none"
+                        stroke="hsl(var(--muted))"
+                        strokeWidth="8"
+                        opacity="0.2"
+                      />
+                      {/* Progress circle */}
+                      <circle
+                        cx="48"
+                        cy="48"
+                        r="40"
+                        fill="none"
+                        stroke={trigger.color}
+                        strokeWidth="8"
+                        strokeDasharray={`${2 * Math.PI * 40}`}
+                        strokeDashoffset={`${2 * Math.PI * 40 * (1 - trigger.avgBloatingWith / 5)}`}
+                        strokeLinecap="round"
+                        className="transition-all duration-700"
+                      />
+                    </svg>
+                    {/* Center text */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <div className="text-2xl font-bold" style={{ color: trigger.color }}>
+                        {Math.round((trigger.avgBloatingWith / 5) * 100)}%
+                      </div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                        Risk
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-full bg-muted/20 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="h-full bg-coral rounded-full transition-all duration-500"
-                      style={{ width: `${(trigger.avgBloatingWith / 5) * 100}%` }}
-                    />
-                  </div>
-                </div>
 
-                {/* Without Trigger */}
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">Without {trigger.displayName}</span>
-                    <span className="font-bold text-primary">{trigger.avgBloatingWithout}/5</span>
-                  </div>
-                  <div className="w-full bg-muted/20 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all duration-500"
-                      style={{ width: `${(trigger.avgBloatingWithout / 5) * 100}%` }}
-                    />
+                  {/* Risk Description */}
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Bloat severity</span>
+                      <span className="font-bold" style={{ color: trigger.color }}>
+                        {trigger.avgBloatingWith}/5
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {trigger.avgBloatingWith >= 3.5
+                        ? `High probability of bloating when consuming ${trigger.displayName.toLowerCase()}.`
+                        : trigger.avgBloatingWith >= 2.5
+                        ? `Moderate bloating risk with ${trigger.displayName.toLowerCase()}.`
+                        : `Low to moderate bloating risk.`}
+                    </p>
                   </div>
                 </div>
               </div>
