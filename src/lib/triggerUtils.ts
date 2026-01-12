@@ -139,8 +139,7 @@ export const TRIGGER_ICONS: Record<string, string> = {
   'radish': '🌱',
   'beet': '🌱',
 
-  // Beans & Legumes
-  'beans': '🫘',
+  // Beans & Legumes (specific items only - 'beans' already defined above in Simplified categories)
   'black beans': '🫘',
   'kidney beans': '🫘',
   'pinto beans': '🫘',
@@ -151,8 +150,7 @@ export const TRIGGER_ICONS: Record<string, string> = {
   'soy': '🫛',
   'soybean': '🫛',
 
-  // Fruits
-  'fruit': '🍎',
+  // Fruits (specific items only - 'fruit' already defined above in Simplified categories)
   'apple': '🍎',
   'banana': '🍌',
   'orange': '🍊',
@@ -265,8 +263,7 @@ export const TRIGGER_ICONS: Record<string, string> = {
   'sesame': '🌰',
   'sunflower': '🌻',
 
-  // Sweets & Desserts
-  'sugar': '🍭',
+  // Sweets & Desserts (specific items only - 'sugar' already defined above in Simplified categories)
   'candy': '🍬',
   'chocolate': '🍫',
   'cake': '🍰',
@@ -891,13 +888,13 @@ export function deduplicateFoods(
  * keep only one (prefer the more specific/complete dish name).
  * Also removes triggers with identical normalized food names.
  */
-export function deduplicateTriggers(
-  triggers: Array<{ category: string; food: string }>
-): Array<{ category: string; food: string }> {
+export function deduplicateTriggers<T extends { category: string; food: string; confidence?: number }>(
+  triggers: T[]
+): T[] {
   if (!triggers || triggers.length === 0) return [];
 
   // Group triggers by category
-  const byCategory: Record<string, Array<{ category: string; food: string }>> = {};
+  const byCategory: Record<string, T[]> = {};
 
   for (const trigger of triggers) {
     if (!byCategory[trigger.category]) {
@@ -907,7 +904,7 @@ export function deduplicateTriggers(
   }
 
   // Deduplicate within each category
-  const deduplicated: Array<{ category: string; food: string }> = [];
+  const deduplicated: T[] = [];
 
   for (const [category, categoryTriggers] of Object.entries(byCategory)) {
     if (categoryTriggers.length === 1) {
@@ -917,7 +914,7 @@ export function deduplicateTriggers(
 
     // Check for duplicate normalized names
     const seen = new Set<string>();
-    const unique: Array<{ category: string; food: string; normalized: string }> = [];
+    const unique: Array<T & { normalized: string }> = [];
 
     for (const trigger of categoryTriggers) {
       const normalized = abbreviateIngredient(trigger.food).toLowerCase();
@@ -949,9 +946,14 @@ export function deduplicateTriggers(
         return !isContainedByAnother;
       });
 
-      deduplicated.push(...filtered.map(({ category, food }) => ({ category, food })));
+      // Return the original triggers (without the 'normalized' property)
+      filtered.forEach(({ normalized, ...rest }) => {
+        deduplicated.push(rest as unknown as T);
+      });
     } else {
-      deduplicated.push(...unique.map(({ category, food }) => ({ category, food })));
+      unique.forEach(({ normalized, ...rest }) => {
+        deduplicated.push(rest as unknown as T);
+      });
     }
   }
 
