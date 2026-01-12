@@ -14,6 +14,9 @@ Place your custom stomach animation videos in this directory with the following 
 - **Recommended Size**: 300x300 pixels (or any square aspect ratio)
 - **Length**: Any duration (videos will loop automatically)
 - **Audio**: Not required (videos are muted by default)
+- **File Size**: Keep under 1-2 MB per video for optimal mobile performance
+  - Current videos are 9.0-9.3 MB each, which may cause slow loading on cellular data
+  - To optimize, use ffmpeg: `ffmpeg -i input.mp4 -vcodec h264 -crf 28 -preset slow -vf scale=300:300 output.mp4`
 
 ## How It Works
 
