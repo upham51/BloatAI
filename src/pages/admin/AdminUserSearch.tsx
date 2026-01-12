@@ -40,8 +40,8 @@ interface UserResult {
   subscription_status: string | null;
   subscription_plan: string | null;
   subscription_ends_at: string | null;
-  admin_granted_by: string | null;
-  admin_granted_at: string | null;
+  admin_granted_by?: string | null;
+  admin_granted_at?: string | null;
   stripe_customer_id: string | null;
   created_at: string;
   updated_at: string;

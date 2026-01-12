@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { analyzeNotesPatterns, analyzeTriggerFrequency, generateComprehensiveInsight } from '../insightsAnalysis';
 import { MealEntry } from '@/types';
-import { RootCauseAssessment } from '@/types/quiz';
 
 describe('insightsAnalysis', () => {
   const createMockEntry = (overrides: Partial<MealEntry> = {}): MealEntry => ({
@@ -141,12 +140,12 @@ describe('insightsAnalysis', () => {
         createMockEntry(),
       ];
 
-      const insight = generateComprehensiveInsight(entries, null);
+      const insight = generateComprehensiveInsight(entries);
 
       expect(insight).toBeNull();
     });
 
-    it('should generate comprehensive insights with quiz data', () => {
+    it('should generate comprehensive insights', () => {
       const entries = [
         createMockEntry({
           notes: 'Stressed 😰',
@@ -164,21 +163,12 @@ describe('insightsAnalysis', () => {
         }),
       ];
 
-      const mockQuiz: Partial<RootCauseAssessment> = {
-        brain_gut_score: 12, // High brain-gut score
-        dysbiosis_score: 8,
-        overall_score: 65,
-        red_flags: ['High stress correlation detected'],
-      } as RootCauseAssessment;
-
-      const insight = generateComprehensiveInsight(entries, mockQuiz as RootCauseAssessment);
+      const insight = generateComprehensiveInsight(entries);
 
       expect(insight).toBeDefined();
       expect(insight?.totalMeals).toBe(3);
       expect(insight?.notesPatterns).toHaveLength(1); // Stress pattern
-      expect(insight?.quizHighRiskCategories.length).toBeGreaterThan(0);
       expect(insight?.summary.overview.length).toBeGreaterThan(0);
-      expect(insight?.summary.rootCauseConnections.length).toBeGreaterThan(0); // Should connect stress notes + quiz
     });
 
     it('should calculate average bloating correctly', () => {
@@ -188,7 +178,7 @@ describe('insightsAnalysis', () => {
         createMockEntry({ bloating_rating: 2 }),
       ];
 
-      const insight = generateComprehensiveInsight(entries, null);
+      const insight = generateComprehensiveInsight(entries);
 
       expect(insight?.avgBloating).toBeCloseTo(3.3, 1);
     });
@@ -200,7 +190,7 @@ describe('insightsAnalysis', () => {
         createMockEntry({ notes: 'Regular meal', bloating_rating: 2 }),
       ];
 
-      const insight = generateComprehensiveInsight(entries, null);
+      const insight = generateComprehensiveInsight(entries);
 
       expect(insight?.summary.behavioralInsights.length).toBeGreaterThan(0);
       expect(insight?.summary.behavioralInsights[0]).toContain('Ate Late');
@@ -221,7 +211,7 @@ describe('insightsAnalysis', () => {
         }),
       ];
 
-      const insight = generateComprehensiveInsight(entries, null);
+      const insight = generateComprehensiveInsight(entries);
 
       expect(insight?.summary.topRecommendations.length).toBeGreaterThan(0);
       expect(insight?.summary.topRecommendations[0]).toBeTruthy();
