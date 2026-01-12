@@ -24,13 +24,14 @@ interface ChartDataItem {
 export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTriggerAnalysisProps) {
   const [expandedTrigger, setExpandedTrigger] = useState<string | null>(null);
 
-  // Impact-based color mapping - "Traffic Light" style
-  const getImpactColor = (score: number): string => {
-    if (score <= 50) return '#26A69A';    // Teal/Sage Green - safe/low impact
-    if (score <= 150) return '#66BB6A';   // Light Green - moderate-low
-    if (score <= 250) return '#FFA726';   // Amber/Orange - moderate
-    if (score <= 350) return '#FF7043';   // Deep Orange - elevated
-    return '#EF5350';                     // Soft Red/Coral - danger/high impact
+  // Severity-based color mapping - "Traffic Light" style
+  // Uses avgBloatingWith (0-5 scale) to determine risk level
+  const getSeverityColor = (severity: number): string => {
+    if (severity < 1.5) return '#26A69A';    // Teal/Sage Green - safe/low severity (0-30%)
+    if (severity < 2.5) return '#66BB6A';    // Light Green - moderate-low (30-50%)
+    if (severity < 3.5) return '#FFA726';    // Amber/Orange - moderate (50-70%)
+    if (severity < 4.5) return '#FF7043';    // Deep Orange - elevated (70-90%)
+    return '#EF5350';                        // Soft Red/Coral - danger/high severity (90-100%)
   };
 
   // Prepare chart data
@@ -40,11 +41,12 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
       .map(trigger => {
         const categoryInfo = getTriggerCategory(trigger.category);
 
-        // Calculate impact score (frequency × severity)
+        // Calculate impact score (frequency × severity) for sorting
         const impactScore = trigger.occurrences * trigger.avgBloatingWith;
 
-        // Determine color based on impact score (not confidence)
-        const color = getImpactColor(impactScore);
+        // Determine color based on bloating severity (avgBloatingWith)
+        // This ensures high-severity triggers are always red, regardless of frequency
+        const color = getSeverityColor(trigger.avgBloatingWith);
 
         return {
           id: trigger.category,
@@ -287,6 +289,33 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                 </div>
               </div>
 
+              {/* Confidence Badge - Golden/Silver Badge Style */}
+              <div className="pt-3 pb-2 border-t border-border/30 flex justify-center">
+                <div className={`
+                  relative px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide
+                  flex items-center gap-2 shadow-md
+                  ${trigger.confidence === 'high'
+                    ? 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-950'
+                    : 'bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 text-gray-900'
+                  }
+                `}>
+                  {/* Badge Shine Effect */}
+                  <div className={`
+                    absolute inset-0 rounded-lg opacity-40
+                    ${trigger.confidence === 'high'
+                      ? 'bg-gradient-to-tr from-transparent via-white to-transparent'
+                      : 'bg-gradient-to-tr from-transparent via-white to-transparent'
+                    }
+                  `} style={{ transform: 'skewX(-20deg)' }} />
+
+                  {/* Badge Content */}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    {trigger.confidence === 'high' ? '🏆' : '🔍'}
+                    {trigger.confidence === 'high' ? 'High Confidence' : 'Investigating'}
+                  </span>
+                </div>
+              </div>
+
               {/* Top Foods */}
               {trigger.topFoods.length > 0 && (
                 <div className="space-y-2 pt-2 border-t border-border/30">
@@ -305,19 +334,6 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                   </div>
                 </div>
               )}
-
-              {/* Confidence Badge */}
-              <div className="pt-2 border-t border-border/30">
-                <span className={`
-                  px-3 py-1.5 rounded-full text-xs font-bold uppercase
-                  ${trigger.confidence === 'high'
-                    ? 'bg-coral/20 text-coral'
-                    : 'bg-peach/20 text-peach'
-                  }
-                `}>
-                  {trigger.confidence === 'high' ? 'High Confidence' : 'Investigating'}
-                </span>
-              </div>
             </div>
           </div>
         );
