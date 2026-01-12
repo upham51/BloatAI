@@ -68,6 +68,7 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
             loop
             muted
             playsInline
+            preload="auto"
             onError={handleVideoError}
             className="w-full h-full object-contain transition-opacity duration-700"
             style={{

@@ -193,7 +193,7 @@ export default function DashboardPage() {
         <div className="min-h-screen relative">
           <AbstractBackground />
           <GrainTexture />
-          <StaggerContainer className="relative z-10 px-5 pt-0 pb-28 max-w-lg mx-auto space-y-4 w-full">
+          <StaggerContainer className="relative z-10 px-5 pt-6 pb-28 max-w-lg mx-auto space-y-4 w-full">
             {/* Header with time-based greeting */}
             <StaggerItem>
               <header className="relative">
