@@ -13,7 +13,7 @@ import { MealPhoto } from '@/components/meals/MealPhoto';
 import { useMeals } from '@/contexts/MealContext';
 import { useToast } from '@/hooks/use-toast';
 import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTES } from '@/types';
-import { formatDistanceToNow, format, isAfter, subDays } from 'date-fns';
+import { formatDistanceToNow, format, isAfter, subDays, isToday, isYesterday, startOfDay } from 'date-fns';
 import { formatTriggerDisplay } from '@/lib/triggerUtils';
 import { haptics } from '@/lib/haptics';
 import { GrainTexture } from '@/components/ui/grain-texture';
@@ -89,7 +89,8 @@ export default function HistoryPage() {
     return rated.reduce((sum, e) => sum + (e.bloating_rating || 0), 0) / rated.length;
   }, [entries]);
 
-  const filteredEntries = useMemo(() => {
+  // Group entries by date
+  const groupedEntries = useMemo(() => {
     let filtered = [...entries].sort(
       (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
@@ -101,8 +102,42 @@ export default function HistoryPage() {
       filtered = filtered.filter((e) => isAfter(new Date(e.created_at), weekAgo));
     }
 
-    return filtered;
+    // Group by date
+    const groups: { date: string; label: string; entries: MealEntry[] }[] = [];
+    const dateMap = new Map<string, MealEntry[]>();
+
+    filtered.forEach(entry => {
+      const entryDate = new Date(entry.created_at);
+      const dateKey = format(startOfDay(entryDate), 'yyyy-MM-dd');
+
+      if (!dateMap.has(dateKey)) {
+        dateMap.set(dateKey, []);
+      }
+      dateMap.get(dateKey)!.push(entry);
+    });
+
+    // Convert map to array with labels
+    dateMap.forEach((entries, dateKey) => {
+      const date = new Date(dateKey);
+      let label: string;
+
+      if (isToday(date)) {
+        label = 'Today';
+      } else if (isYesterday(date)) {
+        label = 'Yesterday';
+      } else {
+        label = format(date, 'EEEE, MMM d');
+      }
+
+      groups.push({ date: dateKey, label, entries });
+    });
+
+    return groups;
   }, [entries, filter]);
+
+  const filteredEntries = useMemo(() => {
+    return groupedEntries.flatMap(group => group.entries);
+  }, [groupedEntries]);
 
   const handleDelete = async (id: string, description: string) => {
     if (!confirm('Delete this entry? This cannot be undone.')) return;
@@ -263,21 +298,42 @@ export default function HistoryPage() {
             </button>
           </div>
 
-          {/* Entry List */}
-          <div className="space-y-4">
-            {filteredEntries.map((entry, index) => (
-              <EntryCard
-                key={entry.id}
-                entry={entry}
-                userAvg={userAvg}
-                onRate={() => setRatingEntry(entry)}
-                onEdit={() => setEditEntry(entry)}
-                onDelete={() => handleDelete(entry.id, entry.meal_description)}
-                onViewDetails={() => handleOpenDetails(entry)}
-                onEditTitle={() => setEditTitleEntry(entry)}
-                delay={100 + index * 50}
-                isFirstPhoto={index === 0 && !!entry.photo_url}
-              />
+          {/* Entry List - Grouped by Date */}
+          <div className="space-y-6">
+            {groupedEntries.map((group, groupIndex) => (
+              <div key={group.date} className="space-y-3">
+                {/* Date Header */}
+                <h2
+                  className="text-sm font-bold text-foreground/70 uppercase tracking-wider px-1 animate-slide-up opacity-0"
+                  style={{ animationDelay: `${100 + groupIndex * 30}ms`, animationFillMode: 'forwards' }}
+                >
+                  {group.label}
+                </h2>
+
+                {/* Entries for this date */}
+                <div className="space-y-3">
+                  {group.entries.map((entry, entryIndex) => {
+                    const globalIndex = groupedEntries
+                      .slice(0, groupIndex)
+                      .reduce((sum, g) => sum + g.entries.length, 0) + entryIndex;
+
+                    return (
+                      <EntryCard
+                        key={entry.id}
+                        entry={entry}
+                        userAvg={userAvg}
+                        onRate={() => setRatingEntry(entry)}
+                        onEdit={() => setEditEntry(entry)}
+                        onDelete={() => handleDelete(entry.id, entry.meal_description)}
+                        onViewDetails={() => handleOpenDetails(entry)}
+                        onEditTitle={() => setEditTitleEntry(entry)}
+                        delay={120 + groupIndex * 30 + entryIndex * 40}
+                        isFirstPhoto={globalIndex === 0 && !!entry.photo_url}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </div>
 
@@ -679,22 +735,40 @@ function EntryCard({
   const displayTitle = entry.custom_title || entry.meal_title || getQuickMealTitle(entry);
   const displayEmoji = entry.meal_emoji || '🍽️';
 
+  // Get color for rating bar (Green for 1-2, Yellow for 3, Red for 4-5)
+  const getRatingBarColor = (rating: number | null) => {
+    if (!rating) return 'transparent';
+    if (rating <= 2) return 'hsl(var(--primary))'; // Green
+    if (rating === 3) return '#eab308'; // Yellow
+    return 'hsl(var(--coral))'; // Red/Coral
+  };
+
   return (
     <div
-      className={`premium-card overflow-hidden animate-slide-up opacity-0 ${
+      className={`premium-card overflow-hidden animate-slide-up opacity-0 relative ${
         isPending ? 'ring-2 ring-coral/30 ring-offset-1 ring-offset-background' : ''
       }`}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
-      {/* Horizontal Card Layout - Image Left, Content Right */}
+      {/* Color-coded vertical bar on far right edge */}
+      <div
+        className="absolute top-0 right-0 bottom-0 w-1.5 transition-all duration-300"
+        style={{
+          backgroundColor: getRatingBarColor(entry.bloating_rating),
+          opacity: entry.bloating_rating ? 1 : 0
+        }}
+      />
+
+      {/* Horizontal Card Layout - Square Image Left, Content Right */}
       <div className="flex gap-3 p-3">
-        {/* Small Photo - Left Side (Fixed Size) */}
+        {/* Square Photo - Left Side (Fixed Size) */}
         {entry.photo_url ? (
           <MealPhoto
             photoUrl={entry.photo_url}
             onClick={onViewDetails}
-            className="w-20 h-20 rounded-xl object-cover shadow-sm cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
+            className="w-20 h-20 rounded-xl shadow-sm cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
             priority={isFirstPhoto}
+            thumbnail={true}
           />
         ) : (
           <div
@@ -706,19 +780,15 @@ function EntryCard({
         )}
 
         {/* Main Content - Right Side (Flexible) */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between gap-1.5">
-          {/* Top Row: Title + Menu */}
-          <div className="flex items-start justify-between gap-2">
-            <button
-              onClick={onEditTitle}
-              className="flex items-center gap-1.5 group min-w-0 flex-1"
-            >
-              <span className="text-lg flex-shrink-0">{displayEmoji}</span>
-              <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors truncate">
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
+          {/* Title Row */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span className="text-xl flex-shrink-0">{displayEmoji}</span>
+              <h3 className="font-bold text-foreground text-base truncate">
                 {displayTitle}
-              </span>
-              <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-            </button>
+              </h3>
+            </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -727,9 +797,13 @@ function EntryCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="rounded-xl">
+                <DropdownMenuItem onClick={onEditTitle} className="rounded-lg">
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit Title
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={onEdit} className="rounded-lg">
                   <Edit3 className="w-4 h-4 mr-2" />
-                  Edit
+                  Edit Details
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onDelete} className="text-destructive rounded-lg">
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -739,63 +813,13 @@ function EntryCard({
             </DropdownMenu>
           </div>
 
-          {/* Middle Row: Time + Rating */}
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
-              <Clock className="w-3 h-3" />
-              {format(new Date(entry.created_at), 'MMM d, h:mm a')}
+          {/* Time Row */}
+          <div className="flex items-center gap-1">
+            <Clock className="w-3 h-3 text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">
+              {format(new Date(entry.created_at), 'h:mm a')}
             </p>
-
-            {/* Bloating Rating - Compact */}
-            {entry.bloating_rating && (
-              <div className={`flex items-center gap-1 px-2 py-1 rounded-lg flex-shrink-0 ${
-                entry.bloating_rating <= 2
-                  ? 'bg-primary/15'
-                  : entry.bloating_rating === 3
-                    ? 'bg-yellow-100'
-                    : 'bg-coral/15'
-              }`}>
-                <span className="text-base">{RATING_EMOJIS[entry.bloating_rating]}</span>
-                <span className={`text-xs font-bold ${
-                  entry.bloating_rating <= 2
-                    ? 'text-primary'
-                    : entry.bloating_rating === 3
-                      ? 'text-yellow-600'
-                      : 'text-coral'
-                }`}>
-                  {entry.bloating_rating}/5
-                </span>
-              </div>
-            )}
           </div>
-
-          {/* Bottom Row: Triggers */}
-          {entry.detected_triggers && entry.detected_triggers.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {formatTriggerDisplay(entry.detected_triggers).slice(0, 3).map((trigger, i) => (
-                <span
-                  key={i}
-                  className="flex items-center gap-1 text-xs"
-                >
-                  <span className="text-sm">{trigger.icon}</span>
-                  <span className="text-muted-foreground">{trigger.name}</span>
-                </span>
-              ))}
-              {entry.detected_triggers.length > 3 && (
-                <span className="text-xs text-muted-foreground">
-                  +{entry.detected_triggers.length - 3}
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Notes Preview - Single Line */}
-          {entry.notes && (
-            <p className="text-2xs text-muted-foreground italic truncate flex items-center gap-1">
-              <FileText className="w-3 h-3 flex-shrink-0" />
-              {entry.notes}
-            </p>
-          )}
         </div>
       </div>
 
