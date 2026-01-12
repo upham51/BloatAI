@@ -120,6 +120,31 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
         </div>
       </div>
 
+      {/* Top 3 Triggers Explanation */}
+      {chartData.length >= 3 && (
+        <div className="space-y-3 p-4 rounded-lg bg-gradient-to-r from-coral/5 to-transparent border border-coral/20">
+          <h3 className="text-sm font-semibold text-foreground">Why These Are Your Top 3 Triggers:</h3>
+          {chartData.slice(0, 3).map((trigger, index) => (
+            <div key={trigger.id} className="flex gap-3 text-xs">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-coral/20 text-coral font-bold flex items-center justify-center">
+                {index + 1}
+              </div>
+              <div className="flex-1 text-muted-foreground">
+                <span className="font-semibold text-foreground">{trigger.displayName}</span>
+                {' '}
+                {trigger.impactScore >= 2.0
+                  ? `increases your bloating by ${trigger.impactScore.toFixed(1)} points on average (from ${trigger.avgBloatingWithout.toFixed(1)} without to ${trigger.avgBloatingWith.toFixed(1)} with). Strong trigger detected across ${trigger.occurrences} meals.`
+                  : trigger.impactScore >= 1.0
+                  ? `raises your bloating by ${trigger.impactScore.toFixed(1)} points (from ${trigger.avgBloatingWithout.toFixed(1)} to ${trigger.avgBloatingWith.toFixed(1)}). Moderate impact seen in ${trigger.occurrences} meals.`
+                  : trigger.impactScore > 0
+                  ? `has a mild impact of +${trigger.impactScore.toFixed(1)} points (from ${trigger.avgBloatingWithout.toFixed(1)} to ${trigger.avgBloatingWith.toFixed(1)}). Logged ${trigger.occurrences} times.`
+                  : `shows minimal or no negative impact. Your bloating is actually ${Math.abs(trigger.impactScore).toFixed(1)} points lower with this trigger (from ${trigger.avgBloatingWithout.toFixed(1)} to ${trigger.avgBloatingWith.toFixed(1)}).`}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Horizontal Bar Chart */}
       <div className="h-[480px]">
         <ResponsiveContainer width="100%" height="100%">

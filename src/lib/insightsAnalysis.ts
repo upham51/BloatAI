@@ -522,7 +522,10 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
     };
   });
 
-  return results.sort((a, b) => {
+  // Filter to only include categories that have been logged at least once
+  const loggedResults = results.filter(r => r.occurrences > 0);
+
+  return loggedResults.sort((a, b) => {
     // Sort by impact score (highest impact first)
     // This ensures the most problematic triggers appear at the top
     return b.impactScore - a.impactScore;
