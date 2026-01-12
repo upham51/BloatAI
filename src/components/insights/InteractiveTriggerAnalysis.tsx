@@ -28,16 +28,32 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    // Include ALL logged categories and ensure they all show visible bars
-    const allCategories = triggerConfidence.map(trigger => {
+    // Sort triggers by impact score first (highest to lowest)
+    const sortedTriggers = [...triggerConfidence].sort((a, b) => b.impactScore - a.impactScore);
+
+    // Find the max impact score to use for relative scaling
+    const maxImpact = Math.max(...sortedTriggers.map(t => t.impactScore), 0);
+
+    // Map to chart data with properly scaled bars
+    const allCategories = sortedTriggers.map(trigger => {
       const categoryInfo = getTriggerCategory(trigger.category);
 
       // Impact Score: (avgBloatingWith - avgBloatingWithout)
-      // Use absolute value for bar length to ensure ALL triggers are visible
-      // Minimum bar size of 5% to ensure even zero-impact triggers show up
+      // Scale bar length proportionally to impact score to maintain descending visual order
+      // Ensure bars are always in descending order by using actual impact score
       const impactScore = trigger.impactScore;
-      const absImpact = Math.abs(impactScore);
-      const bloatPercentage = Math.max(5, Math.round((absImpact / 5) * 100));
+
+      // Calculate bar percentage based on impact relative to max
+      // Use a minimum of 5% only for positive impacts to ensure visibility
+      // For zero or negative impacts, use much smaller values or scale differently
+      let bloatPercentage: number;
+      if (impactScore > 0 && maxImpact > 0) {
+        // Scale positive impacts: higher impacts get longer bars
+        bloatPercentage = Math.max(5, Math.round((impactScore / maxImpact) * 100));
+      } else {
+        // For zero or negative impacts, use very small bars (1-5%)
+        bloatPercentage = Math.max(1, Math.round(5 - Math.abs(impactScore)));
+      }
 
       return {
         id: trigger.category,
@@ -53,8 +69,7 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
         confidence: trigger.confidence,
         confidencePercentage: trigger.confidencePercentage,
       } as ChartDataItem;
-    })
-    .sort((a, b) => b.impactScore - a.impactScore); // Sort by impact score (highest first)
+    });
 
     // Assign colors based on impact score thresholds
     // Red/Orange for triggers that increase bloating (harmful)
@@ -286,7 +301,7 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                         ? `Moderate bloating risk with ${trigger.displayName.toLowerCase()}. Impact: +${trigger.impactScore.toFixed(1)} points.`
                         : trigger.impactScore > 0
                         ? `Low impact detected. ${trigger.displayName} adds ${trigger.impactScore.toFixed(1)} points to bloating.`
-                        : `No negative impact detected. May actually help reduce bloating.`}
+                        : `Low impact detected. Impact: ${trigger.impactScore.toFixed(1)} points.`}
                     </p>
                   </div>
                 </div>
