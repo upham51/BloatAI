@@ -24,33 +24,19 @@ interface ChartDataItem {
 export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTriggerAnalysisProps) {
   const [expandedTrigger, setExpandedTrigger] = useState<string | null>(null);
 
-  // Severity-based color mapping - Simplified to 3 levels
-  // Uses avgBloatingWith (0-5 scale) to determine risk level
-  const getSeverityColor = (severity: number): string => {
-    if (severity < 2.5) return '#26A69A';    // Teal - Low severity
-    if (severity < 3.5) return '#FFA726';    // Orange - Moderate severity
-    return '#EF5350';                        // Red - High severity
-  };
-
   // Prepare chart data
   const chartData = useMemo(() => {
-    return triggerConfidence
+    const filtered = triggerConfidence
       .filter(t => t.confidence === 'high' || t.confidence === 'investigating')
       .map(trigger => {
         const categoryInfo = getTriggerCategory(trigger.category);
-
-        // Calculate impact score (frequency × severity) for sorting
         const impactScore = trigger.occurrences * trigger.avgBloatingWith;
-
-        // Determine color based on bloating severity (avgBloatingWith)
-        // This ensures high-severity triggers are always red, regardless of frequency
-        const color = getSeverityColor(trigger.avgBloatingWith);
 
         return {
           id: trigger.category,
           displayName: categoryInfo?.displayName || trigger.category,
           impactScore: Math.round(impactScore * 10) / 10,
-          color,
+          color: '', // Will be assigned below
           occurrences: trigger.occurrences,
           avgBloatingWith: trigger.avgBloatingWith,
           avgBloatingWithout: trigger.avgBloatingWithout,
@@ -60,6 +46,29 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
         } as ChartDataItem;
       })
       .sort((a, b) => b.impactScore - a.impactScore); // Sort by impact
+
+    // Assign colors based on relative ranking for consistent visual hierarchy
+    // This ensures colors match the chart ordering and work for any user
+    if (filtered.length === 0) return [];
+
+    filtered.forEach((item, index) => {
+      const position = index / Math.max(filtered.length - 1, 1);
+
+      // Top third: High severity (Red)
+      if (position < 0.33) {
+        item.color = '#EF5350'; // Red
+      }
+      // Middle third: Moderate severity (Orange)
+      else if (position < 0.67) {
+        item.color = '#FFA726'; // Orange
+      }
+      // Bottom third: Low severity (Teal)
+      else {
+        item.color = '#26A69A'; // Teal
+      }
+    });
+
+    return filtered;
   }, [triggerConfidence]);
 
   if (chartData.length === 0) {
@@ -98,14 +107,7 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
           <Target className="w-5 h-5 text-coral" />
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h2 className="font-bold text-foreground text-xl">Top Bloat Triggers</h2>
-            {chartData.some(t => t.confidence === 'high') && (
-              <div className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-950 shadow-sm">
-                🏆 High Confidence
-              </div>
-            )}
-          </div>
+          <h2 className="font-bold text-foreground text-xl">Top Bloat Triggers</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Click a bar to see detailed insights
           </p>
@@ -186,11 +188,35 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                   className="w-1 h-12 rounded-full"
                   style={{ backgroundColor: trigger.color }}
                 />
-                <div>
+                <div className="flex-1">
                   <h3 className="font-bold text-foreground text-sm">{trigger.displayName}</h3>
                   <p className="text-xs text-muted-foreground">
                     {trigger.occurrences}x logged • {trigger.percentage}% of meals
                   </p>
+                </div>
+                {/* Confidence Badge - Top Right */}
+                <div className={`
+                  relative px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide
+                  flex items-center gap-1.5 shadow-md
+                  ${trigger.confidence === 'high'
+                    ? 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-950'
+                    : 'bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 text-gray-900'
+                  }
+                `}>
+                  {/* Badge Shine Effect */}
+                  <div className={`
+                    absolute inset-0 rounded-lg opacity-40
+                    ${trigger.confidence === 'high'
+                      ? 'bg-gradient-to-tr from-transparent via-white to-transparent'
+                      : 'bg-gradient-to-tr from-transparent via-white to-transparent'
+                    }
+                  `} style={{ transform: 'skewX(-20deg)' }} />
+
+                  {/* Badge Content */}
+                  <span className="relative z-10 flex items-center gap-1">
+                    {trigger.confidence === 'high' ? '🏆' : '🔍'}
+                    {trigger.confidence === 'high' ? 'High Confidence' : 'Investigating'}
+                  </span>
                 </div>
               </div>
 
@@ -249,33 +275,6 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
                         : `Low to moderate bloating risk.`}
                     </p>
                   </div>
-                </div>
-              </div>
-
-              {/* Confidence Badge - Golden/Silver Badge Style */}
-              <div className="pt-3 pb-2 border-t border-border/30 flex justify-center">
-                <div className={`
-                  relative px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide
-                  flex items-center gap-2 shadow-md
-                  ${trigger.confidence === 'high'
-                    ? 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-950'
-                    : 'bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 text-gray-900'
-                  }
-                `}>
-                  {/* Badge Shine Effect */}
-                  <div className={`
-                    absolute inset-0 rounded-lg opacity-40
-                    ${trigger.confidence === 'high'
-                      ? 'bg-gradient-to-tr from-transparent via-white to-transparent'
-                      : 'bg-gradient-to-tr from-transparent via-white to-transparent'
-                    }
-                  `} style={{ transform: 'skewX(-20deg)' }} />
-
-                  {/* Badge Content */}
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    {trigger.confidence === 'high' ? '🏆' : '🔍'}
-                    {trigger.confidence === 'high' ? 'High Confidence' : 'Investigating'}
-                  </span>
                 </div>
               </div>
 
