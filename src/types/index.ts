@@ -35,7 +35,7 @@ export interface TriggerCategory {
 export const TRIGGER_CATEGORIES: TriggerCategory[] = [
   {
     id: 'grains',
-    displayName: 'Grains',
+    displayName: 'Savory Carbs',
     examples: 'Wheat, bread, onions, garlic',
     color: '#FF6B6B'
   },

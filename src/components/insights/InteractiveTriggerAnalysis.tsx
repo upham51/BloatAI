@@ -11,7 +11,7 @@ interface InteractiveTriggerAnalysisProps {
 interface ChartDataItem {
   id: string;
   displayName: string;
-  impactScore: number;
+  bloatPercentage: number;
   color: string;
   occurrences: number;
   avgBloatingWith: number;
@@ -26,49 +26,46 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    const filtered = triggerConfidence
-      .filter(t => t.confidence === 'high' || t.confidence === 'investigating')
-      .map(trigger => {
-        const categoryInfo = getTriggerCategory(trigger.category);
-        const impactScore = trigger.occurrences * trigger.avgBloatingWith;
+    // Include ALL categories, calculate bloat percentage
+    const allCategories = triggerConfidence.map(trigger => {
+      const categoryInfo = getTriggerCategory(trigger.category);
+      // Calculate bloat percentage: (avgBloatingWith / 5) * 100
+      // This represents the % chance of bloating based on the average rating
+      const bloatPercentage = Math.round((trigger.avgBloatingWith / 5) * 100);
 
-        return {
-          id: trigger.category,
-          displayName: categoryInfo?.displayName || trigger.category,
-          impactScore: Math.round(impactScore * 10) / 10,
-          color: '', // Will be assigned below
-          occurrences: trigger.occurrences,
-          avgBloatingWith: trigger.avgBloatingWith,
-          avgBloatingWithout: trigger.avgBloatingWithout,
-          topFoods: trigger.topFoods,
-          percentage: trigger.percentage,
-          confidence: trigger.confidence,
-        } as ChartDataItem;
-      })
-      .sort((a, b) => b.impactScore - a.impactScore); // Sort by impact
+      return {
+        id: trigger.category,
+        displayName: categoryInfo?.displayName || trigger.category,
+        bloatPercentage,
+        color: '', // Will be assigned below
+        occurrences: trigger.occurrences,
+        avgBloatingWith: trigger.avgBloatingWith,
+        avgBloatingWithout: trigger.avgBloatingWithout,
+        topFoods: trigger.topFoods,
+        percentage: trigger.percentage,
+        confidence: trigger.confidence,
+      } as ChartDataItem;
+    })
+    .sort((a, b) => b.bloatPercentage - a.bloatPercentage); // Sort by bloat % (highest first)
 
-    // Assign colors based on relative ranking for consistent visual hierarchy
-    // This ensures colors match the chart ordering and work for any user
-    if (filtered.length === 0) return [];
-
-    filtered.forEach((item, index) => {
-      const position = index / Math.max(filtered.length - 1, 1);
-
-      // Top third: High severity (Red)
-      if (position < 0.33) {
+    // Assign colors based on bloat percentage thresholds
+    // This ensures consistent coloring across all users based on severity
+    allCategories.forEach((item) => {
+      // High risk: 70%+ bloat chance (Red)
+      if (item.bloatPercentage >= 70) {
         item.color = '#EF5350'; // Red
       }
-      // Middle third: Moderate severity (Orange)
-      else if (position < 0.67) {
+      // Moderate risk: 50-69% bloat chance (Orange)
+      else if (item.bloatPercentage >= 50) {
         item.color = '#FFA726'; // Orange
       }
-      // Bottom third: Low severity (Teal)
+      // Low risk: Below 50% bloat chance (Teal)
       else {
         item.color = '#26A69A'; // Teal
       }
     });
 
-    return filtered;
+    return allCategories;
   }, [triggerConfidence]);
 
   if (chartData.length === 0) {
@@ -139,7 +136,7 @@ export function InteractiveTriggerAnalysis({ triggerConfidence }: InteractiveTri
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.1)' }} />
             <Bar
-              dataKey="impactScore"
+              dataKey="bloatPercentage"
               radius={[0, 8, 8, 0]}
               animationDuration={1500}
               onClick={(data) => handleBarClick(data)}

@@ -1,4 +1,4 @@
-import { MealEntry } from '@/types';
+import { MealEntry, TRIGGER_CATEGORIES } from '@/types';
 import { isHighBloating, isLowBloating } from './bloatingUtils';
 import { deduplicateFoods, getSafeAlternatives, validatePercentage } from './triggerUtils';
 import { getTriggerCategory } from '@/types';
@@ -459,7 +459,24 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
     });
   });
 
-  const results: TriggerConfidenceLevel[] = Object.entries(triggerStats).map(([category, stats]) => {
+  // Create results for all categories, including those not logged yet
+  const results: TriggerConfidenceLevel[] = TRIGGER_CATEGORIES.map(categoryInfo => {
+    const category = categoryInfo.id;
+    const stats = triggerStats[category];
+
+    // If category hasn't been logged, return default values
+    if (!stats) {
+      return {
+        category,
+        confidence: 'needsData' as const,
+        occurrences: 0,
+        avgBloatingWith: 0,
+        avgBloatingWithout: 0,
+        topFoods: [],
+        percentage: 0,
+      };
+    }
+
     const avgWith = stats.bloatingScores.length > 0
       ? stats.bloatingScores.reduce((a, b) => a + b, 0) / stats.bloatingScores.length
       : 0;
