@@ -29,9 +29,69 @@ export function BarcodeScanner() {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const scannerDivId = 'barcode-scanner-region';
 
+  // Check and request camera permissions
+  const checkCameraPermissions = async (): Promise<boolean> => {
+    try {
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast({
+          variant: 'destructive',
+          title: 'Camera Not Supported',
+          description: 'Your browser does not support camera access. Please use a modern browser like Chrome or Safari.',
+        });
+        return false;
+      }
+
+      // Request camera permission explicitly
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+
+      // Stop the stream immediately - we just needed to check permissions
+      stream.getTracks().forEach(track => track.stop());
+      return true;
+    } catch (err: any) {
+      console.error('Camera permission error:', err);
+
+      // Provide specific error messages based on the error type
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        toast({
+          variant: 'destructive',
+          title: 'Camera Permission Denied',
+          description: 'Please allow camera access in your browser settings and try again.',
+        });
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        toast({
+          variant: 'destructive',
+          title: 'No Camera Found',
+          description: 'No camera was detected on your device.',
+        });
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        toast({
+          variant: 'destructive',
+          title: 'Camera In Use',
+          description: 'Camera is already in use by another application. Please close other apps and try again.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Camera Error',
+          description: 'Unable to access camera. Please check your browser settings.',
+        });
+      }
+      return false;
+    }
+  };
+
   // Start camera scanner
   const startScanner = async () => {
     try {
+      // First, explicitly check and request camera permissions
+      const hasPermission = await checkCameraPermissions();
+      if (!hasPermission) {
+        return;
+      }
+
       setIsScanning(true);
 
       // Create scanner instance
@@ -52,8 +112,8 @@ export function BarcodeScanner() {
       console.error('Error starting scanner:', err);
       toast({
         variant: 'destructive',
-        title: 'Camera Error',
-        description: 'Unable to access camera. Please grant camera permissions.',
+        title: 'Scanner Error',
+        description: 'Failed to start the barcode scanner. Please try again.',
       });
       setIsScanning(false);
     }
