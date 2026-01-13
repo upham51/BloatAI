@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface AnimatedStomachCharacterProps {
   healthScore: number; // 0-100
@@ -7,6 +7,9 @@ interface AnimatedStomachCharacterProps {
 export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharacterProps) {
   const [currentVideo, setCurrentVideo] = useState<string>('');
   const [videoError, setVideoError] = useState<boolean>(false);
+  const [retryCount, setRetryCount] = useState<number>(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const MAX_RETRIES = 3;
 
   // Determine which video to show based on score ranges
   // 70-100: Excellent (relaxed, content) - happy
@@ -28,10 +31,47 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
 
     setCurrentVideo(videoPath);
     setVideoError(false);
+    setRetryCount(0);
   }, [healthScore]);
 
-  const handleVideoError = () => {
-    setVideoError(true);
+  // Retry loading video when it fails
+  useEffect(() => {
+    if (videoError && retryCount < MAX_RETRIES && videoRef.current) {
+      const timer = setTimeout(() => {
+        console.log(`Retrying video load (attempt ${retryCount + 1}/${MAX_RETRIES})`);
+        setRetryCount(prev => prev + 1);
+        setVideoError(false);
+
+        // Force reload by resetting src
+        const video = videoRef.current;
+        if (video) {
+          video.load();
+          video.play().catch(err => console.error('Video play failed:', err));
+        }
+      }, 1000 * (retryCount + 1)); // Exponential backoff: 1s, 2s, 3s
+
+      return () => clearTimeout(timer);
+    }
+  }, [videoError, retryCount]);
+
+  const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    const error = (e.target as HTMLVideoElement).error;
+    console.error('Video error:', error?.message || 'Unknown error', 'Code:', error?.code);
+
+    // Only set error state if we've exhausted retries
+    if (retryCount >= MAX_RETRIES) {
+      console.error('Max retries reached, showing fallback');
+      setVideoError(true);
+    } else {
+      setVideoError(true); // Trigger retry
+    }
+  };
+
+  const handleVideoLoad = () => {
+    console.log('Video loaded successfully');
+    if (videoRef.current) {
+      videoRef.current.play().catch(err => console.error('Autoplay failed:', err));
+    }
   };
 
   // Determine mood for placeholder
@@ -61,8 +101,9 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
     >
       {/* Simple container for video/character */}
       <div className="relative w-full h-full flex items-center justify-center rounded-full overflow-hidden bg-white/50">
-        {!videoError ? (
+        {!videoError || retryCount < MAX_RETRIES ? (
           <video
+            ref={videoRef}
             key={currentVideo}
             autoPlay
             loop
@@ -70,6 +111,7 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
             playsInline
             preload="auto"
             onError={handleVideoError}
+            onLoadedData={handleVideoLoad}
             className="w-full h-full object-contain transition-opacity duration-700"
             style={{
               mixBlendMode: 'multiply',
