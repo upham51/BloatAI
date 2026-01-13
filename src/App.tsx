@@ -24,6 +24,7 @@ import AdminUserSearch from "./pages/admin/AdminUserSearch";
 import AdminErrorLogs from "./pages/admin/AdminErrorLogs";
 import EmojiTest from "./pages/admin/EmojiTest";
 import NotFound from "./pages/NotFound";
+import { BarcodeScanner } from "./components/meals/BarcodeScanner";
 
 const queryClient = new QueryClient();
 
@@ -114,6 +115,7 @@ function AppRoutes() {
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/dashboard" element={<ProtectedRoute><SubscriptionGate><DashboardPage /></SubscriptionGate></ProtectedRoute>} />
       <Route path="/add-entry" element={<ProtectedRoute><SubscriptionGate><AddEntryPage /></SubscriptionGate></ProtectedRoute>} />
+      <Route path="/barcode-scanner" element={<ProtectedRoute><SubscriptionGate><BarcodeScanner /></SubscriptionGate></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><SubscriptionGate><HistoryPage /></SubscriptionGate></ProtectedRoute>} />
       <Route path="/insights" element={<ProtectedRoute><SubscriptionGate><InsightsPage /></SubscriptionGate></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
