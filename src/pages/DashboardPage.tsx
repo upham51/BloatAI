@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Settings } from 'lucide-react';
+import { Flame, Settings, Shield, User } from 'lucide-react';
+import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
@@ -33,6 +34,30 @@ const FOOD_BACKGROUNDS = [
   '/assets/images/food-backgrounds/food-bg-7.webp',
   '/assets/images/food-backgrounds/food-bg-8.webp',
 ];
+
+// Admin quick access component
+function AdminQuickAccess() {
+  const { isAdmin, isLoading } = useAdmin();
+  const navigate = useNavigate();
+
+  if (isLoading || !isAdmin) return null;
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate('/admin')}
+        className="w-10 h-10 rounded-2xl bg-primary/10 backdrop-blur-sm border border-primary/20 hover:bg-primary/20 shadow-sm transition-all duration-300"
+      >
+        <Shield className="w-5 h-5 text-primary" />
+      </Button>
+    </motion.div>
+  );
+}
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -193,21 +218,23 @@ export default function DashboardPage() {
             {/* Header with time-based greeting */}
             <StaggerItem>
               <header className="relative">
-                {/* Settings button - absolute positioned in top right */}
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="absolute top-0 right-0"
-                >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => navigate('/profile')}
-                    className="w-10 h-10 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm transition-all duration-300"
+                {/* Action buttons - absolute positioned in top right */}
+                <div className="absolute top-0 right-0 flex items-center gap-2">
+                  <AdminQuickAccess />
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <Settings className="w-5 h-5" />
-                  </Button>
-                </motion.div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => navigate('/profile')}
+                      className="w-10 h-10 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm transition-all duration-300"
+                    >
+                      <User className="w-5 h-5" />
+                    </Button>
+                  </motion.div>
+                </div>
 
                 {/* Centered greeting */}
                 <div className="flex flex-col items-center text-center gap-1 px-12">
