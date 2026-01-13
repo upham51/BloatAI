@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, ChevronDown, ChevronUp, Info, Scan } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { FODMAPGuide } from '@/components/triggers/FODMAPGuide';
 import { TriggerSelectorModal } from '@/components/triggers/TriggerSelectorModal';
@@ -344,6 +344,27 @@ export default function AddEntryPage() {
                 <div className="flex-1 text-left">
                   <h3 className="text-lg font-bold text-foreground mb-0.5">Gallery</h3>
                   <p className="text-sm text-muted-foreground">Choose from your photos</p>
+                </div>
+
+                {/* Arrow indicator */}
+                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+
+            {/* Barcode Scanner Card */}
+            <button onClick={() => navigate('/barcode-scanner')} className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up" style={{
+          animationDelay: '250ms'
+        }}>
+              <div className="flex items-center gap-4">
+                {/* Icon */}
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-orange-500/10 dark:bg-orange-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Scan className="w-7 h-7 text-orange-600 dark:text-orange-400" />
+                </div>
+
+                {/* Text */}
+                <div className="flex-1 text-left">
+                  <h3 className="text-lg font-bold text-foreground mb-0.5">Scan Barcode</h3>
+                  <p className="text-sm text-muted-foreground">Scan product ingredients</p>
                 </div>
 
                 {/* Arrow indicator */}

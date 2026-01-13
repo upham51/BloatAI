@@ -9,6 +9,7 @@ import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
+import { RecipeSuggester } from '@/components/insights/RecipeSuggester';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -156,6 +157,14 @@ export default function InsightsPage() {
               />
             </div>
           )}
+
+          {/* 3.5 RECIPE SUGGESTIONS - Based on safe foods */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}
+          >
+            <RecipeSuggester />
+          </div>
 
           {/* 4. BLOAT HEATMAP CALENDAR */}
           <div
