@@ -92,15 +92,55 @@ export function BarcodeScanner() {
         return;
       }
 
+      // Set scanning state first so the container div renders
       setIsScanning(true);
+
+      // Wait for the DOM to update before initializing the scanner
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Check if the scanner div exists now
+      const scannerDiv = document.getElementById(scannerDivId);
+      if (!scannerDiv) {
+        console.error('Scanner container div not found after state update');
+        toast({
+          variant: 'destructive',
+          title: 'Scanner Error',
+          description: 'Failed to initialize scanner. Please try again.',
+        });
+        setIsScanning(false);
+        return;
+      }
 
       // Create scanner instance
       const html5QrCode = new Html5Qrcode(scannerDivId);
       scannerRef.current = html5QrCode;
 
-      // Start scanning with rear camera
+      // Get available cameras
+      const devices = await Html5Qrcode.getCameras();
+      console.log('Available cameras:', devices);
+
+      if (devices.length === 0) {
+        toast({
+          variant: 'destructive',
+          title: 'No Camera Found',
+          description: 'No camera was detected on your device.',
+        });
+        setIsScanning(false);
+        return;
+      }
+
+      // Prefer rear camera, fallback to first available
+      const rearCamera = devices.find(d => 
+        d.label.toLowerCase().includes('back') || 
+        d.label.toLowerCase().includes('rear') ||
+        d.label.toLowerCase().includes('environment')
+      );
+
+      const cameraId = rearCamera?.id || devices[0].id;
+
+      // Start scanning with selected camera
       await html5QrCode.start(
-        { facingMode: 'environment' },
+        cameraId,
         {
           fps: 10,
           qrbox: { width: 250, height: 250 },
@@ -108,12 +148,25 @@ export function BarcodeScanner() {
         onScanSuccess,
         onScanFailure
       );
-    } catch (err) {
+      
+      console.log('Scanner started successfully with camera:', cameraId);
+    } catch (err: any) {
       console.error('Error starting scanner:', err);
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to start the barcode scanner. Please try again.';
+      if (err.message?.includes('permission')) {
+        errorMessage = 'Camera permission was denied. Please allow camera access.';
+      } else if (err.message?.includes('NotFoundError')) {
+        errorMessage = 'No camera found on your device.';
+      } else if (err.message?.includes('NotReadableError')) {
+        errorMessage = 'Camera is in use by another app. Please close other apps.';
+      }
+      
       toast({
         variant: 'destructive',
         title: 'Scanner Error',
-        description: 'Failed to start the barcode scanner. Please try again.',
+        description: errorMessage,
       });
       setIsScanning(false);
     }

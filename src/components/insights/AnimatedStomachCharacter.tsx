@@ -112,6 +112,10 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
             preload="auto"
             onError={handleVideoError}
             onLoadedData={handleVideoLoad}
+            onCanPlay={(e) => {
+              const video = e.currentTarget;
+              video.play().catch(err => console.log('Autoplay blocked:', err));
+            }}
             className="w-full h-full object-contain transition-opacity duration-700"
             style={{
               mixBlendMode: 'multiply',
