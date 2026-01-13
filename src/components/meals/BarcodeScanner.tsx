@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Package, Sparkles, ArrowRight, Info, Camera } from 'lucide-react';
+import { X, Package, Sparkles, ArrowRight, Info, Camera, Keyboard, Search } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,6 +26,9 @@ export function BarcodeScanner() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showTriggerModal, setShowTriggerModal] = useState(false);
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [manualBarcode, setManualBarcode] = useState('');
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const scannerDivId = 'barcode-scanner-region';
@@ -32,7 +36,17 @@ export function BarcodeScanner() {
   // Start camera scanner
   const startScanner = async () => {
     try {
+      setCameraError(null);
       setIsScanning(true);
+
+      // Check if we're on HTTPS or localhost
+      const isSecureContext = window.isSecureContext;
+      if (!isSecureContext) {
+        setCameraError('Camera access requires HTTPS or localhost. Please use manual input below or access via localhost.');
+        setIsScanning(false);
+        setShowManualInput(true);
+        return;
+      }
 
       // Create scanner instance
       const html5QrCode = new Html5Qrcode(scannerDivId);
@@ -48,14 +62,31 @@ export function BarcodeScanner() {
         onScanSuccess,
         onScanFailure
       );
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error starting scanner:', err);
+
+      let errorMessage = 'Unable to access camera. ';
+
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        errorMessage += 'Please grant camera permissions in your browser settings.';
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        errorMessage += 'No camera found on this device.';
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        errorMessage += 'Camera is already in use by another application.';
+      } else if (err.name === 'NotSupportedError') {
+        errorMessage += 'Camera not supported on this browser.';
+      } else {
+        errorMessage += 'Please try manual input below.';
+      }
+
+      setCameraError(errorMessage);
       toast({
         variant: 'destructive',
         title: 'Camera Error',
-        description: 'Unable to access camera. Please grant camera permissions.',
+        description: errorMessage,
       });
       setIsScanning(false);
+      setShowManualInput(true);
     }
   };
 
@@ -143,6 +174,23 @@ export function BarcodeScanner() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Handle manual barcode lookup
+  const handleManualLookup = async () => {
+    if (!manualBarcode.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid Barcode',
+        description: 'Please enter a valid barcode number.',
+      });
+      return;
+    }
+
+    haptics.light();
+    await fetchProductInfo(manualBarcode.trim());
+    setManualBarcode('');
+    setShowManualInput(false);
   };
 
   // Save scanned product as meal entry
@@ -242,6 +290,23 @@ export function BarcodeScanner() {
       <div className="flex-1 px-6 pb-6">
         {!scannedProduct && !isLoading && (
           <div className="space-y-4">
+            {/* Camera Error Alert */}
+            {cameraError && (
+              <div className="glass-card p-4 border-2 border-orange-500/50 bg-orange-50 dark:bg-orange-950/20">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-semibold text-orange-900 dark:text-orange-100 mb-1">
+                      Camera Access Issue
+                    </p>
+                    <p className="text-orange-700 dark:text-orange-300">
+                      {cameraError}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Scanner Region */}
             {isScanning ? (
               <div className="space-y-4">
@@ -257,21 +322,84 @@ export function BarcodeScanner() {
                   Cancel Scanning
                 </Button>
               </div>
-            ) : (
-              <div className="glass-card p-8 text-center space-y-4">
-                <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                  <Camera className="w-10 h-10 text-primary" />
+            ) : !showManualInput ? (
+              <div className="space-y-3">
+                <div className="glass-card p-8 text-center space-y-4">
+                  <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                    <Camera className="w-10 h-10 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg mb-2">Ready to Scan</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Point your camera at a product barcode
+                    </p>
+                  </div>
+                  <Button onClick={startScanner} className="w-full">
+                    <Camera className="w-5 h-5 mr-2" />
+                    Start Camera
+                  </Button>
                 </div>
-                <div>
-                  <h3 className="font-bold text-lg mb-2">Ready to Scan</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Point your camera at a product barcode
-                  </p>
-                </div>
-                <Button onClick={startScanner} className="w-full">
-                  <Camera className="w-5 h-5 mr-2" />
-                  Start Camera
+
+                {/* Manual Input Toggle */}
+                <Button
+                  onClick={() => setShowManualInput(true)}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Keyboard className="w-4 h-4 mr-2" />
+                  Enter Barcode Manually
                 </Button>
+              </div>
+            ) : (
+              <div className="glass-card p-6 space-y-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Keyboard className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Manual Entry</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Enter the barcode number
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Input
+                    type="text"
+                    placeholder="e.g., 5000112637588"
+                    value={manualBarcode}
+                    onChange={(e) => setManualBarcode(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleManualLookup();
+                      }
+                    }}
+                    className="text-lg text-center tracking-wider"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleManualLookup}
+                      className="flex-1"
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      Look Up Product
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowManualInput(false);
+                        setCameraError(null);
+                      }}
+                      variant="outline"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  Find the barcode number below the barcode lines on the product package
+                </p>
               </div>
             )}
 
@@ -282,7 +410,7 @@ export function BarcodeScanner() {
                 <div className="text-sm text-muted-foreground">
                   <p className="font-semibold text-foreground mb-1">How it works</p>
                   <p>
-                    Scan any product barcode to instantly see ingredients and detect potential FODMAP
+                    Scan any product barcode or enter it manually to instantly see ingredients and detect potential FODMAP
                     triggers. Perfect for grocery shopping!
                   </p>
                 </div>
