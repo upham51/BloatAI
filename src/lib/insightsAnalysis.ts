@@ -356,6 +356,13 @@ export interface TriggerConfidenceLevel {
   impactScore: number; // avgBloatingWith - avgBloatingWithout
   topFoods: string[];
   percentage: number;
+  // Enhanced metrics for Spotify Wrapped UI
+  enhancedImpactScore?: number; // Weighted score with consistency, frequency, recency
+  consistencyFactor?: number; // 0.5-1.0: how reliably it causes bloating
+  frequencyWeight?: number; // 0.8-1.5: how often user eats it
+  recencyBoost?: number; // 1.0-1.2: whether it's recent
+  personalBaselineAdjustment?: number; // How much above user's baseline
+  recentOccurrences?: number; // Occurrences in last 7 days
 }
 
 export interface CombinationInsight {
@@ -407,10 +414,24 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
   const completedEntries = entries.filter(e => e.rating_status === 'completed');
   if (completedEntries.length === 0) return [];
 
+  // Calculate user's personal baseline (overall average bloating)
+  const allBloatingScores = completedEntries
+    .map(e => e.bloating_rating)
+    .filter((r): r is number => r !== null && r !== undefined);
+  const personalBaseline = allBloatingScores.length > 0
+    ? allBloatingScores.reduce((a, b) => a + b, 0) / allBloatingScores.length
+    : 2.5;
+
+  // Determine recent entries (last 7 days)
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
   const triggerStats: Record<string, {
     occurrences: number;
     bloatingScores: number[];
     foods: Set<string>;
+    highBloatingCount: number; // Count of meals with bloating >= 4
+    recentOccurrences: number; // Occurrences in last 7 days
   }> = {};
 
   const mealsWithoutTrigger: Record<string, number[]> = {};
@@ -422,6 +443,8 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
         occurrences: 0,
         bloatingScores: [],
         foods: new Set(),
+        highBloatingCount: 0,
+        recentOccurrences: 0,
       };
     }
     if (!mealsWithoutTrigger[categoryInfo.id]) {
@@ -432,6 +455,8 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
   // Collect trigger stats
   completedEntries.forEach(entry => {
     const triggersInMeal = new Set<string>();
+    const entryDate = new Date(entry.created_at);
+    const isRecent = entryDate > sevenDaysAgo;
 
     entry.detected_triggers?.forEach(trigger => {
       triggersInMeal.add(trigger.category);
@@ -441,11 +466,18 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
           occurrences: 0,
           bloatingScores: [],
           foods: new Set(),
+          highBloatingCount: 0,
+          recentOccurrences: 0,
         };
       }
 
       if (entry.bloating_rating) {
         triggerStats[trigger.category].bloatingScores.push(entry.bloating_rating);
+
+        // Track high bloating occurrences
+        if (entry.bloating_rating >= 4) {
+          triggerStats[trigger.category].highBloatingCount++;
+        }
       }
 
       if (trigger.food) {
@@ -467,9 +499,18 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
   // Count occurrences (unique meals)
   completedEntries.forEach(entry => {
     const counted = new Set<string>();
+    const entryDate = new Date(entry.created_at);
+    const isRecent = entryDate > sevenDaysAgo;
+
     entry.detected_triggers?.forEach(trigger => {
       if (!counted.has(trigger.category)) {
         triggerStats[trigger.category].occurrences++;
+
+        // Count recent occurrences
+        if (isRecent) {
+          triggerStats[trigger.category].recentOccurrences++;
+        }
+
         counted.add(trigger.category);
       }
     });
@@ -507,6 +548,75 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
       confidence = 'needsData';
     }
 
+    // ===== ENHANCED METRICS FOR SPOTIFY WRAPPED UI =====
+
+    // 1. Consistency Factor (0.5 - 1.0)
+    // How reliably does this trigger cause bloating?
+    let consistencyFactor = 0.5;
+    if (stats && occurrences > 0) {
+      const bloatingRate = stats.highBloatingCount / occurrences;
+      consistencyFactor = Math.max(0.5, Math.min(1.0, 0.5 + (bloatingRate * 0.5)));
+    }
+
+    // 2. Frequency Weight (0.8 - 1.5)
+    // How often does the user eat this?
+    let frequencyWeight = 1.0;
+    if (occurrences > 0 && completedEntries.length > 0) {
+      const frequencyRate = occurrences / completedEntries.length;
+      if (frequencyRate >= 0.5) {
+        // Eating it in 50%+ of meals = major problem
+        frequencyWeight = 1.5;
+      } else if (frequencyRate >= 0.25) {
+        // Eating it in 25-50% of meals = significant
+        frequencyWeight = 1.2;
+      } else if (frequencyRate < 0.1) {
+        // Rarely eating it = lower weight
+        frequencyWeight = 0.8;
+      }
+    }
+
+    // 3. Recency Boost (1.0 - 1.2)
+    // Is this trigger happening recently?
+    let recencyBoost = 1.0;
+    const recentOccurrences = stats?.recentOccurrences || 0;
+    if (recentOccurrences > 0 && occurrences > 0) {
+      const recentRate = recentOccurrences / occurrences;
+      if (recentRate >= 0.6) {
+        // 60%+ of occurrences are recent = happening now
+        recencyBoost = 1.2;
+      } else if (recentRate >= 0.3) {
+        // 30-60% recent
+        recencyBoost = 1.1;
+      }
+    }
+
+    // 4. Personal Baseline Adjustment
+    // How much worse is this compared to user's normal?
+    const personalBaselineAdjustment = avgWith - personalBaseline;
+
+    // 5. Weighted Average Impact
+    // Give more weight to severe bloating episodes (4-5 rating)
+    let weightedAvgWith = avgWith;
+    if (stats && stats.bloatingScores.length > 0) {
+      const weightedSum = stats.bloatingScores.reduce((sum, score) => {
+        // Weight severe bloating (4-5) more heavily
+        const weight = score >= 4 ? 1.5 : score >= 3 ? 1.0 : 0.7;
+        return sum + (score * weight);
+      }, 0);
+      const totalWeight = stats.bloatingScores.reduce((sum, score) => {
+        const weight = score >= 4 ? 1.5 : score >= 3 ? 1.0 : 0.7;
+        return sum + weight;
+      }, 0);
+      weightedAvgWith = weightedSum / totalWeight;
+    }
+
+    // 6. Enhanced Impact Score
+    // Combines all factors into one intelligent ranking metric
+    const enhancedImpactScore = (weightedAvgWith - avgWithout)
+      * consistencyFactor
+      * frequencyWeight
+      * recencyBoost;
+
     return {
       category,
       confidence,
@@ -519,6 +629,13 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
       percentage: completedEntries.length > 0
         ? Math.round((occurrences / completedEntries.length) * 100)
         : 0,
+      // Enhanced metrics
+      enhancedImpactScore: Math.round(enhancedImpactScore * 100) / 100,
+      consistencyFactor: Math.round(consistencyFactor * 100) / 100,
+      frequencyWeight: Math.round(frequencyWeight * 100) / 100,
+      recencyBoost: Math.round(recencyBoost * 100) / 100,
+      personalBaselineAdjustment: Math.round(personalBaselineAdjustment * 10) / 10,
+      recentOccurrences,
     };
   });
 
@@ -526,9 +643,9 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
   const loggedResults = results.filter(r => r.occurrences > 0);
 
   return loggedResults.sort((a, b) => {
-    // Sort by impact score (highest impact first)
-    // This ensures the most problematic triggers appear at the top
-    return b.impactScore - a.impactScore;
+    // Sort by enhanced impact score (highest impact first)
+    // This uses the intelligent ranking that considers consistency, frequency, and recency
+    return (b.enhancedImpactScore || b.impactScore) - (a.enhancedImpactScore || a.impactScore);
   });
 }
 
