@@ -41,10 +41,10 @@ function getImpactLabel(impactScore: number): string {
 }
 
 function getGradientClass(impactScore: number): string {
-  if (impactScore >= 2.0) return 'from-red-500/80 to-orange-500/80';
-  if (impactScore >= 1.0) return 'from-orange-500/80 to-amber-500/80';
-  if (impactScore >= 0.5) return 'from-amber-500/80 to-yellow-500/80';
-  return 'from-emerald-500/80 to-teal-500/80';
+  if (impactScore >= 2.0) return 'from-red-500 to-orange-500';
+  if (impactScore >= 1.0) return 'from-orange-500 to-amber-500';
+  if (impactScore >= 0.5) return 'from-amber-500 to-yellow-500';
+  return 'from-emerald-500 to-teal-500';
 }
 
 export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTriggersProps) {
@@ -155,7 +155,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                   backgroundImage: `url(${topTrigger.imageUrl})`,
                 }}
               ></div>
-              <div className={`absolute inset-0 bg-gradient-to-br ${getGradientClass(topTrigger.impactScore)} backdrop-blur-[2px]`}></div>
+              <div className={`absolute inset-0 bg-gradient-to-br ${getGradientClass(topTrigger.impactScore)} opacity-40`}></div>
             </div>
           )}
 
@@ -169,44 +169,29 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
             {/* Top Section */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-sm font-medium">
+                <div className="bg-black/30 backdrop-blur-md px-4 py-1.5 rounded-full text-sm font-semibold border border-white/20 shadow-lg drop-shadow-md">
                   #1 Trigger
                 </div>
               </div>
-              <div className="text-5xl mb-2">{getImpactEmoji(topTrigger.impactScore)}</div>
+              <div className="text-5xl mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">{getImpactEmoji(topTrigger.impactScore)}</div>
             </div>
 
             {/* Bottom Section */}
             <div>
-              <h3 className="text-3xl font-bold mb-2 drop-shadow-lg">
+              <h3 className="text-3xl font-bold mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] [text-shadow:_0_2px_12px_rgb(0_0_0_/_80%)]">
                 {topTrigger.displayName}
               </h3>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg">
-                  <span className="font-semibold">
+              <div className="flex items-center gap-3 text-sm flex-wrap">
+                <div className="bg-black/30 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20 shadow-lg">
+                  <span className="font-semibold drop-shadow-md">
                     Causes bloating {topTrigger.occurrences}/{topTrigger.occurrences} times
                   </span>
                 </div>
-                <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg">
-                  <span className="font-semibold">
+                <div className="bg-black/30 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20 shadow-lg">
+                  <span className="font-semibold drop-shadow-md">
                     +{topTrigger.impactScore.toFixed(1)} avg impact
                   </span>
                 </div>
-              </div>
-
-              {/* Stars for impact */}
-              <div className="mt-3 flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`w-2 h-2 rounded-full ${
-                      i < Math.min(5, Math.ceil(topTrigger.impactScore))
-                        ? 'bg-white'
-                        : 'bg-white/30'
-                    }`}
-                  ></div>
-                ))}
-                <span className="ml-2 text-xs font-medium">{getImpactLabel(topTrigger.impactScore)}</span>
               </div>
             </div>
           </div>
