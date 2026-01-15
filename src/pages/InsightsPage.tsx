@@ -6,10 +6,11 @@ import InsightsLoader from '@/components/shared/InsightsLoader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
-import { CombinedAlternativesAndRecipes } from '@/components/insights/CombinedAlternativesAndRecipes';
+import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
 import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
+import { RecipeSuggester } from '@/components/insights/RecipeSuggester';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -156,17 +157,25 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 4. COMBINED SAFE ALTERNATIVES + RECIPE SUGGESTIONS */}
+          {/* 4. SAFE ALTERNATIVES - Recommendations */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
               style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
             >
-              <CombinedAlternativesAndRecipes
+              <RecommendationCards
                 topTriggers={insights.potentialTriggers.map((t) => t.category)}
               />
             </div>
           )}
+
+          {/* 3.5 RECIPE SUGGESTIONS - Based on safe foods */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}
+          >
+            <RecipeSuggester />
+          </div>
 
           {/* 4. BLOAT HEATMAP CALENDAR */}
           <div
