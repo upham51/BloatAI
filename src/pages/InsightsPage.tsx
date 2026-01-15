@@ -158,13 +158,13 @@ export default function InsightsPage() {
           )}
 
           {/* 4. SAFE ALTERNATIVES - Recommendations */}
-          {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
+          {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
               style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
             >
               <RecommendationCards
-                topTriggers={insights.potentialTriggers.map((t) => t.category)}
+                topTriggers={advancedInsights.triggerConfidence.slice(0, 3).map((t) => t.category)}
               />
             </div>
           )}

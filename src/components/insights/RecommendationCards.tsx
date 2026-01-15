@@ -1,14 +1,21 @@
-import { useState } from 'react';
-import { ChevronRight, Heart, Sparkles, ShoppingBag } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronRight, Heart } from 'lucide-react';
 import { getSafeAlternativesDetailed, type SafeAlternativeItem } from '@/lib/triggerUtils';
 import { getTriggerCategory } from '@/types';
+import { getFoodImage } from '@/lib/pexelsApi';
 
 interface RecommendationCardsProps {
   topTriggers: string[]; // Array of trigger category IDs
 }
 
+interface AlternativeWithImage extends SafeAlternativeItem {
+  imageUrl?: string;
+  photographer?: string;
+}
+
 export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<Record<string, AlternativeWithImage[]>>({});
 
   if (topTriggers.length === 0) {
     return null;
@@ -22,14 +29,49 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
       triggerId,
       triggerName: category?.displayName || triggerId,
       alternatives: alternativesData?.alternatives.slice(0, 6) || [],
-      keyBrands: alternativesData?.keyBrands || [],
-      protip: alternativesData?.protip || 'Swap gradually, one food at a time, to identify what works best for you.',
       color: category?.color || '#7FB069',
       examples: category?.examples || '',
     };
   });
 
   const currentRec = recommendations[currentIndex];
+
+  // Load images for alternatives
+  useEffect(() => {
+    const loadImages = async () => {
+      for (const rec of recommendations) {
+        if (loadedImages[rec.triggerId]) continue;
+
+        const alternativesWithImages = await Promise.all(
+          rec.alternatives.map(async (alt) => {
+            try {
+              // Create very specific search query for each food
+              const specificQuery = getSpecificSearchQuery(alt.name);
+              const imageData = await getFoodImage(specificQuery);
+
+              return {
+                ...alt,
+                imageUrl: imageData?.url,
+                photographer: imageData?.photographer,
+              };
+            } catch (error) {
+              console.error(`Failed to load image for ${alt.name}:`, error);
+              return alt;
+            }
+          })
+        );
+
+        setLoadedImages((prev) => ({
+          ...prev,
+          [rec.triggerId]: alternativesWithImages,
+        }));
+      }
+    };
+
+    loadImages();
+  }, [recommendations]);
+
+  const currentAlternatives = loadedImages[currentRec.triggerId] || currentRec.alternatives;
 
   const handleSwipe = (direction: 'left' | 'right') => {
     if (direction === 'right' && currentIndex < recommendations.length - 1) {
@@ -70,11 +112,10 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
         <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-lavender/10 via-mint/5 to-sage/10 border border-border/50 transition-all duration-300">
           <div className="p-6 space-y-5">
             {/* Header section */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-wide text-primary">
-                  Instead of
+                <span className="text-xs font-bold uppercase tracking-wide text-mint">
+                  INSTEAD OF
                 </span>
               </div>
               <div className="flex items-start gap-3">
@@ -90,7 +131,7 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
             {/* Divider */}
             <div className="h-px bg-border/30" />
 
-            {/* Alternative foods grid */}
+            {/* Alternative foods grid with images */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <span className="text-lg">✨</span>
@@ -98,23 +139,41 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
                   Try these instead:
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                {currentRec.alternatives.map((alt: SafeAlternativeItem, i: number) => (
+              <div className="grid grid-cols-2 gap-3">
+                {currentAlternatives.map((alt: AlternativeWithImage, i: number) => (
                   <div
                     key={i}
-                    className="group p-4 rounded-xl bg-card border border-border/50 hover:border-mint/50 transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer"
+                    className="group relative overflow-hidden rounded-xl border border-border/50 hover:border-mint/50 transition-all hover:scale-[1.02] hover:shadow-lg cursor-pointer h-32"
                   >
-                    <div className="space-y-1">
-                      <span className="text-sm font-semibold text-foreground group-hover:text-mint transition-colors block">
+                    {/* Background Image */}
+                    {alt.imageUrl && (
+                      <div
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-110"
+                        style={{
+                          backgroundImage: `url(${alt.imageUrl})`,
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                      </div>
+                    )}
+
+                    {/* Fallback gradient if no image */}
+                    {!alt.imageUrl && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-mint/20 via-sage/10 to-lavender/20" />
+                    )}
+
+                    {/* Content */}
+                    <div className="relative h-full p-3 flex flex-col justify-end">
+                      <span className="text-sm font-bold text-white drop-shadow-md mb-0.5">
                         {alt.name}
                       </span>
                       {alt.portion && (
-                        <span className="text-xs text-primary font-medium block">
+                        <span className="text-xs text-white/90 font-medium drop-shadow">
                           {alt.portion}
                         </span>
                       )}
                       {alt.notes && (
-                        <span className="text-xs text-muted-foreground block">
+                        <span className="text-xs text-white/80 drop-shadow mt-0.5">
                           {alt.notes}
                         </span>
                       )}
@@ -122,31 +181,6 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Key brands section - only show if brands exist */}
-            {currentRec.keyBrands.length > 0 && (
-              <div className="p-4 rounded-xl bg-lavender/5 border border-lavender/20">
-                <div className="flex items-start gap-2">
-                  <ShoppingBag className="w-4 h-4 text-lavender mt-0.5 flex-shrink-0" />
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-foreground">Recommended Brands:</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {currentRec.keyBrands.join(', ')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Pro tip section */}
-            <div className="p-4 rounded-xl bg-mint/5 border border-mint/20">
-              <p className="text-xs leading-relaxed">
-                <span className="font-bold text-foreground">💚 Pro tip:</span>{' '}
-                <span className="text-muted-foreground">
-                  {currentRec.protip}
-                </span>
-              </p>
             </div>
           </div>
 
@@ -198,4 +232,98 @@ export function RecommendationCards({ topTriggers }: RecommendationCardsProps) {
       </div>
     </div>
   );
+}
+
+/**
+ * Generate very specific search queries for Pexels API
+ * to get accurate food images
+ */
+function getSpecificSearchQuery(foodName: string): string {
+  const name = foodName.toLowerCase();
+
+  // Map food names to very specific Pexels search queries
+  const specificQueries: Record<string, string> = {
+    'sourdough bread': 'artisan sourdough bread loaf sliced',
+    'gluten-free bread': 'gluten free bread sliced toast',
+    'chickpea pasta': 'chickpea pasta bowl cooked',
+    'rice pasta': 'rice pasta gluten free noodles',
+    'white rice': 'white rice bowl steamed jasmine',
+    'quinoa': 'quinoa bowl cooked grain',
+    'garlic-infused oil': 'garlic infused olive oil bottle',
+    'scallions': 'fresh green scallions spring onions',
+    'edamame': 'edamame beans bowl steamed',
+    'canned lentils': 'cooked lentils bowl healthy',
+    'canned chickpeas': 'chickpeas bowl cooked garbanzo',
+    'firm tofu': 'firm tofu block white protein',
+    'tempeh': 'tempeh block fermented soy',
+    'eggs': 'fresh eggs protein breakfast',
+    'cashew milk': 'cashew milk glass dairy free',
+    'almond milk': 'almond milk glass dairy alternative',
+    'coconut milk': 'coconut milk can creamy',
+    'lactose-free milk': 'lactose free milk glass dairy',
+    'hard cheeses': 'hard cheese cheddar parmesan block',
+    'lactose-free yogurt': 'yogurt bowl healthy probiotic',
+    'blueberries': 'fresh blueberries bowl berries',
+    'strawberries': 'fresh strawberries red berries',
+    'raspberries': 'fresh raspberries red berries',
+    'oranges': 'fresh orange citrus fruit sliced',
+    'kiwi': 'kiwi fruit sliced green fresh',
+    'grapes': 'fresh grapes bunch purple green',
+    'pineapple': 'fresh pineapple tropical fruit sliced',
+    'cantaloupe': 'cantaloupe melon sliced orange',
+    'maple syrup': 'pure maple syrup bottle natural',
+    'white/brown sugar': 'white brown sugar bowl granulated',
+    'rice malt syrup': 'rice syrup bottle natural sweetener',
+    'stevia': 'stevia natural sweetener green leaves',
+    'glucose': 'glucose sugar cubes white',
+    'oats': 'rolled oats bowl oatmeal grain',
+    'corn tortillas': 'corn tortillas stack mexican',
+    'bell peppers': 'colorful bell peppers red yellow green',
+    'carrots': 'fresh carrots orange vegetables',
+    'zucchini': 'fresh zucchini green vegetable',
+    'cucumber': 'fresh cucumber sliced green',
+    'spinach': 'fresh spinach leaves green',
+    'eggplant': 'fresh eggplant purple vegetable',
+    'sweet potatoes': 'sweet potato orange roasted',
+    'tomatoes': 'fresh tomatoes red ripe',
+    'bok choy': 'bok choy fresh asian greens',
+    'kale': 'fresh kale leaves green superfood',
+    'grilled chicken breast': 'grilled chicken breast lean protein',
+    'baked salmon': 'baked salmon fillet omega 3',
+    'air-fried options': 'air fryer healthy crispy food',
+    'turkey': 'turkey breast lean meat protein',
+    'cod or tilapia': 'white fish fillet cod tilapia',
+    'olive oil': 'olive oil bottle extra virgin',
+    'still water': 'glass of water fresh hydration',
+    'peppermint tea': 'peppermint tea cup herbal',
+    'ginger tea': 'ginger tea cup fresh root',
+    'rooibos tea': 'rooibos red tea cup herbal',
+    'cranberry juice': 'cranberry juice glass red',
+    'infused water': 'infused water pitcher cucumber mint',
+    'dark chocolate': 'dark chocolate bar cocoa',
+    'lactose-free ice cream': 'ice cream scoop bowl dessert',
+    'plain potato chips': 'potato chips crispy snack',
+    'popcorn': 'popcorn bowl air popped',
+    'rice crackers': 'rice crackers healthy snack',
+    'fresh fruit': 'fresh fruit bowl colorful',
+    'maple syrup treats': 'maple syrup dessert pancakes',
+    'red wine': 'red wine glass pour',
+    'white wine': 'white wine glass chilled',
+    'sparkling wine': 'sparkling wine champagne glass',
+    'vodka': 'vodka bottle clear spirit',
+    'gin': 'gin bottle juniper spirit',
+    'whiskey': 'whiskey glass amber liquor',
+    'tequila': 'tequila shot glass lime',
+    'corn tortilla chips': 'corn tortilla chips bowl salsa',
+    'hard-boiled eggs': 'hard boiled eggs peeled protein',
+    'cheese cubes': 'cheese cubes snack platter',
+  };
+
+  // Return specific query if exists, otherwise construct from name
+  if (specificQueries[name]) {
+    return specificQueries[name];
+  }
+
+  // Fallback: add descriptive keywords to the food name
+  return `${foodName} fresh food healthy meal`;
 }
