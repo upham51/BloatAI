@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { TriggerConfidenceLevel } from '@/lib/insightsAnalysis';
 import { getTriggerCategory } from '@/types';
 import { getFoodImage } from '@/lib/pexelsApi';
-import { Flame, Leaf, ChevronDown, ChevronUp, TrendingUp, Zap } from 'lucide-react';
+import { Flame, Leaf, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, TrendingUp, Zap } from 'lucide-react';
 
 interface SpotifyWrappedTriggersProps {
   triggerConfidence: TriggerConfidenceLevel[];
@@ -51,6 +51,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
   const [topTriggers, setTopTriggers] = useState<TriggerCardData[]>([]);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [imagesLoading, setImagesLoading] = useState(true);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
   useEffect(() => {
     async function loadTriggerData() {
@@ -131,19 +132,41 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
     );
   }
 
-  const topTrigger = topTriggers[0];
+  const topTrigger = topTriggers[currentCardIndex];
+  const totalCards = topTriggers.length;
+
+  const handleNavigate = (direction: 'prev' | 'next') => {
+    if (direction === 'prev' && currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
+      setExpandedIndex(null); // Close expanded details when navigating
+    } else if (direction === 'next' && currentCardIndex < totalCards - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+      setExpandedIndex(null); // Close expanded details when navigating
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Flame className="text-orange-500" size={24} />
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-          Your Top Bloat Triggers
-        </h2>
+      {/* Header with counter */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Flame className="text-orange-500" size={24} />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Your Top Bloat Triggers
+          </h2>
+        </div>
+        {totalCards > 1 && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700">
+            <span className="font-bold text-gray-900 dark:text-white text-sm">
+              {currentCardIndex + 1}
+            </span>
+            <span className="text-xs text-gray-600 dark:text-gray-400">/</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400">{totalCards}</span>
+          </div>
+        )}
       </div>
 
-      {/* Hero Card - #1 Trigger */}
+      {/* Hero Card - Current Trigger */}
       <div className="mb-6">
         <div className="relative overflow-hidden rounded-2xl h-64 group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl bg-gray-100 dark:bg-gray-800">
           {/* Background Image with Overlay */}
@@ -187,11 +210,6 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                     Causes bloating {topTrigger.occurrences}/{topTrigger.occurrences} times
                   </span>
                 </div>
-                <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg">
-                  <span className="font-semibold">
-                    +{topTrigger.impactScore.toFixed(1)} avg impact
-                  </span>
-                </div>
               </div>
 
               {/* Stars for impact */}
@@ -212,12 +230,12 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
           </div>
         </div>
 
-        {/* Expand Button for #1 */}
+        {/* Expand Button for Current Card */}
         <button
-          onClick={() => setExpandedIndex(expandedIndex === 0 ? null : 0)}
+          onClick={() => setExpandedIndex(expandedIndex === currentCardIndex ? null : currentCardIndex)}
           className="w-full mt-3 flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
-          {expandedIndex === 0 ? (
+          {expandedIndex === currentCardIndex ? (
             <>
               <ChevronUp size={16} />
               Hide details
@@ -225,17 +243,17 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
           ) : (
             <>
               <ChevronDown size={16} />
-              Why is this #1?
+              Why is this #{currentCardIndex + 1}?
             </>
           )}
         </button>
 
-        {/* Expanded Details for #1 */}
-        {expandedIndex === 0 && (
+        {/* Expanded Details for Current Card */}
+        {expandedIndex === currentCardIndex && (
           <div className="mt-4 bg-gray-50 dark:bg-gray-900 rounded-xl p-4 space-y-3 animate-in slide-in-from-top duration-200">
             <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <Zap size={16} className="text-orange-500" />
-              Why is {topTrigger.displayName} ranked #1?
+              Why is {topTrigger.displayName} ranked #{currentCardIndex + 1}?
             </h4>
 
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
@@ -254,6 +272,16 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                   <span className="text-xs ml-1">
                     ({topTrigger.personalBaselineAdjustment >= 0 ? '+' : ''}
                     {topTrigger.personalBaselineAdjustment.toFixed(1)} above your baseline)
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <div className="w-1 h-1 rounded-full bg-gray-400 mt-2"></div>
+                <div>
+                  <span className="font-medium">Average impact: +{topTrigger.impactScore.toFixed(1)}</span>
+                  <span className="text-xs ml-1">
+                    ({getImpactLabel(topTrigger.impactScore)})
                   </span>
                 </div>
               </div>
@@ -306,10 +334,60 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
             </div>
           </div>
         )}
+
+        {/* Navigation Arrows */}
+        {totalCards > 1 && (
+          <div className="flex items-center justify-center gap-3 mt-5">
+            <button
+              onClick={() => handleNavigate('prev')}
+              disabled={currentCardIndex === 0}
+              className={`p-3 rounded-full border-2 shadow-lg transition-all ${
+                currentCardIndex === 0
+                  ? 'bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                  : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:scale-110 hover:border-orange-500 dark:hover:border-orange-500'
+              }`}
+              aria-label="Previous trigger"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {/* Navigation dots */}
+            <div className="flex items-center gap-2">
+              {topTriggers.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setCurrentCardIndex(i);
+                    setExpandedIndex(null);
+                  }}
+                  className={`rounded-full transition-all duration-300 ${
+                    i === currentCardIndex
+                      ? 'w-8 h-2.5 bg-orange-500 shadow-sm'
+                      : 'w-2.5 h-2.5 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                  }`}
+                  aria-label={`Go to trigger ${i + 1}`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={() => handleNavigate('next')}
+              disabled={currentCardIndex === totalCards - 1}
+              className={`p-3 rounded-full border-2 shadow-lg transition-all ${
+                currentCardIndex === totalCards - 1
+                  ? 'bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                  : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:scale-110 hover:border-orange-500 dark:hover:border-orange-500'
+              }`}
+              aria-label="Next trigger"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Other Top Triggers - Compact Cards */}
-      {topTriggers.length > 1 && (
+      {topTriggers.length > 1 && false && (
         <div className="overflow-visible">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
             <TrendingUp size={16} />
