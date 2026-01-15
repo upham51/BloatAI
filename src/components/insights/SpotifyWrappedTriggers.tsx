@@ -147,15 +147,16 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
       {/* Hero Card - #1 Trigger */}
       <div className="mb-6">
-        <div className="relative overflow-hidden rounded-2xl h-64 group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+        <div className="relative overflow-hidden rounded-2xl h-64 group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl bg-gray-100 dark:bg-gray-800">
           {/* Background Image with Overlay */}
           {topTrigger.imageUrl && (
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-              style={{
-                backgroundImage: `url(${topTrigger.imageUrl})`,
-              }}
-            >
+            <div className="absolute inset-0 overflow-hidden rounded-2xl">
+              <div
+                className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                style={{
+                  backgroundImage: `url(${topTrigger.imageUrl})`,
+                }}
+              ></div>
               <div className={`absolute inset-0 bg-gradient-to-br ${getGradientClass(topTrigger.impactScore)} backdrop-blur-[2px]`}></div>
             </div>
           )}
@@ -248,7 +249,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex items-start gap-2">
-                <div className="text-green-500 mt-0.5">✓</div>
+                <div className="w-1 h-1 rounded-full bg-gray-400 mt-2"></div>
                 <div>
                   <span className="font-medium">Eaten in {topTrigger.occurrences} meals</span>
                   {topTrigger.percentage > 0 && ` (${topTrigger.percentage}% of your meals)`}
@@ -256,7 +257,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
               </div>
 
               <div className="flex items-start gap-2">
-                <div className="text-green-500 mt-0.5">✓</div>
+                <div className="w-1 h-1 rounded-full bg-gray-400 mt-2"></div>
                 <div>
                   <span className="font-medium">Average bloating: {topTrigger.avgBloatingWith}/5</span>
                   <span className="text-xs ml-1">
@@ -268,7 +269,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
               {topTrigger.consistencyFactor > 0 && (
                 <div className="flex items-start gap-2">
-                  <div className="text-green-500 mt-0.5">✓</div>
+                  <div className="w-1 h-1 rounded-full bg-gray-400 mt-2"></div>
                   <div>
                     <span className="font-medium">
                       Consistency: {Math.round(topTrigger.consistencyFactor * 100)}%
@@ -282,7 +283,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
               {topTrigger.recentOccurrences > 0 && (
                 <div className="flex items-start gap-2">
-                  <div className="text-orange-500 mt-0.5">📈</div>
+                  <div className="w-1 h-1 rounded-full bg-gray-400 mt-2"></div>
                   <div>
                     <span className="font-medium">Recent trend:</span>{' '}
                     {topTrigger.recentOccurrences} times in the last 7 days
@@ -295,7 +296,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
               {topTrigger.topFoods.length > 0 && (
                 <div className="flex items-start gap-2">
-                  <div className="text-blue-500 mt-0.5">🍽️</div>
+                  <div className="w-1 h-1 rounded-full bg-gray-400 mt-2"></div>
                   <div>
                     <span className="font-medium">Common foods:</span>{' '}
                     {topTrigger.topFoods.slice(0, 3).join(', ')}
@@ -318,13 +319,13 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
       {/* Other Top Triggers - Compact Cards */}
       {topTriggers.length > 1 && (
-        <div>
+        <div className="overflow-visible">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
             <TrendingUp size={16} />
             Also watch out for:
           </h3>
-          <div className="space-y-3">
-            {topTriggers.slice(1, 5).map((trigger, idx) => {
+          <div className="space-y-3 pb-2">
+            {topTriggers.slice(1).map((trigger, idx) => {
               const actualIndex = idx + 1;
               const isExpanded = expandedIndex === actualIndex;
 

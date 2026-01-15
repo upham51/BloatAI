@@ -126,10 +126,10 @@ function clearOldCache(): void {
 /**
  * Fetch food image from Pexels API
  */
-async function fetchFromPexels(searchQuery: string): Promise<PexelsPhoto | null> {
+async function fetchFromPexels(searchQuery: string, includeFood: boolean = true): Promise<PexelsPhoto | null> {
   try {
     const params = new URLSearchParams({
-      query: `${searchQuery} food`,
+      query: includeFood ? `${searchQuery} food dish meal` : searchQuery,
       per_page: '1',
       orientation: 'landscape',
     });
@@ -158,22 +158,22 @@ async function fetchFromPexels(searchQuery: string): Promise<PexelsPhoto | null>
 }
 
 /**
- * Get category-specific fallback images
- * These are generic food category images as fallbacks
+ * Get category-specific fallback images with VERY specific keywords
+ * These are designed to get accurate food category images
  */
 const CATEGORY_FALLBACKS: Record<string, string> = {
-  grains: 'bread pasta rice wheat',
-  beans: 'beans legumes lentils',
-  dairy: 'milk cheese yogurt',
-  fruit: 'fresh fruit bowl',
-  sweeteners: 'sugar honey syrup',
-  gluten: 'wheat bread gluten',
-  veggies: 'vegetables fresh produce',
-  'fatty-food': 'fried food greasy',
-  carbonated: 'soda sparkling water',
-  sugar: 'dessert sweet candy',
-  alcohol: 'beer wine drinks',
-  processed: 'snacks packaged food',
+  grains: 'wheat bread pasta rice grains',
+  beans: 'kidney beans lentils chickpeas legumes bowl',
+  dairy: 'milk cheese yogurt dairy products',
+  fruit: 'fresh fruit apple banana orange',
+  sweeteners: 'artificial sweetener packets sugar substitute',
+  gluten: 'wheat gluten bread loaf',
+  veggies: 'broccoli cabbage vegetables fresh',
+  'fatty-food': 'fried chicken greasy burger french fries',
+  carbonated: 'soda can sparkling water bubbles',
+  sugar: 'white sugar cubes dessert cake',
+  alcohol: 'beer glass wine bottle alcoholic beverage',
+  processed: 'packaged snacks chips crackers processed',
 };
 
 /**
@@ -184,24 +184,38 @@ export async function getFoodImage(
   foodName: string,
   category?: string
 ): Promise<{ url: string; photographer: string } | null> {
-  // Check cache first
+  // For categories, use the fallback directly with specific keywords
+  if (category && CATEGORY_FALLBACKS[category]) {
+    const fallbackQuery = CATEGORY_FALLBACKS[category];
+
+    // Check cache for category fallback
+    const cachedCategory = getCachedImage(fallbackQuery);
+    if (cachedCategory) {
+      return cachedCategory;
+    }
+
+    // Fetch using category-specific keywords (no extra "food" needed, already in query)
+    const photo = await fetchFromPexels(fallbackQuery, false);
+
+    if (photo) {
+      const result = {
+        url: photo.src.large,
+        photographer: photo.photographer,
+      };
+
+      cacheImage(fallbackQuery, result.url, result.photographer);
+      return result;
+    }
+  }
+
+  // Fallback: Check cache for food name
   const cached = getCachedImage(foodName);
   if (cached) {
     return cached;
   }
 
   // Try fetching specific food name
-  let photo = await fetchFromPexels(foodName);
-
-  // If not found, try category fallback
-  if (!photo && category && CATEGORY_FALLBACKS[category]) {
-    const cachedCategory = getCachedImage(CATEGORY_FALLBACKS[category]);
-    if (cachedCategory) {
-      return cachedCategory;
-    }
-
-    photo = await fetchFromPexels(CATEGORY_FALLBACKS[category]);
-  }
+  let photo = await fetchFromPexels(foodName, true);
 
   // If still no photo, try just the first word of the food name
   if (!photo) {
@@ -212,7 +226,7 @@ export async function getFoodImage(
         return cachedFirstWord;
       }
 
-      photo = await fetchFromPexels(firstWord);
+      photo = await fetchFromPexels(firstWord, true);
     }
   }
 
