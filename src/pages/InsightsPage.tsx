@@ -8,6 +8,7 @@ import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
+import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
 import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
 import { RecipeSuggester } from '@/components/insights/RecipeSuggester';
 import { useMeals } from '@/contexts/MealContext';
@@ -136,17 +137,27 @@ export default function InsightsPage() {
             </div>
           )}
 
-          {/* 2. TRIGGERS SECTION - Interactive Horizontal Bar Chart */}
+          {/* 2. SPOTIFY WRAPPED TRIGGERS - Premium Cards */}
           {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
             <div
               className="animate-slide-up opacity-0"
               style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
             >
+              <SpotifyWrappedTriggers triggerConfidence={advancedInsights.triggerConfidence} />
+            </div>
+          )}
+
+          {/* 3. DETAILED TRIGGERS - Interactive Horizontal Bar Chart */}
+          {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
+            <div
+              className="animate-slide-up opacity-0"
+              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
+            >
               <InteractiveTriggerAnalysis triggerConfidence={advancedInsights.triggerConfidence} />
             </div>
           )}
 
-          {/* 3. SAFE ALTERNATIVES - Recommendations */}
+          {/* 4. SAFE ALTERNATIVES - Recommendations */}
           {insights?.potentialTriggers && insights.potentialTriggers.length > 0 && (
             <div
               className="animate-slide-up opacity-0"

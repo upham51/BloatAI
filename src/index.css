@@ -703,3 +703,66 @@
 .animate-breathe {
   animation: breathe 4s ease-in-out infinite;
 }
+
+/* Spotify Wrapped Style Animations */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: slideInFromTop 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.slide-in-from-top {
+  animation: slideInFromTop 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Gradient shimmer effect for premium cards */
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+/* Image zoom on hover */
+.hover-zoom-image {
+  overflow: hidden;
+}
+
+.hover-zoom-image img,
+.hover-zoom-image > div {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hover-zoom-image:hover img,
+.hover-zoom-image:hover > div {
+  transform: scale(1.1);
+}
