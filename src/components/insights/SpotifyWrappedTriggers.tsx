@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { TriggerConfidenceLevel } from '@/lib/insightsAnalysis';
 import { getTriggerCategory } from '@/types';
 import { getFoodImage } from '@/lib/pexelsApi';
-import { Flame, Leaf, ChevronDown, ChevronUp, TrendingUp, Calendar, Zap } from 'lucide-react';
+import { Flame, Leaf, ChevronDown, ChevronUp, TrendingUp, Zap } from 'lucide-react';
 
 interface SpotifyWrappedTriggersProps {
   triggerConfidence: TriggerConfidenceLevel[];
@@ -19,7 +19,6 @@ interface TriggerCardData {
   percentage: number;
   topFoods: string[];
   imageUrl: string | null;
-  photographer: string | null;
   consistencyFactor: number;
   frequencyWeight: number;
   recencyBoost: number;
@@ -42,10 +41,10 @@ function getImpactLabel(impactScore: number): string {
 }
 
 function getGradientClass(impactScore: number): string {
-  if (impactScore >= 2.0) return 'from-red-500/90 to-orange-500/90';
-  if (impactScore >= 1.0) return 'from-orange-500/90 to-amber-500/90';
-  if (impactScore >= 0.5) return 'from-amber-500/90 to-yellow-500/90';
-  return 'from-emerald-500/90 to-teal-500/90';
+  if (impactScore >= 2.0) return 'from-red-500/80 to-orange-500/80';
+  if (impactScore >= 1.0) return 'from-orange-500/80 to-amber-500/80';
+  if (impactScore >= 0.5) return 'from-amber-500/80 to-yellow-500/80';
+  return 'from-emerald-500/80 to-teal-500/80';
 }
 
 export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTriggersProps) {
@@ -80,7 +79,6 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
             percentage: trigger.percentage,
             topFoods: trigger.topFoods,
             imageUrl: imageData?.url || null,
-            photographer: imageData?.photographer || null,
             consistencyFactor: trigger.consistencyFactor || 0,
             frequencyWeight: trigger.frequencyWeight || 0,
             recencyBoost: trigger.recencyBoost || 0,
@@ -212,13 +210,6 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
               </div>
             </div>
           </div>
-
-          {/* Photographer Credit */}
-          {topTrigger.photographer && (
-            <div className="absolute bottom-1 right-2 text-[10px] text-white/60">
-              Photo: {topTrigger.photographer}
-            </div>
-          )}
         </div>
 
         {/* Expand Button for #1 */}
@@ -363,12 +354,6 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {trigger.recentOccurrences > 0 && (
-                          <div className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-                            <Calendar size={12} />
-                            Recent
-                          </div>
-                        )}
                         {isExpanded ? (
                           <ChevronUp size={16} className="text-gray-400" />
                         ) : (
@@ -376,13 +361,6 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                         )}
                       </div>
                     </div>
-
-                    {/* Photographer Credit */}
-                    {trigger.photographer && (
-                      <div className="absolute bottom-0.5 right-2 text-[9px] text-gray-400">
-                        Photo: {trigger.photographer}
-                      </div>
-                    )}
                   </div>
 
                   {/* Expanded Details */}
