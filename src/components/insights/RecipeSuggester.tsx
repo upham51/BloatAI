@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { ChefHat, ExternalLink, Clock, Users, Sparkles, Loader2 } from 'lucide-react';
+import { ChefHat, ExternalLink, Clock, Users, Sparkles, Loader2, ChevronRight } from 'lucide-react';
 import { useMeals } from '@/contexts/MealContext';
 import { getSafeFoodRecipes, Recipe } from '@/lib/spoonacularApi';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { isLowBloating } from '@/lib/bloatingUtils';
+import { getSafeAlternativesDetailed } from '@/lib/triggerUtils';
 
 export function RecipeSuggester() {
   const { entries } = useMeals();
@@ -15,36 +16,37 @@ export function RecipeSuggester() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasApiKey, setHasApiKey] = useState(true);
 
-  // Extract safe ingredients from user's low-bloating meals
+  // Handle swipe navigation
+  const handleSwipe = (direction: 'left' | 'right') => {
+    if (direction === 'right' && currentIndex < recipes.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else if (direction === 'left' && currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  // Get safe ingredients from top trigger alternatives
   const getSafeIngredients = (): string[] => {
-    const completedEntries = entries.filter(
-      e => e.rating_status === 'completed' && isLowBloating(e.bloating_rating)
-    );
+    const triggerCategories = getTriggerCategories();
 
-    if (completedEntries.length === 0) return [];
+    if (triggerCategories.length === 0) return [];
 
-    // Extract foods from meal descriptions (simple text analysis)
-    const commonFoods = new Set<string>();
+    // Collect safe alternatives from top 3 triggers
+    const safeIngredients = new Set<string>();
 
-    completedEntries.forEach(entry => {
-      const description = entry.meal_description.toLowerCase();
-
-      // Extract common food keywords
-      const foodKeywords = [
-        'chicken', 'salmon', 'rice', 'quinoa', 'spinach', 'carrot',
-        'zucchini', 'cucumber', 'tomato', 'lettuce', 'egg', 'potato',
-        'sweet potato', 'banana', 'strawberry', 'blueberry', 'oats',
-        'turkey', 'fish', 'tofu', 'kale', 'bell pepper'
-      ];
-
-      foodKeywords.forEach(keyword => {
-        if (description.includes(keyword)) {
-          commonFoods.add(keyword);
-        }
-      });
+    triggerCategories.slice(0, 3).forEach(category => {
+      const alternativesData = getSafeAlternativesDetailed(category);
+      if (alternativesData) {
+        // Extract ingredient names from alternatives
+        alternativesData.alternatives.slice(0, 3).forEach(alt => {
+          // Clean up the name (remove portions and notes)
+          const ingredient = alt.name.toLowerCase();
+          safeIngredients.add(ingredient);
+        });
+      }
     });
 
-    return Array.from(commonFoods).slice(0, 5); // Use top 5 safe ingredients
+    return Array.from(safeIngredients).slice(0, 8); // Use top 8 safe alternatives
   };
 
   // Get trigger categories to exclude
@@ -126,7 +128,7 @@ export function RecipeSuggester() {
           <div>
             <h3 className="font-bold text-foreground text-lg">Recipe Suggestions</h3>
             <p className="text-xs text-muted-foreground">
-              Personalized recipes based on your safe foods
+              Using safe alternatives from your triggers
             </p>
           </div>
         </div>
@@ -186,7 +188,7 @@ export function RecipeSuggester() {
           <div>
             <h3 className="font-bold text-foreground text-lg">Recipe Suggestions</h3>
             <p className="text-xs text-muted-foreground">
-              Based on your safe foods
+              Using safe alternatives from your triggers
             </p>
           </div>
         </div>
@@ -292,6 +294,30 @@ export function RecipeSuggester() {
             ))}
           </div>
         )}
+
+        {/* Swipe arrows - improved design */}
+        {recipes.length > 1 && (
+          <>
+            {currentIndex > 0 && (
+              <button
+                onClick={() => handleSwipe('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 p-3 rounded-full bg-card border-2 border-border/50 shadow-xl hover:scale-110 hover:border-primary/50 transition-all"
+                aria-label="Previous recipe"
+              >
+                <ChevronRight className="w-5 h-5 text-foreground rotate-180" />
+              </button>
+            )}
+            {currentIndex < recipes.length - 1 && (
+              <button
+                onClick={() => handleSwipe('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 p-3 rounded-full bg-card border-2 border-border/50 shadow-xl hover:scale-110 hover:border-primary/50 transition-all"
+                aria-label="Next recipe"
+              >
+                <ChevronRight className="w-5 h-5 text-foreground" />
+              </button>
+            )}
+          </>
+        )}
       </div>
 
       {/* Pro Tip */}
@@ -299,7 +325,7 @@ export function RecipeSuggester() {
         <p className="text-xs leading-relaxed">
           <span className="font-bold text-foreground">💡 Pro tip:</span>{' '}
           <span className="text-muted-foreground">
-            These recipes are suggested based on ingredients from your low-bloating meals. Always check ingredients for your specific triggers!
+            These recipes use safe alternatives from your top triggers. Always check full ingredient lists for any personal sensitivities!
           </span>
         </p>
       </div>
