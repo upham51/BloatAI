@@ -766,3 +766,38 @@
 .hover-zoom-image:hover > div {
   transform: scale(1.1);
 }
+
+/* Weekly Summary Card - Luxurious Design */
+.luxurious-summary {
+  background: linear-gradient(135deg, #faf8f5 0%, #f5f3ef 100%);
+  border: 1px solid rgba(212, 175, 140, 0.2);
+}
+
+.luxurious-summary .narrative {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.luxurious-summary .clinical-text {
+  line-height: 1.7;
+  color: #3a3a3a;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+}
+
+.luxurious-summary .section-title {
+  letter-spacing: 0.3px;
+}
+
+.luxurious-summary .metric-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.luxurious-summary .swap-row .swap-trigger {
+  color: #c07860;
+}
+
+.luxurious-summary .swap-row .swap-alternatives {
+  color: #4a7c59;
+}

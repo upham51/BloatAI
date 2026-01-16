@@ -6,8 +6,12 @@ import InsightsLoader from '@/components/shared/InsightsLoader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
+import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
+import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
+import { RecipeSuggester } from '@/components/insights/RecipeSuggester';
+import { WeeklySummaryCard } from '@/components/WeeklySummaryCard';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -119,6 +123,14 @@ export default function InsightsPage() {
         <div className="absolute top-60 right-5 w-32 h-32 bg-coral/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative p-6 pb-32 max-w-2xl mx-auto space-y-8">
+          {/* 0. WEEKLY SUMMARY CARD - Hero Position */}
+          <div
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}
+          >
+            <WeeklySummaryCard />
+          </div>
+
           {/* 1. HERO SECTION - Bloat Health Score */}
           {insights && (
             <div
