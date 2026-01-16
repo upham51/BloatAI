@@ -1,16 +1,13 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Utensils } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import InsightsLoader from '@/components/shared/InsightsLoader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
-import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
-import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
-import { RecipeSuggester } from '@/components/insights/RecipeSuggester';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -146,36 +143,6 @@ export default function InsightsPage() {
               <SpotifyWrappedTriggers triggerConfidence={advancedInsights.triggerConfidence} />
             </div>
           )}
-
-          {/* 3. DETAILED TRIGGERS - Interactive Horizontal Bar Chart */}
-          {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
-            <div
-              className="animate-slide-up opacity-0"
-              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
-            >
-              <InteractiveTriggerAnalysis triggerConfidence={advancedInsights.triggerConfidence} />
-            </div>
-          )}
-
-          {/* 4. SAFE ALTERNATIVES - Recommendations */}
-          {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
-            <div
-              className="animate-slide-up opacity-0"
-              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
-            >
-              <RecommendationCards
-                topTriggers={advancedInsights.triggerConfidence.slice(0, 3).map((t) => t.category)}
-              />
-            </div>
-          )}
-
-          {/* 3.5 RECIPE SUGGESTIONS - Based on safe foods */}
-          <div
-            className="animate-slide-up opacity-0"
-            style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}
-          >
-            <RecipeSuggester />
-          </div>
 
           {/* 4. BLOAT HEATMAP CALENDAR */}
           <div
