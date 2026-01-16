@@ -3,7 +3,7 @@
  * Fetches high-quality food images with caching and fallbacks
  */
 
-const PEXELS_API_KEY = 'VAV0bPM2tR8obutPU21nYePtMyVOSVw0noMc7uHmBaRwSYBeThciBYvP';
+const PEXELS_API_KEY = import.meta.env.VITE_PEXELS_API_KEY || '';
 const PEXELS_API_URL = 'https://api.pexels.com/v1/search';
 const CACHE_PREFIX = 'pexels_food_';
 const CACHE_EXPIRY_DAYS = 30;
@@ -128,6 +128,11 @@ function clearOldCache(): void {
  */
 async function fetchFromPexels(searchQuery: string, includeFood: boolean = true): Promise<PexelsPhoto | null> {
   try {
+    if (!PEXELS_API_KEY) {
+      console.warn('Pexels API key not configured. Please add VITE_PEXELS_API_KEY to .env');
+      return null;
+    }
+
     const params = new URLSearchParams({
       query: includeFood ? `${searchQuery} food dish meal` : searchQuery,
       per_page: '1',
