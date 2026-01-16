@@ -365,6 +365,24 @@ export interface TriggerConfidenceLevel {
   recentOccurrences?: number; // Occurrences in last 7 days
 }
 
+// Helper interfaces for refactored functions
+interface TriggerStats {
+  occurrences: number;
+  bloatingScores: number[];
+  foods: Set<string>;
+  highBloatingCount: number;
+  recentOccurrences: number;
+}
+
+interface EnhancedMetrics {
+  consistencyFactor: number;
+  frequencyWeight: number;
+  recencyBoost: number;
+  personalBaselineAdjustment: number;
+  weightedAvgWith: number;
+  enhancedImpactScore: number;
+}
+
 export interface CombinationInsight {
   triggers: string[];
   occurrences: number;
@@ -409,6 +427,242 @@ export interface ComprehensiveAdvancedInsights {
   predictedBloating?: number;
 }
 
+// ============================================================
+// HELPER FUNCTIONS FOR TRIGGER CONFIDENCE ANALYSIS
+// ============================================================
+
+// Collects statistics for all trigger categories from meal entries
+function collectTriggerStats(
+  completedEntries: MealEntry[],
+  sevenDaysAgo: Date
+): {
+  triggerStats: Record<string, TriggerStats>;
+  mealsWithoutTrigger: Record<string, number[]>;
+} {
+  const triggerStats: Record<string, TriggerStats> = {};
+  const mealsWithoutTrigger: Record<string, number[]> = {};
+
+  // Initialize stats for ALL categories
+  TRIGGER_CATEGORIES.forEach(categoryInfo => {
+    triggerStats[categoryInfo.id] = {
+      occurrences: 0,
+      bloatingScores: [],
+      foods: new Set(),
+      highBloatingCount: 0,
+      recentOccurrences: 0,
+    };
+    mealsWithoutTrigger[categoryInfo.id] = [];
+  });
+
+  // Collect trigger stats from entries
+  completedEntries.forEach(entry => {
+    const triggersInMeal = new Set<string>();
+    const entryDate = new Date(entry.created_at);
+    const isRecent = entryDate > sevenDaysAgo;
+
+    entry.detected_triggers?.forEach(trigger => {
+      triggersInMeal.add(trigger.category);
+
+      if (entry.bloating_rating) {
+        triggerStats[trigger.category].bloatingScores.push(entry.bloating_rating);
+
+        if (entry.bloating_rating >= 4) {
+          triggerStats[trigger.category].highBloatingCount++;
+        }
+      }
+
+      if (trigger.food) {
+        triggerStats[trigger.category].foods.add(trigger.food);
+      }
+    });
+
+    // Track meals without each trigger
+    TRIGGER_CATEGORIES.forEach(categoryInfo => {
+      if (!triggersInMeal.has(categoryInfo.id) && entry.bloating_rating) {
+        mealsWithoutTrigger[categoryInfo.id].push(entry.bloating_rating);
+      }
+    });
+  });
+
+  // Count occurrences (unique meals with this trigger)
+  completedEntries.forEach(entry => {
+    const counted = new Set<string>();
+    const entryDate = new Date(entry.created_at);
+    const isRecent = entryDate > sevenDaysAgo;
+
+    entry.detected_triggers?.forEach(trigger => {
+      if (!counted.has(trigger.category)) {
+        triggerStats[trigger.category].occurrences++;
+
+        if (isRecent) {
+          triggerStats[trigger.category].recentOccurrences++;
+        }
+
+        counted.add(trigger.category);
+      }
+    });
+  });
+
+  return { triggerStats, mealsWithoutTrigger };
+}
+
+// Calculates how consistently a trigger causes bloating (0.5-1.0)
+function calculateConsistencyFactor(
+  highBloatingCount: number,
+  occurrences: number
+): number {
+  if (occurrences === 0) return 0.5;
+
+  const bloatingRate = highBloatingCount / occurrences;
+  return Math.max(0.5, Math.min(1.0, 0.5 + (bloatingRate * 0.5)));
+}
+
+// Calculates weight based on how frequently the user eats this trigger (0.8-1.5)
+function calculateFrequencyWeight(
+  occurrences: number,
+  totalMeals: number
+): number {
+  if (occurrences === 0 || totalMeals === 0) return 1.0;
+
+  const frequencyRate = occurrences / totalMeals;
+
+  if (frequencyRate >= 0.5) {
+    return 1.5; // Eating in 50%+ of meals
+  } else if (frequencyRate >= 0.25) {
+    return 1.2; // Eating in 25-50% of meals
+  } else if (frequencyRate < 0.1) {
+    return 0.8; // Rarely eating it
+  }
+
+  return 1.0;
+}
+
+// Calculates boost based on recency of occurrences (1.0-1.2)
+function calculateRecencyBoost(
+  recentOccurrences: number,
+  totalOccurrences: number
+): number {
+  if (recentOccurrences === 0 || totalOccurrences === 0) return 1.0;
+
+  const recentRate = recentOccurrences / totalOccurrences;
+
+  if (recentRate >= 0.6) {
+    return 1.2; // 60%+ recent
+  } else if (recentRate >= 0.3) {
+    return 1.1; // 30-60% recent
+  }
+
+  return 1.0;
+}
+
+// Calculates weighted average bloating, giving more weight to severe episodes
+function calculateWeightedAverage(bloatingScores: number[]): number {
+  if (bloatingScores.length === 0) return 0;
+
+  const weightedSum = bloatingScores.reduce((sum, score) => {
+    const weight = score >= 4 ? 1.5 : score >= 3 ? 1.0 : 0.7;
+    return sum + (score * weight);
+  }, 0);
+
+  const totalWeight = bloatingScores.reduce((sum, score) => {
+    const weight = score >= 4 ? 1.5 : score >= 3 ? 1.0 : 0.7;
+    return sum + weight;
+  }, 0);
+
+  return weightedSum / totalWeight;
+}
+
+// Calculates all enhanced metrics for a trigger
+function calculateEnhancedMetrics(
+  stats: TriggerStats,
+  avgWith: number,
+  avgWithout: number,
+  personalBaseline: number,
+  totalMeals: number
+): EnhancedMetrics {
+  const consistencyFactor = calculateConsistencyFactor(
+    stats.highBloatingCount,
+    stats.occurrences
+  );
+
+  const frequencyWeight = calculateFrequencyWeight(
+    stats.occurrences,
+    totalMeals
+  );
+
+  const recencyBoost = calculateRecencyBoost(
+    stats.recentOccurrences,
+    stats.occurrences
+  );
+
+  const personalBaselineAdjustment = avgWith - personalBaseline;
+  const weightedAvgWith = calculateWeightedAverage(stats.bloatingScores);
+
+  const enhancedImpactScore = (weightedAvgWith - avgWithout)
+    * consistencyFactor
+    * frequencyWeight
+    * recencyBoost;
+
+  return {
+    consistencyFactor,
+    frequencyWeight,
+    recencyBoost,
+    personalBaselineAdjustment,
+    weightedAvgWith,
+    enhancedImpactScore,
+  };
+}
+
+// Determines confidence level based on sample size and severity
+function determineConfidenceLevel(
+  occurrences: number,
+  avgWith: number
+): 'high' | 'investigating' | 'needsData' {
+  if (occurrences >= 5 && avgWith >= 3) {
+    return 'high';
+  } else if (occurrences >= 2 && occurrences < 5) {
+    return 'investigating';
+  }
+  return 'needsData';
+}
+
+// Builds the final result object for a trigger category
+function buildTriggerConfidenceResult(
+  categoryId: string,
+  stats: TriggerStats,
+  avgWith: number,
+  avgWithout: number,
+  impactScore: number,
+  confidencePercentage: number,
+  confidence: 'high' | 'investigating' | 'needsData',
+  enhancedMetrics: EnhancedMetrics,
+  totalMeals: number
+): TriggerConfidenceLevel {
+  return {
+    category: categoryId,
+    confidence,
+    confidencePercentage: Math.round(confidencePercentage),
+    occurrences: stats.occurrences,
+    avgBloatingWith: Math.round(avgWith * 10) / 10,
+    avgBloatingWithout: Math.round(avgWithout * 10) / 10,
+    impactScore: Math.round(impactScore * 10) / 10,
+    topFoods: Array.from(stats.foods).slice(0, 3),
+    percentage: totalMeals > 0
+      ? Math.round((stats.occurrences / totalMeals) * 100)
+      : 0,
+    enhancedImpactScore: Math.round(enhancedMetrics.enhancedImpactScore * 100) / 100,
+    consistencyFactor: Math.round(enhancedMetrics.consistencyFactor * 100) / 100,
+    frequencyWeight: Math.round(enhancedMetrics.frequencyWeight * 100) / 100,
+    recencyBoost: Math.round(enhancedMetrics.recencyBoost * 100) / 100,
+    personalBaselineAdjustment: Math.round(enhancedMetrics.personalBaselineAdjustment * 10) / 10,
+    recentOccurrences: stats.recentOccurrences,
+  };
+}
+
+// ============================================================
+// MAIN TRIGGER CONFIDENCE ANALYSIS
+// ============================================================
+
 // Analyze trigger confidence levels
 export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenceLevel[] {
   const completedEntries = entries.filter(e => e.rating_status === 'completed');
@@ -422,229 +676,58 @@ export function analyzeTriggerConfidence(entries: MealEntry[]): TriggerConfidenc
     ? allBloatingScores.reduce((a, b) => a + b, 0) / allBloatingScores.length
     : 2.5;
 
-  // Determine recent entries (last 7 days)
-  const now = new Date();
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  // Determine recent cutoff (last 7 days)
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const triggerStats: Record<string, {
-    occurrences: number;
-    bloatingScores: number[];
-    foods: Set<string>;
-    highBloatingCount: number; // Count of meals with bloating >= 4
-    recentOccurrences: number; // Occurrences in last 7 days
-  }> = {};
+  // Collect all trigger statistics
+  const { triggerStats, mealsWithoutTrigger } = collectTriggerStats(
+    completedEntries,
+    sevenDaysAgo
+  );
 
-  const mealsWithoutTrigger: Record<string, number[]> = {};
-
-  // Initialize stats for ALL categories (including those not yet logged)
-  TRIGGER_CATEGORIES.forEach(categoryInfo => {
-    if (!triggerStats[categoryInfo.id]) {
-      triggerStats[categoryInfo.id] = {
-        occurrences: 0,
-        bloatingScores: [],
-        foods: new Set(),
-        highBloatingCount: 0,
-        recentOccurrences: 0,
-      };
-    }
-    if (!mealsWithoutTrigger[categoryInfo.id]) {
-      mealsWithoutTrigger[categoryInfo.id] = [];
-    }
-  });
-
-  // Collect trigger stats
-  completedEntries.forEach(entry => {
-    const triggersInMeal = new Set<string>();
-    const entryDate = new Date(entry.created_at);
-    const isRecent = entryDate > sevenDaysAgo;
-
-    entry.detected_triggers?.forEach(trigger => {
-      triggersInMeal.add(trigger.category);
-
-      if (!triggerStats[trigger.category]) {
-        triggerStats[trigger.category] = {
-          occurrences: 0,
-          bloatingScores: [],
-          foods: new Set(),
-          highBloatingCount: 0,
-          recentOccurrences: 0,
-        };
-      }
-
-      if (entry.bloating_rating) {
-        triggerStats[trigger.category].bloatingScores.push(entry.bloating_rating);
-
-        // Track high bloating occurrences
-        if (entry.bloating_rating >= 4) {
-          triggerStats[trigger.category].highBloatingCount++;
-        }
-      }
-
-      if (trigger.food) {
-        triggerStats[trigger.category].foods.add(trigger.food);
-      }
-    });
-
-    // Track meals without each trigger (for ALL categories)
-    TRIGGER_CATEGORIES.forEach(categoryInfo => {
-      if (!triggersInMeal.has(categoryInfo.id) && entry.bloating_rating) {
-        if (!mealsWithoutTrigger[categoryInfo.id]) {
-          mealsWithoutTrigger[categoryInfo.id] = [];
-        }
-        mealsWithoutTrigger[categoryInfo.id].push(entry.bloating_rating);
-      }
-    });
-  });
-
-  // Count occurrences (unique meals)
-  completedEntries.forEach(entry => {
-    const counted = new Set<string>();
-    const entryDate = new Date(entry.created_at);
-    const isRecent = entryDate > sevenDaysAgo;
-
-    entry.detected_triggers?.forEach(trigger => {
-      if (!counted.has(trigger.category)) {
-        triggerStats[trigger.category].occurrences++;
-
-        // Count recent occurrences
-        if (isRecent) {
-          triggerStats[trigger.category].recentOccurrences++;
-        }
-
-        counted.add(trigger.category);
-      }
-    });
-  });
-
-  // Create results for all categories, including those not logged yet
+  // Build results for all categories
   const results: TriggerConfidenceLevel[] = TRIGGER_CATEGORIES.map(categoryInfo => {
-    const category = categoryInfo.id;
-    const stats = triggerStats[category];
+    const stats = triggerStats[categoryInfo.id];
 
-    // Calculate averages
-    const avgWith = stats && stats.bloatingScores.length > 0
+    // Calculate basic averages
+    const avgWith = stats.bloatingScores.length > 0
       ? stats.bloatingScores.reduce((a, b) => a + b, 0) / stats.bloatingScores.length
       : 0;
 
-    const withoutScores = mealsWithoutTrigger[category] || [];
+    const withoutScores = mealsWithoutTrigger[categoryInfo.id] || [];
     const avgWithout = withoutScores.length > 0
       ? withoutScores.reduce((a, b) => a + b, 0) / withoutScores.length
       : 0;
 
-    // Calculate Impact Score: (avgBloatingWith - avgBloatingWithout)
     const impactScore = avgWith - avgWithout;
+    const confidencePercentage = Math.min(stats.occurrences / 5, 1.0) * 100;
+    const confidence = determineConfidenceLevel(stats.occurrences, avgWith);
 
-    // Calculate confidence percentage: MIN(occurrences / 5, 1.0) * 100
-    const occurrences = stats?.occurrences || 0;
-    const confidencePercentage = Math.min(occurrences / 5, 1.0) * 100;
+    // Calculate enhanced metrics
+    const enhancedMetrics = calculateEnhancedMetrics(
+      stats,
+      avgWith,
+      avgWithout,
+      personalBaseline,
+      completedEntries.length
+    );
 
-    // Determine confidence level based on sample size and impact
-    let confidence: 'high' | 'investigating' | 'needsData';
-    if (occurrences >= 5 && avgWith >= 3) {
-      confidence = 'high';
-    } else if (occurrences >= 2 && occurrences < 5) {
-      confidence = 'investigating';
-    } else {
-      confidence = 'needsData';
-    }
-
-    // ===== ENHANCED METRICS FOR SPOTIFY WRAPPED UI =====
-
-    // 1. Consistency Factor (0.5 - 1.0)
-    // How reliably does this trigger cause bloating?
-    let consistencyFactor = 0.5;
-    if (stats && occurrences > 0) {
-      const bloatingRate = stats.highBloatingCount / occurrences;
-      consistencyFactor = Math.max(0.5, Math.min(1.0, 0.5 + (bloatingRate * 0.5)));
-    }
-
-    // 2. Frequency Weight (0.8 - 1.5)
-    // How often does the user eat this?
-    let frequencyWeight = 1.0;
-    if (occurrences > 0 && completedEntries.length > 0) {
-      const frequencyRate = occurrences / completedEntries.length;
-      if (frequencyRate >= 0.5) {
-        // Eating it in 50%+ of meals = major problem
-        frequencyWeight = 1.5;
-      } else if (frequencyRate >= 0.25) {
-        // Eating it in 25-50% of meals = significant
-        frequencyWeight = 1.2;
-      } else if (frequencyRate < 0.1) {
-        // Rarely eating it = lower weight
-        frequencyWeight = 0.8;
-      }
-    }
-
-    // 3. Recency Boost (1.0 - 1.2)
-    // Is this trigger happening recently?
-    let recencyBoost = 1.0;
-    const recentOccurrences = stats?.recentOccurrences || 0;
-    if (recentOccurrences > 0 && occurrences > 0) {
-      const recentRate = recentOccurrences / occurrences;
-      if (recentRate >= 0.6) {
-        // 60%+ of occurrences are recent = happening now
-        recencyBoost = 1.2;
-      } else if (recentRate >= 0.3) {
-        // 30-60% recent
-        recencyBoost = 1.1;
-      }
-    }
-
-    // 4. Personal Baseline Adjustment
-    // How much worse is this compared to user's normal?
-    const personalBaselineAdjustment = avgWith - personalBaseline;
-
-    // 5. Weighted Average Impact
-    // Give more weight to severe bloating episodes (4-5 rating)
-    let weightedAvgWith = avgWith;
-    if (stats && stats.bloatingScores.length > 0) {
-      const weightedSum = stats.bloatingScores.reduce((sum, score) => {
-        // Weight severe bloating (4-5) more heavily
-        const weight = score >= 4 ? 1.5 : score >= 3 ? 1.0 : 0.7;
-        return sum + (score * weight);
-      }, 0);
-      const totalWeight = stats.bloatingScores.reduce((sum, score) => {
-        const weight = score >= 4 ? 1.5 : score >= 3 ? 1.0 : 0.7;
-        return sum + weight;
-      }, 0);
-      weightedAvgWith = weightedSum / totalWeight;
-    }
-
-    // 6. Enhanced Impact Score
-    // Combines all factors into one intelligent ranking metric
-    const enhancedImpactScore = (weightedAvgWith - avgWithout)
-      * consistencyFactor
-      * frequencyWeight
-      * recencyBoost;
-
-    return {
-      category,
+    return buildTriggerConfidenceResult(
+      categoryInfo.id,
+      stats,
+      avgWith,
+      avgWithout,
+      impactScore,
+      confidencePercentage,
       confidence,
-      confidencePercentage: Math.round(confidencePercentage),
-      occurrences,
-      avgBloatingWith: Math.round(avgWith * 10) / 10,
-      avgBloatingWithout: Math.round(avgWithout * 10) / 10,
-      impactScore: Math.round(impactScore * 10) / 10,
-      topFoods: stats ? Array.from(stats.foods).slice(0, 3) : [],
-      percentage: completedEntries.length > 0
-        ? Math.round((occurrences / completedEntries.length) * 100)
-        : 0,
-      // Enhanced metrics
-      enhancedImpactScore: Math.round(enhancedImpactScore * 100) / 100,
-      consistencyFactor: Math.round(consistencyFactor * 100) / 100,
-      frequencyWeight: Math.round(frequencyWeight * 100) / 100,
-      recencyBoost: Math.round(recencyBoost * 100) / 100,
-      personalBaselineAdjustment: Math.round(personalBaselineAdjustment * 10) / 10,
-      recentOccurrences,
-    };
+      enhancedMetrics,
+      completedEntries.length
+    );
   });
 
-  // Filter to only include categories that have been logged at least once
+  // Filter to only logged categories and sort by enhanced impact
   const loggedResults = results.filter(r => r.occurrences > 0);
-
   return loggedResults.sort((a, b) => {
-    // Sort by enhanced impact score (highest impact first)
-    // This uses the intelligent ranking that considers consistency, frequency, and recency
     return (b.enhancedImpactScore || b.impactScore) - (a.enhancedImpactScore || a.impactScore);
   });
 }
