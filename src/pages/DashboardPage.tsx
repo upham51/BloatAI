@@ -1,15 +1,12 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Shield, User, TrendingUp, Clock, Activity, Utensils } from 'lucide-react';
+import { Flame, Settings, Shield, User } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
-import { DynamicBackground } from '@/components/ui/DynamicBackground';
-import { MetricCardEnhanced } from '@/components/ui/MetricCardEnhanced';
-import { PercentageChange, calculatePercentageChange } from '@/components/ui/PercentageChange';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
@@ -38,7 +35,7 @@ const FOOD_BACKGROUNDS = [
   '/assets/images/food-backgrounds/food-bg-8.webp',
 ];
 
-// Admin quick access component - Dark Theme
+// Admin quick access component
 function AdminQuickAccess() {
   const { isAdmin, isLoading } = useAdmin();
   const navigate = useNavigate();
@@ -54,9 +51,9 @@ function AdminQuickAccess() {
         variant="ghost"
         size="icon"
         onClick={() => navigate('/admin')}
-        className="w-10 h-10 rounded-2xl bg-indigo-500/20 backdrop-blur-md border border-indigo-400/30 hover:bg-indigo-500/30 shadow-lg transition-all duration-300"
+        className="w-10 h-10 rounded-2xl bg-primary/10 backdrop-blur-sm border border-primary/20 hover:bg-primary/20 shadow-sm transition-all duration-300"
       >
-        <Shield className="w-5 h-5 text-indigo-300" />
+        <Shield className="w-5 h-5 text-primary" />
       </Button>
     </motion.div>
   );
@@ -217,13 +214,10 @@ export default function DashboardPage() {
     <AppLayout>
       <PageTransition>
         <div className="min-h-screen relative">
-          {/* Sonar-Inspired Dark Immersive Background */}
-          <DynamicBackground overlayOpacity={0.75} />
-
-          <StaggerContainer className="relative z-10 px-5 pt-2 pb-28 max-w-lg mx-auto space-y-5 w-full">
-            {/* Header with time-based greeting - Dark Immersive Theme */}
+          <StaggerContainer className="relative z-10 px-5 pt-2 pb-28 max-w-lg mx-auto space-y-4 w-full">
+            {/* Header with time-based greeting */}
             <StaggerItem>
-              <header className="relative mb-2">
+              <header className="relative">
                 {/* Action buttons - absolute positioned in top right */}
                 <div className="absolute top-0 right-0 flex items-center gap-2">
                   <AdminQuickAccess />
@@ -235,73 +229,82 @@ export default function DashboardPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => navigate('/profile')}
-                      className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 shadow-lg transition-all duration-300"
+                      className="w-10 h-10 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm transition-all duration-300"
                     >
-                      <User className="w-5 h-5 text-white" />
+                      <User className="w-5 h-5" />
                     </Button>
                   </motion.div>
                 </div>
 
-                {/* Centered greeting with dark theme */}
-                <div className="flex flex-col items-center text-center gap-2 px-12 pt-4">
-                  <span className="text-base font-medium text-white/70 tracking-tight dark-text-shadow">
+                {/* Centered greeting */}
+                <div className="flex flex-col items-center text-center gap-1 px-12">
+                  <span className="text-lg font-medium text-muted-foreground/80 tracking-tight">
                     {greeting},
                   </span>
-                  <h1 className="text-6xl font-black tracking-tight text-white dark-text-shadow leading-tight">
+                  <h1 className="text-6xl font-black tracking-tight bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent leading-tight">
                     {firstName}
                   </h1>
                 </div>
               </header>
             </StaggerItem>
 
-            {/* Sonar-Inspired Metric Cards */}
+            {/* Main Bloating & Meals Card */}
             {hasEnoughDataForInsights && (
-              <>
-                <StaggerItem>
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Day Streak Card */}
-                    <MetricCardEnhanced
-                      title="Streak"
-                      value={streak}
-                      unit="days"
-                      icon={Flame}
-                      glow={streak > 0}
-                      className="col-span-1"
-                    />
+              <StaggerItem>
+                <motion.div
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="premium-card !bg-transparent p-6 relative overflow-hidden cursor-pointer"
+                >
+              {/* Background Image */}
+              <img
+                src={foodBackground}
+                alt="Food background"
+                className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
+              />
 
-                    {/* Today's Meals Card */}
-                    <MetricCardEnhanced
-                      title="Today"
-                      value={todaysMeals}
-                      unit="meals"
-                      icon={Utensils}
-                      className="col-span-1"
-                    />
+              {/* Gradient overlay for better text contrast */}
+              <div className="absolute inset-0 bg-gradient-to-br from-card/85 via-card/70 to-card/85 pointer-events-none" />
+
+              {/* Content (relative to stack on top of background) */}
+              <div className="relative z-10">
+                {/* Main metric display */}
+                <div className="flex items-center justify-between">
+                  {/* Day Streak */}
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="flex items-center gap-2 mb-2">
+                      <motion.div
+                        animate={{
+                          scale: streak > 0 ? [1, 1.15, 1] : 1,
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: streak > 0 ? Infinity : 0,
+                          ease: 'easeInOut',
+                        }}
+                      >
+                        <Flame className="w-6 h-6 text-coral drop-shadow-sm" />
+                      </motion.div>
+                      <div className="text-5xl font-bold text-coral drop-shadow-sm">
+                        {streak}
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground font-medium">Day Streak</div>
                   </div>
-                </StaggerItem>
 
-                {/* Weekly Bloating Average Card */}
-                <StaggerItem>
-                  <MetricCardEnhanced
-                    title="Weekly Average Bloating"
-                    value={weeklyBloating.toFixed(1)}
-                    unit="/5"
-                    icon={Activity}
-                    progressValue={((5 - weeklyBloating) / 5) * 100}
-                    details={[
-                      {
-                        label: 'Total Meals',
-                        value: completedCount,
-                      },
-                      {
-                        label: 'Days Tracked',
-                        value: daysWithData,
-                      },
-                    ]}
-                    onClick={() => navigate('/insights')}
-                  />
-                </StaggerItem>
-              </>
+                  {/* Divider */}
+                  <div className="w-px h-16 bg-border mx-4" />
+
+                  {/* Today's Meals */}
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="text-5xl font-bold text-foreground mb-2 drop-shadow-sm">
+                      {todaysMeals}
+                    </div>
+                    <div className="text-sm text-muted-foreground font-medium">Meals Today</div>
+                  </div>
+                </div>
+                </div>
+              </motion.div>
+              </StaggerItem>
             )}
 
             {/* Weekly Progress Chart */}
@@ -314,66 +317,73 @@ export default function DashboardPage() {
             {/* Building insights state - show when some meals logged but not enough */}
             {!hasEnoughDataForInsights && completedCount > 0 && (
               <StaggerItem>
-                <div className="dark-immersive-card p-6 text-center">
-                  <span className="text-4xl block mb-3">📊</span>
-                  <h3 className="font-bold text-white mb-2 dark-text-shadow">Building Your Insights</h3>
-                  <p className="text-sm text-white/70 mb-4 dark-text-shadow">
-                    Log meals with bloating ratings across {3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''} to see your weekly trends
-                  </p>
-                  <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden mb-4">
-                    <div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 progress-bar-glow rounded-full transition-all"
-                      style={{ width: `${(daysWithData / 3) * 100}%` }}
-                    />
-                  </div>
-                  <Button
-                    onClick={() => navigate('/add-entry')}
-                    className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all"
-                  >
-                    Log a Meal
-                  </Button>
+                <div className="premium-card p-6 text-center">
+              <span className="text-4xl block mb-3">📊</span>
+              <h3 className="font-bold text-foreground mb-2">Building Your Insights</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Log meals with bloating ratings across {3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''} to see your weekly trends
+              </p>
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                    style={{ width: `${(daysWithData / 3) * 100}%` }}
+                  />
                 </div>
+                <Button
+                  onClick={() => navigate('/add-entry')}
+                  className="bg-primary text-primary-foreground rounded-full px-6"
+                >
+                  Log a Meal
+                </Button>
+              </div>
               </StaggerItem>
             )}
 
-            {/* Pending Rating - Dark Theme */}
+            {/* Pending Rating */}
             {pendingEntry && (
               <StaggerItem>
                 <motion.div
                   initial={{ scale: 0.95, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.3 }}
-                  className="dark-immersive-card p-5"
+                  className="premium-card p-5"
                 >
-                  <p className="font-bold text-white mb-1 dark-text-shadow">Rate your last meal</p>
-                  <p className="text-sm text-white/70 mb-4 line-clamp-1 dark-text-shadow">
-                    {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
-                  </p>
+              <p className="font-bold text-foreground mb-1">Rate your last meal</p>
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-1">
+                {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
+              </p>
 
-                  {/* Number-based rating system */}
-                  <div className="grid grid-cols-5 gap-2">
-                    {[1, 2, 3, 4, 5].map(rating => {
-                      return (
-                        <button
-                          key={rating}
-                          onClick={() => handleRate(rating)}
-                          className="flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-2xl border-2 border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10 transition-all duration-200"
-                        >
-                          <span className="text-2xl font-bold text-white">
-                            {rating}
-                          </span>
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
-                            {RATING_LABELS[rating]}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+              {/* Number-based rating system */}
+              <div className="grid grid-cols-5 gap-2">
+                {[1, 2, 3, 4, 5].map(rating => {
+                  // Dynamic color scoring: 1-2 Green, 3 Amber, 4-5 Coral
+                  const getRatingColor = (r: number) => {
+                    if (r <= 2) return 'border-primary bg-primary text-primary-foreground';
+                    if (r === 3) return 'border-yellow-500 bg-yellow-500 text-white';
+                    return 'border-coral bg-coral text-white';
+                  };
 
-                  <button onClick={handleSkip} className="text-xs text-white/50 mt-3 hover:text-white transition-colors">
-                    Skip for now
-                  </button>
-                </motion.div>
+                  return (
+                    <button
+                      key={rating}
+                      onClick={() => handleRate(rating)}
+                      className="flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30 transition-all duration-200"
+                    >
+                      <span className="text-2xl font-bold text-foreground">
+                        {rating}
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        {RATING_LABELS[rating]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button onClick={handleSkip} className="text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
+                Skip for now
+              </button>
+              </motion.div>
               </StaggerItem>
             )}
 

@@ -1,11 +1,10 @@
 /**
  * Pexels API Service for Food Images
  * Fetches high-quality food images with caching and fallbacks
- * Uses secure Supabase Edge Function to keep API key server-side
  */
 
-import { supabase } from '@/integrations/supabase/client';
-
+const PEXELS_API_KEY = import.meta.env.VITE_PEXELS_API_KEY || '';
+const PEXELS_API_URL = 'https://api.pexels.com/v1/search';
 const CACHE_PREFIX = 'pexels_food_';
 const CACHE_EXPIRY_DAYS = 30;
 
@@ -125,36 +124,34 @@ function clearOldCache(): void {
 }
 
 /**
- * Fetch food image from Pexels API via secure Edge Function
+ * Fetch food image from Pexels API
  */
 async function fetchFromPexels(searchQuery: string, includeFood: boolean = true): Promise<PexelsPhoto | null> {
   try {
-    // Get the current session for authentication
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      console.warn('No active session - Pexels images require authentication');
+    if (!PEXELS_API_KEY) {
+      console.warn('Pexels API key not configured. Please add VITE_PEXELS_API_KEY to .env');
       return null;
     }
 
-    const query = includeFood ? `${searchQuery} food dish meal` : searchQuery;
+    const params = new URLSearchParams({
+      query: includeFood ? `${searchQuery} food dish meal` : searchQuery,
+      per_page: '1',
+      orientation: 'landscape',
+    });
 
-    // Call the secure Edge Function instead of Pexels API directly
-    const { data, error } = await supabase.functions.invoke('pexels-proxy', {
-      body: {
-        query,
-        per_page: 1,
-        orientation: 'landscape',
-        category: includeFood ? 'food' : 'background',
+    const response = await fetch(`${PEXELS_API_URL}?${params}`, {
+      headers: {
+        Authorization: PEXELS_API_KEY,
       },
     });
 
-    if (error) {
-      console.error('Error calling pexels-proxy function:', error);
-      return null;
+    if (!response.ok) {
+      throw new Error(`Pexels API error: ${response.status}`);
     }
 
-    if (data?.photos && data.photos.length > 0) {
+    const data = await response.json();
+
+    if (data.photos && data.photos.length > 0) {
       return data.photos[0];
     }
 
