@@ -9,6 +9,7 @@ import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { RecommendationCards } from '@/components/insights/RecommendationCards';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
+import { SafeAlternativesCards } from '@/components/insights/SafeAlternativesCards';
 import { InteractiveTriggerAnalysis } from '@/components/insights/InteractiveTriggerAnalysis';
 import { RecipeSuggester } from '@/components/insights/RecipeSuggester';
 import { useMeals } from '@/contexts/MealContext';
@@ -147,10 +148,20 @@ export default function InsightsPage() {
             </div>
           )}
 
+          {/* 3. SAFE ALTERNATIVES - Swipable Cards */}
+          {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
+            <div
+              className="animate-slide-up opacity-0"
+              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
+            >
+              <SafeAlternativesCards triggerConfidence={advancedInsights.triggerConfidence} />
+            </div>
+          )}
+
           {/* 4. BLOAT HEATMAP CALENDAR */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
           >
             <BloatHeatmap entries={entries} />
           </div>
@@ -159,7 +170,7 @@ export default function InsightsPage() {
           {insights?.topFoods && insights.topFoods.length > 0 && (
             <div
               className="premium-card p-6 shadow-sm rounded-xl animate-slide-up opacity-0"
-              style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-lavender/30 to-secondary/30">
@@ -194,7 +205,7 @@ export default function InsightsPage() {
           {/* 6. BLOATING GUIDE */}
           <div
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}
           >
             <BloatingGuide />
           </div>
