@@ -33,11 +33,11 @@ function getImpactEmoji(impactScore: number): string {
   return '🌿';
 }
 
-function getImpactLabel(impactScore: number): string {
-  if (impactScore >= 2.0) return 'High Impact';
-  if (impactScore >= 1.0) return 'Moderate Impact';
-  if (impactScore >= 0.5) return 'Mild Impact';
-  return 'Safe Food';
+function getSeverityLabel(impactScore: number): string {
+  if (impactScore >= 2.0) return 'Severe Trigger';
+  if (impactScore >= 1.0) return 'Strong Trigger';
+  if (impactScore >= 0.5) return 'Moderate Trigger';
+  return 'Mild Trigger';
 }
 
 function getGradientClass(impactScore: number): string {
@@ -166,14 +166,9 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
           {/* Content Overlay */}
           <div className="relative h-full flex flex-col justify-between p-6 text-white">
-            {/* Top Section */}
+            {/* Top Section - Impact Emoji */}
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="bg-black/30 backdrop-blur-md px-4 py-1.5 rounded-full text-sm font-semibold border border-white/20 shadow-lg drop-shadow-md">
-                  #1 Trigger
-                </div>
-              </div>
-              <div className="text-5xl mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">{getImpactEmoji(topTrigger.impactScore)}</div>
+              <div className="text-6xl mb-2 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">{getImpactEmoji(topTrigger.impactScore)}</div>
             </div>
 
             {/* Bottom Section */}
@@ -182,14 +177,9 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                 {topTrigger.displayName}
               </h3>
               <div className="flex items-center gap-3 text-sm flex-wrap">
-                <div className="bg-black/30 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20 shadow-lg">
+                <div className="bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-lg border border-white/30 shadow-lg">
                   <span className="font-semibold drop-shadow-md">
-                    Causes bloating {topTrigger.occurrences}/{topTrigger.occurrences} times
-                  </span>
-                </div>
-                <div className="bg-black/30 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20 shadow-lg">
-                  <span className="font-semibold drop-shadow-md">
-                    +{topTrigger.impactScore.toFixed(1)} avg impact
+                    {getSeverityLabel(topTrigger.impactScore)} • {topTrigger.occurrences}/{topTrigger.occurrences} times
                   </span>
                 </div>
               </div>
@@ -333,7 +323,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                             {trigger.displayName}
                           </div>
                           <div className="text-xs text-gray-600 dark:text-gray-400">
-                            +{trigger.impactScore.toFixed(1)} avg impact • {trigger.occurrences} meals
+                            {getSeverityLabel(trigger.impactScore)} • {trigger.occurrences} meals
                           </div>
                         </div>
                       </div>
