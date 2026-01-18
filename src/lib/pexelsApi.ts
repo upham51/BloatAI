@@ -164,21 +164,21 @@ async function fetchFromPexels(searchQuery: string, includeFood: boolean = true)
 
 /**
  * Get category-specific fallback images with VERY specific keywords
- * These are designed to get accurate food category images
+ * These are designed to get accurate, beautiful food category images
  */
 const CATEGORY_FALLBACKS: Record<string, string> = {
-  grains: 'wheat bread pasta rice grains',
-  beans: 'kidney beans lentils chickpeas legumes bowl',
-  dairy: 'milk cheese yogurt dairy products',
-  fruit: 'fresh fruit apple banana orange',
-  sweeteners: 'artificial sweetener packets sugar substitute',
-  gluten: 'wheat gluten bread loaf',
-  veggies: 'broccoli cabbage vegetables fresh',
-  'fatty-food': 'fried chicken greasy burger french fries',
-  carbonated: 'soda can sparkling water bubbles',
-  sugar: 'white sugar cubes dessert cake',
-  alcohol: 'beer glass wine bottle alcoholic beverage',
-  processed: 'packaged snacks chips crackers processed',
+  grains: 'artisan bread crackers pasta golden crispy',
+  beans: 'colorful beans legumes bowl chickpeas lentils',
+  dairy: 'cheese platter milk cream yogurt bowl',
+  fruit: 'fresh fruit bowl colorful berries sliced',
+  sweeteners: 'sugar cubes dessert sweet honey syrup',
+  gluten: 'fresh bread wheat loaf bakery artisan',
+  veggies: 'fresh vegetables colorful broccoli salad greens',
+  'fatty-food': 'fried food crispy golden fries appetizer',
+  carbonated: 'sparkling drink bubbles soda glass fizzy',
+  sugar: 'dessert cake sweet pastry chocolate',
+  alcohol: 'wine glass beer cocktail bar drink',
+  processed: 'snacks chips crackers packaged food',
 };
 
 /**
