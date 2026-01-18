@@ -197,94 +197,126 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
     gradient: 'from-green-400 via-emerald-400 to-teal-400'
   },
   sweeteners: {
-    title: 'Veggies & Other "Healthy" Triggers',
-    description: 'Onions, garlic, certain crucifers, and mushrooms are classic bloat bombs due to FODMAP content.',
+    title: 'Sweeteners & Sugar Alcohols',
+    description: 'Artificial sweeteners (sorbitol, xylitol, mannitol) and high-fructose corn syrup can cause gas and bloating.',
     betterOptions: [
       {
-        title: 'Gentler vegetables',
-        items: ['Carrots', 'Cucumber', 'Eggplant', 'Green beans', 'Lettuce', 'Spinach', 'Zucchini', 'Bell peppers', 'Tomatoes', 'Potatoes']
+        title: 'Better sweeteners',
+        items: ['Pure maple syrup', 'Table sugar (small amounts)', 'Stevia', 'Glucose syrup', 'Rice malt syrup']
       },
       {
-        title: 'Flavor alternatives',
-        items: ['Garlic-infused oil instead of whole garlic or onion']
+        title: 'Avoid these',
+        items: ['Sorbitol', 'Xylitol', 'Mannitol', 'High-fructose corn syrup', 'Agave nectar']
       },
       {
-        title: 'Other swaps',
-        items: ['Still water vs carbonated drinks', 'Baking/grilling vs frying', 'Wine/spirits vs beer']
+        title: 'Natural sweet options',
+        items: ['Low-FODMAP fruits', 'Dark chocolate (small amounts)', 'Vanilla extract']
       }
     ],
     quickRecipes: [
-      { name: 'Asian Chicken Salad', description: 'Shredded chicken + cabbage + bell peppers + cucumber + peanuts with soy-lime-ginger dressing' },
-      { name: 'Brussels Sprout Salad', description: 'Shredded Brussels sprouts + pomegranate seeds + parsley + lemon-mustard vinaigrette' },
-      { name: 'Herbed Popcorn', description: 'Air-popped popcorn + olive oil + rosemary + paprika' }
+      { name: 'Maple-Sweetened Oatmeal', description: 'Rolled oats + maple syrup + cinnamon + blueberries' },
+      { name: 'Dark Chocolate Bark', description: 'Dark chocolate + pumpkin seeds + dried cranberries' },
+      { name: 'Vanilla Chia Pudding', description: 'Chia seeds + almond milk + vanilla + maple syrup + strawberries' }
     ],
-    imageQuery: 'colorful vegetable salad',
-    gradient: 'from-green-400 via-emerald-400 to-teal-400'
+    imageQuery: 'maple syrup natural sweetener',
+    gradient: 'from-yellow-400 via-amber-400 to-orange-400'
   },
   'fatty-food': {
-    title: 'Veggies & Other "Healthy" Triggers',
+    title: 'Fatty & Fried Foods',
     description: 'Fatty and fried foods slow gastric emptying and can worsen bloating.',
     betterOptions: [
       {
         title: 'Cooking methods',
-        items: ['Baking', 'Grilling', 'Air-frying with moderate oil']
+        items: ['Baking', 'Grilling', 'Air-frying with moderate oil', 'Steaming', 'Poaching']
       },
       {
         title: 'Healthier fats',
-        items: ['Extra-virgin olive oil', 'Avocado oil', 'Small portions']
+        items: ['Extra-virgin olive oil', 'Avocado oil', 'Coconut oil (small amounts)']
+      },
+      {
+        title: 'Protein swaps',
+        items: ['Grilled chicken breast', 'Baked fish', 'Lean turkey', 'Tofu']
       }
     ],
     quickRecipes: [
-      { name: 'Asian Chicken Salad', description: 'Shredded chicken + cabbage + bell peppers + cucumber + peanuts with soy-lime-ginger dressing' },
-      { name: 'Brussels Sprout Salad', description: 'Shredded Brussels sprouts + pomegranate seeds + parsley + lemon-mustard vinaigrette' },
-      { name: 'Herbed Popcorn', description: 'Air-popped popcorn + olive oil + rosemary + paprika' }
+      { name: 'Baked Lemon Chicken', description: 'Chicken breast + lemon + herbs + olive oil baked until golden' },
+      { name: 'Grilled Salmon Bowl', description: 'Grilled salmon + quinoa + steamed vegetables + lemon-dill sauce' },
+      { name: 'Air-Fried Sweet Potato Fries', description: 'Sweet potato wedges + light olive oil spray + paprika + salt' }
     ],
     imageQuery: 'grilled chicken healthy',
     gradient: 'from-orange-400 via-amber-400 to-yellow-400'
   },
   carbonated: {
-    title: 'Veggies & Other "Healthy" Triggers',
-    description: 'Carbonated drinks can trap gas in the gut.',
+    title: 'Carbonated Drinks',
+    description: 'Carbonated drinks introduce gas bubbles into the digestive system, which can get trapped and cause bloating.',
     betterOptions: [
       {
         title: 'Better drinks',
-        items: ['Still water', 'Herbal teas', 'Water with citrus slices']
+        items: ['Still water', 'Herbal teas', 'Water with citrus slices', 'Coconut water', 'Fresh juice (diluted)']
+      },
+      {
+        title: 'Avoid these',
+        items: ['Soda', 'Sparkling water', 'Beer', 'Champagne', 'Energy drinks']
+      },
+      {
+        title: 'Flavor ideas',
+        items: ['Mint leaves', 'Lemon/lime slices', 'Cucumber', 'Fresh ginger', 'Berries']
       }
     ],
     quickRecipes: [
-      { name: 'Infused Water', description: 'Still water + lemon + cucumber + mint' },
-      { name: 'Herbal Tea Blend', description: 'Peppermint or ginger tea' }
+      { name: 'Cucumber Mint Water', description: 'Still water + fresh cucumber slices + mint leaves + lemon' },
+      { name: 'Ginger Lemon Tea', description: 'Fresh ginger + hot water + lemon + honey' },
+      { name: 'Berry Infusion', description: 'Still water + crushed strawberries + blueberries + basil' }
     ],
     imageQuery: 'herbal tea mint',
     gradient: 'from-cyan-400 via-blue-400 to-indigo-400'
   },
   alcohol: {
-    title: 'Veggies & Other "Healthy" Triggers',
-    description: 'Beer and sugary cocktails can be especially gassy.',
+    title: 'Alcohol & Cocktails',
+    description: 'Beer and sugary cocktails can be especially gassy. Beer contains carbonation and fermentable carbs, while mixed drinks often have high-fructose mixers.',
     betterOptions: [
       {
-        title: 'If tolerated',
-        items: ['Small amounts of wine or clear spirits with water', 'Avoid beer and sugary cocktails']
+        title: 'If tolerated (small amounts)',
+        items: ['Dry wine (red or white)', 'Clear spirits with water', 'Vodka soda with lime']
+      },
+      {
+        title: 'Avoid these',
+        items: ['Beer', 'Sugary cocktails', 'Sweet mixed drinks', 'Champagne', 'Cider']
+      },
+      {
+        title: 'Better mixers',
+        items: ['Still water', 'Fresh lemon/lime juice', 'Cranberry juice (small amounts)', 'Club soda (if tolerated)']
       }
     ],
     quickRecipes: [
-      { name: 'Simple Wine Spritzer', description: 'Small wine portion + still water' },
+      { name: 'Simple Wine Spritzer', description: 'Small dry wine portion + still water + fresh lemon' },
+      { name: 'Clean Vodka Tonic', description: 'Vodka + still water + lime + fresh mint' },
+      { name: 'Mocktail Alternative', description: 'Sparkling water + muddled berries + lime + mint (if carbonation tolerated)' }
     ],
     imageQuery: 'wine glass elegant',
     gradient: 'from-purple-400 via-violet-400 to-fuchsia-400'
   },
   processed: {
-    title: 'Veggies & Other "Healthy" Triggers',
-    description: 'Highly processed foods can worsen bloating.',
+    title: 'Processed Foods',
+    description: 'Highly processed foods often contain artificial additives, high sodium, unhealthy fats, and hidden FODMAPs that can worsen bloating and digestive discomfort.',
     betterOptions: [
       {
-        title: 'Focus on',
-        items: ['Minimally processed options', 'Lean meats', 'Plain rice', 'Potatoes', 'Simple sauces with herbs, citrus, and olive oil']
+        title: 'Whole food swaps',
+        items: ['Fresh vegetables', 'Lean meats', 'Plain rice', 'Potatoes', 'Fresh fish', 'Eggs']
+      },
+      {
+        title: 'Minimally processed options',
+        items: ['Plain yogurt (lactose-free)', 'Canned beans (rinsed well)', 'Frozen vegetables (no sauce)', 'Plain oats']
+      },
+      {
+        title: 'Cooking from scratch',
+        items: ['Simple sauces with herbs, citrus, and olive oil', 'Homemade salad dressings', 'Fresh-cooked meals']
       }
     ],
     quickRecipes: [
-      { name: 'Simple Grilled Protein', description: 'Chicken or fish + herbs + lemon + olive oil' },
-      { name: 'Rice & Veggie Bowl', description: 'Plain rice + steamed carrots + zucchini + grilled protein' }
+      { name: 'Simple Grilled Protein', description: 'Chicken or fish + fresh herbs + lemon + extra-virgin olive oil' },
+      { name: 'Rice & Veggie Bowl', description: 'Plain white rice + steamed carrots + zucchini + grilled chicken' },
+      { name: 'Homemade Salad Dressing', description: 'Olive oil + lemon juice + Dijon mustard + salt + pepper' }
     ],
     imageQuery: 'simple grilled chicken',
     gradient: 'from-slate-400 via-gray-400 to-zinc-400'
