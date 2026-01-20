@@ -5,6 +5,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
+import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
 import { motion } from 'framer-motion';
@@ -68,7 +69,8 @@ export default function DashboardPage() {
 
   const pendingEntry = getPendingEntry();
   const [greeting, setGreeting] = useState(getTimeBasedGreeting());
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAnimatedOnboarding, setShowAnimatedOnboarding] = useState(false);
+  const [showDataCollection, setShowDataCollection] = useState(false);
 
   // Randomly select a food background image that persists during the session
   const [foodBackground] = useState(() =>
@@ -84,10 +86,10 @@ export default function DashboardPage() {
     img.onerror = () => console.error('❌ Food background failed to load:', foodBackground);
   }, [foodBackground]);
 
-  // Show onboarding if user hasn't completed it
+  // Show animated onboarding first, then data collection for new users
   useEffect(() => {
     if (userProfile && !userProfile.onboarding_completed) {
-      setShowOnboarding(true);
+      setShowAnimatedOnboarding(true);
     }
   }, [userProfile]);
 
@@ -391,13 +393,23 @@ export default function DashboardPage() {
         </div>
       </PageTransition>
 
-      {/* Onboarding Modal - shows for new users */}
+      {/* Animated Onboarding - beautiful intro for new users */}
+      {showAnimatedOnboarding && (
+        <AnimatedOnboarding
+          onComplete={() => {
+            setShowAnimatedOnboarding(false);
+            setShowDataCollection(true);
+          }}
+        />
+      )}
+
+      {/* Data Collection Modal - shows after animated onboarding */}
       {user && (
         <OnboardingModal
-          isOpen={showOnboarding}
+          isOpen={showDataCollection}
           userId={user.id}
           onComplete={() => {
-            setShowOnboarding(false);
+            setShowDataCollection(false);
             refetchProfile();
           }}
         />
