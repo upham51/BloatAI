@@ -316,6 +316,74 @@ export default function DashboardPage() {
               </StaggerItem>
             )}
 
+            {/* Welcome section - show for brand new users with no meals */}
+            {completedCount === 0 && (
+              <>
+                <StaggerItem>
+                  <div className="premium-card p-6 text-center">
+                    <span className="text-5xl block mb-3">👋</span>
+                    <h3 className="font-bold text-foreground text-xl mb-2">Welcome to BloatAI!</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Track your meals and discover patterns in your bloating. Let's start your journey to better digestive health.
+                    </p>
+                    <Button
+                      onClick={() => navigate('/add-entry')}
+                      className="bg-primary text-primary-foreground rounded-full px-8 py-6 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                    >
+                      Log Your First Meal
+                    </Button>
+                  </div>
+                </StaggerItem>
+
+                <StaggerItem>
+                  <div className="premium-card p-6">
+                    <h4 className="font-bold text-foreground mb-4 text-center">How it works</h4>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-lg">🍽️</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">Log your meals</p>
+                          <p className="text-xs text-muted-foreground">Track what you eat throughout the day</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-lg">⏰</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">Rate your bloating</p>
+                          <p className="text-xs text-muted-foreground">After meals, rate your bloating from 1-5</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-lg">📊</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">Discover patterns</p>
+                          <p className="text-xs text-muted-foreground">See insights and trends in your bloating</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </StaggerItem>
+
+                <StaggerItem>
+                  <div className="premium-card p-6 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-2xl">💡</span>
+                      <h4 className="font-bold text-foreground">Pro Tip</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      For best results, log meals consistently for at least 3 days. This helps us identify patterns and provide meaningful insights about your triggers.
+                    </p>
+                  </div>
+                </StaggerItem>
+              </>
+            )}
+
             {/* Building insights state - show when some meals logged but not enough */}
             {!hasEnoughDataForInsights && completedCount > 0 && (
               <StaggerItem>
