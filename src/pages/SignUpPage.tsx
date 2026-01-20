@@ -23,6 +23,7 @@ export default function SignUpPage() {
   // Redirect to dashboard if already logged in
   useEffect(() => {
     if (user) {
+      setIsLoading(false);
       navigate('/dashboard');
     }
   }, [user, navigate]);
@@ -73,11 +74,10 @@ export default function SignUpPage() {
     try {
       await signUp(email, password, name);
       toast.success('Account created successfully!');
-      navigate('/dashboard');
+      // Navigation will happen automatically via useEffect when user state updates
     } catch (error: any) {
       console.error('Sign up error:', error);
       toast.error(error.message || 'Failed to create account');
-    } finally {
       setIsLoading(false);
     }
   };

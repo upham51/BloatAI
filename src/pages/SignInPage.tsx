@@ -16,6 +16,7 @@ export default function SignInPage() {
   // Redirect to dashboard if already logged in
   useEffect(() => {
     if (user) {
+      setIsLoading(false);
       navigate('/dashboard');
     }
   }, [user, navigate]);
@@ -49,11 +50,10 @@ export default function SignInPage() {
     try {
       await signIn(email, password);
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      // Navigation will happen automatically via useEffect when user state updates
     } catch (error: any) {
       console.error('Sign in error:', error);
       toast.error(error.message || 'Invalid email or password');
-    } finally {
       setIsLoading(false);
     }
   };
