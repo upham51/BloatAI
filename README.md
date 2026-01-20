@@ -71,3 +71,30 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Paywall Bypass (for Testing)
+
+This project includes a temporary paywall bypass feature for testing purposes.
+
+### How to Bypass the Paywall
+
+To allow users to sign up and access the app without payment:
+
+1. Open the `.env` file in the project root
+2. Set `VITE_BYPASS_PAYWALL="true"`
+3. Restart the development server (`npm run dev`)
+
+When the bypass is active:
+- All authenticated users will have free access to the app
+- Users are treated as having a free annual plan
+- A yellow banner appears at the top of protected pages indicating bypass is active
+
+### How to Re-enable the Paywall
+
+To turn the paywall back on:
+
+1. Open the `.env` file
+2. Set `VITE_BYPASS_PAYWALL="false"` (or remove the line entirely)
+3. Restart the development server
+
+**Note:** The bypass only affects frontend access control. To permanently grant users free subscriptions (e.g., to grandfather early testers), use the admin panel's subscription management tools after they sign up.
