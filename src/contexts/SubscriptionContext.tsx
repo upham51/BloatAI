@@ -30,6 +30,7 @@ interface SubscriptionContextType {
   isLoading: boolean;
   isInitialLoad: boolean;
   isCheckingOut: boolean;
+  isBypassActive: boolean;
   startCheckout: (planType: 'monthly' | 'annual') => Promise<void>;
   openCustomerPortal: () => Promise<void>;
   refreshSubscription: () => Promise<void>;
@@ -46,6 +47,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
+  // Check if paywall bypass is active via environment variable
+  const isBypassActive = import.meta.env.VITE_BYPASS_PAYWALL === 'true';
+
   const checkSubscription = useCallback(async () => {
     // Wait for auth and admin status to be determined
     if (authLoading || adminLoading) {
@@ -55,6 +59,15 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     if (!user || !session) {
       setStatus('inactive');
       setIsInitialLoad(false);
+      return;
+    }
+
+    // If paywall bypass is active, grant all authenticated users free access
+    if (isBypassActive) {
+      setStatus('active');
+      setPlan('annual'); // Grandfathered into free annual plan
+      setIsInitialLoad(false);
+      console.log('🎉 Paywall bypass active - granting free access');
       return;
     }
 
@@ -95,7 +108,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsInitialLoad(false);
     }
-  }, [user, session, isAdmin, authLoading, adminLoading]);
+  }, [user, session, isAdmin, authLoading, adminLoading, isBypassActive]);
 
   useEffect(() => {
     checkSubscription();
@@ -151,7 +164,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const hasAccess = status === 'active' || isAdmin;
+  const hasAccess = status === 'active' || isAdmin || isBypassActive;
 
   return (
     <SubscriptionContext.Provider
@@ -163,6 +176,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         isLoading: status === 'loading',
         isInitialLoad,
         isCheckingOut,
+        isBypassActive,
         startCheckout,
         openCustomerPortal,
         refreshSubscription: checkSubscription,
