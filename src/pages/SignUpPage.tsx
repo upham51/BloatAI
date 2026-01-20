@@ -71,14 +71,15 @@ export default function SignUpPage() {
 
     setIsLoading(true);
 
-    try {
-      await signUp(email, password, name);
+    const result = await signUp(email, password, name);
+
+    if (result.error) {
+      console.error('Sign up error:', result.error);
+      toast.error(result.error || 'Failed to create account');
+      setIsLoading(false);
+    } else {
       toast.success('Account created successfully!');
       // Navigation will happen automatically via useEffect when user state updates
-    } catch (error: any) {
-      console.error('Sign up error:', error);
-      toast.error(error.message || 'Failed to create account');
-      setIsLoading(false);
     }
   };
 
