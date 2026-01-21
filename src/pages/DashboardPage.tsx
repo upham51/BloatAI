@@ -45,14 +45,14 @@ function AdminQuickAccess() {
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
+      whileHover={{ scale: 1.08, y: -2 }}
       whileTap={{ scale: 0.95 }}
     >
       <Button
         variant="ghost"
         size="icon"
         onClick={() => navigate('/admin')}
-        className="w-10 h-10 rounded-2xl bg-primary/10 backdrop-blur-sm border border-primary/20 hover:bg-primary/20 shadow-sm transition-all duration-300"
+        className="w-11 h-11 rounded-2xl bg-primary/10 backdrop-blur-md border border-primary/30 hover:bg-primary/20 shadow-lg hover:shadow-xl transition-all duration-300"
       >
         <Shield className="w-5 h-5 text-primary" />
       </Button>
@@ -225,67 +225,76 @@ export default function DashboardPage() {
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 className="relative overflow-hidden"
               >
-                {/* Animated gradient background card */}
-                <div className="relative premium-card p-6">
-                  {/* Animated blobs in background */}
-                  <div className="absolute inset-0 overflow-hidden opacity-30">
+                {/* Premium gradient background card with refined styling */}
+                <div className="relative premium-card p-7 shadow-xl border border-border/50">
+                  {/* Sophisticated animated blobs in background */}
+                  <div className="absolute inset-0 overflow-hidden opacity-20">
                     <motion.div
-                      className="absolute w-32 h-32 rounded-full bg-gradient-to-br from-mint to-primary blur-3xl"
+                      className="absolute w-40 h-40 rounded-full bg-gradient-to-br from-mint via-primary to-lavender blur-[80px]"
                       animate={{
-                        x: [0, 30, 0],
-                        y: [0, -20, 0],
-                        scale: [1, 1.1, 1],
+                        x: [0, 40, 0],
+                        y: [0, -30, 0],
+                        scale: [1, 1.15, 1],
                       }}
                       transition={{
-                        duration: 8,
+                        duration: 12,
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
-                      style={{ top: '-20px', right: '-20px' }}
+                      style={{ top: '-30px', right: '-30px' }}
                     />
                     <motion.div
-                      className="absolute w-40 h-40 rounded-full bg-gradient-to-br from-lavender to-mint blur-3xl"
+                      className="absolute w-48 h-48 rounded-full bg-gradient-to-br from-lavender via-mint to-primary blur-[80px]"
                       animate={{
-                        x: [0, -20, 0],
-                        y: [0, 30, 0],
+                        x: [0, -30, 0],
+                        y: [0, 40, 0],
                         scale: [1, 1.2, 1],
                       }}
                       transition={{
-                        duration: 10,
+                        duration: 15,
                         repeat: Infinity,
                         ease: "easeInOut",
-                        delay: 1,
+                        delay: 2,
                       }}
-                      style={{ bottom: '-30px', left: '-30px' }}
+                      style={{ bottom: '-40px', left: '-40px' }}
                     />
                   </div>
 
+                  {/* Subtle overlay for depth */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 pointer-events-none" />
+
                   {/* Content */}
                   <div className="relative z-10">
-                    {/* Action buttons - absolute positioned in top right */}
-                    <div className="absolute -top-2 -right-2 flex items-center gap-2">
+                    {/* Action buttons - refined positioning */}
+                    <div className="absolute -top-3 -right-3 flex items-center gap-2.5">
                       <AdminQuickAccess />
                       <motion.div
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={{ scale: 1.08, y: -2 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => navigate('/profile')}
-                          className="w-10 h-10 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card shadow-sm transition-all duration-300"
+                          className="w-11 h-11 rounded-2xl bg-card/90 backdrop-blur-md border border-border/60 hover:bg-card/95 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary/30"
                         >
-                          <User className="w-5 h-5" />
+                          <User className="w-5 h-5 text-foreground/80" />
                         </Button>
                       </motion.div>
                     </div>
 
                     {/* Centered greeting */}
-                    <div className="flex flex-col items-center text-center gap-2 pt-2">
-                      <span className="text-base font-medium text-muted-foreground/80 tracking-tight">
+                    <div className="flex flex-col items-center text-center gap-1 pt-2">
+                      <span className="text-sm font-medium text-muted-foreground/70 tracking-wide">
                         {greeting},
                       </span>
-                      <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-primary via-mint to-lavender bg-clip-text text-transparent leading-tight">
+                      <h1 className="text-[56px] font-black tracking-tight text-foreground leading-none mt-1" style={{
+                        background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--mint)) 50%, hsl(var(--primary)) 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundSize: '200% auto',
+                      }}>
                         {firstName}
                       </h1>
 
@@ -336,18 +345,19 @@ export default function DashboardPage() {
               </motion.div>
             </StaggerItem>
 
-            {/* Enhanced Stats Cards Row */}
+            {/* Premium Stats Cards Row */}
             {hasEnoughDataForInsights && (
               <StaggerItem>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   {/* Day Streak Card */}
                   <motion.div
-                    whileHover={{ y: -4, scale: 1.02 }}
+                    whileHover={{ y: -6, scale: 1.03 }}
                     whileTap={{ scale: 0.98 }}
-                    className="premium-card p-5 relative overflow-hidden group cursor-pointer"
+                    className="premium-card p-6 relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 border border-border/50"
                   >
-                    {/* Glow effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-coral/10 via-transparent to-coral/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    {/* Enhanced glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-coral/15 via-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-coral/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     <div className="relative z-10 flex flex-col items-center text-center">
                       <motion.div
@@ -393,13 +403,14 @@ export default function DashboardPage() {
 
                   {/* Meals Today Card */}
                   <motion.div
-                    whileHover={{ y: -4, scale: 1.02 }}
+                    whileHover={{ y: -6, scale: 1.03 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => navigate('/add-entry')}
-                    className="premium-card p-5 relative overflow-hidden group cursor-pointer"
+                    className="premium-card p-6 relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 border border-border/50"
                   >
-                    {/* Glow effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-mint/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    {/* Enhanced glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-mint/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     <div className="relative z-10 flex flex-col items-center text-center">
                       <div className="mb-2">
@@ -439,34 +450,57 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
-                    className="premium-card p-8 text-center relative overflow-hidden"
+                    className="premium-card p-9 text-center relative overflow-hidden shadow-xl border border-border/50"
                   >
-                    {/* Animated gradient background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-mint/5 to-lavender/5 animate-gradient" />
+                    {/* Sophisticated animated gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-mint/8 to-lavender/8" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-mint/10" />
 
                     <div className="relative z-10">
                       <motion.div
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        animate={{ y: [0, -12, 0] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                        className="mb-5"
                       >
-                        <span className="text-6xl block mb-4">🌟</span>
+                        <div className="inline-flex items-center justify-center">
+                          <div className="relative">
+                            {/* Glow behind star */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-mint/30 blur-2xl rounded-full scale-150" />
+                            <span className="text-7xl block relative">🌟</span>
+                          </div>
+                        </div>
                       </motion.div>
-                      <h3 className="font-black text-foreground text-2xl mb-3 bg-gradient-to-r from-primary via-mint to-primary bg-clip-text text-transparent">
+                      <h3 className="font-black text-foreground text-3xl mb-4 tracking-tight" style={{
+                        background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--mint)) 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }}>
                         Welcome to BloatAI!
                       </h3>
-                      <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto leading-relaxed">
+                      <p className="text-sm text-muted-foreground/80 mb-7 max-w-sm mx-auto leading-relaxed font-medium">
                         Your personalized journey to better digestive wellness starts here. Track meals, discover patterns, and feel your best.
                       </p>
                       <motion.div
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.03, y: -3 }}
+                        whileTap={{ scale: 0.97 }}
                       >
                         <Button
                           onClick={() => navigate('/add-entry')}
-                          className="bg-gradient-to-r from-primary to-mint text-white rounded-full px-10 py-6 text-base font-bold shadow-elevated hover:shadow-xl transition-all floating-button"
+                          className="relative bg-gradient-to-r from-primary via-mint to-primary text-white rounded-full px-12 py-7 text-base font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group"
+                          style={{ backgroundSize: '200% auto' }}
                         >
-                          <span className="mr-2">🍽️</span>
-                          Log Your First Meal
+                          {/* Shine effect */}
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                            initial={{ x: '-100%' }}
+                            whileHover={{ x: '100%' }}
+                            transition={{ duration: 0.6 }}
+                          />
+                          <span className="relative flex items-center gap-2">
+                            <span className="text-xl">🍽️</span>
+                            Log Your First Meal
+                          </span>
                         </Button>
                       </motion.div>
                     </div>
@@ -474,13 +508,14 @@ export default function DashboardPage() {
                 </StaggerItem>
 
                 <StaggerItem>
-                  <div className="premium-card p-6 relative overflow-hidden">
-                    {/* Subtle gradient background */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-mint/10 to-transparent rounded-full blur-3xl" />
+                  <div className="premium-card p-7 relative overflow-hidden shadow-lg border border-border/50">
+                    {/* Refined gradient background */}
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-mint/15 to-primary/10 rounded-full blur-[80px]" />
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-lavender/10 to-transparent rounded-full blur-[60px]" />
 
                     <div className="relative z-10">
-                      <h4 className="font-bold text-foreground mb-5 text-center text-lg">How it works</h4>
-                      <div className="space-y-4">
+                      <h4 className="font-black text-foreground mb-6 text-center text-xl tracking-tight">How it works</h4>
+                      <div className="space-y-5">
                         {[
                           { icon: '🍽️', title: 'Log your meals', desc: 'Track what you eat throughout the day', color: 'from-primary/20 to-mint/20' },
                           { icon: '⏰', title: 'Rate your bloating', desc: 'After meals, rate your bloating from 1-5', color: 'from-lavender/20 to-primary/20' },
@@ -493,12 +528,12 @@ export default function DashboardPage() {
                             transition={{ delay: 0.3 + index * 0.1 }}
                             className="flex items-start gap-4 group"
                           >
-                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                              <span className="text-xl">{step.icon}</span>
+                            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.color} border border-white/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300 shadow-md`}>
+                              <span className="text-2xl">{step.icon}</span>
                             </div>
-                            <div className="flex-1 pt-1">
-                              <p className="font-bold text-foreground text-sm mb-1">{step.title}</p>
-                              <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
+                            <div className="flex-1 pt-2">
+                              <p className="font-bold text-foreground text-base mb-1.5">{step.title}</p>
+                              <p className="text-xs text-muted-foreground/80 leading-relaxed">{step.desc}</p>
                             </div>
                           </motion.div>
                         ))}
@@ -509,20 +544,21 @@ export default function DashboardPage() {
 
                 <StaggerItem>
                   <motion.div
-                    whileHover={{ y: -4 }}
-                    className="premium-card p-6 relative overflow-hidden border-2 border-primary/20"
+                    whileHover={{ y: -6 }}
+                    className="premium-card p-7 relative overflow-hidden border-2 border-primary/30 shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
-                    {/* Glow effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-mint/5 to-transparent" />
+                    {/* Enhanced glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-mint/10 to-transparent" />
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
 
                     <div className="relative z-10">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary/20 to-mint/20 flex items-center justify-center">
+                      <div className="flex items-center gap-3.5 mb-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/25 to-mint/25 border border-primary/20 flex items-center justify-center shadow-lg">
                           <span className="text-2xl">💡</span>
                         </div>
-                        <h4 className="font-bold text-foreground text-base">Pro Tip</h4>
+                        <h4 className="font-black text-foreground text-lg">Pro Tip</h4>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-sm text-muted-foreground/80 leading-relaxed font-medium">
                         For best results, log meals consistently for at least <span className="font-bold text-primary">3 days</span>. This helps us identify patterns and provide meaningful insights about your triggers.
                       </p>
                     </div>
@@ -537,87 +573,179 @@ export default function DashboardPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="premium-card p-8 text-center relative overflow-hidden"
+                  className="premium-card p-7 text-center relative overflow-hidden"
                 >
-                  {/* Animated gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-mint/5 to-transparent animate-gradient" />
+                  {/* Sophisticated gradient background with multiple layers */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-mint/8 to-lavender/5 opacity-60" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-mint/10" />
 
                   <div className="relative z-10">
+                    {/* Modern icon treatment with glassmorphism */}
                     <motion.div
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      animate={{
+                        y: [0, -6, 0],
+                        rotate: [0, 2, -2, 0]
+                      }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="inline-flex items-center justify-center mb-5"
                     >
-                      <span className="text-5xl block mb-4">📊</span>
+                      <div className="relative">
+                        {/* Glow effect behind icon */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-mint/30 blur-2xl rounded-full scale-150" />
+                        {/* Glass card for icon */}
+                        <div className="relative bg-gradient-to-br from-primary/10 to-mint/10 backdrop-blur-xl border border-white/20 rounded-3xl p-4 shadow-xl">
+                          <svg
+                            className="w-10 h-10 text-primary"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
                     </motion.div>
 
-                    <h3 className="font-bold text-foreground text-xl mb-2 bg-gradient-to-r from-primary to-mint bg-clip-text text-transparent">
+                    <h3 className="font-black text-foreground text-2xl mb-3 tracking-tight" style={{
+                      background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--mint)) 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}>
                       Building Your Insights
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                    <p className="text-sm text-muted-foreground/80 mb-7 max-w-xs mx-auto leading-relaxed font-medium">
                       Log meals with bloating ratings across <span className="font-bold text-primary">{3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''}</span> to unlock your wellness wave
                     </p>
 
-                    {/* Enhanced progress bar */}
-                    <div className="w-full mb-6">
-                      <div className="flex justify-between items-center mb-2 text-xs">
-                        <span className="font-semibold text-muted-foreground">Progress</span>
-                        <span className="font-bold text-primary">{daysWithData}/3 days</span>
+                    {/* Modern progress visualization */}
+                    <div className="w-full mb-7">
+                      <div className="flex justify-between items-center mb-3 text-xs">
+                        <span className="font-bold text-muted-foreground/70 uppercase tracking-wider text-[10px]">Progress</span>
+                        <span className="font-black text-primary text-sm">{daysWithData}<span className="text-muted-foreground/50">/3</span> days</span>
                       </div>
-                      <div className="relative w-full h-3 bg-gradient-to-r from-muted/50 to-muted rounded-full overflow-hidden backdrop-blur-sm">
+
+                      {/* Premium progress bar with depth */}
+                      <div className="relative w-full h-4 bg-gradient-to-r from-muted/30 to-muted/20 rounded-full overflow-hidden backdrop-blur-sm shadow-inner border border-border/30">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${(daysWithData / 3) * 100}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-gradient-to-r from-primary via-mint to-primary rounded-full relative overflow-hidden"
+                          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                          className="h-full bg-gradient-to-r from-primary via-mint to-primary rounded-full relative overflow-hidden shadow-lg"
+                          style={{
+                            boxShadow: '0 2px 8px rgba(var(--primary-rgb), 0.3), inset 0 1px 1px rgba(255,255,255,0.3)'
+                          }}
                         >
-                          {/* Shimmer effect */}
+                          {/* Animated shimmer effect */}
                           <motion.div
                             animate={{ x: ['-100%', '200%'] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                            transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 0.5 }}
+                            className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-12"
                           />
+                          {/* Top highlight */}
+                          <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-full" />
                         </motion.div>
                       </div>
-                      {/* Milestone markers */}
-                      <div className="flex justify-between mt-2">
+
+                      {/* Refined milestone markers */}
+                      <div className="flex justify-between mt-4 px-1">
                         {[1, 2, 3].map((day) => (
-                          <div
+                          <motion.div
                             key={day}
-                            className={`flex flex-col items-center ${
-                              daysWithData >= day ? 'opacity-100' : 'opacity-30'
-                            } transition-opacity`}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.2 + day * 0.1, type: "spring", stiffness: 200 }}
+                            className={`flex flex-col items-center transition-all duration-500 ${
+                              daysWithData >= day ? 'opacity-100' : 'opacity-40'
+                            }`}
                           >
-                            <div className={`w-2 h-2 rounded-full ${
-                              daysWithData >= day ? 'bg-primary animate-pulse' : 'bg-muted-foreground'
-                            }`} />
-                            <span className="text-2xs text-muted-foreground mt-1">Day {day}</span>
-                          </div>
+                            <div className={`relative w-8 h-8 rounded-full flex items-center justify-center ${
+                              daysWithData >= day
+                                ? 'bg-gradient-to-br from-primary to-mint shadow-lg'
+                                : 'bg-muted/50 border-2 border-muted-foreground/20'
+                            } transition-all duration-500`}>
+                              {daysWithData >= day ? (
+                                <motion.svg
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="w-4 h-4 text-white"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth={3}
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </motion.svg>
+                              ) : (
+                                <span className="text-xs font-bold text-muted-foreground/50">{day}</span>
+                              )}
+                              {/* Pulse animation for completed */}
+                              {daysWithData >= day && (
+                                <motion.div
+                                  animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+                                  transition={{ duration: 2, repeat: Infinity }}
+                                  className="absolute inset-0 rounded-full bg-primary"
+                                />
+                              )}
+                            </div>
+                            <span className={`text-[10px] font-semibold mt-2 uppercase tracking-wider ${
+                              daysWithData >= day ? 'text-primary' : 'text-muted-foreground/50'
+                            }`}>
+                              Day {day}
+                            </span>
+                          </motion.div>
                         ))}
                       </div>
                     </div>
 
                     <motion.div
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.03, y: -3 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="relative"
                     >
                       <Button
                         onClick={() => navigate('/add-entry')}
-                        className="bg-gradient-to-r from-primary to-mint text-white rounded-full px-8 py-5 text-base font-bold shadow-elevated hover:shadow-xl transition-all floating-button"
+                        className="relative bg-gradient-to-r from-primary via-mint to-primary text-white rounded-full px-10 py-6 text-base font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group"
+                        style={{
+                          backgroundSize: '200% auto',
+                        }}
                       >
-                        <span className="mr-2">✨</span>
-                        Continue Logging
+                        {/* Shine effect on hover */}
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                          initial={{ x: '-100%' }}
+                          whileHover={{ x: '100%' }}
+                          transition={{ duration: 0.6 }}
+                        />
+                        <span className="relative flex items-center gap-2">
+                          <motion.span
+                            animate={{ rotate: [0, 20, -20, 0] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          >
+                            ✨
+                          </motion.span>
+                          Continue Logging
+                        </span>
                       </Button>
                     </motion.div>
 
-                    {/* Encouraging message */}
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="text-xs text-muted-foreground mt-4"
+                    {/* Encouraging message with better styling */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="mt-5 px-4 py-3 rounded-2xl bg-gradient-to-r from-primary/5 to-mint/5 border border-primary/10"
                     >
-                      You're doing great! Keep it up! 🎉
-                    </motion.p>
+                      <p className="text-xs text-muted-foreground/80 font-medium flex items-center justify-center gap-2">
+                        <span className="text-base">🎉</span>
+                        You're doing great! Keep it up!
+                      </p>
+                    </motion.div>
                   </div>
                 </motion.div>
               </StaggerItem>
@@ -630,15 +758,18 @@ export default function DashboardPage() {
                   initial={{ scale: 0.95, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.3 }}
-                  className="premium-card p-5"
+                  className="premium-card p-6 shadow-xl border border-border/50 relative overflow-hidden"
                 >
-              <p className="font-bold text-foreground mb-1">Rate your last meal</p>
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-1">
+                  {/* Subtle gradient accent */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+              <p className="font-black text-foreground mb-2 text-lg">Rate your last meal</p>
+              <p className="text-sm text-muted-foreground/80 mb-5 line-clamp-1 font-medium">
                 {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
               </p>
 
               {/* Number-based rating system */}
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 gap-2.5">
                 {[1, 2, 3, 4, 5].map(rating => {
                   // Dynamic color scoring: 1-2 Green, 3 Amber, 4-5 Coral
                   const getRatingColor = (r: number) => {
@@ -648,23 +779,25 @@ export default function DashboardPage() {
                   };
 
                   return (
-                    <button
+                    <motion.button
                       key={rating}
+                      whileHover={{ scale: 1.08, y: -3 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => handleRate(rating)}
-                      className="flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30 transition-all duration-200"
+                      className="flex flex-col items-center justify-center gap-2 py-4 px-2 rounded-2xl border-2 border-border/60 bg-card hover:border-primary/40 hover:bg-muted/40 shadow-md hover:shadow-lg transition-all duration-200"
                     >
-                      <span className="text-2xl font-bold text-foreground">
+                      <span className="text-2xl font-black text-foreground">
                         {rating}
                       </span>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/70">
                         {RATING_LABELS[rating]}
                       </span>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
 
-              <button onClick={handleSkip} className="text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
+              <button onClick={handleSkip} className="text-xs text-muted-foreground/70 mt-4 hover:text-foreground transition-colors font-medium">
                 Skip for now
               </button>
               </motion.div>
