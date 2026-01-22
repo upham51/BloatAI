@@ -111,11 +111,28 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, [user, session, isAdmin, authLoading, adminLoading, isBypassActive]);
 
   useEffect(() => {
+    // Check subscription only on mount
+    // Removed aggressive 60-second polling for better performance
     checkSubscription();
 
-    // Auto-refresh every 60 seconds
-    const interval = setInterval(checkSubscription, 60000);
-    return () => clearInterval(interval);
+    // Listen for window focus to check subscription (e.g., after payment in new tab)
+    const handleFocus = () => {
+      checkSubscription();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    // Listen for custom payment success event
+    const handlePaymentSuccess = () => {
+      checkSubscription();
+    };
+
+    window.addEventListener('payment-success', handlePaymentSuccess);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('payment-success', handlePaymentSuccess);
+    };
   }, [checkSubscription]);
 
   const startCheckout = async (planType: 'monthly' | 'annual') => {

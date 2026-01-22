@@ -10,23 +10,47 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { motion } from "framer-motion";
+import { lazy, Suspense } from "react";
+
+// Eager load authentication pages (small, needed immediately)
 import WelcomePage from "./pages/WelcomePage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
-import DashboardPage from "./pages/DashboardPage";
-import AddEntryPage from "./pages/AddEntryPage";
-import HistoryPage from "./pages/HistoryPage";
-import InsightsPage from "./pages/InsightsPage";
-import ProfilePage from "./pages/ProfilePage";
-import PricingPage from "./pages/PricingPage";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminUserSearch from "./pages/admin/AdminUserSearch";
-import AdminErrorLogs from "./pages/admin/AdminErrorLogs";
-import EmojiTest from "./pages/admin/EmojiTest";
-import NotFound from "./pages/NotFound";
-import { BarcodeScanner } from "./components/meals/BarcodeScanner";
 
-const queryClient = new QueryClient();
+// Lazy load main app pages (loaded on demand for better initial performance)
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const AddEntryPage = lazy(() => import("./pages/AddEntryPage"));
+const HistoryPage = lazy(() => import("./pages/HistoryPage"));
+const InsightsPage = lazy(() => import("./pages/InsightsPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const BarcodeScanner = lazy(() => import("./components/meals/BarcodeScanner").then(m => ({ default: m.BarcodeScanner })));
+
+// Lazy load admin pages (rarely used, can load on demand)
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminUserSearch = lazy(() => import("./pages/admin/AdminUserSearch"));
+const AdminErrorLogs = lazy(() => import("./pages/admin/AdminErrorLogs"));
+const EmojiTest = lazy(() => import("./pages/admin/EmojiTest"));
+
+// Lazy load error page
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Configure React Query for optimal caching and performance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Cache data for 5 minutes before considering it stale
+      staleTime: 5 * 60 * 1000,
+      // Keep unused data in cache for 30 minutes
+      gcTime: 30 * 60 * 1000,
+      // Don't refetch on window focus (prevents unnecessary requests)
+      refetchOnWindowFocus: false,
+      // Retry failed queries 3 times with exponential backoff
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+  },
+});
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -106,13 +130,35 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Loading fallback for lazy-loaded components
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 0.4,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
+        <div className="relative">
+          <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/" element={<PublicRoute><WelcomePage /></PublicRoute>} />
-      <Route path="/signin" element={<PublicRoute><SignInPage /></PublicRoute>} />
-      <Route path="/signup" element={<PublicRoute><SignUpPage /></PublicRoute>} />
-      <Route path="/pricing" element={<PricingPage />} />
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        <Route path="/" element={<PublicRoute><WelcomePage /></PublicRoute>} />
+        <Route path="/signin" element={<PublicRoute><SignInPage /></PublicRoute>} />
+        <Route path="/signup" element={<PublicRoute><SignUpPage /></PublicRoute>} />
+        <Route path="/pricing" element={<PricingPage />} />
       <Route path="/dashboard" element={<ProtectedRoute><SubscriptionGate><DashboardPage /></SubscriptionGate></ProtectedRoute>} />
       <Route path="/add-entry" element={<ProtectedRoute><SubscriptionGate><AddEntryPage /></SubscriptionGate></ProtectedRoute>} />
       <Route path="/barcode-scanner" element={<ProtectedRoute><SubscriptionGate><BarcodeScanner /></SubscriptionGate></ProtectedRoute>} />
@@ -125,6 +171,7 @@ function AppRoutes() {
       <Route path="/admin/emoji-test" element={<AdminRoute><EmojiTest /></AdminRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
   );
 }
 

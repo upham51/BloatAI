@@ -42,7 +42,7 @@ type FilterType = 'all' | 'high-bloating' | 'this-week';
 
 export default function HistoryPage() {
   const navigate = useNavigate();
-  const { entries, deleteEntry, updateRating, skipRating, updateEntry } = useMeals();
+  const { entries, deleteEntry, updateRating, skipRating, updateEntry, hasMore, loadMore, isLoading: entriesLoading } = useMeals();
   const { toast } = useToast();
 
   const [filter, setFilter] = useState<FilterType>('all');
@@ -336,6 +336,27 @@ export default function HistoryPage() {
               </div>
             ))}
           </div>
+
+          {/* Load More Button */}
+          {hasMore && filteredEntries.length > 0 && (
+            <div className="flex justify-center mt-6">
+              <Button
+                onClick={loadMore}
+                disabled={entriesLoading}
+                variant="outline"
+                className="premium-card px-6 py-3 font-semibold"
+              >
+                {entriesLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  'Load More'
+                )}
+              </Button>
+            </div>
+          )}
 
           {/* Empty State */}
           {filteredEntries.length === 0 && (
