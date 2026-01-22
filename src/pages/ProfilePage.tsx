@@ -9,6 +9,7 @@ import { useSubscription, STRIPE_PLANS } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { GrainTexture } from '@/components/ui/grain-texture';
+import { StorageManager } from '@/components/profile/StorageManager';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -188,6 +189,11 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Storage Management Section */}
+          <div className="animate-slide-up opacity-0" style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
+            <StorageManager />
           </div>
 
           {/* Account Section */}

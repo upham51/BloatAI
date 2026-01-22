@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
 import { retryWithBackoff } from '@/lib/bloatingUtils';
+import { localPhotoStorage } from '@/lib/localPhotoStorage';
 
 interface MealContextType {
   entries: MealEntry[];
@@ -134,12 +135,27 @@ export function MealProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteEntry = async (id: string) => {
+    // Find the entry to get the photo reference
+    const entry = entries.find(e => e.id === id);
+
     const { error } = await supabase
       .from('meal_entries')
       .delete()
       .eq('id', id);
 
     if (error) throw error;
+
+    // Delete photo from local storage if it exists
+    if (entry?.photo_url) {
+      try {
+        await localPhotoStorage.deletePhoto(entry.photo_url);
+        console.log('✅ Photo deleted from local storage:', entry.photo_url);
+      } catch (error) {
+        console.error('Failed to delete photo from local storage:', error);
+        // Don't throw - entry is already deleted from DB
+      }
+    }
+
     setEntries(prev => prev.filter(entry => entry.id !== id));
   };
 
