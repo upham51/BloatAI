@@ -766,9 +766,7 @@ function EntryCard({
 
   return (
     <div
-      className={`premium-card overflow-hidden animate-slide-up opacity-0 relative ${
-        isPending ? 'ring-2 ring-coral/30 ring-offset-1 ring-offset-background' : ''
-      }`}
+      className="premium-card overflow-hidden animate-slide-up opacity-0 relative group cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
       {/* Color-coded vertical bar on far right edge */}
