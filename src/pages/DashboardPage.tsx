@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Settings, Shield, User } from 'lucide-react';
+import { Flame, Settings, Shield, User, Sparkles, BarChart3, Compass } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -223,7 +223,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                className="relative overflow-hidden rounded-[2rem] h-48"
+                className="relative overflow-hidden rounded-[2rem] h-40"
               >
                 {/* Dramatic gradient background - Pink to Purple to Peach */}
                 <div className="absolute inset-0 bg-gradient-to-br from-pink-200/60 via-purple-200/50 to-peach-200/60" />
@@ -263,9 +263,9 @@ export default function DashboardPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => navigate('/profile')}
-                          className="w-11 h-11 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/80 hover:bg-white shadow-lg hover:shadow-xl transition-all duration-300"
+                          className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary/20 via-lavender/20 to-purple-400/20 backdrop-blur-sm border border-white/80 hover:from-primary/30 hover:via-lavender/30 hover:to-purple-400/30 shadow-lg hover:shadow-xl transition-all duration-300"
                         >
-                          <User className="w-5 h-5" />
+                          <Sparkles className="w-5 h-5 text-primary" />
                         </Button>
                       </motion.div>
                     </div>
@@ -278,13 +278,13 @@ export default function DashboardPage() {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="text-sm font-bold text-foreground/60 tracking-wide uppercase"
                       >
-                        {greeting} 👋
+                        {greeting}
                       </motion.span>
                       <motion.h1
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3, duration: 0.5 }}
-                        className="text-5xl font-black tracking-tight text-foreground leading-tight"
+                        className="text-6xl font-black tracking-tight text-foreground leading-tight drop-shadow-sm"
                       >
                         {firstName}
                       </motion.h1>
@@ -680,9 +680,6 @@ export default function DashboardPage() {
                         </Button>
                       </motion.div>
 
-                      <p className="text-xs text-muted-foreground font-semibold mt-4">
-                        Keep up the great work! 🎉
-                      </p>
                     </div>
                   </div>
                 </motion.div>
