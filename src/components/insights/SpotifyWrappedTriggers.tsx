@@ -71,7 +71,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
           return {
             category: trigger.category,
             displayName: categoryInfo?.displayName || trigger.category,
-            emoji: categoryInfo?.emoji || '🍽️',
+            emoji: '🍽️',
             impactScore: trigger.impactScore,
             enhancedImpactScore: trigger.enhancedImpactScore || trigger.impactScore,
             occurrences: trigger.occurrences,

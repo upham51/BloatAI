@@ -13,8 +13,8 @@ interface AnimatedOnboardingProps {
 export function AnimatedOnboarding({ onComplete }: AnimatedOnboardingProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
-    draggable: true,
-    skipSnaps: false
+    skipSnaps: false,
+    watchDrag: true
   });
 
   const [currentIndex, setCurrentIndex] = useState(0);

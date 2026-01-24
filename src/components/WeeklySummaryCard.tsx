@@ -41,9 +41,9 @@ export function WeeklySummaryCard() {
           <EmptyState
             title="Not enough data yet"
             description="Track at least 3 meals this week to generate your summary."
-            actionText="Log a meal"
-            actionHref="/log"
-            icon={<Calendar className="h-12 w-12 text-gray-300" />}
+            actionLabel="Log a meal"
+            onAction={() => window.location.href = '/log'}
+            IconComponent={Calendar}
           />
         </CardContent>
       </Card>
