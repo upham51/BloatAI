@@ -38,7 +38,7 @@ export const MeshGradientBackground: React.FC<MeshGradientBackgroundProps> = ({
   const colors = colorSchemes[variant];
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div className="fixed inset-0 -z-10 overflow-hidden bg-transparent">
       {/* Blob 1 - Top Left */}
       <motion.div
         className="absolute rounded-full blur-3xl"
