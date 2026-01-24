@@ -9,6 +9,7 @@ import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import { MeshGradientBackground } from "@/components/ui/mesh-gradient-background";
 import { motion } from "framer-motion";
 import { lazy, Suspense } from "react";
 
@@ -56,7 +57,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -81,7 +82,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -108,7 +109,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading || isAdminLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -133,7 +134,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 // Loading fallback for lazy-loaded components
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -178,6 +179,7 @@ function AppRoutes() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <MeshGradientBackground variant="balanced" />
       <Toaster />
       <Sonner />
       <BrowserRouter>

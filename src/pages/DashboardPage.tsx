@@ -8,7 +8,6 @@ import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
-import { MeshGradientBackground } from '@/components/ui/mesh-gradient-background';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
@@ -217,9 +216,6 @@ export default function DashboardPage() {
     <AppLayout>
       <PageTransition>
         <div className="min-h-screen relative">
-          {/* Mesh Gradient Background */}
-          <MeshGradientBackground variant="balanced" />
-
           <StaggerContainer className="relative z-10 px-5 pt-2 pb-28 max-w-lg mx-auto space-y-5 w-full">
             {/* Enhanced Hero Section with Gradient Card */}
             <StaggerItem>
