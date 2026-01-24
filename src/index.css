@@ -439,6 +439,59 @@
   animation: slideUp 2.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Premium Card Reveal Animation - Ultra smooth slide up from bottom */
+@keyframes cardReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  40% {
+    opacity: 0.8;
+    transform: translateY(20%);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-2%);
+  }
+  85% {
+    transform: translateY(1%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-reveal {
+  animation: cardReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Premium content reveal animation with spring physics */
+@keyframes premiumReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1.01);
+    filter: blur(0);
+  }
+  80% {
+    transform: translateY(2px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-premium-reveal {
+  animation: premiumReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .animate-scale-in {
   animation: scaleIn 1.0s ease-out;
 }
