@@ -459,7 +459,7 @@ export default function DashboardPage() {
                       Keep up the great work!
                     </p>
                   </div>
-                </motion.div>
+                </div>
               </StaggerItem>
             )}
 
