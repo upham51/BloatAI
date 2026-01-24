@@ -89,7 +89,8 @@ export default {
       },
       fontFamily: {
         sans: [
-          "SF Pro Display",
+          "Nunito",
+          "SF Pro Rounded",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
