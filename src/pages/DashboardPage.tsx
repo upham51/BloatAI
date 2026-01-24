@@ -8,6 +8,7 @@ import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
+import { MeshGradientBackground } from '@/components/ui/mesh-gradient-background';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
@@ -216,6 +217,9 @@ export default function DashboardPage() {
     <AppLayout>
       <PageTransition>
         <div className="min-h-screen relative">
+          {/* Mesh Gradient Background */}
+          <MeshGradientBackground variant="balanced" />
+
           <StaggerContainer className="relative z-10 px-5 pt-2 pb-28 max-w-lg mx-auto space-y-5 w-full">
             {/* Enhanced Hero Section with Gradient Card */}
             <StaggerItem>
@@ -250,15 +254,14 @@ export default function DashboardPage() {
                       </motion.div>
                     </div>
 
-                    {/* Centered greeting */}
-                    <div className="flex flex-col items-center text-center gap-2 pt-2">
-                      <span className="text-base font-medium text-muted-foreground/80 tracking-tight">
+                    {/* Left-aligned greeting with improved typography hierarchy */}
+                    <div className="flex flex-col items-start gap-1 pt-2">
+                      <span className="text-sm font-medium text-muted-foreground/70 tracking-tight">
                         {greeting},
                       </span>
-                      <h1 className="text-5xl font-black tracking-tight text-foreground leading-tight drop-shadow-sm">
+                      <h1 className="text-4xl font-bold tracking-tight text-foreground leading-tight">
                         {firstName}
                       </h1>
-
                     </div>
                   </div>
                 </div>
@@ -353,39 +356,49 @@ export default function DashboardPage() {
                 </StaggerItem>
 
                 <StaggerItem>
-                  <div className="premium-card p-6">
-                    <h4 className="font-semibold text-foreground mb-5 text-lg">How it works</h4>
-                    <div className="space-y-4">
+                  <div>
+                    <h4 className="font-bold text-foreground mb-4 text-lg px-1">How it works</h4>
+                    <div className="grid grid-cols-3 gap-3">
                       {[
-                        { icon: '🍽️', title: 'Log your meals', desc: 'Track what you eat throughout the day' },
-                        { icon: '⏰', title: 'Rate your bloating', desc: 'After meals, rate your bloating from 1-5' },
-                        { icon: '📊', title: 'Discover patterns', desc: 'See insights and trends in your bloating' },
-                      ].map((step) => (
-                        <div key={step.title} className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <span className="text-xl">{step.icon}</span>
+                        { icon: '🍽️', title: 'Log', desc: 'Track meals', bg: 'bg-gradient-to-br from-mint/40 to-mint/20' },
+                        { icon: '⏰', title: 'Rate', desc: 'Score bloating', bg: 'bg-gradient-to-br from-peach/40 to-peach/20' },
+                        { icon: '📊', title: 'Patterns', desc: 'See insights', bg: 'bg-gradient-to-br from-lavender/40 to-lavender/20' },
+                      ].map((step, index) => (
+                        <motion.div
+                          key={step.title}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1, duration: 0.4 }}
+                          className="glass-card p-5 hover:scale-105 transition-transform duration-300 cursor-default"
+                        >
+                          <div className="flex flex-col items-center text-center gap-3">
+                            <div className={`w-14 h-14 rounded-2xl ${step.bg} flex items-center justify-center`}>
+                              <span className="text-2xl">{step.icon}</span>
+                            </div>
+                            <div>
+                              <p className="font-bold text-foreground text-sm mb-0.5">{step.title}</p>
+                              <p className="text-xs text-muted-foreground leading-snug">{step.desc}</p>
+                            </div>
                           </div>
-                          <div className="flex-1 pt-1">
-                            <p className="font-semibold text-foreground text-sm mb-1">{step.title}</p>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
-                          </div>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   </div>
                 </StaggerItem>
 
                 <StaggerItem>
-                  <div className="premium-card p-6 border border-primary/20">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <div className="glass-card p-5 border border-primary/20">
+                    <div className="flex items-start gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-2xl">💡</span>
                       </div>
-                      <h4 className="font-semibold text-foreground text-base">Pro Tip</h4>
+                      <div className="flex-1 pt-1">
+                        <h4 className="font-bold text-foreground text-sm mb-1.5">Pro Tip</h4>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Log meals consistently for at least <span className="font-bold text-primary">3 days</span> to identify patterns and get meaningful insights.
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      For best results, log meals consistently for at least <span className="font-semibold text-primary">3 days</span>. This helps identify patterns and provide meaningful insights about your triggers.
-                    </p>
                   </div>
                 </StaggerItem>
               </>
