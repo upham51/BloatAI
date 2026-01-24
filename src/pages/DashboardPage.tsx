@@ -8,6 +8,7 @@ import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
+import { MeshGradientBackground } from '@/components/ui/mesh-gradient-background';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
@@ -216,6 +217,9 @@ export default function DashboardPage() {
     <AppLayout>
       <PageTransition>
         <div className="min-h-screen relative">
+          {/* Mesh Gradient Background */}
+          <MeshGradientBackground variant="balanced" />
+
           <StaggerContainer className="relative z-10 px-5 pt-2 pb-28 max-w-lg mx-auto space-y-5 w-full">
             {/* Enhanced Hero Section with Gradient Card */}
             <StaggerItem>
@@ -250,15 +254,14 @@ export default function DashboardPage() {
                       </motion.div>
                     </div>
 
-                    {/* Centered greeting */}
-                    <div className="flex flex-col items-center text-center gap-2 pt-2">
-                      <span className="text-base font-medium text-muted-foreground/80 tracking-tight">
+                    {/* Left-aligned greeting with improved typography hierarchy */}
+                    <div className="flex flex-col items-start gap-1 pt-2">
+                      <span className="text-sm font-medium text-muted-foreground/70 tracking-tight">
                         {greeting},
                       </span>
-                      <h1 className="text-5xl font-black tracking-tight text-foreground leading-tight drop-shadow-sm">
+                      <h1 className="text-4xl font-bold tracking-tight text-foreground leading-tight">
                         {firstName}
                       </h1>
-
                     </div>
                   </div>
                 </div>
