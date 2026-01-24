@@ -48,7 +48,14 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      await signIn(email, password);
+      const { error } = await signIn(email, password);
+
+      if (error) {
+        toast.error(error);
+        setIsLoading(false);
+        return;
+      }
+
       toast.success('Welcome back!');
       // Navigation will happen automatically via useEffect when user state updates
     } catch (error: any) {

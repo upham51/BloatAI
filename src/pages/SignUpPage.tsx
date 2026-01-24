@@ -72,7 +72,14 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
-      await signUp(email, password, name);
+      const { error } = await signUp(email, password, name);
+
+      if (error) {
+        toast.error(error);
+        setIsLoading(false);
+        return;
+      }
+
       toast.success('Account created successfully!');
       // Navigation will happen automatically via useEffect when user state updates
     } catch (error: any) {
