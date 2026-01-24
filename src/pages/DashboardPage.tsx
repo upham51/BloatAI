@@ -216,152 +216,183 @@ export default function DashboardPage() {
     <AppLayout>
       <PageTransition>
         <div className="min-h-screen relative">
-          <StaggerContainer className="relative z-10 px-5 pt-2 pb-28 max-w-lg mx-auto space-y-4 w-full">
-            {/* STUNNING Hero Section - Large Gradient Card */}
+          <StaggerContainer className="relative z-10 px-5 pt-4 pb-32 max-w-lg mx-auto space-y-5 w-full">
+            {/* PREMIUM Hero Section - Ultra-polished Gradient Card */}
             <StaggerItem>
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                className="relative overflow-hidden rounded-[2rem] h-40"
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="relative overflow-hidden rounded-[2.5rem] h-48 shadow-2xl shadow-purple-500/10"
               >
-                {/* Dramatic gradient background - Pink to Purple to Peach */}
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-200/60 via-purple-200/50 to-peach-200/60" />
+                {/* Enhanced gradient background with more depth */}
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-100/80 via-purple-100/70 to-blue-100/80" />
 
-                {/* Animated gradient blobs */}
+                {/* Multiple animated gradient orbs for depth */}
+                <motion.div
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    x: [0, 25, 0],
+                    y: [0, -15, 0],
+                  }}
+                  transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-purple-400/30 to-pink-400/25 rounded-full blur-3xl"
+                />
+
                 <motion.div
                   animate={{
                     scale: [1, 1.2, 1],
-                    x: [0, 20, 0],
-                    y: [0, -10, 0],
+                    x: [0, -20, 0],
+                    y: [0, 15, 0],
                   }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-br from-lavender/40 to-purple-300/30 rounded-full blur-3xl"
+                  transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                  className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-blue-400/25 to-teal-300/20 rounded-full blur-3xl"
                 />
 
                 <motion.div
                   animate={{
-                    scale: [1, 1.1, 1],
-                    x: [0, -15, 0],
-                    y: [0, 10, 0],
+                    scale: [1, 1.15, 1],
+                    rotate: [0, 180, 360],
                   }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                  className="absolute -bottom-20 -left-20 w-60 h-60 bg-gradient-to-tr from-mint/30 to-sky/25 rounded-full blur-3xl"
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 bg-gradient-to-br from-lavender/20 to-mint/15 rounded-full blur-2xl"
                 />
 
-                {/* Glassmorphic card overlay */}
-                <div className="relative h-full backdrop-blur-xl bg-white/40 border border-white/60">
-                  <div className="relative h-full p-6 flex flex-col justify-between">
-                    {/* Action buttons - top right */}
-                    <div className="absolute top-4 right-4 flex items-center gap-2">
+                {/* Premium glassmorphic overlay */}
+                <div className="relative h-full backdrop-blur-2xl bg-white/50 border-2 border-white/70 shadow-inner">
+                  <div className="relative h-full p-7 flex flex-col justify-between">
+                    {/* Action buttons - top right with enhanced styling */}
+                    <div className="absolute top-5 right-5 flex items-center gap-2.5">
                       <AdminQuickAccess />
                       <motion.div
-                        whileHover={{ scale: 1.08 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.08, rotate: 5 }}
+                        whileTap={{ scale: 0.96 }}
                       >
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => navigate('/profile')}
-                          className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary/20 via-lavender/20 to-purple-400/20 backdrop-blur-sm border border-white/80 hover:from-primary/30 hover:via-lavender/30 hover:to-purple-400/30 shadow-lg hover:shadow-xl transition-all duration-300"
+                          className="w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-white/80 via-white/60 to-white/80 backdrop-blur-md border-2 border-white/90 hover:from-white/90 hover:via-white/70 hover:to-white/90 shadow-xl hover:shadow-2xl transition-all duration-300"
                         >
-                          <Sparkles className="w-5 h-5 text-primary" />
+                          <Sparkles className="w-5 h-5 text-primary drop-shadow-sm" />
                         </Button>
                       </motion.div>
                     </div>
 
-                    {/* Greeting */}
-                    <div className="flex flex-col items-start gap-1">
+                    {/* Greeting with enhanced typography */}
+                    <div className="flex flex-col items-start gap-1.5 pr-16">
                       <motion.span
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2, duration: 0.5 }}
-                        className="text-sm font-bold text-foreground/60 tracking-wide uppercase"
+                        transition={{ delay: 0.2, duration: 0.6 }}
+                        className="text-[0.7rem] font-extrabold text-foreground/50 tracking-[0.15em] uppercase"
                       >
                         {greeting}
                       </motion.span>
                       <motion.h1
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3, duration: 0.5 }}
-                        className="text-6xl font-black tracking-tight text-foreground leading-tight drop-shadow-sm"
+                        transition={{ delay: 0.3, duration: 0.6 }}
+                        className="text-7xl font-black tracking-tight text-foreground leading-[0.9] drop-shadow-lg"
+                        style={{
+                          textShadow: '0 2px 20px rgba(0,0,0,0.08)'
+                        }}
                       >
                         {firstName}
                       </motion.h1>
                     </div>
 
-                    {/* Quick stat */}
-                    {hasEnoughDataForInsights && (
+                    {/* Enhanced stats - always show for better UX */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5, duration: 0.6 }}
+                      className="flex items-center gap-3"
+                    >
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4, duration: 0.5 }}
-                        className="flex items-center gap-3"
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        className="flex items-center gap-2.5 px-5 py-3 rounded-[1.25rem] bg-white/90 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-orange-500/10"
                       >
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-white/80 shadow-lg">
-                          <span className="text-2xl">🔥</span>
-                          <div className="flex flex-col">
-                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Streak</span>
-                            <span className="text-lg font-black text-foreground">{streak} days</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-white/80 shadow-lg">
-                          <span className="text-2xl">🍽️</span>
-                          <div className="flex flex-col">
-                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Today</span>
-                            <span className="text-lg font-black text-foreground">{todaysMeals}</span>
-                          </div>
+                        <span className="text-3xl drop-shadow-sm">🔥</span>
+                        <div className="flex flex-col leading-tight">
+                          <span className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Streak</span>
+                          <span className="text-xl font-black text-foreground">{streak} <span className="text-sm font-bold text-muted-foreground">days</span></span>
                         </div>
                       </motion.div>
-                    )}
+                      <motion.div
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        className="flex items-center gap-2.5 px-5 py-3 rounded-[1.25rem] bg-white/90 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-blue-500/10"
+                      >
+                        <span className="text-3xl drop-shadow-sm">🍽️</span>
+                        <div className="flex flex-col leading-tight">
+                          <span className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Today</span>
+                          <span className="text-xl font-black text-foreground">{todaysMeals}</span>
+                        </div>
+                      </motion.div>
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>
             </StaggerItem>
 
-            {/* BENTO GRID - Modern Layout with Varying Card Sizes */}
+            {/* PREMIUM BENTO GRID - Next-level Layout */}
             {hasEnoughDataForInsights && (
               <>
-                {/* Quick Actions Grid - 2 columns */}
+                {/* Quick Actions Grid - Enhanced spacing */}
                 <StaggerItem>
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Log Meal - Large CTA Card */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Log Meal - Ultra-Premium CTA Card */}
                     <motion.div
-                      whileHover={{ scale: 1.03, y: -4 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ scale: 1.04, y: -6 }}
+                      whileTap={{ scale: 0.97 }}
                       onClick={() => navigate('/add-entry')}
-                      className="relative overflow-hidden rounded-3xl cursor-pointer group col-span-2 h-32"
+                      className="relative overflow-hidden rounded-[2rem] cursor-pointer group col-span-2 h-36 shadow-2xl shadow-teal-500/20"
                     >
-                      {/* Gradient background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-mint/60 via-sky/50 to-primary/60" />
+                      {/* Multi-layer gradient background */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-teal-100/80 via-cyan-100/70 to-blue-100/80" />
 
-                      {/* Animated blob */}
+                      {/* Multiple animated orbs for depth */}
+                      <motion.div
+                        animate={{
+                          scale: [1, 1.3, 1],
+                          x: [0, 20, 0],
+                          rotate: [0, 90, 0],
+                        }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute -right-12 -top-12 w-48 h-48 bg-gradient-to-br from-primary/25 to-teal-400/20 rounded-full blur-2xl"
+                      />
+
                       <motion.div
                         animate={{
                           scale: [1, 1.2, 1],
-                          x: [0, 15, 0],
+                          x: [0, -10, 0],
                         }}
-                        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute -right-10 -top-10 w-40 h-40 bg-primary/20 rounded-full blur-2xl"
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        className="absolute -left-8 -bottom-8 w-40 h-40 bg-gradient-to-tr from-mint/20 to-sky/15 rounded-full blur-2xl"
                       />
 
-                      {/* Glass overlay */}
-                      <div className="relative h-full backdrop-blur-xl bg-white/50 border border-white/70 group-hover:bg-white/60 transition-all duration-300">
-                        <div className="h-full p-5 flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                              <span className="text-4xl">✨</span>
-                            </div>
+                      {/* Premium glass overlay */}
+                      <div className="relative h-full backdrop-blur-2xl bg-white/60 border-2 border-white/80 group-hover:bg-white/70 transition-all duration-500">
+                        <div className="h-full px-6 py-5 flex items-center justify-between">
+                          <div className="flex items-center gap-5">
+                            <motion.div
+                              whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
+                              transition={{ duration: 0.5 }}
+                              className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-white/90 to-white/70 flex items-center justify-center shadow-xl shadow-teal-500/20 border-2 border-white/95"
+                            >
+                              <span className="text-5xl drop-shadow-lg">✨</span>
+                            </motion.div>
                             <div className="text-left">
-                              <h3 className="text-2xl font-black text-foreground mb-0.5">Log a Meal</h3>
-                              <p className="text-sm font-semibold text-foreground/60">Track your wellness</p>
+                              <h3 className="text-3xl font-black text-foreground mb-1 tracking-tight" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>Log a Meal</h3>
+                              <p className="text-sm font-bold text-foreground/60">Track your wellness</p>
                             </div>
                           </div>
                           <motion.div
-                            animate={{ x: [0, 4, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                            animate={{ x: [0, 6, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            className="mr-2"
                           >
-                            <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <svg className="w-7 h-7 text-primary drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                             </svg>
                           </motion.div>
@@ -369,43 +400,63 @@ export default function DashboardPage() {
                       </div>
                     </motion.div>
 
-                    {/* Insights Card */}
+                    {/* Insights Card - Enhanced */}
                     <motion.div
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ scale: 1.06, y: -4 }}
+                      whileTap={{ scale: 0.97 }}
                       onClick={() => navigate('/insights')}
-                      className="relative overflow-hidden rounded-3xl cursor-pointer group h-28"
+                      className="relative overflow-hidden rounded-[1.75rem] cursor-pointer group h-36 shadow-xl shadow-purple-500/15"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-lavender/50 to-purple-200/50" />
-                      <div className="relative h-full backdrop-blur-xl bg-white/50 border border-white/70 group-hover:bg-white/60 transition-all duration-300">
-                        <div className="h-full p-4 flex flex-col justify-between">
-                          <div className="w-12 h-12 rounded-2xl bg-lavender/30 flex items-center justify-center">
-                            <BarChart3 className="w-6 h-6 text-purple-600" strokeWidth={2.5} />
-                          </div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-100/80 via-pink-100/70 to-lavender/80" />
+
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+                        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                        className="absolute -right-8 -top-8 w-32 h-32 bg-purple-400/20 rounded-full blur-2xl"
+                      />
+
+                      <div className="relative h-full backdrop-blur-2xl bg-white/60 border-2 border-white/80 group-hover:bg-white/70 transition-all duration-500">
+                        <div className="h-full p-5 flex flex-col justify-between">
+                          <motion.div
+                            whileHover={{ rotate: 5, scale: 1.1 }}
+                            className="w-14 h-14 rounded-[1.25rem] bg-white/80 flex items-center justify-center shadow-lg shadow-purple-500/20 border-2 border-white/90"
+                          >
+                            <BarChart3 className="w-7 h-7 text-purple-600 drop-shadow-sm" strokeWidth={2.5} />
+                          </motion.div>
                           <div>
-                            <h3 className="text-lg font-black text-foreground">Insights</h3>
-                            <p className="text-xs font-semibold text-foreground/50">View patterns</p>
+                            <h3 className="text-xl font-black text-foreground tracking-tight">Insights</h3>
+                            <p className="text-xs font-bold text-foreground/60 mt-0.5">View patterns</p>
                           </div>
                         </div>
                       </div>
                     </motion.div>
 
-                    {/* History Card */}
+                    {/* History Card - Enhanced */}
                     <motion.div
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ scale: 1.06, y: -4 }}
+                      whileTap={{ scale: 0.97 }}
                       onClick={() => navigate('/history')}
-                      className="relative overflow-hidden rounded-3xl cursor-pointer group h-28"
+                      className="relative overflow-hidden rounded-[1.75rem] cursor-pointer group h-36 shadow-xl shadow-orange-500/15"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-peach/50 to-orange-200/50" />
-                      <div className="relative h-full backdrop-blur-xl bg-white/50 border border-white/70 group-hover:bg-white/60 transition-all duration-300">
-                        <div className="h-full p-4 flex flex-col justify-between">
-                          <div className="w-12 h-12 rounded-2xl bg-peach/30 flex items-center justify-center">
-                            <Compass className="w-6 h-6 text-orange-600" strokeWidth={2.5} />
-                          </div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-orange-100/80 via-peach/70 to-amber-100/80" />
+
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1], x: [0, 15, 0] }}
+                        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute -left-8 -bottom-8 w-32 h-32 bg-orange-400/20 rounded-full blur-2xl"
+                      />
+
+                      <div className="relative h-full backdrop-blur-2xl bg-white/60 border-2 border-white/80 group-hover:bg-white/70 transition-all duration-500">
+                        <div className="h-full p-5 flex flex-col justify-between">
+                          <motion.div
+                            whileHover={{ rotate: -5, scale: 1.1 }}
+                            className="w-14 h-14 rounded-[1.25rem] bg-white/80 flex items-center justify-center shadow-lg shadow-orange-500/20 border-2 border-white/90"
+                          >
+                            <Compass className="w-7 h-7 text-orange-600 drop-shadow-sm" strokeWidth={2.5} />
+                          </motion.div>
                           <div>
-                            <h3 className="text-lg font-black text-foreground">History</h3>
-                            <p className="text-xs font-semibold text-foreground/50">Past meals</p>
+                            <h3 className="text-xl font-black text-foreground tracking-tight">History</h3>
+                            <p className="text-xs font-bold text-foreground/60 mt-0.5">Past meals</p>
                           </div>
                         </div>
                       </div>
@@ -415,29 +466,43 @@ export default function DashboardPage() {
               </>
             )}
 
-            {/* Weekly Progress Chart - Enhanced Bento Card */}
+            {/* Weekly Progress Chart - Ultra-Premium Card */}
             {hasEnoughDataForInsights && (
               <StaggerItem>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.6 }}
-                  className="relative overflow-hidden rounded-3xl"
+                  transition={{ delay: 0.3, duration: 0.7 }}
+                  className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-blue-500/10"
                 >
-                  {/* Subtle gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-sky/20 via-mint/15 to-primary/20" />
+                  {/* Enhanced gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/90 via-teal-50/80 to-cyan-50/90" />
 
-                  {/* Glass overlay */}
-                  <div className="relative backdrop-blur-xl bg-white/60 border border-white/80">
-                    <div className="p-5">
-                      <div className="flex items-center justify-between mb-4">
+                  {/* Animated gradient orb */}
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      x: [0, 30, 0],
+                      y: [0, -20, 0],
+                    }}
+                    transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-16 -right-16 w-48 h-48 bg-gradient-to-br from-blue-400/15 to-teal-400/10 rounded-full blur-3xl"
+                  />
+
+                  {/* Premium glass overlay */}
+                  <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/90">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-5">
                         <div>
-                          <h2 className="text-xl font-black text-foreground">Weekly Progress</h2>
-                          <p className="text-xs font-semibold text-muted-foreground">Your wellness journey</p>
+                          <h2 className="text-2xl font-black text-foreground tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>Weekly Progress</h2>
+                          <p className="text-xs font-bold text-muted-foreground/70 mt-1">Your wellness journey</p>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                          <span className="text-2xl">📊</span>
-                        </div>
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          className="w-14 h-14 rounded-[1.25rem] bg-white/90 border-2 border-white/95 flex items-center justify-center shadow-lg shadow-blue-500/10"
+                        >
+                          <span className="text-3xl drop-shadow-sm">📊</span>
+                        </motion.div>
                       </div>
                       <WeeklyProgressChart entries={entries} />
                     </div>
@@ -446,55 +511,61 @@ export default function DashboardPage() {
               </StaggerItem>
             )}
 
-            {/* Enhanced Welcome section - show for brand new users with no meals */}
+            {/* Ultra-Premium Welcome section - show for brand new users with no meals */}
             {completedCount === 0 && (
               <>
-                {/* Hero Welcome Card */}
+                {/* Hero Welcome Card - Stunning Design */}
                 <StaggerItem>
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    className="relative overflow-hidden rounded-[2rem] min-h-[200px]"
+                    transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-purple-500/15"
                   >
-                    {/* Dramatic gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-mint/20 to-sky/30" />
+                    {/* Multi-layer gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-100/80 via-pink-100/70 to-blue-100/80" />
 
-                    {/* Animated blobs */}
+                    {/* Multiple animated gradient orbs */}
                     <motion.div
-                      animate={{ scale: [1, 1.3, 1], rotate: [0, 90, 0] }}
-                      transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute -top-20 -right-20 w-60 h-60 bg-mint/20 rounded-full blur-3xl"
+                      animate={{ scale: [1, 1.4, 1], rotate: [0, 120, 0] }}
+                      transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-purple-400/20 to-pink-400/15 rounded-full blur-3xl"
                     />
 
-                    {/* Glass overlay */}
-                    <div className="relative backdrop-blur-xl bg-white/50 border border-white/70">
-                      <div className="p-8 text-center">
+                    <motion.div
+                      animate={{ scale: [1, 1.3, 1], rotate: [0, -90, 0] }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                      className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-blue-400/15 to-teal-400/10 rounded-full blur-3xl"
+                    />
+
+                    {/* Premium glass overlay */}
+                    <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80">
+                      <div className="p-10 text-center">
                         <motion.div
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                          animate={{ y: [0, -10, 0], rotate: [0, 5, -5, 0] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                         >
-                          <span className="text-6xl block mb-4">🌟</span>
+                          <span className="text-7xl block mb-5 drop-shadow-lg">🌟</span>
                         </motion.div>
-                        <h3 className="font-black text-foreground text-3xl mb-3 tracking-tight">
+                        <h3 className="font-black text-foreground text-4xl mb-4 tracking-tight" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.06)' }}>
                           Welcome to BloatAI
                         </h3>
-                        <p className="text-sm text-muted-foreground font-semibold mb-6 max-w-sm mx-auto leading-relaxed">
+                        <p className="text-base text-muted-foreground font-bold mb-8 max-w-md mx-auto leading-relaxed">
                           Track your meals, discover patterns, and improve your digestive wellness.
                         </p>
                         <motion.div
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.98 }}
+                          whileHover={{ scale: 1.06, y: -3 }}
+                          whileTap={{ scale: 0.97 }}
                         >
                           <Button
                             onClick={() => navigate('/add-entry')}
-                            className="bg-gradient-to-r from-primary via-mint to-primary text-white rounded-full px-8 py-6 text-base font-bold shadow-2xl hover:shadow-3xl transition-all"
+                            className="bg-gradient-to-r from-primary via-teal-500 to-primary text-white rounded-[1.5rem] px-10 py-7 text-lg font-black shadow-2xl hover:shadow-3xl transition-all border-2 border-white/50"
                             style={{
                               backgroundSize: '200% 100%',
                               animation: 'gradientShift 3s ease infinite',
                             }}
                           >
-                            <span className="mr-2">🍽️</span>
+                            <span className="mr-3 text-2xl">🍽️</span>
                             Log Your First Meal
                           </Button>
                         </motion.div>
@@ -503,33 +574,44 @@ export default function DashboardPage() {
                   </motion.div>
                 </StaggerItem>
 
-                {/* How It Works - Bento Grid */}
+                {/* How It Works - Premium Bento Grid */}
                 <StaggerItem>
                   <div>
-                    <h4 className="font-black text-foreground mb-4 text-xl px-1">How it works</h4>
-                    <div className="grid grid-cols-3 gap-3">
+                    <h4 className="font-black text-foreground mb-5 text-2xl px-1 tracking-tight">How it works</h4>
+                    <div className="grid grid-cols-3 gap-4">
                       {[
-                        { icon: '🍽️', title: 'Log', desc: 'Track meals', gradient: 'from-mint/60 to-mint/30' },
-                        { icon: '⏰', title: 'Rate', desc: 'Score bloating', gradient: 'from-peach/60 to-peach/30' },
-                        { icon: '📊', title: 'Patterns', desc: 'See insights', gradient: 'from-lavender/60 to-lavender/30' },
+                        { icon: '🍽️', title: 'Log', desc: 'Track meals', gradient: 'from-teal-100/90 to-mint/80', iconBg: 'from-teal-50 to-mint/60' },
+                        { icon: '⏰', title: 'Rate', desc: 'Score bloating', gradient: 'from-orange-100/90 to-peach/80', iconBg: 'from-orange-50 to-peach/60' },
+                        { icon: '📊', title: 'Insights', desc: 'See patterns', gradient: 'from-purple-100/90 to-lavender/80', iconBg: 'from-purple-50 to-lavender/60' },
                       ].map((step, index) => (
                         <motion.div
                           key={step.title}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
-                          whileHover={{ scale: 1.08, y: -4 }}
-                          className="relative overflow-hidden rounded-3xl cursor-default group"
+                          transition={{ delay: 0.4 + index * 0.1, duration: 0.6 }}
+                          whileHover={{ scale: 1.08, y: -6 }}
+                          className="relative overflow-hidden rounded-[1.75rem] cursor-default group shadow-lg shadow-black/5"
                         >
                           <div className={`absolute inset-0 bg-gradient-to-br ${step.gradient}`} />
-                          <div className="relative backdrop-blur-xl bg-white/50 border border-white/70 group-hover:bg-white/60 transition-all duration-300">
-                            <div className="p-5 flex flex-col items-center text-center gap-3">
-                              <div className="w-14 h-14 rounded-2xl bg-white/60 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <span className="text-2xl">{step.icon}</span>
-                              </div>
+
+                          <motion.div
+                            animate={{ scale: [1, 1.1, 1], rotate: [0, 45, 0] }}
+                            transition={{ duration: 12 + index * 2, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute -top-8 -right-8 w-24 h-24 bg-white/20 rounded-full blur-2xl"
+                          />
+
+                          <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 group-hover:bg-white/70 transition-all duration-500">
+                            <div className="p-6 flex flex-col items-center text-center gap-4">
+                              <motion.div
+                                whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.15 }}
+                                transition={{ duration: 0.5 }}
+                                className={`w-16 h-16 rounded-[1.25rem] bg-gradient-to-br ${step.iconBg} border-2 border-white/90 flex items-center justify-center shadow-lg`}
+                              >
+                                <span className="text-3xl drop-shadow-sm">{step.icon}</span>
+                              </motion.div>
                               <div>
-                                <p className="font-black text-foreground text-sm mb-0.5">{step.title}</p>
-                                <p className="text-xs text-muted-foreground font-semibold leading-snug">{step.desc}</p>
+                                <p className="font-black text-foreground text-base mb-1">{step.title}</p>
+                                <p className="text-xs text-muted-foreground font-bold leading-snug">{step.desc}</p>
                               </div>
                             </div>
                           </div>
@@ -539,24 +621,35 @@ export default function DashboardPage() {
                   </div>
                 </StaggerItem>
 
-                {/* Pro Tip Card */}
+                {/* Pro Tip Card - Enhanced */}
                 <StaggerItem>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6, duration: 0.5 }}
-                    className="relative overflow-hidden rounded-3xl"
+                    transition={{ delay: 0.7, duration: 0.6 }}
+                    className="relative overflow-hidden rounded-[2rem] shadow-xl shadow-blue-500/10"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-mint/20" />
-                    <div className="relative backdrop-blur-xl bg-white/60 border border-white/80">
-                      <div className="p-5 flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-2xl">💡</span>
-                        </div>
-                        <div className="flex-1 pt-1">
-                          <h4 className="font-black text-foreground text-sm mb-1.5">Pro Tip</h4>
-                          <p className="text-xs text-muted-foreground font-semibold leading-relaxed">
-                            Log meals consistently for at least <span className="font-bold text-primary">3 days</span> to identify patterns and get meaningful insights.
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-100/80 via-cyan-100/70 to-teal-100/80" />
+
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1], x: [0, 20, 0] }}
+                      transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute -right-12 -top-12 w-40 h-40 bg-blue-400/15 rounded-full blur-2xl"
+                    />
+
+                    <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/90">
+                      <div className="p-6 flex items-start gap-4">
+                        <motion.div
+                          whileHover={{ rotate: [0, -15, 15, 0], scale: 1.1 }}
+                          transition={{ duration: 0.6 }}
+                          className="w-14 h-14 rounded-[1.25rem] bg-white/90 border-2 border-white/95 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/10"
+                        >
+                          <span className="text-3xl drop-shadow-sm">💡</span>
+                        </motion.div>
+                        <div className="flex-1 pt-1.5">
+                          <h4 className="font-black text-foreground text-lg mb-2 tracking-tight">Pro Tip</h4>
+                          <p className="text-sm text-muted-foreground font-bold leading-relaxed">
+                            Log meals consistently for at least <span className="font-black text-primary text-base">3 days</span> to identify patterns and get meaningful insights.
                           </p>
                         </div>
                       </div>
@@ -566,116 +659,130 @@ export default function DashboardPage() {
               </>
             )}
 
-            {/* Enhanced Building insights state - show when some meals logged but not enough */}
+            {/* Ultra-Premium Building insights state - show when some meals logged but not enough */}
             {!hasEnoughDataForInsights && completedCount > 0 && (
               <StaggerItem>
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative overflow-hidden rounded-[2rem]"
+                  transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                  className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-indigo-500/15"
                 >
-                  {/* Gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-mint/20 to-lavender/30" />
+                  {/* Enhanced gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/80 via-purple-100/70 to-pink-100/80" />
 
-                  {/* Animated gradient blobs */}
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 180, 0],
-                    }}
-                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-20 -right-20 w-60 h-60 bg-primary/15 rounded-full blur-3xl"
-                  />
-
+                  {/* Multiple animated gradient orbs */}
                   <motion.div
                     animate={{
                       scale: [1, 1.3, 1],
-                      rotate: [0, -90, 0],
+                      rotate: [0, 180, 360],
                     }}
-                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="absolute -bottom-20 -left-20 w-60 h-60 bg-lavender/15 rounded-full blur-3xl"
+                    transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-indigo-400/20 to-purple-400/15 rounded-full blur-3xl"
                   />
 
-                  {/* Glass overlay */}
-                  <div className="relative backdrop-blur-xl bg-white/50 border border-white/70">
-                    <div className="p-8 text-center">
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.4, 1],
+                      rotate: [0, -120, 0],
+                    }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                    className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-pink-400/15 to-rose-400/10 rounded-full blur-3xl"
+                  />
+
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 90, 180],
+                    }}
+                    transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-lavender/15 to-purple-300/10 rounded-full blur-3xl"
+                  />
+
+                  {/* Premium glass overlay */}
+                  <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80">
+                    <div className="p-10 text-center">
                       <motion.div
                         animate={{
-                          scale: [1, 1.1, 1],
-                          rotate: [0, 5, -5, 0],
+                          scale: [1, 1.15, 1],
+                          rotate: [0, 8, -8, 0],
                         }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        <span className="text-6xl block mb-4">📊</span>
+                        <span className="text-7xl block mb-5 drop-shadow-lg">📊</span>
                       </motion.div>
 
-                      <h3 className="font-black text-foreground text-2xl mb-2 tracking-tight">
+                      <h3 className="font-black text-foreground text-3xl mb-3 tracking-tight" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.06)' }}>
                         Building Your Insights
                       </h3>
-                      <p className="text-sm text-muted-foreground font-semibold mb-6 max-w-sm mx-auto leading-relaxed">
-                        Log meals with bloating ratings across <span className="font-black text-primary">{3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''}</span> to unlock your wellness insights
+                      <p className="text-base text-muted-foreground font-bold mb-8 max-w-md mx-auto leading-relaxed">
+                        Log meals with bloating ratings across <span className="font-black text-primary text-lg">{3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''}</span> to unlock your wellness insights
                       </p>
 
-                      {/* Enhanced progress bar */}
-                      <div className="w-full mb-6">
-                        <div className="flex justify-between items-center mb-3 text-xs">
-                          <span className="font-bold text-muted-foreground uppercase tracking-wider">Progress</span>
-                          <span className="font-black text-primary text-sm">{daysWithData}/3 days</span>
+                      {/* Premium progress bar */}
+                      <div className="w-full mb-8">
+                        <div className="flex justify-between items-center mb-4 text-sm">
+                          <span className="font-extrabold text-muted-foreground/70 uppercase tracking-[0.12em]">Progress</span>
+                          <span className="font-black text-primary text-lg">{daysWithData}/3 <span className="text-sm font-bold text-muted-foreground">days</span></span>
                         </div>
-                        <div className="relative w-full h-4 rounded-full overflow-hidden backdrop-blur-sm bg-white/60 border border-white/80">
+                        <div className="relative w-full h-5 rounded-full overflow-hidden backdrop-blur-md bg-white/70 border-2 border-white/90 shadow-inner">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${(daysWithData / 3) * 100}%` }}
-                            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                            className="h-full bg-gradient-to-r from-primary via-mint to-primary rounded-full relative overflow-hidden"
+                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                            className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full relative overflow-hidden shadow-lg"
                             style={{
                               backgroundSize: '200% 100%',
                               animation: 'gradientShift 3s ease infinite',
                             }}
                           >
-                            {/* Shimmer effect */}
+                            {/* Enhanced shimmer effect */}
                             <motion.div
                               animate={{ x: ['-100%', '200%'] }}
-                              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/60 to-transparent"
                             />
                           </motion.div>
                         </div>
-                        {/* Milestone markers */}
-                        <div className="flex justify-between mt-3">
+                        {/* Premium milestone markers */}
+                        <div className="flex justify-between mt-5">
                           {[1, 2, 3].map((day) => (
                             <motion.div
                               key={day}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: 0.3 + day * 0.1 }}
+                              transition={{ delay: 0.4 + day * 0.1, duration: 0.5 }}
+                              whileHover={{ scale: 1.1, y: -2 }}
                               className={`flex flex-col items-center ${
-                                daysWithData >= day ? 'opacity-100' : 'opacity-30'
-                              } transition-opacity`}
+                                daysWithData >= day ? 'opacity-100' : 'opacity-40'
+                              } transition-all`}
                             >
-                              <div className={`w-3 h-3 rounded-full ${
-                                daysWithData >= day ? 'bg-primary shadow-lg shadow-primary/50' : 'bg-muted-foreground'
+                              <div className={`w-4 h-4 rounded-full border-2 ${
+                                daysWithData >= day
+                                  ? 'bg-gradient-to-br from-indigo-500 to-purple-500 border-white shadow-xl shadow-indigo-500/50'
+                                  : 'bg-muted border-muted-foreground/30'
                               }`} />
-                              <span className="text-xs font-bold text-muted-foreground mt-1.5">Day {day}</span>
+                              <span className={`text-xs font-black mt-2 ${
+                                daysWithData >= day ? 'text-foreground' : 'text-muted-foreground/60'
+                              }`}>Day {day}</span>
                             </motion.div>
                           ))}
                         </div>
                       </div>
 
                       <motion.div
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ scale: 1.06, y: -3 }}
+                        whileTap={{ scale: 0.97 }}
                       >
                         <Button
                           onClick={() => navigate('/add-entry')}
-                          className="bg-gradient-to-r from-primary via-mint to-primary text-white rounded-full px-8 py-6 text-base font-bold shadow-2xl hover:shadow-3xl transition-all"
+                          className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-[1.5rem] px-10 py-7 text-lg font-black shadow-2xl hover:shadow-3xl transition-all border-2 border-white/50"
                           style={{
                             backgroundSize: '200% 100%',
                             animation: 'gradientShift 3s ease infinite',
                           }}
                         >
-                          <span className="mr-2">✨</span>
+                          <span className="mr-3 text-2xl">✨</span>
                           Continue Logging
                         </Button>
                       </motion.div>
@@ -686,54 +793,71 @@ export default function DashboardPage() {
               </StaggerItem>
             )}
 
-            {/* Pending Rating - Beautiful Card */}
+            {/* Pending Rating - Ultra-Premium Card */}
             {pendingEntry && (
               <StaggerItem>
                 <motion.div
-                  initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                  initial={{ scale: 0.96, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative overflow-hidden rounded-[2rem]"
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-orange-500/15"
                 >
-                  {/* Gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-peach/40 via-lavender/30 to-mint/40" />
+                  {/* Enhanced gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 via-orange-100/70 to-rose-100/80" />
 
-                  {/* Animated blob */}
+                  {/* Multiple animated orbs */}
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.3, 1],
+                      x: [0, 25, 0],
+                      rotate: [0, 60, 0],
+                    }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-12 -right-12 w-48 h-48 bg-gradient-to-br from-orange-400/20 to-amber-400/15 rounded-full blur-2xl"
+                  />
+
                   <motion.div
                     animate={{
                       scale: [1, 1.2, 1],
-                      x: [0, 20, 0],
+                      x: [0, -15, 0],
                     }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-10 -right-10 w-40 h-40 bg-peach/20 rounded-full blur-2xl"
+                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute -bottom-12 -left-12 w-48 h-48 bg-gradient-to-tr from-rose-400/15 to-pink-400/10 rounded-full blur-2xl"
                   />
 
-                  {/* Glass overlay */}
-                  <div className="relative backdrop-blur-xl bg-white/60 border border-white/80">
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="font-black text-foreground text-xl mb-1">Rate your last meal</h3>
-                          <p className="text-sm text-muted-foreground font-semibold line-clamp-1">
+                  {/* Premium glass overlay */}
+                  <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/90">
+                    <div className="p-7">
+                      <div className="flex items-start justify-between mb-6">
+                        <div className="flex-1 pr-4">
+                          <h3 className="font-black text-foreground text-2xl mb-2 tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>Rate your last meal</h3>
+                          <p className="text-sm text-muted-foreground font-bold line-clamp-1">
                             {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
                           </p>
                         </div>
                         <motion.div
-                          animate={{ rotate: [0, 10, -10, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                          animate={{ rotate: [0, 12, -12, 0] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          className="w-16 h-16 rounded-[1.25rem] bg-white/90 border-2 border-white/95 flex items-center justify-center shadow-lg shadow-orange-500/10"
                         >
-                          <span className="text-3xl">🍽️</span>
+                          <span className="text-4xl drop-shadow-sm">🍽️</span>
                         </motion.div>
                       </div>
 
-                      {/* Number-based rating system with beautiful styling */}
-                      <div className="grid grid-cols-5 gap-2 mb-4">
+                      {/* Premium number-based rating system */}
+                      <div className="grid grid-cols-5 gap-3 mb-5">
                         {[1, 2, 3, 4, 5].map((rating, index) => {
-                          // Dynamic color scoring
+                          // Enhanced dynamic color scoring
                           const getGradient = (r: number) => {
-                            if (r <= 2) return 'from-primary/80 to-mint/80';
-                            if (r === 3) return 'from-yellow-400/80 to-orange-400/80';
-                            return 'from-coral/80 to-red-400/80';
+                            if (r <= 2) return 'from-emerald-400 to-teal-500';
+                            if (r === 3) return 'from-amber-400 to-orange-500';
+                            return 'from-rose-400 to-red-500';
+                          };
+
+                          const getShadow = (r: number) => {
+                            if (r <= 2) return 'shadow-emerald-500/30';
+                            if (r === 3) return 'shadow-amber-500/30';
+                            return 'shadow-rose-500/30';
                           };
 
                           return (
@@ -741,19 +865,19 @@ export default function DashboardPage() {
                               key={rating}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.05, duration: 0.3 }}
-                              whileHover={{ scale: 1.1, y: -4 }}
-                              whileTap={{ scale: 0.95 }}
+                              transition={{ delay: index * 0.06, duration: 0.4 }}
+                              whileHover={{ scale: 1.12, y: -6 }}
+                              whileTap={{ scale: 0.96 }}
                               onClick={() => handleRate(rating)}
-                              className="relative overflow-hidden flex flex-col items-center justify-center gap-1.5 py-5 px-2 rounded-2xl backdrop-blur-xl bg-white/50 border-2 border-white/70 hover:border-white/90 shadow-lg hover:shadow-xl transition-all duration-300 group"
+                              className={`relative overflow-hidden flex flex-col items-center justify-center gap-2 py-6 px-2 rounded-[1.25rem] backdrop-blur-md bg-white/70 border-2 border-white/85 hover:border-white shadow-lg hover:shadow-2xl ${getShadow(rating)} transition-all duration-500 group`}
                             >
-                              {/* Gradient overlay on hover */}
-                              <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(rating)} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                              {/* Premium gradient overlay on hover */}
+                              <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(rating)} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
-                              <span className="relative text-2xl font-black text-foreground group-hover:text-white transition-colors duration-300">
+                              <span className="relative text-3xl font-black text-foreground group-hover:text-white group-hover:scale-110 transition-all duration-300 drop-shadow-sm">
                                 {rating}
                               </span>
-                              <span className="relative text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-white/90 transition-colors duration-300">
+                              <span className="relative text-[9px] font-extrabold uppercase tracking-[0.08em] text-muted-foreground group-hover:text-white/95 transition-colors duration-300">
                                 {RATING_LABELS[rating]}
                               </span>
                             </motion.button>
@@ -762,10 +886,10 @@ export default function DashboardPage() {
                       </div>
 
                       <motion.button
-                        whileHover={{ scale: 1.02 }}
+                        whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSkip}
-                        className="text-xs text-muted-foreground font-semibold hover:text-foreground transition-colors w-full py-2"
+                        className="text-sm text-muted-foreground font-bold hover:text-foreground transition-colors w-full py-3 rounded-xl hover:bg-white/50"
                       >
                         Skip for now
                       </motion.button>
