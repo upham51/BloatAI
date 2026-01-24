@@ -476,14 +476,25 @@ export default function AddEntryPage() {
               </>}
           </section>
 
-          {/* Scrollable Content */}
-          <section className="flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)]">
+          {/* Scrollable Content - Only show after analysis completes */}
+          <section
+            className={`flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)] transition-all duration-1000 ease-out ${
+              isAnalyzing
+                ? 'translate-y-full opacity-0 pointer-events-none'
+                : photoAnalyzed
+                  ? 'translate-y-0 opacity-100 animate-card-reveal'
+                  : ''
+            }`}
+            style={{
+              transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
+          >
             <div className="p-5 space-y-4 pt-8">
           {/* AI Analysis Results */}
           {photoAnalyzed && <div className="space-y-4">
               {/* AI Detection Card - Stagger 1 */}
-              <div className="glass-card p-5 animate-slide-up opacity-0" style={{
-              animationDelay: '0ms',
+              <div className="glass-card p-5 animate-premium-reveal opacity-0" style={{
+              animationDelay: '200ms',
               animationFillMode: 'forwards'
             }}>
                 <div className="flex items-center justify-between mb-4">
@@ -504,8 +515,8 @@ export default function AddEntryPage() {
               </div>
 
               {/* Triggers Card - Stagger 2 */}
-              <div className="glass-card p-5 animate-slide-up opacity-0" style={{
-              animationDelay: '100ms',
+              <div className="glass-card p-5 animate-premium-reveal opacity-0" style={{
+              animationDelay: '400ms',
               animationFillMode: 'forwards'
             }}>
                 <div className="flex items-center justify-between mb-4">
@@ -575,16 +586,16 @@ export default function AddEntryPage() {
               </div>
 
               {/* Notes Card - Stagger 2.5 */}
-              <div className="glass-card p-5 animate-slide-up opacity-0" style={{
-              animationDelay: '150ms',
+              <div className="glass-card p-5 animate-premium-reveal opacity-0" style={{
+              animationDelay: '600ms',
               animationFillMode: 'forwards'
             }}>
                 <NotesInput value={notes} onChange={setNotes} />
               </div>
 
               {/* Bloating Rating Card - Stagger 3 */}
-              <div className="glass-card p-5 animate-slide-up opacity-0" style={{
-              animationDelay: '200ms',
+              <div className="glass-card p-5 animate-premium-reveal opacity-0" style={{
+              animationDelay: '800ms',
               animationFillMode: 'forwards'
             }}>
                 <div className="flex items-center gap-3 mb-1">
