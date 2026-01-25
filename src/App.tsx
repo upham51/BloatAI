@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MealProvider } from "@/contexts/MealContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
@@ -176,13 +176,25 @@ function AppRoutes() {
   );
 }
 
+function GlobalBackground() {
+  const { pathname } = useLocation();
+
+  // The welcome/auth screens already render their own background. Keeping the global
+  // animated mesh background off these routes avoids cold-start jank that can cause
+  // the preview iframe to disconnect (“connection was reset”).
+  const disableOn = new Set<string>(["/", "/signin", "/signup"]);
+  if (disableOn.has(pathname)) return null;
+
+  return <DeferredMeshGradientBackground variant="balanced" delayMs={2500} />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <DeferredMeshGradientBackground variant="balanced" delayMs={600} />
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <GlobalBackground />
         <ScrollToTop />
         <AuthProvider>
           <SubscriptionProvider>
