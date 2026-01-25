@@ -346,7 +346,7 @@ export default function DashboardPage() {
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                   className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-orange-500/15"
                 >
-                  {/* Meal photo background (if available) */}
+                  {/* Meal photo background - full coverage, no overlay */}
                   {pendingEntry.photo_url && (
                     <div
                       className="absolute inset-0 bg-cover bg-center"
@@ -354,12 +354,11 @@ export default function DashboardPage() {
                     />
                   )}
 
-                  {/* Color overlay - 15% opacity over photo, or full gradient if no photo */}
-                  <div className={`absolute inset-0 ${pendingEntry.photo_url ? 'bg-gradient-to-br from-amber-100/[0.15] via-orange-100/[0.15] to-rose-100/[0.15]' : 'bg-gradient-to-br from-amber-100/80 via-orange-100/70 to-rose-100/80'}`} />
-
-                  {/* Multiple animated orbs - only show when no photo */}
+                  {/* Gradient background only when no photo */}
                   {!pendingEntry.photo_url && (
                     <>
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 via-orange-100/70 to-rose-100/80" />
+
                       <motion.div
                         animate={{
                           scale: [1, 1.3, 1],
@@ -381,35 +380,28 @@ export default function DashboardPage() {
                     </>
                   )}
 
-                  {/* Premium glass overlay */}
-                  <div className={`relative ${pendingEntry.photo_url ? 'backdrop-blur-[2px] bg-black/20' : 'backdrop-blur-2xl bg-white/70'} border-2 border-white/90`}>
+                  {/* Content overlay - transparent when photo, glass when no photo */}
+                  <div className={`relative ${pendingEntry.photo_url ? '' : 'backdrop-blur-2xl bg-white/70 border-2 border-white/90'}`}>
                     <div className="p-7">
                       <div className="flex items-start justify-between mb-6">
                         <div className="flex-1 pr-4">
-                          <h3 className={`font-black text-2xl mb-2 tracking-tight ${pendingEntry.photo_url ? 'text-white' : 'text-foreground'}`} style={{ textShadow: pendingEntry.photo_url ? '0 2px 12px rgba(0,0,0,0.5)' : '0 1px 8px rgba(0,0,0,0.04)' }}>Rate your last meal</h3>
-                          <p className={`text-sm font-bold line-clamp-1 ${pendingEntry.photo_url ? 'text-white/90' : 'text-muted-foreground'}`} style={pendingEntry.photo_url ? { textShadow: '0 1px 8px rgba(0,0,0,0.4)' } : {}}>
+                          <h3 className={`font-black text-2xl mb-2 tracking-tight ${pendingEntry.photo_url ? 'text-white' : 'text-foreground'}`} style={{ textShadow: pendingEntry.photo_url ? '0 2px 16px rgba(0,0,0,0.7), 0 4px 24px rgba(0,0,0,0.5)' : '0 1px 8px rgba(0,0,0,0.04)' }}>Rate your last meal</h3>
+                          <p className={`text-sm font-bold line-clamp-1 ${pendingEntry.photo_url ? 'text-white' : 'text-muted-foreground'}`} style={pendingEntry.photo_url ? { textShadow: '0 2px 12px rgba(0,0,0,0.6), 0 4px 20px rgba(0,0,0,0.4)' } : {}}>
                             {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
                           </p>
                         </div>
-                        <motion.div
-                          animate={{ rotate: [0, 12, -12, 0] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="w-16 h-16 rounded-[1.25rem] overflow-hidden border-2 border-white/95 shadow-lg shadow-orange-500/10"
-                        >
-                          {pendingEntry.photo_url ? (
-                            <MealPhoto
-                              photoUrl={pendingEntry.photo_url}
-                              thumbnail
-                              priority
-                              className="w-full h-full"
-                              alt={pendingEntry.custom_title || pendingEntry.meal_title || 'Meal photo'}
-                            />
-                          ) : (
+                        {/* Animated emoji only when no photo - photo is the full background */}
+                        {!pendingEntry.photo_url && (
+                          <motion.div
+                            animate={{ rotate: [0, 12, -12, 0] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            className="w-16 h-16 rounded-[1.25rem] overflow-hidden border-2 border-white/95 shadow-lg shadow-orange-500/10"
+                          >
                             <div className="w-full h-full bg-gradient-to-br from-orange-200 via-amber-100 to-rose-200 flex items-center justify-center">
                               <span className="text-3xl drop-shadow-sm">🍽️</span>
                             </div>
-                          )}
-                        </motion.div>
+                          </motion.div>
+                        )}
                       </div>
 
                       {/* Premium number-based rating system */}
@@ -457,8 +449,8 @@ export default function DashboardPage() {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSkip}
-                        className={`text-sm font-bold transition-colors w-full py-3 rounded-xl ${pendingEntry.photo_url ? 'text-white/90 hover:text-white hover:bg-white/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/50'}`}
-                        style={pendingEntry.photo_url ? { textShadow: '0 1px 6px rgba(0,0,0,0.3)' } : {}}
+                        className={`text-sm font-bold transition-colors w-full py-3 rounded-xl ${pendingEntry.photo_url ? 'text-white hover:bg-white/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/50'}`}
+                        style={pendingEntry.photo_url ? { textShadow: '0 2px 10px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)' } : {}}
                       >
                         Skip for now
                       </motion.button>
