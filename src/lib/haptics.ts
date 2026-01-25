@@ -244,4 +244,159 @@ export const haptics = {
       80,               // Final satisfying thump
     ]);
   },
+
+  // ==========================================
+  // MILESTONE HAPTICS - Premium Retention Engine
+  // ==========================================
+
+  /**
+   * Micro-milestone complete - satisfying single checkmark
+   * 180ms total to match the visual stroke-draw animation
+   */
+  milestoneComplete: () => {
+    if (!navigator.vibrate) return;
+    // Precise, satisfying "tick" with subtle trail
+    navigator.vibrate([15, 30, 25, 20, 15]);
+  },
+
+  /**
+   * Progress tick - subtle feedback as progress bar fills
+   * Used for visual progress animations
+   */
+  progressTick: () => {
+    if (!navigator.vibrate) return;
+    // Quick, barely-there pulse
+    navigator.vibrate([8]);
+  },
+
+  /**
+   * Tier unlock - triumphant pattern for major unlocks
+   * Pattern Detection, Experiments, AI Guide, Blueprint
+   */
+  tierUnlock: () => {
+    if (!navigator.vibrate) return;
+    // Dramatic build-up with satisfying release
+    navigator.vibrate([
+      20, 40,   // Initial attention
+      30, 40,   // Building
+      40, 50,   // Rising
+      50, 60,   // Peak tension
+      70, 30,   // Release hit 1
+      60, 30,   // Release hit 2
+      80,       // Final triumphant thump
+    ]);
+  },
+
+  /**
+   * Badge reveal - when achievement badges animate in
+   */
+  badgeReveal: () => {
+    if (!navigator.vibrate) return;
+    // Quick exciting burst
+    navigator.vibrate([25, 30, 35, 30, 45]);
+  },
+
+  /**
+   * Confetti burst - micro celebration effect
+   */
+  confettiBurst: () => {
+    if (!navigator.vibrate) return;
+    // Sparkly rapid taps like confetti landing
+    navigator.vibrate([10, 20, 15, 20, 10, 20, 15, 20, 10, 30, 20]);
+  },
+
+  /**
+   * Streak milestone - for 72-hour streak completion
+   */
+  streakComplete: () => {
+    if (!navigator.vibrate) return;
+    // Triple celebration pattern
+    navigator.vibrate([
+      30, 50, 40, 50, 50,  // First wave
+      60, 100,              // Pause
+      40, 40, 40, 40, 40,  // Rapid celebration
+      70,                   // Final hit
+    ]);
+  },
+
+  /**
+   * Experiment start - anticipation pattern
+   */
+  experimentStart: () => {
+    if (!navigator.vibrate) return;
+    // Scientific "beep boop" feel
+    navigator.vibrate([20, 60, 30, 60, 20]);
+  },
+
+  /**
+   * Experiment complete - discovery celebration
+   */
+  experimentComplete: () => {
+    if (!navigator.vibrate) return;
+    // "Eureka!" moment
+    navigator.vibrate([
+      15, 30,   // Quick intro
+      25, 40,   // Build
+      35, 50,   // Rising
+      50, 30,   // Peak
+      40, 30, 35, 30, 30, 30,  // Excited taps
+      60,       // Final discovery hit
+    ]);
+  },
+
+  /**
+   * AI Guide reveal - magical reveal pattern
+   */
+  aiGuideReveal: () => {
+    if (!navigator.vibrate) return;
+    // Mystical, premium feel
+    navigator.vibrate([
+      10, 50,   // Soft start
+      20, 40,   // Gentle build
+      30, 40,
+      40, 50,
+      50, 60,
+      60, 100,  // Dramatic pause
+      80, 50,   // Grand reveal
+      60,       // Settling
+    ]);
+  },
+
+  /**
+   * Blueprint unlock - ultimate achievement
+   */
+  blueprintUnlock: () => {
+    if (!navigator.vibrate) return;
+    // The most satisfying pattern - 90 days of work culminated
+    navigator.vibrate([
+      // Fanfare intro
+      40, 40, 50, 40, 60, 60,
+      // Dramatic pause
+      80, 150,
+      // Triumphant sequence
+      70, 30, 70, 30, 70, 50,
+      // Celebration burst
+      40, 20, 40, 20, 40, 20, 40, 40,
+      // Grand finale
+      100,
+    ]);
+  },
+
+  /**
+   * Day completion - daily milestone achieved
+   */
+  dayComplete: () => {
+    if (!navigator.vibrate) return;
+    // Satisfying daily "ding"
+    navigator.vibrate([20, 40, 30, 30, 25]);
+  },
+
+  /**
+   * Unlock tease - when tapping locked content
+   */
+  lockedTap: () => {
+    if (!navigator.vibrate) return;
+    // Subtle "nope" feel
+    navigator.vibrate([15, 50, 10]);
+  },
 };

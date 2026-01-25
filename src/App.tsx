@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MealProvider } from "@/contexts/MealContext";
+import { MilestonesProvider } from "@/contexts/MilestonesContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
@@ -199,7 +200,9 @@ const App = () => (
         <AuthProvider>
           <SubscriptionProvider>
             <MealProvider>
-              <AppRoutes />
+              <MilestonesProvider>
+                <AppRoutes />
+              </MilestonesProvider>
             </MealProvider>
           </SubscriptionProvider>
         </AuthProvider>
