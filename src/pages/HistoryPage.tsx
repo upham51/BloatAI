@@ -1040,13 +1040,24 @@ function PremiumEntryCard({
       {/* Premium glass overlay */}
       <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 group-hover:bg-white/70 transition-all duration-500">
         {/* Rating Indicator Badge - Top Right */}
-        {rating && (
+        {rating ? (
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className={`absolute top-3 right-3 w-10 h-10 rounded-xl ${style.accent} flex items-center justify-center shadow-lg z-10`}
+            className={`absolute top-3 right-3 w-12 h-12 rounded-2xl ${style.accent} flex items-center justify-center shadow-lg z-10`}
           >
-            <span className="text-white font-black text-lg">{rating}</span>
+            <div className="flex items-baseline">
+              <span className="text-white font-black text-sm">{rating}</span>
+              <span className="text-white/80 font-bold text-[10px]">/5</span>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute top-3 right-3 px-3 py-2 rounded-xl bg-gradient-to-br from-gray-100/90 to-slate-100/90 backdrop-blur-md border border-white/60 shadow-md z-10"
+          >
+            <span className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wide">No rating</span>
           </motion.div>
         )}
 
