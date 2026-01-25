@@ -1,9 +1,14 @@
 /**
  * Haptic Feedback Utility
  * Provides tactile feedback for user interactions
+ * Enhanced with creative, addictive patterns for premium UX
  */
 
 type HapticStyle = 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error';
+
+// Store interval references for cleanup
+let scanningIntervalId: ReturnType<typeof setInterval> | null = null;
+let pulsingIntervalId: ReturnType<typeof setInterval> | null = null;
 
 export const haptics = {
   /**
@@ -70,5 +75,173 @@ export const haptics = {
    */
   warning: () => {
     haptics.impact('warning');
+  },
+
+  /**
+   * Custom pattern - for advanced haptic sequences
+   */
+  pattern: (vibrationPattern: number[]) => {
+    if (!navigator.vibrate) return;
+    navigator.vibrate(vibrationPattern);
+  },
+
+  /**
+   * Heavy pulsing haptic for scanning animation
+   * Creates a rhythmic heartbeat-like pulse that syncs with visual scanning
+   * Runs continuously until stopped
+   */
+  startScanningPulse: () => {
+    if (!navigator.vibrate) return;
+
+    // Clear any existing interval
+    haptics.stopScanningPulse();
+
+    // Initial heavy burst to signal start
+    navigator.vibrate([40, 100, 40, 100, 60]);
+
+    // Heartbeat pulse pattern - heavy double-tap every 600ms
+    // Mimics a scanning "heartbeat" rhythm
+    scanningIntervalId = setInterval(() => {
+      // Heavy double-tap pulse like a heartbeat
+      navigator.vibrate([35, 80, 50]);
+    }, 600);
+  },
+
+  /**
+   * Stop the scanning pulse
+   */
+  stopScanningPulse: () => {
+    if (scanningIntervalId) {
+      clearInterval(scanningIntervalId);
+      scanningIntervalId = null;
+    }
+    // Final completion burst
+    if (navigator.vibrate) {
+      navigator.vibrate([30, 50, 30, 50, 60, 100, 80]);
+    }
+  },
+
+  /**
+   * Phase change haptic - signals transition between scanning phases
+   * Gets progressively stronger with each phase
+   */
+  scanPhaseChange: (phaseNumber: number) => {
+    if (!navigator.vibrate) return;
+
+    // Escalating intensity based on phase (0-4)
+    const patterns = [
+      [20, 40, 20],                    // Phase 0: Light double tap
+      [25, 50, 35],                    // Phase 1: Medium pulse
+      [30, 40, 30, 40, 40],            // Phase 2: Triple pulse
+      [35, 50, 40, 50, 50],            // Phase 3: Stronger triple
+      [40, 30, 40, 30, 40, 30, 60],    // Phase 4: Intense finale buildup
+    ];
+
+    const pattern = patterns[Math.min(phaseNumber, 4)];
+    navigator.vibrate(pattern);
+  },
+
+  /**
+   * Scan complete celebration - triumphant haptic sequence
+   */
+  scanComplete: () => {
+    if (!navigator.vibrate) return;
+
+    // Triumphant completion pattern - builds up then releases
+    // Like a "ta-da!" moment
+    navigator.vibrate([
+      30, 50,   // Quick tap
+      40, 50,   // Slightly stronger
+      50, 50,   // Building...
+      60, 80,   // Pause for drama
+      80,       // Big finale hit
+    ]);
+  },
+
+  /**
+   * SUPER ADDICTIVE Log Meal button haptic
+   * Multi-stage satisfying feedback that makes you WANT to press it again
+   * Inspired by slot machine "win" feedback
+   */
+  logMealPress: () => {
+    if (!navigator.vibrate) return;
+
+    // Stage 1: Initial satisfying "click" with depth
+    navigator.vibrate([
+      50, 30,   // Strong initial impact
+      35, 25,   // Quick secondary tap
+      25,       // Soft bounce
+    ]);
+
+    // Stage 2: Delayed "reward" burst (after 150ms)
+    setTimeout(() => {
+      if (!navigator.vibrate) return;
+      navigator.vibrate([
+        40, 40,   // Build up
+        50, 40,   // Rising
+        60, 50,   // Peak
+        45,       // Satisfying release
+      ]);
+    }, 150);
+
+    // Stage 3: Final "celebration" micro-burst (after 350ms)
+    setTimeout(() => {
+      if (!navigator.vibrate) return;
+      navigator.vibrate([
+        30, 30, 30, 30, 35, 30, 40,  // Rapid celebration taps
+      ]);
+    }, 350);
+  },
+
+  /**
+   * Quick "anticipation" tap when button is touched but before full press
+   */
+  logMealTouch: () => {
+    if (!navigator.vibrate) return;
+    // Subtle anticipation vibration
+    navigator.vibrate([15, 20, 10]);
+  },
+
+  /**
+   * Continuous exciting pulse while saving
+   * Creates anticipation during the save operation
+   */
+  startSavingPulse: () => {
+    if (!navigator.vibrate) return;
+
+    haptics.stopSavingPulse();
+
+    // Excited rapid pulse while saving
+    pulsingIntervalId = setInterval(() => {
+      navigator.vibrate([20, 60, 25, 60, 30]);
+    }, 300);
+  },
+
+  /**
+   * Stop the saving pulse with success flourish
+   */
+  stopSavingPulse: () => {
+    if (pulsingIntervalId) {
+      clearInterval(pulsingIntervalId);
+      pulsingIntervalId = null;
+    }
+  },
+
+  /**
+   * Ultimate success celebration - for when meal is saved
+   * Slot machine jackpot-style celebration
+   */
+  mealSavedCelebration: () => {
+    if (!navigator.vibrate) return;
+
+    // Big celebration pattern
+    navigator.vibrate([
+      50, 40,           // Initial hit
+      60, 50,           // Building
+      70, 60,           // Peak
+      40, 40, 40, 40,   // Rapid celebration
+      50, 100,          // Pause
+      80,               // Final satisfying thump
+    ]);
   },
 };
