@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { Sparkles, Shield, Lock, Heart } from 'lucide-react';
@@ -7,6 +7,7 @@ import { Sparkles, Shield, Lock, Heart } from 'lucide-react';
 export default function WelcomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [showAmbient, setShowAmbient] = useState(false);
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
@@ -15,60 +16,60 @@ export default function WelcomePage() {
     }
   }, [user, navigate]);
 
+  // Defer non-critical ambient animations to avoid long tasks during cold start.
+  useEffect(() => {
+    let cancelled = false;
+    const enable = () => {
+      if (!cancelled) setShowAmbient(true);
+    };
+
+    const ric = (window as any).requestIdleCallback as
+      | ((cb: () => void, opts?: { timeout: number }) => number)
+      | undefined;
+    const cic = (window as any).cancelIdleCallback as ((id: number) => void) | undefined;
+
+    if (ric) {
+      const id = ric(enable, { timeout: 1200 });
+      return () => {
+        cancelled = true;
+        cic?.(id);
+      };
+    }
+
+    const t = window.setTimeout(enable, 900);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center px-4">
-      {/* Dramatic Gradient Background - Inspired by reference screenshots */}
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-purple-50 to-peach-100" />
+      {/* Base Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-muted to-background" />
 
-      {/* Animated Mesh Gradients */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Large pink/peach blob */}
-        <motion.div
-          animate={{
-            x: [0, 30, 0],
-            y: [0, -40, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-pink-300/40 via-peach-300/30 to-orange-200/20 blur-3xl"
-        />
+      {/* Deferred Ambient Blobs (heavy) */}
+      {showAmbient && (
+        <div className="absolute inset-0 overflow-hidden">
+          <motion.div
+            animate={{ x: [0, 24, 0], y: [0, -28, 0], scale: [1, 1.08, 1] }}
+            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-40 -right-40 w-[520px] h-[520px] rounded-full bg-gradient-to-br from-primary/20 via-accent/15 to-transparent blur-2xl"
+          />
 
-        {/* Purple/lavender blob */}
-        <motion.div
-          animate={{
-            x: [0, -40, 0],
-            y: [0, 30, 0],
-            scale: [1, 1.15, 1],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-          className="absolute -bottom-40 -left-40 w-[700px] h-[700px] rounded-full bg-gradient-to-tr from-purple-300/35 via-lavender-300/25 to-blue-200/20 blur-3xl"
-        />
+          <motion.div
+            animate={{ x: [0, -32, 0], y: [0, 24, 0], scale: [1, 1.12, 1] }}
+            transition={{ duration: 26, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-secondary/25 via-accent/15 to-transparent blur-2xl"
+          />
 
-        {/* Mint/teal accent blob */}
-        <motion.div
-          animate={{
-            x: [0, 20, 0],
-            y: [0, 20, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-mint/30 via-sky/20 to-teal-200/15 blur-3xl"
-        />
-      </div>
+          <motion.div
+            animate={{ x: [0, 16, 0], y: [0, 16, 0], scale: [1, 1.14, 1] }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full bg-gradient-to-br from-accent/20 via-primary/10 to-transparent blur-2xl"
+          />
+        </div>
+      )}
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-md mx-auto text-center space-y-8">
@@ -140,7 +141,7 @@ export default function WelcomePage() {
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => navigate('/signin')}
-            className="group relative w-full px-8 py-5 rounded-[1.5rem] bg-gradient-to-r from-primary via-mint to-primary text-white font-bold text-lg overflow-hidden shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25)] hover:shadow-[0_25px_70px_-12px_rgba(0,0,0,0.3)] transition-all duration-500"
+            className="group relative w-full px-8 py-5 rounded-[1.5rem] bg-gradient-to-r from-primary via-mint to-primary text-primary-foreground font-bold text-lg overflow-hidden shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25)] hover:shadow-[0_25px_70px_-12px_rgba(0,0,0,0.3)] transition-all duration-500"
             style={{
               backgroundSize: '200% 100%',
               animation: 'gradientShift 3s ease infinite',
