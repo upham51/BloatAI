@@ -3,181 +3,368 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TriggerConfidenceLevel } from '@/lib/insightsAnalysis';
 import { getTriggerCategory } from '@/types';
 import { getFoodImage } from '@/lib/pexelsApi';
-import { ChevronDown, ChevronUp, TrendingUp, Zap, AlertTriangle, Leaf, Check, ChefHat, AlertCircle, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, TrendingUp, Zap, AlertTriangle, Check, X, ChefHat, AlertCircle, Lightbulb, ShieldCheck, Ban } from 'lucide-react';
 
-// Safe alternatives data integrated from SafeAlternativesCards
+// Comprehensive safe alternatives data with clear safe/avoid separation
 const SAFE_ALTERNATIVES_DATA: Record<string, {
   title: string;
   description: string;
-  betterOptions: { title: string; items: string[] }[];
-  quickRecipes: { name: string; description: string }[];
+  safeOptions: string[];
+  avoidOptions: string[];
+  tip: string;
+  quickRecipes: { name: string; ingredients: string }[];
 }> = {
   grains: {
     title: 'Savory Carbs & Gluten',
     description: 'Many savory carbs (pasta, bread, pizza crusts) are wheat-based and high in fructans, which commonly trigger bloating.',
-    betterOptions: [
-      { title: 'Gluten-free grains', items: ['White rice', 'Quinoa', 'Oats', 'Corn', 'Buckwheat', 'Potatoes'] },
-      { title: 'Gluten-free products', items: ['Gluten-free pasta', 'Sourdough bread', 'Gluten-free orzo'] },
-      { title: 'Cooking tips', items: ['Swap butter with olive oil'] }
+    safeOptions: [
+      'White rice (unlimited)',
+      'Quinoa',
+      'Oats (certified GF)',
+      'Potatoes',
+      'Sourdough bread (2 slices)',
+      'Gluten-free pasta',
+      'Corn tortillas',
+      'Rice noodles',
+      'Buckwheat',
+      'Garlic-infused oil (for flavor)',
+      'Scallions (green parts only)'
     ],
+    avoidOptions: [
+      'Regular bread',
+      'Regular pasta',
+      'Wheat-based cereals',
+      'Couscous',
+      'Whole garlic',
+      'Whole onion'
+    ],
+    tip: 'Sourdough\'s fermentation naturally breaks down fructans, making it easier to digest than regular bread. Choose long-fermented varieties.',
     quickRecipes: [
-      { name: 'Lemon Herb Quinoa Bowl', description: 'Quinoa + grilled chicken + cucumber + tomatoes + olive oil, lemon, and herbs' },
-      { name: 'Gluten-Free Orzo Salad', description: 'Gluten-free orzo + cucumber + tomato + lemon vinaigrette' },
-      { name: 'Crispy Potato Wedges', description: 'Roast potatoes in olive oil with salt, pepper, and herbs' }
+      { name: 'Lemon Herb Quinoa Bowl', ingredients: 'Quinoa, grilled chicken, cucumber, cherry tomatoes, olive oil, lemon juice, fresh herbs' },
+      { name: 'Garlic-Infused Pasta', ingredients: 'Gluten-free pasta, garlic-infused olive oil, parmesan, fresh basil, cherry tomatoes' },
+      { name: 'Crispy Roasted Potatoes', ingredients: 'Baby potatoes, olive oil, rosemary, salt, pepper, roasted until golden' }
     ]
   },
   gluten: {
     title: 'Savory Carbs & Gluten',
     description: 'Many savory carbs (pasta, bread, pizza crusts) are wheat-based and high in fructans, which commonly trigger bloating.',
-    betterOptions: [
-      { title: 'Gluten-free grains', items: ['White rice', 'Quinoa', 'Oats', 'Corn', 'Buckwheat', 'Potatoes'] },
-      { title: 'Gluten-free products', items: ['Gluten-free pasta', 'Sourdough bread', 'Gluten-free orzo'] },
-      { title: 'Cooking tips', items: ['Swap butter with olive oil'] }
+    safeOptions: [
+      'White rice (unlimited)',
+      'Quinoa',
+      'Oats (certified GF)',
+      'Potatoes',
+      'Sourdough bread (2 slices)',
+      'Gluten-free pasta',
+      'Corn tortillas',
+      'Rice noodles',
+      'Buckwheat'
     ],
+    avoidOptions: [
+      'Regular bread',
+      'Regular pasta',
+      'Wheat-based cereals',
+      'Couscous',
+      'Barley',
+      'Rye'
+    ],
+    tip: 'Gluten-free doesn\'t always mean low FODMAP. Check labels for hidden onion, garlic, honey, and high-FODMAP flours.',
     quickRecipes: [
-      { name: 'Lemon Herb Quinoa Bowl', description: 'Quinoa + grilled chicken + cucumber + tomatoes + olive oil, lemon, and herbs' },
-      { name: 'Gluten-Free Orzo Salad', description: 'Gluten-free orzo + cucumber + tomato + lemon vinaigrette' },
-      { name: 'Crispy Potato Wedges', description: 'Roast potatoes in olive oil with salt, pepper, and herbs' }
+      { name: 'Rice Noodle Stir-Fry', ingredients: 'Rice noodles, vegetables, soy sauce, ginger, sesame oil, protein of choice' },
+      { name: 'Loaded Baked Potato', ingredients: 'Baked potato, butter, chives (green parts), hard cheese, sour cream (small amount)' },
+      { name: 'Quinoa Buddha Bowl', ingredients: 'Quinoa, roasted vegetables, tahini dressing, pumpkin seeds, fresh greens' }
     ]
   },
   beans: {
-    title: 'Beans & Other Legumes',
-    description: 'Beans are rich in galacto-oligosaccharides (GOS), a FODMAP class that can cause gas and bloating.',
-    betterOptions: [
-      { title: 'Small portions', items: ['Well-rinsed canned lentils or chickpeas in modest amounts'] },
-      { title: 'Protein alternatives', items: ['Eggs', 'Chicken', 'Fish', 'Tofu', 'Firm tempeh'] },
-      { title: 'Texture substitutes', items: ['Quinoa', 'Rice', 'Roasted chickpeas (modest portions)'] }
+    title: 'Beans & Legumes',
+    description: 'Beans are rich in galacto-oligosaccharides (GOS), a FODMAP class that causes gas and bloating in most people.',
+    safeOptions: [
+      'Canned lentils (¼ cup, rinsed well)',
+      'Canned chickpeas (¼ cup, rinsed well)',
+      'Firm tofu (unlimited)',
+      'Tempeh (fermented)',
+      'Eggs',
+      'Edamame (½ cup max)'
     ],
+    avoidOptions: [
+      'Dried beans (all types)',
+      'Black beans',
+      'Kidney beans',
+      'Baked beans',
+      'Hummus (large portions)',
+      'Split peas'
+    ],
+    tip: 'Canned beans have 60-70% fewer FODMAPs than dried. Always rinse thoroughly to remove the liquid containing oligosaccharides.',
     quickRecipes: [
-      { name: 'Chicken & Red Lentil Skillet', description: 'Small portion of red lentils + chicken thighs + broth + carrots + spices over rice' },
-      { name: 'Tofu Banh Mi Bowl', description: 'Rice + marinated tofu + pickled carrots/daikon + cabbage and cilantro' },
-      { name: 'Crunchy Roasted Chickpeas', description: 'Rinse canned chickpeas, toss with olive oil and spices, roast until crisp' }
+      { name: 'Tofu Scramble', ingredients: 'Firm tofu crumbled, turmeric, paprika, spinach, cherry tomatoes, served with rice' },
+      { name: 'Lentil & Chicken Bowl', ingredients: 'Small portion canned lentils (rinsed), grilled chicken, carrots, rice, lemon dressing' },
+      { name: 'Tempeh Stir-Fry', ingredients: 'Marinated tempeh, bok choy, bell peppers, ginger, rice noodles' }
     ]
   },
   dairy: {
-    title: 'Dairy',
-    description: 'Lactose in milk, soft cheeses, and ice cream is a common bloating trigger.',
-    betterOptions: [
-      { title: 'Lactose-free options', items: ['Lactose-free milk and yogurt', 'Small amounts of cream'] },
-      { title: 'Lower-lactose cheeses', items: ['Cheddar', 'Swiss', 'Parmesan'] },
-      { title: 'Plant milks', items: ['Almond milk', 'Oat milk', 'Rice milk', 'Coconut milk'] }
+    title: 'Dairy Products',
+    description: 'Lactose in milk, soft cheeses, and ice cream is a common bloating trigger. Hard aged cheeses are naturally lower in lactose.',
+    safeOptions: [
+      'Lactose-free milk',
+      'Lactose-free yogurt',
+      'Hard cheeses (cheddar, parmesan, swiss)',
+      'Butter (small amounts)',
+      'Almond milk',
+      'Oat milk',
+      'Coconut milk',
+      'Brie & camembert (small portions)'
     ],
+    avoidOptions: [
+      'Regular milk',
+      'Soft cheeses (ricotta, cottage)',
+      'Ice cream',
+      'Heavy cream (large amounts)',
+      'Milk chocolate',
+      'Cream-based sauces'
+    ],
+    tip: 'Hard aged cheeses like parmesan have almost no lactose. The longer the aging process, the less lactose remains.',
     quickRecipes: [
-      { name: 'Lactose-Free Yogurt Parfait', description: 'Lactose-free yogurt + strawberries or blueberries + pumpkin seeds' },
-      { name: 'Creamy Salmon Chowder', description: 'Salmon + potatoes + carrots + leek greens + coconut milk' },
-      { name: 'Cheese & Rice Crackers', description: 'Hard cheese slices with gluten-free rice crackers' }
+      { name: 'Lactose-Free Parfait', ingredients: 'Lactose-free yogurt, strawberries, blueberries, pumpkin seeds, drizzle of maple syrup' },
+      { name: 'Parmesan Risotto', ingredients: 'Arborio rice, chicken broth, parmesan, butter, white wine, fresh herbs' },
+      { name: 'Coconut Milk Smoothie', ingredients: 'Coconut milk, banana, frozen berries, spinach, chia seeds' }
     ]
   },
   fruit: {
-    title: 'Fruit & Sugar',
-    description: 'Fructose and sugar alcohols in fruit and sweeteners can ferment and cause bloating.',
-    betterOptions: [
-      { title: 'Lower-FODMAP fruits', items: ['Bananas', 'Blueberries', 'Strawberries', 'Grapes', 'Kiwi', 'Oranges'] },
-      { title: 'Limit these', items: ['Apples', 'Pears', 'Mango', 'Watermelon', 'Dried fruit'] },
-      { title: 'Better sweeteners', items: ['Table sugar (small amounts)', 'Maple syrup', 'Rice syrup'] }
+    title: 'Fruits',
+    description: 'Fructose in certain fruits can ferment in the gut and cause bloating. Stick to lower-fructose options.',
+    safeOptions: [
+      'Bananas (ripe)',
+      'Blueberries (1 cup)',
+      'Strawberries (10)',
+      'Grapes',
+      'Oranges',
+      'Kiwi (2)',
+      'Pineapple (1 cup)',
+      'Cantaloupe (¾ cup)',
+      'Raspberries (⅓ cup)'
     ],
+    avoidOptions: [
+      'Apples',
+      'Pears',
+      'Mango',
+      'Watermelon',
+      'Cherries',
+      'Dried fruit',
+      'Fruit juice (large amounts)',
+      'Peaches',
+      'Plums'
+    ],
+    tip: 'Berries are generally safer choices. If you love apples, try small portions and see how you respond individually.',
     quickRecipes: [
-      { name: 'Strawberry-Banana Smoothie', description: 'Banana + frozen strawberries + lactose-free yogurt + dairy-free milk' },
-      { name: 'Protein Waffles', description: 'Oat or buckwheat-based waffle + maple syrup + berries' },
-      { name: 'Low-FODMAP Energy Balls', description: 'Oats + peanut butter + chia seeds + maple syrup rolled into bites' }
+      { name: 'Berry Smoothie Bowl', ingredients: 'Frozen strawberries, banana, lactose-free yogurt, topped with blueberries and seeds' },
+      { name: 'Tropical Fruit Salad', ingredients: 'Pineapple, kiwi, oranges, grapes, fresh mint, squeeze of lime' },
+      { name: 'Banana Oat Pancakes', ingredients: 'Mashed banana, oats, eggs, cinnamon, served with maple syrup and berries' }
     ]
   },
   sugar: {
-    title: 'Fruit & Sugar',
-    description: 'Fructose and sugar alcohols in fruit and sweeteners can ferment and cause bloating.',
-    betterOptions: [
-      { title: 'Lower-FODMAP fruits', items: ['Bananas', 'Blueberries', 'Strawberries', 'Grapes', 'Kiwi', 'Oranges'] },
-      { title: 'Limit these', items: ['Apples', 'Pears', 'Mango', 'Watermelon', 'Dried fruit'] },
-      { title: 'Better sweeteners', items: ['Table sugar (small amounts)', 'Maple syrup', 'Rice syrup'] }
+    title: 'Sugars & Sweeteners',
+    description: 'Sugar alcohols and high-fructose sweeteners can cause significant bloating and digestive discomfort.',
+    safeOptions: [
+      'Table sugar (moderate)',
+      'Maple syrup',
+      'Rice malt syrup',
+      'Glucose',
+      'Stevia (2 tsp)',
+      'Dark chocolate (30g, 70%+)'
     ],
+    avoidOptions: [
+      'High-fructose corn syrup',
+      'Honey (large amounts)',
+      'Agave',
+      'Sorbitol',
+      'Xylitol',
+      'Mannitol',
+      'Erythritol',
+      'Sugar-free candies'
+    ],
+    tip: 'Sugar alcohols (ending in -ol) are major bloating triggers. Check labels on "sugar-free" products carefully.',
     quickRecipes: [
-      { name: 'Strawberry-Banana Smoothie', description: 'Banana + frozen strawberries + lactose-free yogurt + dairy-free milk' },
-      { name: 'Protein Waffles', description: 'Oat or buckwheat-based waffle + maple syrup + berries' },
-      { name: 'Low-FODMAP Energy Balls', description: 'Oats + peanut butter + chia seeds + maple syrup rolled into bites' }
+      { name: 'Maple Glazed Salmon', ingredients: 'Salmon fillet, maple syrup, soy sauce, ginger, served with rice and vegetables' },
+      { name: 'Dark Chocolate Bark', ingredients: 'Melted dark chocolate, pumpkin seeds, dried cranberries, sea salt flakes' },
+      { name: 'Vanilla Rice Pudding', ingredients: 'Rice, lactose-free milk, vanilla, maple syrup, cinnamon' }
     ]
   },
   veggies: {
-    title: 'Veggies & Other "Healthy" Triggers',
-    description: 'Onions, garlic, certain crucifers, and mushrooms are classic bloat bombs due to FODMAP content.',
-    betterOptions: [
-      { title: 'Gentler vegetables', items: ['Carrots', 'Cucumber', 'Eggplant', 'Green beans', 'Lettuce', 'Spinach', 'Zucchini', 'Bell peppers'] },
-      { title: 'Flavor alternatives', items: ['Garlic-infused oil instead of whole garlic or onion'] },
-      { title: 'Other swaps', items: ['Still water vs carbonated', 'Baking/grilling vs frying'] }
+    title: 'Vegetables',
+    description: 'Onions, garlic, cruciferous vegetables, and mushrooms contain FODMAPs that can cause bloating.',
+    safeOptions: [
+      'Carrots (unlimited)',
+      'Cucumber (unlimited)',
+      'Bell peppers (all colors)',
+      'Zucchini',
+      'Spinach',
+      'Lettuce',
+      'Tomatoes',
+      'Eggplant',
+      'Green beans',
+      'Bok choy',
+      'Potatoes',
+      'Garlic-infused oil'
     ],
+    avoidOptions: [
+      'Onion (all types)',
+      'Garlic',
+      'Cauliflower (large portions)',
+      'Mushrooms',
+      'Asparagus',
+      'Artichokes',
+      'Brussels sprouts (large)',
+      'Snow peas'
+    ],
+    tip: 'For garlic flavor without the bloat, use garlic-infused oil. The FODMAPs don\'t transfer to oil, only the flavor does.',
     quickRecipes: [
-      { name: 'Asian Chicken Salad', description: 'Shredded chicken + cabbage + bell peppers + cucumber + peanuts with soy-lime-ginger dressing' },
-      { name: 'Brussels Sprout Salad', description: 'Shredded Brussels sprouts + pomegranate seeds + parsley + lemon-mustard vinaigrette' },
-      { name: 'Herbed Popcorn', description: 'Air-popped popcorn + olive oil + rosemary + paprika' }
+      { name: 'Rainbow Veggie Stir-Fry', ingredients: 'Bell peppers, carrots, zucchini, bok choy, ginger, garlic-infused oil, soy sauce' },
+      { name: 'Mediterranean Salad', ingredients: 'Cucumber, tomatoes, olives, feta, spinach, olive oil, lemon dressing' },
+      { name: 'Roasted Veggie Medley', ingredients: 'Zucchini, eggplant, bell peppers, cherry tomatoes, olive oil, herbs' }
     ]
   },
   sweeteners: {
-    title: 'Sweeteners & Sugar Alcohols',
-    description: 'Artificial sweeteners (sorbitol, xylitol, mannitol) and high-fructose corn syrup can cause gas and bloating.',
-    betterOptions: [
-      { title: 'Better sweeteners', items: ['Pure maple syrup', 'Table sugar (small amounts)', 'Stevia', 'Rice malt syrup'] },
-      { title: 'Avoid these', items: ['Sorbitol', 'Xylitol', 'Mannitol', 'High-fructose corn syrup', 'Agave'] },
-      { title: 'Natural sweet options', items: ['Low-FODMAP fruits', 'Dark chocolate (small amounts)', 'Vanilla extract'] }
+    title: 'Artificial Sweeteners',
+    description: 'Artificial sweeteners, especially sugar alcohols, can cause significant gas and bloating.',
+    safeOptions: [
+      'Pure maple syrup',
+      'Table sugar (small amounts)',
+      'Stevia',
+      'Rice malt syrup',
+      'Glucose syrup',
+      'Brown sugar'
     ],
+    avoidOptions: [
+      'Sorbitol',
+      'Xylitol',
+      'Mannitol',
+      'Erythritol',
+      'Isomalt',
+      'High-fructose corn syrup',
+      'Agave nectar',
+      'Sugar-free gum'
+    ],
+    tip: 'Check ingredient lists for anything ending in "-ol" - these are sugar alcohols and major bloating culprits.',
     quickRecipes: [
-      { name: 'Maple-Sweetened Oatmeal', description: 'Rolled oats + maple syrup + cinnamon + blueberries' },
-      { name: 'Dark Chocolate Bark', description: 'Dark chocolate + pumpkin seeds + dried cranberries' },
-      { name: 'Vanilla Chia Pudding', description: 'Chia seeds + almond milk + vanilla + maple syrup + strawberries' }
+      { name: 'Maple Oatmeal', ingredients: 'Rolled oats, lactose-free milk, maple syrup, banana, cinnamon, walnuts' },
+      { name: 'Homemade Lemonade', ingredients: 'Fresh lemon juice, water, table sugar, ice, mint leaves' },
+      { name: 'Chia Seed Pudding', ingredients: 'Chia seeds, almond milk, maple syrup, vanilla, topped with berries' }
     ]
   },
   'fatty-food': {
     title: 'Fatty & Fried Foods',
-    description: 'Fatty and fried foods slow gastric emptying and can worsen bloating.',
-    betterOptions: [
-      { title: 'Cooking methods', items: ['Baking', 'Grilling', 'Air-frying', 'Steaming', 'Poaching'] },
-      { title: 'Healthier fats', items: ['Extra-virgin olive oil', 'Avocado oil', 'Coconut oil (small amounts)'] },
-      { title: 'Protein swaps', items: ['Grilled chicken breast', 'Baked fish', 'Lean turkey', 'Tofu'] }
+    description: 'High-fat foods slow gastric emptying, causing food to sit longer in the stomach and ferment.',
+    safeOptions: [
+      'Grilled chicken breast',
+      'Baked fish',
+      'Air-fried foods',
+      'Lean turkey',
+      'Olive oil (cooking)',
+      'Avocado oil',
+      'Grilled vegetables',
+      'Steamed dishes'
     ],
+    avoidOptions: [
+      'Deep-fried foods',
+      'Fast food',
+      'Creamy sauces',
+      'Fatty cuts of meat',
+      'Fried chicken',
+      'French fries',
+      'Onion rings',
+      'Heavy cream dishes'
+    ],
+    tip: 'Baking, grilling, and air-frying give you similar textures to frying without the digestive burden.',
     quickRecipes: [
-      { name: 'Baked Lemon Chicken', description: 'Chicken breast + lemon + herbs + olive oil baked until golden' },
-      { name: 'Grilled Salmon Bowl', description: 'Grilled salmon + quinoa + steamed vegetables + lemon-dill sauce' },
-      { name: 'Air-Fried Sweet Potato Fries', description: 'Sweet potato wedges + light olive oil spray + paprika + salt' }
+      { name: 'Lemon Herb Chicken', ingredients: 'Chicken breast, lemon, rosemary, thyme, olive oil, roasted until golden' },
+      { name: 'Grilled Salmon', ingredients: 'Salmon fillet, dill, lemon, olive oil, served with quinoa and steamed vegetables' },
+      { name: 'Air-Fried Sweet Potato Fries', ingredients: 'Sweet potato wedges, olive oil spray, paprika, salt, dipped in maple mustard' }
     ]
   },
   carbonated: {
     title: 'Carbonated Drinks',
-    description: 'Carbonated drinks introduce gas bubbles into the digestive system, which can get trapped and cause bloating.',
-    betterOptions: [
-      { title: 'Better drinks', items: ['Still water', 'Herbal teas', 'Water with citrus', 'Coconut water', 'Fresh juice (diluted)'] },
-      { title: 'Avoid these', items: ['Soda', 'Sparkling water', 'Beer', 'Champagne', 'Energy drinks'] },
-      { title: 'Flavor ideas', items: ['Mint leaves', 'Lemon/lime slices', 'Cucumber', 'Fresh ginger', 'Berries'] }
+    description: 'The CO₂ gas in carbonated drinks gets trapped in the digestive system, directly causing bloating.',
+    safeOptions: [
+      'Still water',
+      'Herbal teas (peppermint, ginger)',
+      'Water with lemon/lime',
+      'Coconut water',
+      'Fresh-brewed iced tea',
+      'Infused water (cucumber, mint)',
+      'Lactose-free milk'
     ],
+    avoidOptions: [
+      'Soda / soft drinks',
+      'Sparkling water',
+      'Beer',
+      'Champagne',
+      'Energy drinks',
+      'Kombucha',
+      'Sparkling wine',
+      'Club soda'
+    ],
+    tip: 'Even "healthy" sparkling water causes bloating. The carbonation itself is the problem, not just the sugars.',
     quickRecipes: [
-      { name: 'Cucumber Mint Water', description: 'Still water + fresh cucumber slices + mint leaves + lemon' },
-      { name: 'Ginger Lemon Tea', description: 'Fresh ginger + hot water + lemon + honey' },
-      { name: 'Berry Infusion', description: 'Still water + crushed strawberries + blueberries + basil' }
+      { name: 'Cucumber Mint Infusion', ingredients: 'Still water, fresh cucumber slices, mint leaves, lemon wedges, ice' },
+      { name: 'Ginger Wellness Tea', ingredients: 'Fresh ginger slices, hot water, lemon, honey (small amount), served warm or iced' },
+      { name: 'Berry Infused Water', ingredients: 'Still water, muddled strawberries, blueberries, fresh basil leaves' }
     ]
   },
   alcohol: {
     title: 'Alcohol & Cocktails',
-    description: 'Beer and sugary cocktails can be especially gassy. Beer contains carbonation and fermentable carbs.',
-    betterOptions: [
-      { title: 'If tolerated (small amounts)', items: ['Dry wine (red or white)', 'Clear spirits with water', 'Vodka soda with lime'] },
-      { title: 'Avoid these', items: ['Beer', 'Sugary cocktails', 'Sweet mixed drinks', 'Champagne', 'Cider'] },
-      { title: 'Better mixers', items: ['Still water', 'Fresh lemon/lime juice', 'Cranberry juice (small amounts)'] }
+    description: 'Beer contains carbonation and fermentable carbs. Sugary cocktails often have high-fructose mixers.',
+    safeOptions: [
+      'Dry red wine (5 oz)',
+      'Dry white wine (5 oz)',
+      'Vodka with still water',
+      'Gin with lime juice',
+      'Whiskey (neat or rocks)',
+      'Tequila with fresh lime'
     ],
+    avoidOptions: [
+      'Beer (all types)',
+      'Cider',
+      'Sugary cocktails',
+      'Rum (with sugary mixers)',
+      'Champagne',
+      'Sweet wines',
+      'Margarita mixes',
+      'Drinks with juice'
+    ],
+    tip: 'Stick to dry wines or clear spirits with still water or fresh citrus. Avoid all carbonated mixers.',
     quickRecipes: [
-      { name: 'Simple Wine Spritzer', description: 'Small dry wine portion + still water + fresh lemon' },
-      { name: 'Clean Vodka Tonic', description: 'Vodka + still water + lime + fresh mint' },
-      { name: 'Mocktail Alternative', description: 'Still water + muddled berries + lime + mint' }
+      { name: 'Wine Spritzer (Still)', ingredients: 'Dry white wine, still water, fresh lemon slice, ice' },
+      { name: 'Clean Vodka Lime', ingredients: 'Vodka, still water, fresh lime juice, lime wedge, mint' },
+      { name: 'Mocktail Option', ingredients: 'Still water, muddled berries, fresh lime, mint, ice' }
     ]
   },
   processed: {
     title: 'Processed Foods',
-    description: 'Highly processed foods often contain artificial additives, high sodium, and hidden FODMAPs that worsen bloating.',
-    betterOptions: [
-      { title: 'Whole food swaps', items: ['Fresh vegetables', 'Lean meats', 'Plain rice', 'Potatoes', 'Fresh fish', 'Eggs'] },
-      { title: 'Minimally processed', items: ['Plain yogurt (lactose-free)', 'Canned beans (rinsed)', 'Frozen vegetables', 'Plain oats'] },
-      { title: 'Cooking from scratch', items: ['Simple sauces with herbs', 'Homemade dressings', 'Fresh-cooked meals'] }
+    description: 'Processed foods often contain hidden onion/garlic powder, inulin, high-fructose corn syrup, and other FODMAP additives.',
+    safeOptions: [
+      'Fresh vegetables',
+      'Fresh meats',
+      'Plain rice',
+      'Plain potatoes',
+      'Eggs',
+      'Plain oats',
+      'Frozen plain vegetables',
+      'FODY Foods brand'
     ],
+    avoidOptions: [
+      'Premade sauces',
+      'Seasoning packets',
+      'Processed meats (check labels)',
+      'Instant noodles',
+      'Granola bars',
+      'Protein bars',
+      'Premade soups',
+      'Chips with seasonings'
+    ],
+    tip: 'Always check labels for onion powder, garlic powder, honey, inulin, chicory root, and HFCS - they\'re hidden everywhere.',
     quickRecipes: [
-      { name: 'Simple Grilled Protein', description: 'Chicken or fish + fresh herbs + lemon + extra-virgin olive oil' },
-      { name: 'Rice & Veggie Bowl', description: 'Plain white rice + steamed carrots + zucchini + grilled chicken' },
-      { name: 'Homemade Salad Dressing', description: 'Olive oil + lemon juice + Dijon mustard + salt + pepper' }
+      { name: 'Simple Grilled Chicken', ingredients: 'Chicken breast, olive oil, salt, pepper, fresh herbs, lemon' },
+      { name: 'Homemade Rice Bowl', ingredients: 'Plain rice, grilled protein, steamed carrots, zucchini, soy sauce, ginger' },
+      { name: 'DIY Salad Dressing', ingredients: 'Olive oil, lemon juice, Dijon mustard, salt, pepper, fresh herbs' }
     ]
   }
 };
@@ -541,161 +728,175 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                   className="overflow-hidden"
                 >
                   <div className="mt-4 space-y-4">
-                    {/* Stats Section */}
+                    {/* Why It Triggers + Stats Combined */}
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
                       className="relative overflow-hidden rounded-2xl"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-orange-50/90 via-amber-50/80 to-yellow-50/90" />
-                      <div className="relative backdrop-blur-xl bg-white/40 border-2 border-white/60 rounded-2xl p-5">
-                        <h4 className="font-bold text-foreground flex items-center gap-2 mb-4">
-                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
-                            <Zap size={16} className="text-white" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50" />
+                      <div className="relative bg-white/80 backdrop-blur-xl border border-gray-200/60 rounded-2xl p-5">
+                        {/* Why section */}
+                        <div className="flex items-start gap-3 mb-5">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 border border-amber-200/50 flex items-center justify-center flex-shrink-0">
+                            <AlertCircle size={20} className="text-amber-600" />
                           </div>
-                          <span>Why is {topTrigger.displayName} ranked #1?</span>
-                        </h4>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/80">
-                            <div className="text-2xl font-black text-orange-600">{topTrigger.occurrences}</div>
-                            <div className="text-xs text-muted-foreground font-semibold">meals with this</div>
+                          <div>
+                            <h4 className="font-bold text-foreground text-sm mb-1">Why {topTrigger.displayName} triggers bloating</h4>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {SAFE_ALTERNATIVES_DATA[topTrigger.category]?.description || `${topTrigger.displayName} has been consistently linked to your bloating episodes.`}
+                            </p>
                           </div>
-                          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/80">
-                            <div className="text-2xl font-black text-amber-600">{topTrigger.avgBloatingWith}/5</div>
-                            <div className="text-xs text-muted-foreground font-semibold">avg bloating</div>
-                          </div>
-                          {topTrigger.consistencyFactor > 0 && (
-                            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/80">
-                              <div className="text-2xl font-black text-rose-600">{Math.round(topTrigger.consistencyFactor * 100)}%</div>
-                              <div className="text-xs text-muted-foreground font-semibold">consistency</div>
-                            </div>
-                          )}
-                          {topTrigger.recentOccurrences > 0 && (
-                            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/80">
-                              <div className="text-2xl font-black text-purple-600">{topTrigger.recentOccurrences}</div>
-                              <div className="text-xs text-muted-foreground font-semibold">times this week</div>
-                            </div>
-                          )}
                         </div>
 
+                        {/* Stats row */}
+                        <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
+                          <div className="text-center">
+                            <div className="text-2xl font-black text-foreground">{topTrigger.occurrences}</div>
+                            <div className="text-[11px] text-muted-foreground font-medium">occurrences</div>
+                          </div>
+                          <div className="w-px h-10 bg-gray-200" />
+                          <div className="text-center">
+                            <div className="text-2xl font-black text-foreground">{topTrigger.avgBloatingWith}<span className="text-base font-bold text-muted-foreground">/5</span></div>
+                            <div className="text-[11px] text-muted-foreground font-medium">avg bloating</div>
+                          </div>
+                          <div className="w-px h-10 bg-gray-200" />
+                          <div className="text-center">
+                            <div className="text-2xl font-black text-foreground">{topTrigger.percentage}%</div>
+                            <div className="text-[11px] text-muted-foreground font-medium">of meals</div>
+                          </div>
+                        </div>
+
+                        {/* Common foods */}
                         {topTrigger.topFoods.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-orange-200/50">
-                            <div className="text-xs font-bold text-muted-foreground mb-2">Common foods:</div>
-                            <div className="flex flex-wrap gap-2">
-                              {topTrigger.topFoods.slice(0, 4).map((food, idx) => (
-                                <span key={idx} className="px-3 py-1.5 rounded-full bg-white/80 text-xs font-semibold text-foreground border border-orange-200/50 shadow-sm">
-                                  {food}
-                                </span>
-                              ))}
-                            </div>
+                          <div className="mt-4 pt-4 border-t border-gray-100">
+                            <span className="text-xs font-semibold text-muted-foreground">Your common triggers: </span>
+                            <span className="text-xs text-foreground">{topTrigger.topFoods.slice(0, 4).join(', ')}</span>
                           </div>
                         )}
                       </div>
                     </motion.div>
 
-                    {/* Why It Triggers Section */}
                     {SAFE_ALTERNATIVES_DATA[topTrigger.category] && (
                       <>
+                        {/* Safe Options Section */}
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
                           className="relative overflow-hidden rounded-2xl"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-br from-rose-50/90 via-pink-50/80 to-red-50/90" />
-                          <div className="relative backdrop-blur-xl bg-white/40 border-2 border-white/60 rounded-2xl p-5">
-                            <h4 className="font-bold text-foreground flex items-center gap-2 mb-3">
-                              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
-                                <AlertCircle size={16} className="text-white" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50" />
+                          <div className="relative bg-white/60 backdrop-blur-xl border border-emerald-200/60 rounded-2xl p-5">
+                            <div className="flex items-center gap-2 mb-4">
+                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                                <ShieldCheck size={16} className="text-white" />
                               </div>
-                              <span>Why it triggers bloating</span>
-                            </h4>
-                            <p className="text-sm text-rose-900/80 leading-relaxed">
-                              {SAFE_ALTERNATIVES_DATA[topTrigger.category].description}
-                            </p>
-                          </div>
-                        </motion.div>
-
-                        {/* Better Options Section */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3 }}
-                          className="relative overflow-hidden rounded-2xl"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/90 via-green-50/80 to-teal-50/90" />
-                          <div className="relative backdrop-blur-xl bg-white/40 border-2 border-white/60 rounded-2xl p-5">
-                            <h4 className="font-bold text-foreground flex items-center gap-2 mb-4">
-                              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                                <Check size={16} className="text-white" />
-                              </div>
-                              <span>Better Options</span>
-                              <Sparkles size={14} className="text-emerald-500 ml-auto" />
-                            </h4>
-                            <div className="space-y-4">
-                              {SAFE_ALTERNATIVES_DATA[topTrigger.category].betterOptions.map((option, idx) => (
+                              <h4 className="font-bold text-emerald-900">Safe to Eat</h4>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2">
+                              {SAFE_ALTERNATIVES_DATA[topTrigger.category].safeOptions.map((item, idx) => (
                                 <motion.div
                                   key={idx}
                                   initial={{ opacity: 0, x: -10 }}
                                   animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: 0.4 + idx * 0.1 }}
+                                  transition={{ delay: 0.25 + idx * 0.03 }}
+                                  className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-white/60 transition-colors"
                                 >
-                                  <h5 className="font-bold text-emerald-800 text-xs mb-2 uppercase tracking-wide">
-                                    {option.title}
-                                  </h5>
-                                  <div className="flex flex-wrap gap-2">
-                                    {option.items.map((item, itemIdx) => (
-                                      <motion.span
-                                        key={itemIdx}
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: 0.5 + idx * 0.1 + itemIdx * 0.05 }}
-                                        className="inline-flex items-center px-3 py-2 rounded-xl bg-white/80 text-xs font-semibold text-foreground/90 shadow-sm border border-emerald-200/50 hover:bg-white hover:shadow-md hover:border-emerald-300/50 transition-all cursor-default"
-                                      >
-                                        <Leaf size={12} className="text-emerald-500 mr-1.5" />
-                                        {item}
-                                      </motion.span>
-                                    ))}
+                                  <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                    <Check size={12} className="text-emerald-600" strokeWidth={3} />
                                   </div>
+                                  <span className="text-sm text-foreground">{item}</span>
                                 </motion.div>
                               ))}
                             </div>
                           </div>
                         </motion.div>
 
-                        {/* Quick Recipes Section */}
+                        {/* Avoid Section */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                          className="relative overflow-hidden rounded-2xl"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-br from-rose-50 via-red-50 to-pink-50" />
+                          <div className="relative bg-white/60 backdrop-blur-xl border border-rose-200/60 rounded-2xl p-5">
+                            <div className="flex items-center gap-2 mb-4">
+                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center">
+                                <Ban size={16} className="text-white" />
+                              </div>
+                              <h4 className="font-bold text-rose-900">Avoid These</h4>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2">
+                              {SAFE_ALTERNATIVES_DATA[topTrigger.category].avoidOptions.map((item, idx) => (
+                                <motion.div
+                                  key={idx}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.35 + idx * 0.03 }}
+                                  className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-white/60 transition-colors"
+                                >
+                                  <div className="w-5 h-5 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+                                    <X size={12} className="text-rose-600" strokeWidth={3} />
+                                  </div>
+                                  <span className="text-sm text-foreground">{item}</span>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </div>
+                        </motion.div>
+
+                        {/* Pro Tip Section */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          className="relative overflow-hidden rounded-2xl"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50" />
+                          <div className="relative bg-white/60 backdrop-blur-xl border border-amber-200/60 rounded-2xl p-5">
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center flex-shrink-0">
+                                <Lightbulb size={16} className="text-white" />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-amber-900 mb-1">Pro Tip</h4>
+                                <p className="text-sm text-amber-800/80 leading-relaxed">
+                                  {SAFE_ALTERNATIVES_DATA[topTrigger.category].tip}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+
+                        {/* Recipe Ideas */}
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.5 }}
                           className="relative overflow-hidden rounded-2xl"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-br from-violet-50/90 via-purple-50/80 to-fuchsia-50/90" />
-                          <div className="relative backdrop-blur-xl bg-white/40 border-2 border-white/60 rounded-2xl p-5">
-                            <h4 className="font-bold text-foreground flex items-center gap-2 mb-4">
-                              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                          <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50" />
+                          <div className="relative bg-white/60 backdrop-blur-xl border border-violet-200/60 rounded-2xl p-5">
+                            <div className="flex items-center gap-2 mb-4">
+                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
                                 <ChefHat size={16} className="text-white" />
                               </div>
-                              <span>Quick Recipe Ideas</span>
-                            </h4>
-                            <div className="space-y-3">
+                              <h4 className="font-bold text-violet-900">Recipe Ideas</h4>
+                            </div>
+                            <div className="space-y-4">
                               {SAFE_ALTERNATIVES_DATA[topTrigger.category].quickRecipes.map((recipe, idx) => (
                                 <motion.div
                                   key={idx}
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: 0.6 + idx * 0.1 }}
-                                  whileHover={{ scale: 1.02, x: 4 }}
-                                  className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-violet-200/50 hover:shadow-lg hover:border-violet-300/50 transition-all cursor-pointer group"
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.55 + idx * 0.1 }}
+                                  className="bg-white/70 rounded-xl p-4 border border-violet-100"
                                 >
-                                  <h5 className="font-bold text-violet-800 text-sm mb-1 group-hover:text-violet-900 transition-colors">
-                                    {recipe.name}
-                                  </h5>
-                                  <p className="text-xs text-violet-700/70 leading-relaxed">
-                                    {recipe.description}
-                                  </p>
+                                  <h5 className="font-bold text-violet-900 text-sm mb-2">{recipe.name}</h5>
+                                  <p className="text-xs text-violet-700/80 leading-relaxed">{recipe.ingredients}</p>
                                 </motion.div>
                               ))}
                             </div>
@@ -810,107 +1011,129 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                             className="overflow-hidden"
                           >
                             <div className="mt-3 space-y-3">
-                              {/* Quick Stats */}
+                              {/* Why + Stats */}
                               <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="grid grid-cols-3 gap-2"
+                                className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/60"
                               >
-                                <div className="bg-gradient-to-br from-orange-50/90 to-amber-50/90 backdrop-blur-sm rounded-xl p-3 border border-orange-200/50 text-center">
-                                  <div className="text-lg font-black text-orange-600">{trigger.avgBloatingWith}/5</div>
-                                  <div className="text-[10px] text-muted-foreground font-semibold">bloating</div>
-                                </div>
-                                <div className="bg-gradient-to-br from-amber-50/90 to-yellow-50/90 backdrop-blur-sm rounded-xl p-3 border border-amber-200/50 text-center">
-                                  <div className="text-lg font-black text-amber-600">{trigger.percentage}%</div>
-                                  <div className="text-[10px] text-muted-foreground font-semibold">of meals</div>
-                                </div>
-                                <div className="bg-gradient-to-br from-rose-50/90 to-pink-50/90 backdrop-blur-sm rounded-xl p-3 border border-rose-200/50 text-center">
-                                  <div className="text-lg font-black text-rose-600">{trigger.occurrences}</div>
-                                  <div className="text-[10px] text-muted-foreground font-semibold">times</div>
+                                <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                                  {SAFE_ALTERNATIVES_DATA[trigger.category]?.description || `${trigger.displayName} has been linked to your bloating.`}
+                                </p>
+                                <div className="flex items-center justify-between text-center pt-3 border-t border-gray-100">
+                                  <div>
+                                    <div className="text-lg font-black text-foreground">{trigger.avgBloatingWith}<span className="text-sm font-bold text-muted-foreground">/5</span></div>
+                                    <div className="text-[10px] text-muted-foreground">bloating</div>
+                                  </div>
+                                  <div className="w-px h-8 bg-gray-200" />
+                                  <div>
+                                    <div className="text-lg font-black text-foreground">{trigger.percentage}%</div>
+                                    <div className="text-[10px] text-muted-foreground">of meals</div>
+                                  </div>
+                                  <div className="w-px h-8 bg-gray-200" />
+                                  <div>
+                                    <div className="text-lg font-black text-foreground">{trigger.occurrences}</div>
+                                    <div className="text-[10px] text-muted-foreground">times</div>
+                                  </div>
                                 </div>
                               </motion.div>
 
-                              {/* Why It Triggers */}
                               {SAFE_ALTERNATIVES_DATA[trigger.category] && (
                                 <>
+                                  {/* Safe Options - Compact */}
                                   <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.15 }}
-                                    className="bg-gradient-to-br from-rose-50/80 to-pink-50/80 backdrop-blur-sm rounded-xl p-4 border border-rose-200/50"
+                                    className="bg-gradient-to-br from-emerald-50 to-teal-50 backdrop-blur-sm rounded-xl p-4 border border-emerald-200/60"
                                   >
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center">
-                                        <AlertCircle size={10} className="text-white" />
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <div className="w-5 h-5 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                                        <Check size={10} className="text-white" strokeWidth={3} />
                                       </div>
-                                      <span className="text-xs font-bold text-rose-800">Why it triggers</span>
+                                      <span className="text-xs font-bold text-emerald-800">Safe Options</span>
                                     </div>
-                                    <p className="text-[11px] text-rose-900/70 leading-relaxed">
-                                      {SAFE_ALTERNATIVES_DATA[trigger.category].description}
-                                    </p>
+                                    <div className="space-y-1.5">
+                                      {SAFE_ALTERNATIVES_DATA[trigger.category].safeOptions.slice(0, 5).map((item, itemIdx) => (
+                                        <div key={itemIdx} className="flex items-center gap-2 text-xs text-emerald-900/80">
+                                          <div className="w-1 h-1 rounded-full bg-emerald-400" />
+                                          {item}
+                                        </div>
+                                      ))}
+                                      {SAFE_ALTERNATIVES_DATA[trigger.category].safeOptions.length > 5 && (
+                                        <div className="text-[10px] text-emerald-600 font-semibold mt-2">
+                                          +{SAFE_ALTERNATIVES_DATA[trigger.category].safeOptions.length - 5} more options
+                                        </div>
+                                      )}
+                                    </div>
                                   </motion.div>
 
-                                  {/* Better Options */}
+                                  {/* Avoid Options - Compact */}
                                   <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2 }}
-                                    className="bg-gradient-to-br from-emerald-50/80 to-teal-50/80 backdrop-blur-sm rounded-xl p-4 border border-emerald-200/50"
+                                    className="bg-gradient-to-br from-rose-50 to-red-50 backdrop-blur-sm rounded-xl p-4 border border-rose-200/60"
                                   >
                                     <div className="flex items-center gap-2 mb-3">
-                                      <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                                        <Check size={10} className="text-white" />
+                                      <div className="w-5 h-5 rounded-md bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center">
+                                        <X size={10} className="text-white" strokeWidth={3} />
                                       </div>
-                                      <span className="text-xs font-bold text-emerald-800">Better Options</span>
-                                      <Sparkles size={10} className="text-emerald-500 ml-auto" />
+                                      <span className="text-xs font-bold text-rose-800">Avoid These</span>
                                     </div>
-                                    <div className="space-y-3">
-                                      {SAFE_ALTERNATIVES_DATA[trigger.category].betterOptions.slice(0, 2).map((option, optIdx) => (
-                                        <div key={optIdx}>
-                                          <div className="text-[10px] font-bold text-emerald-700 mb-1.5 uppercase tracking-wide">{option.title}</div>
-                                          <div className="flex flex-wrap gap-1.5">
-                                            {option.items.slice(0, 4).map((item, itemIdx) => (
-                                              <span
-                                                key={itemIdx}
-                                                className="inline-flex items-center px-2.5 py-1 rounded-lg bg-white/80 text-[10px] font-semibold text-foreground/80 border border-emerald-200/50"
-                                              >
-                                                <Leaf size={8} className="text-emerald-500 mr-1" />
-                                                {item}
-                                              </span>
-                                            ))}
-                                            {option.items.length > 4 && (
-                                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100/80 text-[10px] font-bold text-emerald-700">
-                                                +{option.items.length - 4} more
-                                              </span>
-                                            )}
-                                          </div>
+                                    <div className="space-y-1.5">
+                                      {SAFE_ALTERNATIVES_DATA[trigger.category].avoidOptions.slice(0, 4).map((item, itemIdx) => (
+                                        <div key={itemIdx} className="flex items-center gap-2 text-xs text-rose-900/80">
+                                          <div className="w-1 h-1 rounded-full bg-rose-400" />
+                                          {item}
                                         </div>
                                       ))}
+                                      {SAFE_ALTERNATIVES_DATA[trigger.category].avoidOptions.length > 4 && (
+                                        <div className="text-[10px] text-rose-600 font-semibold mt-2">
+                                          +{SAFE_ALTERNATIVES_DATA[trigger.category].avoidOptions.length - 4} more to avoid
+                                        </div>
+                                      )}
                                     </div>
                                   </motion.div>
 
-                                  {/* Quick Recipe */}
+                                  {/* Pro Tip - Compact */}
                                   <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.25 }}
-                                    className="bg-gradient-to-br from-violet-50/80 to-purple-50/80 backdrop-blur-sm rounded-xl p-4 border border-violet-200/50"
+                                    className="bg-gradient-to-br from-amber-50 to-orange-50 backdrop-blur-sm rounded-xl p-4 border border-amber-200/60"
                                   >
-                                    <div className="flex items-center gap-2 mb-3">
-                                      <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
-                                        <ChefHat size={10} className="text-white" />
+                                    <div className="flex items-start gap-2">
+                                      <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <Lightbulb size={10} className="text-white" />
                                       </div>
-                                      <span className="text-xs font-bold text-violet-800">Try this recipe</span>
-                                    </div>
-                                    <div className="bg-white/70 rounded-lg p-3 border border-violet-200/30">
-                                      <div className="font-bold text-violet-800 text-xs mb-1">
-                                        {SAFE_ALTERNATIVES_DATA[trigger.category].quickRecipes[0].name}
-                                      </div>
-                                      <p className="text-[10px] text-violet-700/70 leading-relaxed">
-                                        {SAFE_ALTERNATIVES_DATA[trigger.category].quickRecipes[0].description}
+                                      <p className="text-xs text-amber-900/80 leading-relaxed">
+                                        <span className="font-bold">Tip: </span>
+                                        {SAFE_ALTERNATIVES_DATA[trigger.category].tip}
                                       </p>
                                     </div>
+                                  </motion.div>
+
+                                  {/* Quick Recipe - Compact */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="bg-gradient-to-br from-violet-50 to-purple-50 backdrop-blur-sm rounded-xl p-4 border border-violet-200/60"
+                                  >
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
+                                        <ChefHat size={10} className="text-white" />
+                                      </div>
+                                      <span className="text-xs font-bold text-violet-800">Try This</span>
+                                    </div>
+                                    <div className="font-semibold text-violet-900 text-xs mb-1">
+                                      {SAFE_ALTERNATIVES_DATA[trigger.category].quickRecipes[0].name}
+                                    </div>
+                                    <p className="text-[11px] text-violet-700/70 leading-relaxed">
+                                      {SAFE_ALTERNATIVES_DATA[trigger.category].quickRecipes[0].ingredients}
+                                    </p>
                                   </motion.div>
                                 </>
                               )}
@@ -923,14 +1146,8 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                                   transition={{ delay: 0.15 }}
                                   className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/80"
                                 >
-                                  <div className="text-[10px] font-bold text-muted-foreground mb-2">Common foods:</div>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {trigger.topFoods.slice(0, 4).map((food, foodIdx) => (
-                                      <span key={foodIdx} className="px-2.5 py-1 rounded-lg bg-white/80 text-[10px] font-semibold text-foreground border border-gray-200/50">
-                                        {food}
-                                      </span>
-                                    ))}
-                                  </div>
+                                  <div className="text-xs font-semibold text-muted-foreground mb-2">Common triggers:</div>
+                                  <div className="text-xs text-foreground">{trigger.topFoods.slice(0, 4).join(', ')}</div>
                                 </motion.div>
                               )}
                             </div>
