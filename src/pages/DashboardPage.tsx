@@ -259,7 +259,7 @@ export default function DashboardPage() {
                 />
 
                 {/* Premium glassmorphic overlay */}
-                <div className="relative h-full backdrop-blur-2xl bg-white/50 border-2 border-white/70 shadow-inner">
+                <div className="relative h-full backdrop-blur-2xl bg-white/40">
                   <div className="relative h-full p-7 flex flex-col">
                     {/* Action buttons - top right with enhanced styling */}
                     <div className="absolute top-5 right-5 flex items-center gap-2.5">
@@ -313,22 +313,25 @@ export default function DashboardPage() {
                 >
                   <motion.div
                     whileHover={{ scale: 1.05, y: -2 }}
-                    className="flex items-center gap-2.5 px-5 py-3 rounded-[1.25rem] bg-white/95 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-orange-500/10"
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white shadow-lg shadow-black/8"
                   >
-                    <span className="text-3xl drop-shadow-sm">🔥</span>
-                    <div className="flex flex-col leading-tight">
-                      <span className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Streak</span>
-                      <span className="text-xl font-black text-foreground">{streak} <span className="text-sm font-bold text-muted-foreground">days</span></span>
+                    <span className="text-2xl">🔥</span>
+                    <div className="flex flex-col leading-none">
+                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Streak</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-lg font-black text-foreground">{streak}</span>
+                        <span className="text-xs font-semibold text-muted-foreground">days</span>
+                      </div>
                     </div>
                   </motion.div>
                   <motion.div
                     whileHover={{ scale: 1.05, y: -2 }}
-                    className="flex items-center gap-2.5 px-5 py-3 rounded-[1.25rem] bg-white/95 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-blue-500/10"
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white shadow-lg shadow-black/8"
                   >
-                    <span className="text-3xl drop-shadow-sm">🍽️</span>
-                    <div className="flex flex-col leading-tight">
-                      <span className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Today</span>
-                      <span className="text-xl font-black text-foreground">{todaysMeals}</span>
+                    <span className="text-2xl">🍽️</span>
+                    <div className="flex flex-col leading-none">
+                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Today</span>
+                      <span className="text-lg font-black text-foreground">{todaysMeals}</span>
                     </div>
                   </motion.div>
                 </motion.div>
