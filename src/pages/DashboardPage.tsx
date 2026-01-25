@@ -223,7 +223,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="relative overflow-hidden rounded-[2.5rem] h-48 shadow-2xl shadow-purple-500/10 mb-8"
+                className="relative overflow-hidden rounded-[2.5rem] h-48 shadow-2xl shadow-purple-500/10"
               >
                 {/* Enhanced gradient background with more depth */}
                 <div className="absolute inset-0 bg-gradient-to-br from-pink-100/80 via-purple-100/70 to-blue-100/80" />
@@ -304,34 +304,31 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Stats badges - hanging off bottom, centered */}
+                {/* Stats badges - positioned at bottom right inside the card */}
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
-                  className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center gap-3 z-10"
+                  className="absolute bottom-5 right-5 flex items-center gap-2 z-10"
                 >
                   <motion.div
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white shadow-lg shadow-black/8"
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/90 backdrop-blur-sm shadow-md"
                   >
-                    <span className="text-2xl">🔥</span>
-                    <div className="flex flex-col leading-none">
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Streak</span>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-black text-foreground">{streak}</span>
-                        <span className="text-xs font-semibold text-muted-foreground">days</span>
-                      </div>
+                    <span className="text-lg">🔥</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-base font-black text-foreground">{streak}</span>
+                      <span className="text-[10px] font-semibold text-muted-foreground">days</span>
                     </div>
                   </motion.div>
                   <motion.div
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white shadow-lg shadow-black/8"
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/90 backdrop-blur-sm shadow-md"
                   >
-                    <span className="text-2xl">🍽️</span>
-                    <div className="flex flex-col leading-none">
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Today</span>
-                      <span className="text-lg font-black text-foreground">{todaysMeals}</span>
+                    <span className="text-lg">🍽️</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-base font-black text-foreground">{todaysMeals}</span>
+                      <span className="text-[10px] font-semibold text-muted-foreground">today</span>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -347,36 +344,48 @@ export default function DashboardPage() {
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                   className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-orange-500/15"
                 >
-                  {/* Enhanced gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 via-orange-100/70 to-rose-100/80" />
+                  {/* Meal photo background (if available) */}
+                  {pendingEntry.photo_url && (
+                    <div
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${pendingEntry.photo_url})` }}
+                    />
+                  )}
 
-                  {/* Multiple animated orbs */}
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      x: [0, 25, 0],
-                      rotate: [0, 60, 0],
-                    }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-12 -right-12 w-48 h-48 bg-gradient-to-br from-orange-400/20 to-amber-400/15 rounded-full blur-2xl"
-                  />
+                  {/* Color overlay - 15% opacity over photo, or full gradient if no photo */}
+                  <div className={`absolute inset-0 ${pendingEntry.photo_url ? 'bg-gradient-to-br from-amber-100/[0.15] via-orange-100/[0.15] to-rose-100/[0.15]' : 'bg-gradient-to-br from-amber-100/80 via-orange-100/70 to-rose-100/80'}`} />
 
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      x: [0, -15, 0],
-                    }}
-                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="absolute -bottom-12 -left-12 w-48 h-48 bg-gradient-to-tr from-rose-400/15 to-pink-400/10 rounded-full blur-2xl"
-                  />
+                  {/* Multiple animated orbs - only show when no photo */}
+                  {!pendingEntry.photo_url && (
+                    <>
+                      <motion.div
+                        animate={{
+                          scale: [1, 1.3, 1],
+                          x: [0, 25, 0],
+                          rotate: [0, 60, 0],
+                        }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute -top-12 -right-12 w-48 h-48 bg-gradient-to-br from-orange-400/20 to-amber-400/15 rounded-full blur-2xl"
+                      />
+
+                      <motion.div
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          x: [0, -15, 0],
+                        }}
+                        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        className="absolute -bottom-12 -left-12 w-48 h-48 bg-gradient-to-tr from-rose-400/15 to-pink-400/10 rounded-full blur-2xl"
+                      />
+                    </>
+                  )}
 
                   {/* Premium glass overlay */}
-                  <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/90">
+                  <div className={`relative ${pendingEntry.photo_url ? 'backdrop-blur-[2px] bg-black/20' : 'backdrop-blur-2xl bg-white/70'} border-2 border-white/90`}>
                     <div className="p-7">
                       <div className="flex items-start justify-between mb-6">
                         <div className="flex-1 pr-4">
-                          <h3 className="font-black text-foreground text-2xl mb-2 tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>Rate your last meal</h3>
-                          <p className="text-sm text-muted-foreground font-bold line-clamp-1">
+                          <h3 className={`font-black text-2xl mb-2 tracking-tight ${pendingEntry.photo_url ? 'text-white' : 'text-foreground'}`} style={{ textShadow: pendingEntry.photo_url ? '0 2px 12px rgba(0,0,0,0.5)' : '0 1px 8px rgba(0,0,0,0.04)' }}>Rate your last meal</h3>
+                          <p className={`text-sm font-bold line-clamp-1 ${pendingEntry.photo_url ? 'text-white/90' : 'text-muted-foreground'}`} style={pendingEntry.photo_url ? { textShadow: '0 1px 8px rgba(0,0,0,0.4)' } : {}}>
                             {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
                           </p>
                         </div>
@@ -434,7 +443,8 @@ export default function DashboardPage() {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSkip}
-                        className="text-sm text-muted-foreground font-bold hover:text-foreground transition-colors w-full py-3 rounded-xl hover:bg-white/50"
+                        className={`text-sm font-bold transition-colors w-full py-3 rounded-xl ${pendingEntry.photo_url ? 'text-white/90 hover:text-white hover:bg-white/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/50'}`}
+                        style={pendingEntry.photo_url ? { textShadow: '0 1px 6px rgba(0,0,0,0.3)' } : {}}
                       >
                         Skip for now
                       </motion.button>
