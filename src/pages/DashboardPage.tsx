@@ -8,6 +8,7 @@ import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
+import { MealPhoto } from '@/components/meals/MealPhoto';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
@@ -392,9 +393,21 @@ export default function DashboardPage() {
                         <motion.div
                           animate={{ rotate: [0, 12, -12, 0] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="w-16 h-16 rounded-[1.25rem] bg-white/90 border-2 border-white/95 flex items-center justify-center shadow-lg shadow-orange-500/10"
+                          className="w-16 h-16 rounded-[1.25rem] overflow-hidden border-2 border-white/95 shadow-lg shadow-orange-500/10"
                         >
-                          <span className="text-4xl drop-shadow-sm">🍽️</span>
+                          {pendingEntry.photo_url ? (
+                            <MealPhoto
+                              photoUrl={pendingEntry.photo_url}
+                              thumbnail
+                              priority
+                              className="w-full h-full"
+                              alt={pendingEntry.custom_title || pendingEntry.meal_title || 'Meal photo'}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-orange-200 via-amber-100 to-rose-200 flex items-center justify-center">
+                              <span className="text-3xl drop-shadow-sm">🍽️</span>
+                            </div>
+                          )}
                         </motion.div>
                       </div>
 
