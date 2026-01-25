@@ -223,7 +223,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="relative overflow-hidden rounded-[2.5rem] h-48 shadow-2xl shadow-purple-500/10"
+                className="relative overflow-hidden rounded-[2.5rem] h-48 shadow-2xl shadow-purple-500/10 mb-8"
               >
                 {/* Enhanced gradient background with more depth */}
                 <div className="absolute inset-0 bg-gradient-to-br from-pink-100/80 via-purple-100/70 to-blue-100/80" />
@@ -260,7 +260,7 @@ export default function DashboardPage() {
 
                 {/* Premium glassmorphic overlay */}
                 <div className="relative h-full backdrop-blur-2xl bg-white/50 border-2 border-white/70 shadow-inner">
-                  <div className="relative h-full p-7 flex flex-col justify-between">
+                  <div className="relative h-full p-7 flex flex-col">
                     {/* Action buttons - top right with enhanced styling */}
                     <div className="absolute top-5 right-5 flex items-center gap-2.5">
                       <AdminQuickAccess />
@@ -301,37 +301,37 @@ export default function DashboardPage() {
                         {firstName}
                       </motion.h1>
                     </div>
-
-                    {/* Enhanced stats - always show for better UX */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5, duration: 0.6 }}
-                      className="flex items-center gap-3"
-                    >
-                      <motion.div
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        className="flex items-center gap-2.5 px-5 py-3 rounded-[1.25rem] bg-white/90 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-orange-500/10"
-                      >
-                        <span className="text-3xl drop-shadow-sm">🔥</span>
-                        <div className="flex flex-col leading-tight">
-                          <span className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Streak</span>
-                          <span className="text-xl font-black text-foreground">{streak} <span className="text-sm font-bold text-muted-foreground">days</span></span>
-                        </div>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        className="flex items-center gap-2.5 px-5 py-3 rounded-[1.25rem] bg-white/90 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-blue-500/10"
-                      >
-                        <span className="text-3xl drop-shadow-sm">🍽️</span>
-                        <div className="flex flex-col leading-tight">
-                          <span className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Today</span>
-                          <span className="text-xl font-black text-foreground">{todaysMeals}</span>
-                        </div>
-                      </motion.div>
-                    </motion.div>
                   </div>
                 </div>
+
+                {/* Stats badges - hanging off bottom, centered */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.6 }}
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center gap-3 z-10"
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="flex items-center gap-2.5 px-5 py-3 rounded-[1.25rem] bg-white/95 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-orange-500/10"
+                  >
+                    <span className="text-3xl drop-shadow-sm">🔥</span>
+                    <div className="flex flex-col leading-tight">
+                      <span className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Streak</span>
+                      <span className="text-xl font-black text-foreground">{streak} <span className="text-sm font-bold text-muted-foreground">days</span></span>
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="flex items-center gap-2.5 px-5 py-3 rounded-[1.25rem] bg-white/95 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-blue-500/10"
+                  >
+                    <span className="text-3xl drop-shadow-sm">🍽️</span>
+                    <div className="flex flex-col leading-tight">
+                      <span className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Today</span>
+                      <span className="text-xl font-black text-foreground">{todaysMeals}</span>
+                    </div>
+                  </motion.div>
+                </motion.div>
               </motion.div>
             </StaggerItem>
 
