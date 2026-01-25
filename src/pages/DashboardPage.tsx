@@ -8,6 +8,7 @@ import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
+import { MilestonesCard } from '@/components/milestones/MilestonesCard';
 import { MealPhoto } from '@/components/meals/MealPhoto';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -466,6 +467,11 @@ export default function DashboardPage() {
                 </motion.div>
               </StaggerItem>
             )}
+
+            {/* Milestones Card - Your Gut Health Journey */}
+            <StaggerItem>
+              <MilestonesCard />
+            </StaggerItem>
 
             {/* Weekly Progress Chart - Ultra-Premium Card - Now shows after rating */}
             {hasEnoughDataForInsights && (
