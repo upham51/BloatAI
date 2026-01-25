@@ -8,6 +8,7 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
   const [currentVideo, setCurrentVideo] = useState<string>('');
   const [videoError, setVideoError] = useState<boolean>(false);
   const [retryCount, setRetryCount] = useState<number>(0);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const MAX_RETRIES = 3;
 
@@ -32,10 +33,41 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
     setCurrentVideo(videoPath);
     setVideoError(false);
     setRetryCount(0);
+    setShouldLoadVideo(false);
   }, [healthScore]);
+
+  // Defer loading large video assets until after initial paint / idle time.
+  useEffect(() => {
+    if (!currentVideo) return;
+
+    let cancelled = false;
+    const enable = () => {
+      if (!cancelled) setShouldLoadVideo(true);
+    };
+
+    const ric = (window as any).requestIdleCallback as
+      | ((cb: () => void, opts?: { timeout: number }) => number)
+      | undefined;
+    const cic = (window as any).cancelIdleCallback as ((id: number) => void) | undefined;
+
+    if (ric) {
+      const id = ric(enable, { timeout: 800 });
+      return () => {
+        cancelled = true;
+        cic?.(id);
+      };
+    }
+
+    const t = window.setTimeout(enable, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [currentVideo]);
 
   // Retry loading video when it fails
   useEffect(() => {
+    if (!shouldLoadVideo) return;
     if (videoError && retryCount < MAX_RETRIES && videoRef.current) {
       const timer = setTimeout(() => {
         console.log(`Retrying video load (attempt ${retryCount + 1}/${MAX_RETRIES})`);
@@ -52,7 +84,7 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
 
       return () => clearTimeout(timer);
     }
-  }, [videoError, retryCount]);
+  }, [videoError, retryCount, shouldLoadVideo]);
 
   const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
     const error = (e.target as HTMLVideoElement).error;
@@ -101,7 +133,7 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
     >
       {/* Simple container for video/character */}
       <div className="relative w-full h-full flex items-center justify-center rounded-full overflow-hidden bg-white/50">
-        {!videoError || retryCount < MAX_RETRIES ? (
+        {shouldLoadVideo && (!videoError || retryCount < MAX_RETRIES) ? (
           <video
             ref={videoRef}
             key={currentVideo}
@@ -109,7 +141,7 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
             loop
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             onError={handleVideoError}
             onLoadedData={handleVideoLoad}
             onCanPlay={(e) => {
@@ -125,7 +157,7 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
             Your browser does not support the video tag.
           </video>
         ) : (
-          // Fallback placeholder when video is not available
+          // Placeholder while deferred-loading, or when video is not available
           <div className="flex flex-col items-center justify-center gap-3 p-4">
             <div
               className="text-7xl"
