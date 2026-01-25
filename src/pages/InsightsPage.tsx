@@ -10,7 +10,6 @@ import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
-import { SafeAlternativesCards } from '@/components/insights/SafeAlternativesCards';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -290,14 +289,7 @@ export default function InsightsPage() {
               </StaggerItem>
             )}
 
-            {/* 3. SAFE ALTERNATIVES - Swipable Cards */}
-            {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
-              <StaggerItem>
-                <SafeAlternativesCards triggerConfidence={advancedInsights.triggerConfidence} />
-              </StaggerItem>
-            )}
-
-            {/* 4. BLOAT HEATMAP CALENDAR */}
+            {/* 3. BLOAT HEATMAP CALENDAR */}
             <StaggerItem>
               <BloatHeatmap entries={entries} />
             </StaggerItem>
