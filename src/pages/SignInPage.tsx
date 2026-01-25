@@ -102,12 +102,6 @@ export default function SignInPage() {
         <div className="absolute top-1/3 left-1/4 text-5xl">🫐</div>
       </div>
 
-      {/* Subtle animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 left-20 w-80 h-80 bg-emerald-200/20 rounded-full blur-3xl animate-float-delayed" />
-      </div>
-
       {/* Main Card with wooden texture effect */}
       <div className="relative w-full max-w-md animate-fade-in-up">
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border-4 border-amber-100 p-8 md:p-10 relative overflow-hidden">
@@ -290,16 +284,6 @@ export default function SignInPage() {
       </div>
 
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(20px, -20px) scale(1.1); }
-        }
-
-        @keyframes float-delayed {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(-20px, 20px) scale(1.05); }
-        }
-
         @keyframes fade-in-up {
           from {
             opacity: 0;

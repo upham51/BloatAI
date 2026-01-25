@@ -120,7 +120,7 @@ export function ConfettiMicroAnimation({
           transition: {
             duration: config.duration,
             delay: particle.delay,
-            ease: [0.16, 1, 0.3, 1],
+            ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
           },
         };
       case 'sparkle':
@@ -135,7 +135,7 @@ export function ConfettiMicroAnimation({
           transition: {
             duration: config.duration * 0.7,
             delay: particle.delay,
-            ease: "easeOut",
+            ease: "easeOut" as any,
           },
         };
       default: // burst
@@ -151,7 +151,7 @@ export function ConfettiMicroAnimation({
           transition: {
             duration: config.duration,
             delay: particle.delay,
-            ease: [0.16, 1, 0.3, 1],
+            ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
           },
         };
     }
