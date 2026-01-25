@@ -335,6 +335,119 @@ export default function DashboardPage() {
               </motion.div>
             </StaggerItem>
 
+            {/* RATE YOUR BLOATING - Always show first when pending */}
+            {pendingEntry && (
+              <StaggerItem>
+                <motion.div
+                  initial={{ scale: 0.96, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-orange-500/15"
+                >
+                  {/* Enhanced gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 via-orange-100/70 to-rose-100/80" />
+
+                  {/* Multiple animated orbs */}
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.3, 1],
+                      x: [0, 25, 0],
+                      rotate: [0, 60, 0],
+                    }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-12 -right-12 w-48 h-48 bg-gradient-to-br from-orange-400/20 to-amber-400/15 rounded-full blur-2xl"
+                  />
+
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      x: [0, -15, 0],
+                    }}
+                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute -bottom-12 -left-12 w-48 h-48 bg-gradient-to-tr from-rose-400/15 to-pink-400/10 rounded-full blur-2xl"
+                  />
+
+                  {/* Premium glass overlay */}
+                  <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/90">
+                    <div className="p-7">
+                      <div className="flex items-start justify-between mb-6">
+                        <div className="flex-1 pr-4">
+                          <h3 className="font-black text-foreground text-2xl mb-2 tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>Rate your last meal</h3>
+                          <p className="text-sm text-muted-foreground font-bold line-clamp-1">
+                            {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
+                          </p>
+                        </div>
+                        <motion.div
+                          animate={{ rotate: [0, 12, -12, 0] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          className="w-16 h-16 rounded-[1.25rem] bg-white/90 border-2 border-white/95 flex items-center justify-center shadow-lg shadow-orange-500/10"
+                        >
+                          <span className="text-4xl drop-shadow-sm">🍽️</span>
+                        </motion.div>
+                      </div>
+
+                      {/* Premium number-based rating system */}
+                      <div className="grid grid-cols-5 gap-3 mb-5">
+                        {[1, 2, 3, 4, 5].map((rating, index) => {
+                          // Enhanced dynamic color scoring
+                          const getGradient = (r: number) => {
+                            if (r <= 2) return 'from-emerald-400 to-teal-500';
+                            if (r === 3) return 'from-amber-400 to-orange-500';
+                            return 'from-rose-400 to-red-500';
+                          };
+
+                          const getShadow = (r: number) => {
+                            if (r <= 2) return 'shadow-emerald-500/30';
+                            if (r === 3) return 'shadow-amber-500/30';
+                            return 'shadow-rose-500/30';
+                          };
+
+                          return (
+                            <motion.button
+                              key={rating}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.06, duration: 0.4 }}
+                              whileHover={{ scale: 1.12, y: -6 }}
+                              whileTap={{ scale: 0.96 }}
+                              onClick={() => handleRate(rating)}
+                              className={`relative overflow-hidden flex flex-col items-center justify-center gap-2 py-6 px-2 rounded-[1.25rem] backdrop-blur-md bg-white/70 border-2 border-white/85 hover:border-white shadow-lg hover:shadow-2xl ${getShadow(rating)} transition-all duration-500 group`}
+                            >
+                              {/* Premium gradient overlay on hover */}
+                              <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(rating)} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+
+                              <span className="relative text-3xl font-black text-foreground group-hover:text-white group-hover:scale-110 transition-all duration-300 drop-shadow-sm">
+                                {rating}
+                              </span>
+                              <span className="relative text-[9px] font-extrabold uppercase tracking-[0.08em] text-muted-foreground group-hover:text-white/95 transition-colors duration-300">
+                                {RATING_LABELS[rating]}
+                              </span>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleSkip}
+                        className="text-sm text-muted-foreground font-bold hover:text-foreground transition-colors w-full py-3 rounded-xl hover:bg-white/50"
+                      >
+                        Skip for now
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              </StaggerItem>
+            )}
+
+            {/* Weekly Progress Chart - Ultra-Premium Card - Now shows after rating */}
+            {hasEnoughDataForInsights && (
+              <StaggerItem>
+                <WeeklyProgressChart entries={entries} />
+              </StaggerItem>
+            )}
+
             {/* PREMIUM BENTO GRID - Next-level Layout */}
             {hasEnoughDataForInsights && (
               <>
@@ -464,51 +577,6 @@ export default function DashboardPage() {
                   </div>
                 </StaggerItem>
               </>
-            )}
-
-            {/* Weekly Progress Chart - Ultra-Premium Card */}
-            {hasEnoughDataForInsights && (
-              <StaggerItem>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.7 }}
-                  className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-blue-500/10"
-                >
-                  {/* Enhanced gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/90 via-teal-50/80 to-cyan-50/90" />
-
-                  {/* Animated gradient orb */}
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      x: [0, 30, 0],
-                      y: [0, -20, 0],
-                    }}
-                    transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-16 -right-16 w-48 h-48 bg-gradient-to-br from-blue-400/15 to-teal-400/10 rounded-full blur-3xl"
-                  />
-
-                  {/* Premium glass overlay */}
-                  <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/90">
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-5">
-                        <div>
-                          <h2 className="text-2xl font-black text-foreground tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>Weekly Progress</h2>
-                          <p className="text-xs font-bold text-muted-foreground/70 mt-1">Your wellness journey</p>
-                        </div>
-                        <motion.div
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          className="w-14 h-14 rounded-[1.25rem] bg-white/90 border-2 border-white/95 flex items-center justify-center shadow-lg shadow-blue-500/10"
-                        >
-                          <span className="text-3xl drop-shadow-sm">📊</span>
-                        </motion.div>
-                      </div>
-                      <WeeklyProgressChart entries={entries} />
-                    </div>
-                  </div>
-                </motion.div>
-              </StaggerItem>
             )}
 
             {/* Ultra-Premium Welcome section - show for brand new users with no meals */}
@@ -787,112 +855,6 @@ export default function DashboardPage() {
                         </Button>
                       </motion.div>
 
-                    </div>
-                  </div>
-                </motion.div>
-              </StaggerItem>
-            )}
-
-            {/* Pending Rating - Ultra-Premium Card */}
-            {pendingEntry && (
-              <StaggerItem>
-                <motion.div
-                  initial={{ scale: 0.96, opacity: 0, y: 20 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-orange-500/15"
-                >
-                  {/* Enhanced gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 via-orange-100/70 to-rose-100/80" />
-
-                  {/* Multiple animated orbs */}
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      x: [0, 25, 0],
-                      rotate: [0, 60, 0],
-                    }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-12 -right-12 w-48 h-48 bg-gradient-to-br from-orange-400/20 to-amber-400/15 rounded-full blur-2xl"
-                  />
-
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      x: [0, -15, 0],
-                    }}
-                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="absolute -bottom-12 -left-12 w-48 h-48 bg-gradient-to-tr from-rose-400/15 to-pink-400/10 rounded-full blur-2xl"
-                  />
-
-                  {/* Premium glass overlay */}
-                  <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/90">
-                    <div className="p-7">
-                      <div className="flex items-start justify-between mb-6">
-                        <div className="flex-1 pr-4">
-                          <h3 className="font-black text-foreground text-2xl mb-2 tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>Rate your last meal</h3>
-                          <p className="text-sm text-muted-foreground font-bold line-clamp-1">
-                            {pendingEntry.custom_title || pendingEntry.meal_title || 'Your meal'}
-                          </p>
-                        </div>
-                        <motion.div
-                          animate={{ rotate: [0, 12, -12, 0] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="w-16 h-16 rounded-[1.25rem] bg-white/90 border-2 border-white/95 flex items-center justify-center shadow-lg shadow-orange-500/10"
-                        >
-                          <span className="text-4xl drop-shadow-sm">🍽️</span>
-                        </motion.div>
-                      </div>
-
-                      {/* Premium number-based rating system */}
-                      <div className="grid grid-cols-5 gap-3 mb-5">
-                        {[1, 2, 3, 4, 5].map((rating, index) => {
-                          // Enhanced dynamic color scoring
-                          const getGradient = (r: number) => {
-                            if (r <= 2) return 'from-emerald-400 to-teal-500';
-                            if (r === 3) return 'from-amber-400 to-orange-500';
-                            return 'from-rose-400 to-red-500';
-                          };
-
-                          const getShadow = (r: number) => {
-                            if (r <= 2) return 'shadow-emerald-500/30';
-                            if (r === 3) return 'shadow-amber-500/30';
-                            return 'shadow-rose-500/30';
-                          };
-
-                          return (
-                            <motion.button
-                              key={rating}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.06, duration: 0.4 }}
-                              whileHover={{ scale: 1.12, y: -6 }}
-                              whileTap={{ scale: 0.96 }}
-                              onClick={() => handleRate(rating)}
-                              className={`relative overflow-hidden flex flex-col items-center justify-center gap-2 py-6 px-2 rounded-[1.25rem] backdrop-blur-md bg-white/70 border-2 border-white/85 hover:border-white shadow-lg hover:shadow-2xl ${getShadow(rating)} transition-all duration-500 group`}
-                            >
-                              {/* Premium gradient overlay on hover */}
-                              <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(rating)} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-                              <span className="relative text-3xl font-black text-foreground group-hover:text-white group-hover:scale-110 transition-all duration-300 drop-shadow-sm">
-                                {rating}
-                              </span>
-                              <span className="relative text-[9px] font-extrabold uppercase tracking-[0.08em] text-muted-foreground group-hover:text-white/95 transition-colors duration-300">
-                                {RATING_LABELS[rating]}
-                              </span>
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-
-                      <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleSkip}
-                        className="text-sm text-muted-foreground font-bold hover:text-foreground transition-colors w-full py-3 rounded-xl hover:bg-white/50"
-                      >
-                        Skip for now
-                      </motion.button>
                     </div>
                   </div>
                 </motion.div>
