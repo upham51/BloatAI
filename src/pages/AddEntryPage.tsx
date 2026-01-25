@@ -477,17 +477,13 @@ export default function AddEntryPage() {
           </section>
 
           {/* Scrollable Content - Only show after analysis completes */}
+          {!isAnalyzing && (
           <section
-            className={`flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)] transition-all duration-1000 ease-out ${
-              isAnalyzing
-                ? 'translate-y-full opacity-0 pointer-events-none'
-                : photoAnalyzed
-                  ? 'translate-y-0 opacity-100 animate-card-reveal'
-                  : ''
+            className={`flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)] ${
+              photoAnalyzed
+                ? 'animate-card-reveal'
+                : 'opacity-0'
             }`}
-            style={{
-              transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)'
-            }}
           >
             <div className="p-5 space-y-4 pt-8">
           {/* AI Analysis Results */}
@@ -633,9 +629,10 @@ export default function AddEntryPage() {
             </div>}
             </div>
           </section>
+          )}
 
           {/* Sticky Save Button at Bottom of Content */}
-          {photoAnalyzed && <div className="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent pt-8">
+          {!isAnalyzing && photoAnalyzed && <div className="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent pt-8">
               <button onClick={handleSave} disabled={!isValid || isSaving} className={`w-full h-[56px] flex items-center justify-center gap-3 rounded-2xl font-semibold text-base transition-all duration-300 ${!isValid || isSaving ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 active:scale-[0.98]'}`} style={isValid && !isSaving ? {
           boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
         } : undefined}>
