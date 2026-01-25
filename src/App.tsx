@@ -9,7 +9,7 @@ import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
-import { MeshGradientBackground } from "@/components/ui/mesh-gradient-background";
+import { DeferredMeshGradientBackground } from "@/components/ui/DeferredMeshGradientBackground";
 import { motion } from "framer-motion";
 import { lazy, Suspense } from "react";
 
@@ -179,7 +179,7 @@ function AppRoutes() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <MeshGradientBackground variant="balanced" />
+      <DeferredMeshGradientBackground variant="balanced" delayMs={600} />
       <Toaster />
       <Sonner />
       <BrowserRouter>
