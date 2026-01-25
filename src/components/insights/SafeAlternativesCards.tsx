@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Leaf, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Leaf, Sparkles, Check, ChefHat } from 'lucide-react';
 import { TriggerConfidenceLevel } from '@/lib/insightsAnalysis';
 import { getFoodImage } from '@/lib/pexelsApi';
 
@@ -17,6 +18,7 @@ interface AlternativeCardData {
   imageUrl: string | null;
   imageQuery: string;
   gradient: string;
+  lightGradient: string;
 }
 
 // Comprehensive safe alternatives data
@@ -44,7 +46,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Crispy Potato Wedges', description: 'Roast potatoes in olive oil with salt, pepper, and herbs' }
     ],
     imageQuery: 'quinoa bowl healthy',
-    gradient: 'from-amber-400 via-orange-400 to-rose-400'
+    gradient: 'from-amber-500 via-orange-500 to-rose-500',
+    lightGradient: 'from-amber-100/80 via-orange-100/70 to-rose-100/80'
   },
   gluten: {
     title: 'Savory Carbs & Gluten',
@@ -69,7 +72,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Crispy Potato Wedges', description: 'Roast potatoes in olive oil with salt, pepper, and herbs' }
     ],
     imageQuery: 'quinoa bowl healthy',
-    gradient: 'from-amber-400 via-orange-400 to-rose-400'
+    gradient: 'from-amber-500 via-orange-500 to-rose-500',
+    lightGradient: 'from-amber-100/80 via-orange-100/70 to-rose-100/80'
   },
   beans: {
     title: 'Beans & Other Legumes',
@@ -94,7 +98,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Crunchy Roasted Chickpeas', description: 'Rinse canned chickpeas, toss with olive oil and spices, roast until crisp' }
     ],
     imageQuery: 'tofu bowl asian',
-    gradient: 'from-emerald-400 via-teal-400 to-cyan-400'
+    gradient: 'from-emerald-500 via-teal-500 to-cyan-500',
+    lightGradient: 'from-emerald-100/80 via-teal-100/70 to-cyan-100/80'
   },
   dairy: {
     title: 'Dairy',
@@ -119,7 +124,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Cheese & Rice Crackers', description: 'Hard cheese slices with gluten-free rice crackers' }
     ],
     imageQuery: 'yogurt parfait berries',
-    gradient: 'from-blue-400 via-indigo-400 to-purple-400'
+    gradient: 'from-blue-500 via-indigo-500 to-purple-500',
+    lightGradient: 'from-blue-100/80 via-indigo-100/70 to-purple-100/80'
   },
   fruit: {
     title: 'Fruit & Sugar',
@@ -144,7 +150,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Low-FODMAP Energy Balls', description: 'Oats + peanut butter + chia seeds + maple syrup rolled into bites' }
     ],
     imageQuery: 'fresh berries strawberries',
-    gradient: 'from-pink-400 via-rose-400 to-red-400'
+    gradient: 'from-pink-500 via-rose-500 to-red-500',
+    lightGradient: 'from-pink-100/80 via-rose-100/70 to-red-100/80'
   },
   sugar: {
     title: 'Fruit & Sugar',
@@ -169,7 +176,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Low-FODMAP Energy Balls', description: 'Oats + peanut butter + chia seeds + maple syrup rolled into bites' }
     ],
     imageQuery: 'fresh berries strawberries',
-    gradient: 'from-pink-400 via-rose-400 to-red-400'
+    gradient: 'from-pink-500 via-rose-500 to-red-500',
+    lightGradient: 'from-pink-100/80 via-rose-100/70 to-red-100/80'
   },
   veggies: {
     title: 'Veggies & Other "Healthy" Triggers',
@@ -194,7 +202,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Herbed Popcorn', description: 'Air-popped popcorn + olive oil + rosemary + paprika' }
     ],
     imageQuery: 'colorful vegetable salad',
-    gradient: 'from-green-400 via-emerald-400 to-teal-400'
+    gradient: 'from-green-500 via-emerald-500 to-teal-500',
+    lightGradient: 'from-green-100/80 via-emerald-100/70 to-teal-100/80'
   },
   sweeteners: {
     title: 'Sweeteners & Sugar Alcohols',
@@ -219,7 +228,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Vanilla Chia Pudding', description: 'Chia seeds + almond milk + vanilla + maple syrup + strawberries' }
     ],
     imageQuery: 'maple syrup natural sweetener',
-    gradient: 'from-yellow-400 via-amber-400 to-orange-400'
+    gradient: 'from-yellow-500 via-amber-500 to-orange-500',
+    lightGradient: 'from-yellow-100/80 via-amber-100/70 to-orange-100/80'
   },
   'fatty-food': {
     title: 'Fatty & Fried Foods',
@@ -244,7 +254,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Air-Fried Sweet Potato Fries', description: 'Sweet potato wedges + light olive oil spray + paprika + salt' }
     ],
     imageQuery: 'grilled chicken healthy',
-    gradient: 'from-orange-400 via-amber-400 to-yellow-400'
+    gradient: 'from-orange-500 via-amber-500 to-yellow-500',
+    lightGradient: 'from-orange-100/80 via-amber-100/70 to-yellow-100/80'
   },
   carbonated: {
     title: 'Carbonated Drinks',
@@ -269,7 +280,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Berry Infusion', description: 'Still water + crushed strawberries + blueberries + basil' }
     ],
     imageQuery: 'herbal tea mint',
-    gradient: 'from-cyan-400 via-blue-400 to-indigo-400'
+    gradient: 'from-cyan-500 via-blue-500 to-indigo-500',
+    lightGradient: 'from-cyan-100/80 via-blue-100/70 to-indigo-100/80'
   },
   alcohol: {
     title: 'Alcohol & Cocktails',
@@ -294,7 +306,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Mocktail Alternative', description: 'Sparkling water + muddled berries + lime + mint (if carbonation tolerated)' }
     ],
     imageQuery: 'wine glass elegant',
-    gradient: 'from-purple-400 via-violet-400 to-fuchsia-400'
+    gradient: 'from-purple-500 via-violet-500 to-fuchsia-500',
+    lightGradient: 'from-purple-100/80 via-violet-100/70 to-fuchsia-100/80'
   },
   processed: {
     title: 'Processed Foods',
@@ -319,7 +332,8 @@ const SAFE_ALTERNATIVES_DATA: Record<string, Omit<AlternativeCardData, 'category
       { name: 'Homemade Salad Dressing', description: 'Olive oil + lemon juice + Dijon mustard + salt + pepper' }
     ],
     imageQuery: 'simple grilled chicken',
-    gradient: 'from-slate-400 via-gray-400 to-zinc-400'
+    gradient: 'from-slate-500 via-gray-500 to-zinc-500',
+    lightGradient: 'from-slate-100/80 via-gray-100/70 to-zinc-100/80'
   }
 };
 
@@ -329,6 +343,7 @@ export function SafeAlternativesCards({ triggerConfidence }: SafeAlternativesCar
   const [imagesLoading, setImagesLoading] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [direction, setDirection] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Minimum swipe distance (in px)
@@ -372,10 +387,12 @@ export function SafeAlternativesCards({ triggerConfidence }: SafeAlternativesCar
   }, [triggerConfidence]);
 
   const handlePrevious = () => {
+    setDirection(-1);
     setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
+    setDirection(1);
     setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
   };
 
@@ -404,17 +421,37 @@ export function SafeAlternativesCards({ triggerConfidence }: SafeAlternativesCar
 
   if (imagesLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <Leaf className="text-green-500" size={24} />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Safe Alternatives
-          </h2>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-[2rem] shadow-2xl"
+      >
+        {/* Premium gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/80 via-teal-100/70 to-cyan-100/80" />
+
+        {/* Animated orbs */}
+        <motion.div
+          animate={{ scale: [1, 1.3, 1], x: [0, 20, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-br from-emerald-400/20 to-teal-400/15 rounded-full blur-3xl"
+        />
+
+        <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/80 rounded-[2rem] p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center">
+              <Leaf className="w-6 h-6 text-emerald-600" />
+            </div>
+            <h2 className="text-2xl font-black text-foreground tracking-tight">
+              Safe Alternatives
+            </h2>
+          </div>
+          <motion.div
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="h-[500px] bg-gradient-to-r from-gray-200/50 to-gray-100/50 rounded-2xl"
+          />
         </div>
-        <div className="animate-pulse">
-          <div className="h-[600px] bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
-        </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -424,167 +461,297 @@ export function SafeAlternativesCards({ triggerConfidence }: SafeAlternativesCar
 
   const currentCard = cards[currentIndex];
 
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.95,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.95,
+    }),
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20">
-            <Leaf className="text-green-600 dark:text-green-400" size={24} />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Safe Alternatives
-            </h2>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-              Better choices for your top triggers
-            </p>
-          </div>
-        </div>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.96, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-emerald-500/10"
+    >
+      {/* Multi-layer gradient background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${currentCard.lightGradient}`} />
 
-        {/* Pagination dots */}
-        <div className="flex items-center gap-1.5">
-          {cards.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`transition-all duration-300 rounded-full ${
-                index === currentIndex
-                  ? 'w-6 h-2 bg-green-600 dark:bg-green-400'
-                  : 'w-2 h-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
-              }`}
-              aria-label={`Go to card ${index + 1}`}
-            />
-          ))}
-        </div>
-      </div>
+      {/* Animated gradient orbs for depth */}
+      <motion.div
+        animate={{
+          scale: [1, 1.3, 1],
+          x: [0, 25, 0],
+          y: [0, -15, 0],
+        }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-emerald-400/25 to-teal-400/20 rounded-full blur-3xl"
+      />
 
-      {/* Card Container */}
-      <div
-        ref={containerRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        className="relative"
-      >
-        {/* Navigation Buttons */}
-        <button
-          onClick={handlePrevious}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md p-3 rounded-full shadow-xl hover:scale-110 transition-all duration-200 hover:bg-white dark:hover:bg-gray-800 group"
-          aria-label="Previous card"
-        >
-          <ChevronLeft className="text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400" size={24} />
-        </button>
-        <button
-          onClick={handleNext}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md p-3 rounded-full shadow-xl hover:scale-110 transition-all duration-200 hover:bg-white dark:hover:bg-gray-800 group"
-          aria-label="Next card"
-        >
-          <ChevronRight className="text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400" size={24} />
-        </button>
+      <motion.div
+        animate={{
+          scale: [1, 1.2, 1],
+          x: [0, -20, 0],
+          y: [0, 15, 0],
+        }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-cyan-400/20 to-blue-300/15 rounded-full blur-3xl"
+      />
 
-        {/* Card Content */}
-        <div
-          key={currentIndex}
-          className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-right-5 duration-300"
-        >
-          {/* Hero Image Section */}
-          <div className="relative h-48 overflow-hidden">
-            {currentCard.imageUrl ? (
-              <div
-                className="absolute inset-0 bg-cover bg-center scale-105"
-                style={{
-                  backgroundImage: `url(${currentCard.imageUrl})`,
-                }}
+      {/* Premium glass overlay */}
+      <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 rounded-[2rem]">
+        <div className="p-6">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="flex items-center justify-between mb-6"
+          >
+            <div className="flex items-center gap-3">
+              <motion.div
+                whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                transition={{ duration: 0.5 }}
+                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-emerald-500/20"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${currentCard.gradient} opacity-60`}></div>
+                <Leaf className="w-6 h-6 text-emerald-600" strokeWidth={2.5} />
+              </motion.div>
+              <div>
+                <h2 className="text-2xl font-black text-foreground tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                  Safe Alternatives
+                </h2>
+                <p className="text-xs text-muted-foreground font-semibold mt-0.5">
+                  Better choices for your top triggers
+                </p>
               </div>
-            ) : (
-              <div className={`absolute inset-0 bg-gradient-to-br ${currentCard.gradient}`}></div>
-            )}
-
-            {/* Title Overlay */}
-            <div className="relative h-full flex flex-col justify-end p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="text-white drop-shadow-lg" size={20} />
-                <span className="text-white/90 text-sm font-medium drop-shadow-md">
-                  Trigger {currentIndex + 1} of {cards.length}
-                </span>
-              </div>
-              <h3 className="text-3xl font-bold text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] [text-shadow:_0_2px_16px_rgb(0_0_0_/_90%)]">
-                {currentCard.title}
-              </h3>
-            </div>
-          </div>
-
-          {/* Content Section */}
-          <div className="p-6 space-y-6">
-            {/* Description */}
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-              <p className="text-sm text-amber-900 dark:text-amber-100 leading-relaxed">
-                <span className="font-semibold">Why it triggers:</span> {currentCard.description}
-              </p>
             </div>
 
-            {/* Better Options */}
-            <div>
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                Better Options
-              </h4>
-              <div className="space-y-3">
-                {currentCard.betterOptions.map((option, idx) => (
-                  <div key={idx} className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-200 dark:border-green-800">
-                    <h5 className="font-semibold text-green-900 dark:text-green-100 text-sm mb-2">
-                      {option.title}
-                    </h5>
-                    <div className="flex flex-wrap gap-2">
-                      {option.items.map((item, itemIdx) => (
-                        <span
-                          key={itemIdx}
-                          className="inline-flex items-center px-3 py-1.5 rounded-full bg-white dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm border border-green-200 dark:border-green-700"
+            {/* Pagination dots */}
+            <div className="flex items-center gap-2">
+              {cards.map((_, index) => (
+                <motion.button
+                  key={index}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => {
+                    setDirection(index > currentIndex ? 1 : -1);
+                    setCurrentIndex(index);
+                  }}
+                  className={`transition-all duration-300 rounded-full ${
+                    index === currentIndex
+                      ? 'w-8 h-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30'
+                      : 'w-2.5 h-2.5 bg-gray-300/70 hover:bg-gray-400/70'
+                  }`}
+                  aria-label={`Go to card ${index + 1}`}
+                />
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Card Container */}
+          <div
+            ref={containerRef}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            className="relative"
+          >
+            {/* Navigation Buttons */}
+            <motion.button
+              whileHover={{ scale: 1.1, x: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handlePrevious}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-xl border-2 border-white/80 hover:bg-white transition-all duration-300 group"
+              aria-label="Previous card"
+            >
+              <ChevronLeft className="text-foreground/70 group-hover:text-emerald-600 transition-colors" size={24} />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1, x: 2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-xl border-2 border-white/80 hover:bg-white transition-all duration-300 group"
+              aria-label="Next card"
+            >
+              <ChevronRight className="text-foreground/70 group-hover:text-emerald-600 transition-colors" size={24} />
+            </motion.button>
+
+            {/* Card Content */}
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={currentIndex}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="bg-white/70 backdrop-blur-xl rounded-[1.5rem] overflow-hidden shadow-xl border-2 border-white/80"
+              >
+                {/* Hero Image Section */}
+                <div className="relative h-44 overflow-hidden">
+                  {currentCard.imageUrl ? (
+                    <motion.div
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.8 }}
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${currentCard.imageUrl})` }}
+                    >
+                      <div className={`absolute inset-0 bg-gradient-to-br ${currentCard.gradient} opacity-60`} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                    </motion.div>
+                  ) : (
+                    <div className={`absolute inset-0 bg-gradient-to-br ${currentCard.gradient}`} />
+                  )}
+
+                  {/* Title Overlay */}
+                  <div className="relative h-full flex flex-col justify-end p-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2, duration: 0.4 }}
+                      className="flex items-center gap-2 mb-2"
+                    >
+                      <div className="px-3 py-1.5 rounded-full backdrop-blur-md bg-white/20 border border-white/30">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="text-white drop-shadow-lg" size={14} />
+                          <span className="text-white/90 text-xs font-bold drop-shadow-md">
+                            Trigger {currentIndex + 1} of {cards.length}
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                    <motion.h3
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.4 }}
+                      className="text-2xl font-black text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] [text-shadow:_0_2px_16px_rgb(0_0_0_/_90%)]"
+                    >
+                      {currentCard.title}
+                    </motion.h3>
+                  </div>
+                </div>
+
+                {/* Content Section */}
+                <div className="p-6 space-y-5">
+                  {/* Description */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="bg-amber-50/80 backdrop-blur-sm border-2 border-amber-200/50 rounded-2xl p-4"
+                  >
+                    <p className="text-sm text-amber-900 leading-relaxed">
+                      <span className="font-bold">Why it triggers:</span> {currentCard.description}
+                    </p>
+                  </motion.div>
+
+                  {/* Better Options */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center">
+                        <Check size={14} className="text-emerald-600" />
+                      </div>
+                      <h4 className="text-base font-bold text-foreground">
+                        Better Options
+                      </h4>
+                    </div>
+                    <div className="space-y-3">
+                      {currentCard.betterOptions.map((option, idx) => (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.5 + idx * 0.1 }}
+                          className="bg-emerald-50/80 backdrop-blur-sm rounded-xl p-4 border-2 border-emerald-200/50"
                         >
-                          {item}
-                        </span>
+                          <h5 className="font-bold text-emerald-800 text-sm mb-2">
+                            {option.title}
+                          </h5>
+                          <div className="flex flex-wrap gap-2">
+                            {option.items.map((item, itemIdx) => (
+                              <span
+                                key={itemIdx}
+                                className="inline-flex items-center px-3 py-1.5 rounded-full bg-white/80 text-xs font-semibold text-foreground/80 shadow-sm border border-emerald-200/50 hover:bg-white hover:shadow-md transition-all"
+                              >
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        </motion.div>
                       ))}
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  </motion.div>
 
-            {/* Quick Recipe Ideas */}
-            <div>
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                Quick Recipe Ideas
-              </h4>
-              <div className="space-y-2">
-                {currentCard.quickRecipes.map((recipe, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-800 hover:shadow-md transition-shadow"
+                  {/* Quick Recipe Ideas */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
                   >
-                    <h5 className="font-semibold text-purple-900 dark:text-purple-100 text-sm mb-1">
-                      {recipe.name}
-                    </h5>
-                    <p className="text-xs text-purple-700 dark:text-purple-300 leading-relaxed">
-                      {recipe.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                        <ChefHat size={14} className="text-purple-600" />
+                      </div>
+                      <h4 className="text-base font-bold text-foreground">
+                        Quick Recipe Ideas
+                      </h4>
+                    </div>
+                    <div className="space-y-2">
+                      {currentCard.quickRecipes.map((recipe, idx) => (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.7 + idx * 0.1 }}
+                          whileHover={{ scale: 1.02, x: 4 }}
+                          className="bg-gradient-to-r from-purple-50/80 to-pink-50/80 backdrop-blur-sm rounded-xl p-4 border-2 border-purple-200/50 cursor-pointer hover:shadow-md transition-all"
+                        >
+                          <h5 className="font-bold text-purple-800 text-sm mb-1">
+                            {recipe.name}
+                          </h5>
+                          <p className="text-xs text-purple-700/80 leading-relaxed">
+                            {recipe.description}
+                          </p>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
+
+          {/* Card Counter */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-4 text-center"
+          >
+            <p className="text-sm text-muted-foreground font-medium">
+              Swipe or use arrows to explore more alternatives
+            </p>
+          </motion.div>
         </div>
       </div>
-
-      {/* Card Counter */}
-      <div className="mt-4 text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Swipe or use arrows to explore more alternatives
-        </p>
-      </div>
-    </div>
+    </motion.div>
   );
 }
