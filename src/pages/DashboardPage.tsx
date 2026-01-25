@@ -344,7 +344,7 @@ export default function DashboardPage() {
                   initial={{ scale: 0.96, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-orange-500/15"
+                  className={`relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-orange-500/15 ${pendingEntry.photo_url ? 'min-h-[420px]' : ''}`}
                 >
                   {/* Meal photo background - full coverage, no overlay */}
                   {pendingEntry.photo_url && (
@@ -380,9 +380,13 @@ export default function DashboardPage() {
                     </>
                   )}
 
-                  {/* Content overlay - transparent when photo, glass when no photo */}
-                  <div className={`relative ${pendingEntry.photo_url ? '' : 'backdrop-blur-2xl bg-white/70 border-2 border-white/90'}`}>
-                    <div className="p-7">
+                  {/* Content container - positioned at bottom when photo, normal flow when no photo */}
+                  <div className={`relative ${pendingEntry.photo_url ? 'absolute inset-x-0 bottom-0' : 'backdrop-blur-2xl bg-white/70 border-2 border-white/90'}`}>
+                    {/* Subtle gradient fade for readability when photo - fades from transparent to slightly dark */}
+                    {pendingEntry.photo_url && (
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent pointer-events-none" />
+                    )}
+                    <div className={`relative p-7 ${pendingEntry.photo_url ? 'pt-10' : ''}`}>
                       <div className="flex items-start justify-between mb-6">
                         <div className="flex-1 pr-4">
                           <h3 className={`font-black text-2xl mb-2 tracking-tight ${pendingEntry.photo_url ? 'text-white' : 'text-foreground'}`} style={{ textShadow: pendingEntry.photo_url ? '0 2px 16px rgba(0,0,0,0.7), 0 4px 24px rgba(0,0,0,0.5)' : '0 1px 8px rgba(0,0,0,0.04)' }}>Rate your last meal</h3>
