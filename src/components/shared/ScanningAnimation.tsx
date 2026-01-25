@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { haptics } from '@/lib/haptics';
 
 interface ScanningAnimationProps {
   imageUrl?: string | null;
@@ -10,6 +11,7 @@ export function ScanningAnimation({ imageUrl, onComplete }: ScanningAnimationPro
   const [activePhase, setActivePhase] = useState(0);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  const lastPhaseRef = useRef<number>(-1);
 
   const phases = useMemo(() => [
     'Initializing neural analysis',
@@ -18,6 +20,17 @@ export function ScanningAnimation({ imageUrl, onComplete }: ScanningAnimationPro
     'Identifying potential triggers',
     'Finalizing insights'
   ], []);
+
+  // Start haptic pulse on mount, stop on unmount
+  useEffect(() => {
+    // Start the heavy pulsing haptic feedback
+    haptics.startScanningPulse();
+
+    return () => {
+      // Stop scanning pulse and play completion haptic
+      haptics.stopScanningPulse();
+    };
+  }, []);
 
   // Smooth progress animation using requestAnimationFrame
   useEffect(() => {
@@ -30,13 +43,22 @@ export function ScanningAnimation({ imageUrl, onComplete }: ScanningAnimationPro
 
       const elapsed = timestamp - startTimeRef.current;
       const newProgress = Math.min((elapsed / duration) * 100, 100);
+      const newPhase = Math.min(Math.floor(newProgress / 20), phases.length - 1);
 
       setProgress(newProgress);
-      setActivePhase(Math.min(Math.floor(newProgress / 20), phases.length - 1));
+      setActivePhase(newPhase);
+
+      // Trigger phase change haptic when phase changes
+      if (newPhase !== lastPhaseRef.current) {
+        lastPhaseRef.current = newPhase;
+        haptics.scanPhaseChange(newPhase);
+      }
 
       if (newProgress < 100) {
         animationRef.current = requestAnimationFrame(animate);
       } else {
+        // Play scan complete celebration haptic
+        haptics.scanComplete();
         onComplete?.();
       }
     };

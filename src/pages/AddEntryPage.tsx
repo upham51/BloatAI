@@ -234,8 +234,12 @@ export default function AddEntryPage() {
       setIsEditingDescription(true);
       return;
     }
-    haptics.medium();
+    // Creative "addictive" haptic feedback on button press
+    haptics.logMealPress();
     setIsSaving(true);
+
+    // Start the excited pulsing while saving
+    haptics.startSavingPulse();
     try {
       let photoReference = null;
       if (photoFile) {
@@ -274,7 +278,9 @@ export default function AddEntryPage() {
         notes: notes || null,
         entry_method: 'photo'
       });
-      haptics.success();
+      // Stop pulsing and play the ultimate celebration haptic!
+      haptics.stopSavingPulse();
+      haptics.mealSavedCelebration();
       toast({
         title: 'Meal logged!',
         description: bloatingRating ? 'Thanks for rating your meal.' : "We'll remind you to rate in 90 minutes."
@@ -282,6 +288,8 @@ export default function AddEntryPage() {
       navigate('/dashboard');
     } catch (error) {
       console.error('Save error:', error);
+      haptics.stopSavingPulse();
+      haptics.error();
       toast({
         variant: 'destructive',
         title: 'Failed to save',
@@ -633,9 +641,26 @@ export default function AddEntryPage() {
 
           {/* Sticky Save Button at Bottom of Content */}
           {!isAnalyzing && photoAnalyzed && <div className="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent pt-8">
-              <button onClick={handleSave} disabled={!isValid || isSaving} className={`w-full h-[56px] flex items-center justify-center gap-3 rounded-2xl font-semibold text-base transition-all duration-300 ${!isValid || isSaving ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 active:scale-[0.98]'}`} style={isValid && !isSaving ? {
-          boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
-        } : undefined}>
+              <button
+                onClick={handleSave}
+                onTouchStart={() => {
+                  // Anticipation haptic when finger touches button
+                  if (isValid && !isSaving) {
+                    haptics.logMealTouch();
+                  }
+                }}
+                onMouseDown={() => {
+                  // Also trigger on mouse for desktop testing
+                  if (isValid && !isSaving) {
+                    haptics.logMealTouch();
+                  }
+                }}
+                disabled={!isValid || isSaving}
+                className={`w-full h-[56px] flex items-center justify-center gap-3 rounded-2xl font-semibold text-base transition-all duration-300 ${!isValid || isSaving ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 active:scale-[0.98]'}`}
+                style={isValid && !isSaving ? {
+                  boxShadow: '0 8px 24px -4px hsl(var(--primary) / 0.4)'
+                } : undefined}
+              >
                 {isSaving ? <>
                     <span className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
                     Saving...
