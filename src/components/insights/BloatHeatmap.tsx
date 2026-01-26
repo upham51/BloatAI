@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { MealEntry } from '@/types';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
-import { Calendar, TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { Calendar, Smile, Frown, Activity } from 'lucide-react';
 
 interface BloatHeatmapProps {
   entries: MealEntry[];
@@ -45,11 +45,13 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
 
       if (avgBloating !== null) {
         bloatLevel = Math.round(avgBloating * 10) / 10;
+        // Use consistent thresholds: <=2 = good, <4 = moderate, >=4 = bad
+        // This matches the stats calculation and bloatingUtils.ts constants
         if (avgBloating <= 2) {
           color = 'bg-gradient-to-br from-emerald-400 to-teal-500';
           gradient = 'from-emerald-400 to-teal-500';
           label = 'Good day';
-        } else if (avgBloating <= 3) {
+        } else if (avgBloating < 4) {
           color = 'bg-gradient-to-br from-amber-400 to-orange-500';
           gradient = 'from-amber-400 to-orange-500';
           label = 'Moderate';
@@ -174,7 +176,7 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
               className="text-center p-4 rounded-2xl bg-emerald-50/80 backdrop-blur-sm border border-emerald-200/50 shadow-sm"
             >
               <div className="flex items-center justify-center mb-2">
-                <TrendingDown className="w-4 h-4 text-emerald-600 mr-1.5" />
+                <Smile className="w-4 h-4 text-emerald-600 mr-1.5" />
                 <span className="text-2xl font-black text-emerald-600">{stats.goodDays}</span>
               </div>
               <div className="text-xs text-emerald-700 font-semibold">Good days</div>
@@ -184,7 +186,7 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
               className="text-center p-4 rounded-2xl bg-rose-50/80 backdrop-blur-sm border border-rose-200/50 shadow-sm"
             >
               <div className="flex items-center justify-center mb-2">
-                <TrendingUp className="w-4 h-4 text-rose-600 mr-1.5" />
+                <Frown className="w-4 h-4 text-rose-600 mr-1.5" />
                 <span className="text-2xl font-black text-rose-600">{stats.badDays}</span>
               </div>
               <div className="text-xs text-rose-700 font-semibold">Bad days</div>

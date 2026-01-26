@@ -65,20 +65,40 @@ export default function HistoryPage() {
       ? weeklyRated.reduce((sum, e) => sum + (e.bloating_rating || 0), 0) / weeklyRated.length
       : 0;
 
-    // Find most common trigger
-    const triggerCounts: Record<string, number> = {};
+    // Find top trigger by bloating impact (not just frequency)
+    // Weight triggers by the bloating rating of meals they appear in
+    const triggerStats: Record<string, { count: number; totalBloating: number; highBloatingCount: number }> = {};
     entries.forEach(entry => {
+      if (entry.rating_status !== 'completed' || !entry.bloating_rating) return;
       entry.detected_triggers?.forEach(trigger => {
-        triggerCounts[trigger.category] = (triggerCounts[trigger.category] || 0) + 1;
+        if (!triggerStats[trigger.category]) {
+          triggerStats[trigger.category] = { count: 0, totalBloating: 0, highBloatingCount: 0 };
+        }
+        triggerStats[trigger.category].count += 1;
+        triggerStats[trigger.category].totalBloating += entry.bloating_rating!;
+        if (entry.bloating_rating! >= 4) {
+          triggerStats[trigger.category].highBloatingCount += 1;
+        }
       });
     });
-    const topTrigger = Object.entries(triggerCounts).sort((a, b) => b[1] - a[1])[0];
+
+    // Calculate impact score: higher avg bloating + more occurrences = higher impact
+    // Score = (avgBloating * 0.6) + (highBloatingRate * 0.4) - requires at least 2 occurrences
+    const topTrigger = Object.entries(triggerStats)
+      .filter(([_, stats]) => stats.count >= 2) // Need at least 2 meals to be meaningful
+      .map(([category, stats]) => {
+        const avgBloating = stats.totalBloating / stats.count;
+        const highBloatingRate = stats.highBloatingCount / stats.count;
+        const impactScore = (avgBloating * 0.6) + (highBloatingRate * 4 * 0.4); // Scale high rate to match avg scale
+        return { category, count: stats.count, impactScore };
+      })
+      .sort((a, b) => b.impactScore - a.impactScore)[0];
 
     return {
       thisWeekCount: thisWeekEntries.length,
       highBloatingCount: highBloatingEntries.length,
       weeklyAvg,
-      topTrigger: topTrigger ? { category: topTrigger[0], count: topTrigger[1] } : null,
+      topTrigger: topTrigger ? { category: topTrigger.category, count: topTrigger.count } : null,
     };
   }, [entries]);
 
