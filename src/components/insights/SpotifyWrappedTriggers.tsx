@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TriggerConfidenceLevel } from '@/lib/insightsAnalysis';
 import { getTriggerCategory } from '@/types';
 import { getFoodImage } from '@/lib/pexelsApi';
-import { ChevronDown, ChevronUp, TrendingUp, Zap, AlertTriangle, Leaf, Check, ChefHat, AlertCircle, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, Zap, AlertTriangle, Leaf, Check, ChefHat, AlertCircle, Sparkles } from 'lucide-react';
 
 // Safe alternatives data integrated from SafeAlternativesCards
 const SAFE_ALTERNATIVES_DATA: Record<string, {
@@ -719,7 +719,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
             >
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
-                  <TrendingUp size={16} className="text-amber-600" />
+                  <Eye size={16} className="text-amber-600" />
                 </div>
                 <h3 className="text-sm font-bold text-foreground">
                   Also watch out for:
