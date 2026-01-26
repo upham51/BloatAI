@@ -11,8 +11,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { DeferredMeshGradientBackground } from "@/components/ui/DeferredMeshGradientBackground";
-import { motion } from "framer-motion";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 
 // Eager load authentication pages (small, needed immediately)
 import WelcomePage from "./pages/WelcomePage";
@@ -59,19 +58,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 0.4,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
-          <div className="relative">
-            <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
-          </div>
-        </motion.div>
+        <div className="relative">
+          <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
+        </div>
       </div>
     );
   }
@@ -84,19 +74,10 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 0.4,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
-          <div className="relative">
-            <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
-          </div>
-        </motion.div>
+        <div className="relative">
+          <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
+        </div>
       </div>
     );
   }
@@ -111,19 +92,10 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   if (isLoading || isAdminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 0.4,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
-          <div className="relative">
-            <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
-          </div>
-        </motion.div>
+        <div className="relative">
+          <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
+        </div>
       </div>
     );
   }
@@ -136,19 +108,10 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function LoadingFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 0.4,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-      >
-        <div className="relative">
-          <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
-        </div>
-      </motion.div>
+      <div className="relative">
+        <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
+      </div>
     </div>
   );
 }
@@ -190,6 +153,7 @@ function GlobalBackground() {
 }
 
 const App = () => (
+  <Suspense fallback={<LoadingFallback />}>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -209,6 +173,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </Suspense>
 );
 
 export default App;
