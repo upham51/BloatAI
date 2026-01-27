@@ -11,7 +11,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { DeferredMeshGradientBackground } from "@/components/ui/DeferredMeshGradientBackground";
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense } from "react";
 
 // Eager load authentication pages (small, needed immediately)
 import WelcomePage from "./pages/WelcomePage";
@@ -152,6 +152,23 @@ function GlobalBackground() {
   return <DeferredMeshGradientBackground variant="balanced" delayMs={2500} />;
 }
 
+function RouteProviders({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+
+  // These routes should boot as fast as possible. Avoid mounting providers that do
+  // background work (subscription checks, DB queries, localStorage parsing, etc.).
+  const minimalRoutes = new Set<string>(["/", "/signin", "/signup"]);
+  if (minimalRoutes.has(pathname)) return <>{children}</>;
+
+  return (
+    <SubscriptionProvider>
+      <MealProvider>
+        <MilestonesProvider>{children}</MilestonesProvider>
+      </MealProvider>
+    </SubscriptionProvider>
+  );
+}
+
 const App = () => (
   <Suspense fallback={<LoadingFallback />}>
   <QueryClientProvider client={queryClient}>
@@ -162,13 +179,9 @@ const App = () => (
         <GlobalBackground />
         <ScrollToTop />
         <AuthProvider>
-          <SubscriptionProvider>
-            <MealProvider>
-              <MilestonesProvider>
-                <AppRoutes />
-              </MilestonesProvider>
-            </MealProvider>
-          </SubscriptionProvider>
+          <RouteProviders>
+            <AppRoutes />
+          </RouteProviders>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
