@@ -490,15 +490,19 @@ export default function AddEntryPage() {
             className={`flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)] ${
               photoAnalyzed
                 ? 'animate-card-reveal'
-                : 'opacity-0'
+                : 'opacity-0 translate-y-[60px]'
             }`}
+            style={{
+              transform: 'translateZ(0)',
+              WebkitTransform: 'translateZ(0)'
+            }}
           >
             <div className="p-5 space-y-4 pt-8">
           {/* AI Analysis Results */}
           {photoAnalyzed && <div className="space-y-4">
               {/* AI Detection Card - Stagger 1 */}
               <div className="glass-card p-5 animate-premium-reveal opacity-0" style={{
-              animationDelay: '200ms',
+              animationDelay: '100ms',
               animationFillMode: 'forwards'
             }}>
                 <div className="flex items-center justify-between mb-4">
@@ -520,7 +524,7 @@ export default function AddEntryPage() {
 
               {/* Triggers Card - Stagger 2 */}
               <div className="glass-card p-5 animate-premium-reveal opacity-0" style={{
-              animationDelay: '400ms',
+              animationDelay: '200ms',
               animationFillMode: 'forwards'
             }}>
                 <div className="flex items-center justify-between mb-4">
@@ -591,7 +595,7 @@ export default function AddEntryPage() {
 
               {/* Notes Card - Stagger 2.5 */}
               <div className="glass-card p-5 animate-premium-reveal opacity-0" style={{
-              animationDelay: '600ms',
+              animationDelay: '300ms',
               animationFillMode: 'forwards'
             }}>
                 <NotesInput value={notes} onChange={setNotes} />
@@ -599,7 +603,7 @@ export default function AddEntryPage() {
 
               {/* Bloating Rating Card - Stagger 3 */}
               <div className="glass-card p-5 animate-premium-reveal opacity-0" style={{
-              animationDelay: '800ms',
+              animationDelay: '400ms',
               animationFillMode: 'forwards'
             }}>
                 <div className="flex items-center gap-3 mb-1">
