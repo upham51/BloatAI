@@ -461,24 +461,6 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                       #1 Trigger
                     </span>
                   </motion.div>
-
-                  {/* Severity indicator bar */}
-                  <div className="flex items-center gap-1.5">
-                    {[1, 2, 3, 4, 5].map((level) => (
-                      <motion.div
-                        key={level}
-                        initial={{ scaleY: 0 }}
-                        animate={{ scaleY: 1 }}
-                        transition={{ delay: 0.6 + level * 0.1, duration: 0.3 }}
-                        className={`w-2 rounded-full ${
-                          topTrigger.impactScore >= level * 0.5
-                            ? 'bg-white shadow-lg'
-                            : 'bg-white/30'
-                        }`}
-                        style={{ height: `${8 + level * 4}px` }}
-                      />
-                    ))}
-                  </div>
                 </div>
 
                 {/* Bottom Section */}
@@ -747,13 +729,13 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                         {/* Background Image */}
                         {trigger.imageUrl && (
                           <div
-                            className="absolute inset-0 bg-cover bg-center opacity-15 transition-transform duration-500 group-hover:scale-110 group-hover:opacity-25"
+                            className="absolute inset-0 bg-cover bg-center opacity-50 transition-transform duration-500 group-hover:scale-110 group-hover:opacity-60"
                             style={{ backgroundImage: `url(${trigger.imageUrl})` }}
                           />
                         )}
 
                         {/* Gradient base */}
-                        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm" />
+                        <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px]" />
 
                         {/* Gradient Overlay */}
                         <div className={`absolute inset-0 bg-gradient-to-r ${colors.from} ${colors.to} opacity-10 group-hover:opacity-20 transition-opacity`} />
@@ -761,20 +743,6 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                         {/* Content */}
                         <div className="relative h-full flex items-center justify-between px-5">
                           <div className="flex items-center gap-4">
-                            {/* Severity indicator */}
-                            <div className="flex items-center gap-1">
-                              {[1, 2, 3].map((level) => (
-                                <div
-                                  key={level}
-                                  className={`w-1.5 rounded-full transition-all ${
-                                    trigger.impactScore >= level * 0.7
-                                      ? `${getSeverityColor(trigger.impactScore)}`
-                                      : 'bg-gray-200 dark:bg-gray-700'
-                                  }`}
-                                  style={{ height: `${10 + level * 4}px` }}
-                                />
-                              ))}
-                            </div>
                             <div>
                               <div className="font-bold text-foreground">
                                 {trigger.displayName}
