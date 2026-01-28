@@ -417,8 +417,14 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 @keyframes scaleIn {
@@ -436,60 +442,44 @@
 }
 
 .animate-slide-up {
-  animation: slideUp 2.5s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideUp 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+  will-change: transform, opacity;
 }
 
-/* Premium Card Reveal Animation - Ultra smooth slide up from bottom */
+/* Premium Card Reveal Animation - Buttery smooth slide up from bottom */
 @keyframes cardReveal {
   0% {
     opacity: 0;
-    transform: translateY(100%);
-  }
-  40% {
-    opacity: 0.8;
-    transform: translateY(20%);
-  }
-  70% {
-    opacity: 1;
-    transform: translateY(-2%);
-  }
-  85% {
-    transform: translateY(1%);
+    transform: translate3d(0, 60px, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .animate-card-reveal {
-  animation: cardReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cardReveal 0.5s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
-/* Premium content reveal animation with spring physics */
+/* Premium content reveal animation - smooth and performant */
 @keyframes premiumReveal {
   0% {
     opacity: 0;
-    transform: translateY(40px) scale(0.95);
-    filter: blur(4px);
-  }
-  60% {
-    opacity: 1;
-    transform: translateY(-5px) scale(1.01);
-    filter: blur(0);
-  }
-  80% {
-    transform: translateY(2px) scale(0.995);
+    transform: translate3d(0, 24px, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .animate-premium-reveal {
-  animation: premiumReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: premiumReveal 0.4s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .animate-scale-in {
