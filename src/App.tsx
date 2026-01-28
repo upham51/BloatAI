@@ -124,6 +124,8 @@ function AppRoutes() {
         <Route path="/signin" element={<PublicRoute><SignInPage /></PublicRoute>} />
         <Route path="/signup" element={<PublicRoute><SignUpPage /></PublicRoute>} />
         <Route path="/pricing" element={<PricingPage />} />
+        {/* Back-compat / typo route: prevent 404 + potential heavy background animations on unknown routes */}
+        <Route path="/add" element={<Navigate to="/add-entry" replace />} />
       <Route path="/dashboard" element={<ProtectedRoute><SubscriptionGate><DashboardPage /></SubscriptionGate></ProtectedRoute>} />
       <Route path="/add-entry" element={<ProtectedRoute><SubscriptionGate><AddEntryPage /></SubscriptionGate></ProtectedRoute>} />
       <Route path="/barcode-scanner" element={<ProtectedRoute><SubscriptionGate><BarcodeScanner /></SubscriptionGate></ProtectedRoute>} />
@@ -148,6 +150,23 @@ function GlobalBackground() {
   // the preview iframe to disconnect (“connection was reset”).
   const disableOn = new Set<string>(["/", "/signin", "/signup"]);
   if (disableOn.has(pathname)) return null;
+
+  // Only enable the animated background on known routes. Unknown routes (e.g. typos like
+  // "/add") should stay as lightweight as possible to avoid preview resets.
+  const enableOn = new Set<string>([
+    "/pricing",
+    "/dashboard",
+    "/add-entry",
+    "/barcode-scanner",
+    "/history",
+    "/insights",
+    "/profile",
+    "/admin",
+    "/admin/users",
+    "/admin/errors",
+    "/admin/emoji-test",
+  ]);
+  if (!enableOn.has(pathname)) return null;
 
   return <DeferredMeshGradientBackground variant="balanced" delayMs={2500} />;
 }
