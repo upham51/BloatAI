@@ -239,7 +239,7 @@ export function MilestonesCard() {
     haptics.medium();
 
     if (currentTier === 1) {
-      navigate('/add');
+      navigate('/add-entry');
     } else if (currentTier === 3 && !isMilestoneComplete('first_experiment')) {
       navigate('/insights?tab=experiments');
     } else {
