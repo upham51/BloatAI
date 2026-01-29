@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { MotionConfig } from "framer-motion";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MealProvider } from "@/contexts/MealContext";
 import { MilestonesProvider } from "@/contexts/MilestonesContext";
@@ -11,7 +12,9 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { DeferredMeshGradientBackground } from "@/components/ui/DeferredMeshGradientBackground";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useContext, useState } from "react";
+import { RecoveryModeContext } from "@/contexts/RecoveryModeContext";
+import { initRecoveryMode } from "@/lib/recoveryMode";
 
 // Eager load authentication pages (small, needed immediately)
 import WelcomePage from "./pages/WelcomePage";
@@ -144,6 +147,9 @@ function AppRoutes() {
 
 function GlobalBackground() {
   const { pathname } = useLocation();
+  const recoveryMode = useContext(RecoveryModeContext);
+
+  if (recoveryMode) return null;
 
   // The welcome/auth screens already render their own background. Keeping the global
   // animated mesh background off these routes avoids cold-start jank that can cause
@@ -189,23 +195,35 @@ function RouteProviders({ children }: { children: React.ReactNode }) {
 }
 
 const App = () => (
-  <Suspense fallback={<LoadingFallback />}>
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <GlobalBackground />
-        <ScrollToTop />
-        <AuthProvider>
-          <RouteProviders>
-            <AppRoutes />
-          </RouteProviders>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-  </Suspense>
+  <AppWithRecovery />
 );
+
+function AppWithRecovery() {
+  const [recoveryMode] = useState(() => initRecoveryMode());
+
+  return (
+    <RecoveryModeContext.Provider value={recoveryMode}>
+      <MotionConfig reducedMotion={recoveryMode ? "always" : "user"}>
+        <Suspense fallback={<LoadingFallback />}>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <GlobalBackground />
+                <ScrollToTop />
+                <AuthProvider>
+                  <RouteProviders>
+                    <AppRoutes />
+                  </RouteProviders>
+                </AuthProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </QueryClientProvider>
+        </Suspense>
+      </MotionConfig>
+    </RecoveryModeContext.Provider>
+  );
+}
 
 export default App;

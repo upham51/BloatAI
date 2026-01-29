@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface MeshGradientBackgroundProps {
   variant?: 'warm' | 'cool' | 'balanced';
@@ -39,8 +38,35 @@ export const MeshGradientBackground: React.FC<MeshGradientBackgroundProps> = ({
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-transparent">
+      <style>{`
+        @keyframes meshBlob1 {
+          0% { transform: translate3d(0, 0, 0) scale(1); }
+          50% { transform: translate3d(30px, 50px, 0) scale(1.1); }
+          100% { transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes meshBlob2 {
+          0% { transform: translate3d(0, 0, 0) scale(1); }
+          50% { transform: translate3d(-40px, 30px, 0) scale(1.15); }
+          100% { transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes meshBlob3 {
+          0% { transform: translate3d(0, 0, 0) scale(1); }
+          50% { transform: translate3d(40px, -40px, 0) scale(1.2); }
+          100% { transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes meshBlob4 {
+          0% { transform: translate3d(0, 0, 0) scale(1); }
+          50% { transform: translate3d(-30px, -50px, 0) scale(1.1); }
+          100% { transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes meshBlobCenter {
+          0% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 0.3; }
+          50% { transform: translate3d(calc(-50% + 20px), calc(-50% + 30px), 0) scale(1.15); opacity: 0.5; }
+          100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 0.3; }
+        }
+      `}</style>
       {/* Blob 1 - Top Left */}
-      <motion.div
+      <div
         className="absolute rounded-full blur-3xl"
         style={{
           width: '600px',
@@ -48,21 +74,13 @@ export const MeshGradientBackground: React.FC<MeshGradientBackgroundProps> = ({
           background: `radial-gradient(circle, ${colors.blob1}, transparent 70%)`,
           top: '-10%',
           left: '-10%',
-        }}
-        animate={{
-          x: [0, 30, 0],
-          y: [0, 50, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: 'easeInOut',
+          animation: 'meshBlob1 20s ease-in-out infinite',
+          willChange: 'transform',
         }}
       />
 
       {/* Blob 2 - Top Right */}
-      <motion.div
+      <div
         className="absolute rounded-full blur-3xl"
         style={{
           width: '500px',
@@ -70,22 +88,14 @@ export const MeshGradientBackground: React.FC<MeshGradientBackgroundProps> = ({
           background: `radial-gradient(circle, ${colors.blob2}, transparent 70%)`,
           top: '10%',
           right: '-5%',
-        }}
-        animate={{
-          x: [0, -40, 0],
-          y: [0, 30, 0],
-          scale: [1, 1.15, 1],
-        }}
-        transition={{
-          duration: 18,
-          repeat: Infinity,
-          ease: 'easeInOut',
-          delay: 2,
+          animation: 'meshBlob2 18s ease-in-out infinite',
+          animationDelay: '2s',
+          willChange: 'transform',
         }}
       />
 
       {/* Blob 3 - Bottom Left */}
-      <motion.div
+      <div
         className="absolute rounded-full blur-3xl"
         style={{
           width: '550px',
@@ -93,22 +103,14 @@ export const MeshGradientBackground: React.FC<MeshGradientBackgroundProps> = ({
           background: `radial-gradient(circle, ${colors.blob3}, transparent 70%)`,
           bottom: '-15%',
           left: '5%',
-        }}
-        animate={{
-          x: [0, 40, 0],
-          y: [0, -40, 0],
-          scale: [1, 1.2, 1],
-        }}
-        transition={{
-          duration: 22,
-          repeat: Infinity,
-          ease: 'easeInOut',
-          delay: 4,
+          animation: 'meshBlob3 22s ease-in-out infinite',
+          animationDelay: '4s',
+          willChange: 'transform',
         }}
       />
 
       {/* Blob 4 - Bottom Right */}
-      <motion.div
+      <div
         className="absolute rounded-full blur-3xl"
         style={{
           width: '480px',
@@ -116,22 +118,14 @@ export const MeshGradientBackground: React.FC<MeshGradientBackgroundProps> = ({
           background: `radial-gradient(circle, ${colors.blob4}, transparent 70%)`,
           bottom: '5%',
           right: '-10%',
-        }}
-        animate={{
-          x: [0, -30, 0],
-          y: [0, -50, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: 'easeInOut',
-          delay: 6,
+          animation: 'meshBlob4 25s ease-in-out infinite',
+          animationDelay: '6s',
+          willChange: 'transform',
         }}
       />
 
       {/* Center floating blob for extra depth */}
-      <motion.div
+      <div
         className="absolute rounded-full blur-3xl"
         style={{
           width: '400px',
@@ -139,19 +133,10 @@ export const MeshGradientBackground: React.FC<MeshGradientBackgroundProps> = ({
           background: `radial-gradient(circle, ${colors.blob1}, transparent 80%)`,
           top: '40%',
           left: '50%',
-          transform: 'translate(-50%, -50%)',
-        }}
-        animate={{
-          x: [-20, 20, -20],
-          y: [-30, 30, -30],
-          scale: [1, 1.15, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 15,
-          repeat: Infinity,
-          ease: 'easeInOut',
-          delay: 1,
+          transform: 'translate3d(-50%, -50%, 0)',
+          animation: 'meshBlobCenter 15s ease-in-out infinite',
+          animationDelay: '1s',
+          willChange: 'transform, opacity',
         }}
       />
 

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { haptics } from '@/lib/haptics';
 
 interface MilestoneCheckmarkProps {
@@ -56,15 +56,18 @@ const colorConfig = {
   },
 };
 
-export function MilestoneCheckmark({
-  isComplete,
-  isActive = false,
-  size = 'md',
-  color = 'sage',
-  showGlow = true,
-  onComplete,
-  delay = 0,
-}: MilestoneCheckmarkProps) {
+export const MilestoneCheckmark = forwardRef<HTMLDivElement, MilestoneCheckmarkProps>(function MilestoneCheckmark(
+  {
+    isComplete,
+    isActive = false,
+    size = 'md',
+    color = 'sage',
+    showGlow = true,
+    onComplete,
+    delay = 0,
+  },
+  ref
+) {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [showCheck, setShowCheck] = useState(isComplete);
 
@@ -92,6 +95,7 @@ export function MilestoneCheckmark({
     <div
       className="relative flex items-center justify-center"
       style={{ width: config.container, height: config.container }}
+      ref={ref}
     >
       {/* Background circle */}
       <motion.div
@@ -246,7 +250,9 @@ export function MilestoneCheckmark({
       </AnimatePresence>
     </div>
   );
-}
+});
+
+MilestoneCheckmark.displayName = 'MilestoneCheckmark';
 
 // Timeline connector line
 export function MilestoneConnector({
