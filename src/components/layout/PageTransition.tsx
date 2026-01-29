@@ -1,5 +1,6 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ReactNode } from 'react';
+import { useRecoveryMode } from '@/contexts/RecoveryModeContext';
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -11,6 +12,12 @@ interface PageTransitionProps {
  * Uses Framer Motion for buttery-smooth 60fps animations
  */
 export const PageTransition = ({ children, className = '' }: PageTransitionProps) => {
+  const recoveryMode = useRecoveryMode();
+
+  if (recoveryMode) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -31,6 +38,12 @@ export const PageTransition = ({ children, className = '' }: PageTransitionProps
  * Staggered container for animating children in sequence
  */
 export const StaggerContainer = ({ children, className = '' }: PageTransitionProps) => {
+  const recoveryMode = useRecoveryMode();
+
+  if (recoveryMode) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       initial="hidden"
@@ -54,6 +67,12 @@ export const StaggerContainer = ({ children, className = '' }: PageTransitionPro
  * Individual stagger item
  */
 export const StaggerItem = ({ children, className = '' }: PageTransitionProps) => {
+  const recoveryMode = useRecoveryMode();
+
+  if (recoveryMode) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       variants={{
@@ -78,6 +97,12 @@ export const StaggerItem = ({ children, className = '' }: PageTransitionProps) =
  * Scale and fade transition for modal-like content
  */
 export const ScaleTransition = ({ children, className = '' }: PageTransitionProps) => {
+  const recoveryMode = useRecoveryMode();
+
+  if (recoveryMode) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -98,6 +123,12 @@ export const ScaleTransition = ({ children, className = '' }: PageTransitionProp
  * Slide from right transition for drawer/detail views
  */
 export const SlideTransition = ({ children, className = '' }: PageTransitionProps) => {
+  const recoveryMode = useRecoveryMode();
+
+  if (recoveryMode) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
