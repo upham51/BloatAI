@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, ChevronDown, ChevronUp, Info, Scan } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { FODMAPGuide } from '@/components/triggers/FODMAPGuide';
@@ -10,6 +10,7 @@ import { NotesInput } from '@/components/meals/NotesInput';
 import { TextOnlyEntry } from '@/components/meals/TextOnlyEntry';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMilestones } from '@/contexts/MilestonesContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { DetectedTrigger, validateTriggers, getTriggerCategory } from '@/types';
@@ -44,8 +45,16 @@ function TextOnlyModeWrapper({
       <TextOnlyEntry />
     </div>;
 }
+// Type for experiment location state
+interface ExperimentLocationState {
+  isExperimentMeal?: boolean;
+  experimentTriggerCategory?: string;
+  experimentTriggerName?: string;
+}
+
 export default function AddEntryPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     addEntry
   } = useMeals();
@@ -55,7 +64,18 @@ export default function AddEntryPage() {
   const {
     toast
   } = useToast();
+  const {
+    completeExperiment,
+    setPendingExperimentMeal,
+    getCurrentExperiment
+  } = useMilestones();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check if this is an experiment meal
+  const experimentState = location.state as ExperimentLocationState | null;
+  const isExperimentMeal = experimentState?.isExperimentMeal ?? false;
+  const experimentTriggerCategory = experimentState?.experimentTriggerCategory;
+  const experimentTriggerName = experimentState?.experimentTriggerName;
 
   // Entry mode
   const [entryMode, setEntryMode] = useState<EntryMode>('photo');
@@ -261,7 +281,7 @@ export default function AddEntryPage() {
         }
       }
       const ratingDueAt = bloatingRating ? null : new Date(Date.now() + 90 * 60 * 1000).toISOString();
-      await addEntry({
+      const newEntry = await addEntry({
         meal_description: aiDescription.trim(),
         photo_url: photoReference,
         portion_size: null,
@@ -278,13 +298,38 @@ export default function AddEntryPage() {
         notes: notes || null,
         entry_method: 'photo'
       });
-      // Stop pulsing and play the ultimate celebration haptic!
+
+      // Handle experiment meal completion
+      if (isExperimentMeal && getCurrentExperiment()) {
+        if (bloatingRating !== null) {
+          // User provided a rating - complete the experiment now
+          await completeExperiment(newEntry.id, bloatingRating);
+          toast({
+            title: 'Experiment Complete!',
+            description: 'Check your Experiments tab to see the results.'
+          });
+        } else {
+          // No rating yet - mark this meal as the experiment meal for later completion
+          setPendingExperimentMeal(newEntry.id);
+          toast({
+            title: 'Experiment Meal Logged!',
+            description: "Rate this meal to complete your experiment."
+          });
+        }
+      } else {
+        // Stop pulsing and play the ultimate celebration haptic!
+        haptics.stopSavingPulse();
+        haptics.mealSavedCelebration();
+        toast({
+          title: 'Meal logged!',
+          description: bloatingRating ? 'Thanks for rating your meal.' : "We'll remind you to rate in 90 minutes."
+        });
+      }
+
+      // Stop pulsing haptic if not already stopped
       haptics.stopSavingPulse();
       haptics.mealSavedCelebration();
-      toast({
-        title: 'Meal logged!',
-        description: bloatingRating ? 'Thanks for rating your meal.' : "We'll remind you to rate in 90 minutes."
-      });
+
       navigate('/dashboard');
     } catch (error) {
       console.error('Save error:', error);
