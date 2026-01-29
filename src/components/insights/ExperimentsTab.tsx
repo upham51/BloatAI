@@ -208,7 +208,13 @@ function ActiveExperimentCard({
             className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-400 to-violet-500 text-white font-semibold shadow-lg flex items-center justify-center gap-2"
             onClick={() => {
               haptics.medium();
-              navigate('/add-entry');
+              navigate('/add-entry', {
+                state: {
+                  isExperimentMeal: true,
+                  experimentTriggerCategory: experiment.triggerCategory,
+                  experimentTriggerName: experiment.triggerName
+                }
+              });
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

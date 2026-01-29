@@ -50,6 +50,8 @@ interface MilestonesContextType {
   // Experiments
   startExperiment: (triggerCategory: string, triggerName: string, hypothesis: string) => Promise<void>;
   completeExperiment: (experimentMealId: string, bloatingScore: number) => Promise<ExperimentResult>;
+  setPendingExperimentMeal: (mealId: string) => void;
+  getPendingExperimentMealId: () => string | null;
   cancelExperiment: () => void;
   getCurrentExperiment: () => Experiment | null;
   getCompletedExperiments: () => Experiment[];
@@ -748,6 +750,31 @@ export function MilestonesProvider({ children }: { children: ReactNode }) {
     saveState(newState);
   }, [milestoneState, saveState]);
 
+  const setPendingExperimentMeal = useCallback((mealId: string) => {
+    if (!milestoneState?.tier3.currentExperiment) return;
+
+    const updatedExperiment = {
+      ...milestoneState.tier3.currentExperiment,
+      experimentMealId: mealId
+    };
+
+    const newState = {
+      ...milestoneState,
+      tier3: {
+        ...milestoneState.tier3,
+        currentExperiment: updatedExperiment
+      },
+      updatedAt: new Date().toISOString()
+    };
+
+    setMilestoneState(newState);
+    saveState(newState);
+  }, [milestoneState, saveState]);
+
+  const getPendingExperimentMealId = useCallback(() => {
+    return milestoneState?.tier3.currentExperiment?.experimentMealId || null;
+  }, [milestoneState]);
+
   const getCurrentExperiment = useCallback(() => {
     return milestoneState?.tier3.currentExperiment || null;
   }, [milestoneState]);
@@ -1069,6 +1096,8 @@ export function MilestonesProvider({ children }: { children: ReactNode }) {
         checkAndUpdateMilestones,
         startExperiment,
         completeExperiment,
+        setPendingExperimentMeal,
+        getPendingExperimentMealId,
         cancelExperiment,
         getCurrentExperiment,
         getCompletedExperiments,

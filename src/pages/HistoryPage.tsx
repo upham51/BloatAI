@@ -11,6 +11,7 @@ import { EditMealModal } from '@/components/meals/EditMealModal';
 import { EditTitleModal } from '@/components/meals/EditTitleModal';
 import { MealPhoto } from '@/components/meals/MealPhoto';
 import { useMeals } from '@/contexts/MealContext';
+import { useMilestones } from '@/contexts/MilestonesContext';
 import { useToast } from '@/hooks/use-toast';
 import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTES } from '@/types';
 import { formatDistanceToNow, format, isAfter, subDays, isToday, isYesterday, startOfDay } from 'date-fns';
@@ -43,6 +44,7 @@ type FilterType = 'all' | 'high-bloating' | 'this-week';
 export default function HistoryPage() {
   const navigate = useNavigate();
   const { entries, deleteEntry, updateRating, skipRating, updateEntry, hasMore, loadMore, isLoading: entriesLoading } = useMeals();
+  const { getPendingExperimentMealId, completeExperiment } = useMilestones();
   const { toast } = useToast();
 
   const [filter, setFilter] = useState<FilterType>('all');
@@ -174,7 +176,19 @@ export default function HistoryPage() {
     haptics.success();
     try {
       await updateRating(ratingEntry.id, rating);
-      toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+
+      // Check if this is a pending experiment meal
+      const pendingExperimentMealId = getPendingExperimentMealId();
+      if (pendingExperimentMealId && pendingExperimentMealId === ratingEntry.id) {
+        // Complete the experiment with this rating
+        await completeExperiment(ratingEntry.id, rating);
+        toast({
+          title: 'Experiment Complete!',
+          description: 'Check your Experiments tab to see the results.'
+        });
+      } else {
+        toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+      }
       setRatingEntry(null);
     } catch (error) {
       console.error('Failed to save rating:', error);
@@ -834,13 +848,26 @@ export default function HistoryPage() {
 // Inline Rating Component for pending entries - Premium Design
 function InlineRating({ entryId }: { entryId: string }) {
   const { updateRating, skipRating } = useMeals();
+  const { getPendingExperimentMealId, completeExperiment } = useMilestones();
   const { toast } = useToast();
 
   const handleRate = async (rating: number) => {
     haptics.success();
     try {
       await updateRating(entryId, rating);
-      toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+
+      // Check if this is a pending experiment meal
+      const pendingExperimentMealId = getPendingExperimentMealId();
+      if (pendingExperimentMealId && pendingExperimentMealId === entryId) {
+        // Complete the experiment with this rating
+        await completeExperiment(entryId, rating);
+        toast({
+          title: 'Experiment Complete!',
+          description: 'Check your Experiments tab to see the results.'
+        });
+      } else {
+        toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
+      }
     } catch (error) {
       console.error('Failed to save rating:', error);
       toast({
