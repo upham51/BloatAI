@@ -1,4 +1,5 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import JSZip from 'jszip';
 
 interface PhotoDB extends DBSchema {
   photos: {
@@ -330,11 +331,44 @@ class LocalPhotoStorage {
 
   /**
    * Export all photos as a downloadable ZIP (for backup)
-   * Note: Requires a ZIP library - placeholder for future implementation
+   * @returns The number of photos exported
    */
-  async exportPhotos(): Promise<void> {
-    console.warn('Export functionality not yet implemented');
-    // TODO: Implement ZIP export using JSZip or similar
+  async exportPhotos(): Promise<number> {
+    if (!this.db) await this.init();
+
+    try {
+      const zip = new JSZip();
+      const photoKeys = await this.db!.getAllKeys('photos');
+
+      if (photoKeys.length === 0) {
+        console.warn('No photos to export');
+        return 0;
+      }
+
+      for (const key of photoKeys) {
+        const photo = await this.db!.get('photos', key);
+        if (photo) {
+          const extension = photo.mimeType === 'image/png' ? 'png' : 'jpg';
+          zip.file(`${key}.${extension}`, photo.blob);
+        }
+      }
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `bloatai-photos-${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      console.log(`Exported ${photoKeys.length} photos to ZIP`);
+      return photoKeys.length;
+    } catch (error) {
+      console.error('Failed to export photos:', error);
+      throw error;
+    }
   }
 }
 
