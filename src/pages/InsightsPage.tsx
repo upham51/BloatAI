@@ -39,12 +39,19 @@ export default function InsightsPage() {
   const tabFromUrl = searchParams.get('tab') as InsightTab | null;
   const [activeTab, setActiveTab] = useState<InsightTab>(tabFromUrl || 'analysis');
 
-  // Update tab when URL changes
+  // Update tab when URL changes, but redirect to analysis if tab is locked
   useEffect(() => {
     if (tabFromUrl && ['analysis', 'experiments', 'ai_guide', 'blueprint'].includes(tabFromUrl)) {
-      setActiveTab(tabFromUrl);
+      // Only allow navigation to unlocked tabs (analysis is always unlocked for display)
+      if (tabFromUrl === 'analysis' || isTabUnlocked(tabFromUrl)) {
+        setActiveTab(tabFromUrl);
+      } else {
+        // Redirect to analysis tab if requested tab is locked
+        setActiveTab('analysis');
+        setSearchParams({ tab: 'analysis' });
+      }
     }
-  }, [tabFromUrl]);
+  }, [tabFromUrl, isTabUnlocked, setSearchParams]);
 
   // Handle tab change
   const handleTabChange = (tab: InsightTab) => {
@@ -309,7 +316,7 @@ export default function InsightsPage() {
               <AIGuideTab />
             )}
 
-            {activeTab === 'blueprint' && (
+            {activeTab === 'blueprint' && isTabUnlocked('blueprint') && (
               <BlueprintTab />
             )}
 

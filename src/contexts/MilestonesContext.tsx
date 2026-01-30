@@ -494,11 +494,12 @@ export function MilestonesProvider({ children }: { children: ReactNode }) {
 
     switch (tier) {
       case 1: {
-        const total = 3;
+        const total = 4;
         let completed = 0;
         if (milestoneState.tier1.firstMealLogged) completed++;
         if (milestoneState.tier1.firstMealRated) completed++;
         if (milestoneState.tier1.threeMealsCompleted) completed++;
+        if (milestoneState.tier1.patternDetectionUnlocked) completed++;
         return { completed, total, percentage: (completed / total) * 100 };
       }
       case 2: {
