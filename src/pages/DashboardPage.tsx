@@ -851,7 +851,7 @@ export default function DashboardPage() {
                           </motion.div>
                         </div>
                         {/* Premium milestone markers */}
-                        <div className="flex justify-between mt-5">
+                        <div className="relative mt-5 h-12">
                           {[1, 2, 3].map((day) => (
                             <motion.div
                               key={day}
@@ -859,9 +859,10 @@ export default function DashboardPage() {
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: 0.4 + day * 0.1, duration: 0.5 }}
                               whileHover={{ scale: 1.1, y: -2 }}
-                              className={`flex flex-col items-center ${
+                              className={`absolute flex flex-col items-center ${
                                 daysWithData >= day ? 'opacity-100' : 'opacity-40'
                               } transition-all`}
+                              style={{ left: `${(day / 3) * 100}%`, transform: 'translateX(-50%)' }}
                             >
                               <div className={`w-4 h-4 rounded-full border-2 ${
                                 daysWithData >= day

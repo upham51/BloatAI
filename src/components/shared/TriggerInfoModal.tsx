@@ -91,7 +91,7 @@ export function TriggerInfoModal({ trigger, isOpen, onClose }: TriggerInfoModalP
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto bg-card/95 backdrop-blur-xl border-border/50 rounded-3xl">
+      <DialogContent className="max-w-md mx-auto bg-card/95 backdrop-blur-xl border-border/50 rounded-3xl" hideCloseButton>
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
