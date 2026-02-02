@@ -302,16 +302,21 @@ export default function InsightsPage() {
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6 }}
-                  className="relative overflow-hidden rounded-[2rem] shadow-xl"
+                  className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-amber-500/10"
                 >
                   {/* Premium gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-lavender/30 via-purple-100/20 to-pink-100/30" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-50/90 via-orange-50/80 to-yellow-50/90" />
 
-                  {/* Animated orb */}
+                  {/* Animated orbs */}
                   <motion.div
                     animate={{ scale: [1, 1.2, 1], x: [0, 15, 0] }}
                     transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-16 -right-16 w-48 h-48 bg-gradient-to-br from-lavender/30 to-purple-300/20 rounded-full blur-3xl"
+                    className="absolute -top-16 -right-16 w-48 h-48 bg-gradient-to-br from-amber-400/25 to-orange-400/20 rounded-full blur-3xl"
+                  />
+                  <motion.div
+                    animate={{ scale: [1, 1.15, 1], x: [0, -10, 0] }}
+                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                    className="absolute -bottom-16 -left-16 w-40 h-40 bg-gradient-to-tr from-yellow-400/20 to-amber-300/15 rounded-full blur-3xl"
                   />
 
                   {/* Glass overlay */}
@@ -320,9 +325,9 @@ export default function InsightsPage() {
                       <motion.div
                         whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
                         transition={{ duration: 0.5 }}
-                        className="w-12 h-12 rounded-2xl bg-gradient-to-br from-lavender/40 to-purple-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-purple-500/20"
+                        className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-amber-500/20"
                       >
-                        <UtensilsCrossed className="w-6 h-6 text-purple-600" strokeWidth={2.5} />
+                        <UtensilsCrossed className="w-6 h-6 text-amber-600" strokeWidth={2.5} />
                       </motion.div>
                       <div>
                         <h2 className="font-black text-foreground text-xl tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
@@ -342,13 +347,13 @@ export default function InsightsPage() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1, duration: 0.4 }}
                             whileHover={{ scale: 1.02, x: 4 }}
-                            className="flex items-center gap-4 p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/80 hover:bg-white/80 hover:shadow-md transition-all cursor-pointer"
+                            className="flex items-center gap-4 p-4 rounded-2xl bg-white/70 backdrop-blur-sm border border-amber-100/80 hover:bg-white/90 hover:shadow-md hover:border-amber-200/80 transition-all cursor-pointer"
                           >
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lavender/50 to-purple-500/20 border border-white/80 flex items-center justify-center text-lg shadow-sm">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 border border-amber-200/50 flex items-center justify-center text-lg shadow-sm">
                               {icon}
                             </div>
                             <span className="flex-1 font-bold text-foreground">{item.food}</span>
-                            <span className="text-sm font-black text-purple-600 bg-purple-500/10 px-3 py-1.5 rounded-full">
+                            <span className="text-sm font-black text-amber-700 bg-gradient-to-r from-amber-100 to-orange-100 px-3 py-1.5 rounded-full border border-amber-200/50">
                               {item.count}x
                             </span>
                           </motion.div>

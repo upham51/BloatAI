@@ -15,10 +15,10 @@ export function BloatingGuide() {
         whileHover={{ scale: 1.02, y: -4 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setIsModalOpen(true)}
-        className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-pink-500/10 cursor-pointer group"
+        className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-sky-500/10 cursor-pointer group"
       >
         {/* Multi-layer gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-100/80 via-rose-100/70 to-purple-100/80" />
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-50/90 via-blue-50/80 to-indigo-50/90" />
 
         {/* Animated gradient orbs */}
         <motion.div
@@ -28,7 +28,7 @@ export function BloatingGuide() {
             y: [0, -15, 0],
           }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-pink-400/25 to-rose-400/20 rounded-full blur-3xl"
+          className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-sky-400/25 to-blue-400/20 rounded-full blur-3xl"
         />
 
         <motion.div
@@ -38,7 +38,7 @@ export function BloatingGuide() {
             y: [0, 15, 0],
           }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-purple-400/20 to-violet-300/15 rounded-full blur-3xl"
+          className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-indigo-400/20 to-blue-300/15 rounded-full blur-3xl"
         />
 
         {/* Premium glass overlay */}
@@ -49,9 +49,9 @@ export function BloatingGuide() {
               <motion.div
                 whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
                 transition={{ duration: 0.5 }}
-                className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-pink-500/20 flex-shrink-0"
+                className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500/20 to-blue-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-sky-500/20 flex-shrink-0"
               >
-                <BookOpen className="w-7 h-7 text-pink-600" strokeWidth={2.5} />
+                <BookOpen className="w-7 h-7 text-sky-600" strokeWidth={2.5} />
               </motion.div>
 
               {/* Content */}
@@ -68,9 +68,9 @@ export function BloatingGuide() {
               <motion.div
                 animate={{ x: [0, 4, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="flex-shrink-0 w-10 h-10 rounded-2xl bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-2 border-white/80 flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-pink-500 group-hover:to-rose-500 transition-all duration-300"
+                className="flex-shrink-0 w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-500/20 to-blue-500/20 border-2 border-white/80 flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-sky-500 group-hover:to-blue-500 transition-all duration-300"
               >
-                <ArrowRight className="w-5 h-5 text-pink-600 group-hover:text-white transition-colors" strokeWidth={2.5} />
+                <ArrowRight className="w-5 h-5 text-sky-600 group-hover:text-white transition-colors" strokeWidth={2.5} />
               </motion.div>
             </div>
 
@@ -81,7 +81,7 @@ export function BloatingGuide() {
               transition={{ delay: 0.3 }}
               className="mt-4 pt-4 border-t border-white/50"
             >
-              <p className="text-sm font-bold text-pink-600 group-hover:text-pink-700 transition-colors flex items-center gap-2">
+              <p className="text-sm font-bold text-sky-600 group-hover:text-sky-700 transition-colors flex items-center gap-2">
                 <span>Tap to read the complete guide</span>
                 <motion.span
                   animate={{ x: [0, 4, 0] }}
