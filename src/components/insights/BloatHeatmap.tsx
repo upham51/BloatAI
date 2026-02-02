@@ -1,19 +1,47 @@
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MealEntry } from '@/types';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
-import { Calendar, Smile, Frown, Activity } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isAfter, isBefore } from 'date-fns';
+import { Calendar, Smile, Frown, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BloatHeatmapProps {
   entries: MealEntry[];
 }
 
 export function BloatHeatmap({ entries }: BloatHeatmapProps) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const today = new Date();
+
+  // Find the earliest entry date to limit navigation
+  const earliestEntry = useMemo(() => {
+    const completedEntries = entries.filter(e => e.rating_status === 'completed' && e.bloating_rating);
+    if (completedEntries.length === 0) return today;
+    return completedEntries.reduce((earliest, entry) => {
+      const entryDate = new Date(entry.created_at);
+      return entryDate < earliest ? entryDate : earliest;
+    }, new Date());
+  }, [entries]);
+
+  const canGoBack = isAfter(startOfMonth(currentMonth), startOfMonth(earliestEntry)) ||
+                    format(currentMonth, 'yyyy-MM') !== format(earliestEntry, 'yyyy-MM');
+  const canGoForward = isBefore(endOfMonth(currentMonth), today);
+
+  const goToPreviousMonth = () => {
+    if (canGoBack) {
+      setCurrentMonth(prev => subMonths(prev, 1));
+    }
+  };
+
+  const goToNextMonth = () => {
+    if (canGoForward) {
+      setCurrentMonth(prev => addMonths(prev, 1));
+    }
+  };
+
   const { calendarDays, stats } = useMemo(() => {
-    // Get current month
-    const today = new Date();
-    const monthStart = startOfMonth(today);
-    const monthEnd = endOfMonth(today);
+    // Get selected month
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
     // Calculate daily averages
@@ -85,7 +113,7 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
       calendarDays,
       stats: { goodDays, badDays, trackedDays },
     };
-  }, [entries]);
+  }, [entries, currentMonth]);
 
   // Get weekday headers
   const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -99,10 +127,10 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
       initial={{ opacity: 0, scale: 0.96, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-blue-500/10"
+      className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-teal-500/10"
     >
       {/* Multi-layer gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-sky-100/80 via-blue-100/70 to-indigo-100/80" />
+      <div className="absolute inset-0 bg-gradient-to-br from-teal-50/90 via-emerald-50/80 to-cyan-50/90" />
 
       {/* Animated gradient orbs */}
       <motion.div
@@ -112,7 +140,7 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
           y: [0, -15, 0],
         }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-sky-400/25 to-blue-400/20 rounded-full blur-3xl"
+        className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-teal-400/25 to-emerald-400/20 rounded-full blur-3xl"
       />
 
       <motion.div
@@ -122,7 +150,7 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
           y: [0, 15, 0],
         }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-indigo-400/20 to-purple-300/15 rounded-full blur-3xl"
+        className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-cyan-400/20 to-teal-300/15 rounded-full blur-3xl"
       />
 
       {/* Premium glass overlay */}
@@ -133,23 +161,77 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="flex items-center gap-3 mb-6"
+            className="flex items-center gap-3 mb-4"
           >
             <motion.div
               whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
               transition={{ duration: 0.5 }}
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/20 to-blue-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-blue-500/20"
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500/20 to-emerald-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-teal-500/20"
             >
-              <Calendar className="w-6 h-6 text-blue-600" strokeWidth={2.5} />
+              <Calendar className="w-6 h-6 text-teal-600" strokeWidth={2.5} />
             </motion.div>
             <div>
               <h3 className="font-black text-foreground text-xl tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
                 Bloat Calendar
               </h3>
               <p className="text-xs text-muted-foreground font-semibold mt-0.5">
-                {format(new Date(), 'MMMM yyyy')} • Daily bloating patterns
+                Daily bloating patterns
               </p>
             </div>
+          </motion.div>
+
+          {/* Month Navigation */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.5 }}
+            className="flex items-center justify-between mb-6 px-2"
+          >
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={goToPreviousMonth}
+              disabled={!canGoBack}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                canGoBack
+                  ? 'bg-white/70 border-2 border-white/80 shadow-md hover:bg-white/90 hover:shadow-lg text-teal-600'
+                  : 'bg-white/30 border border-white/40 text-muted-foreground/40 cursor-not-allowed'
+              }`}
+            >
+              <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
+            </motion.button>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={format(currentMonth, 'yyyy-MM')}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+                className="text-center"
+              >
+                <p className="text-2xl font-black text-foreground tracking-tight">
+                  {format(currentMonth, 'MMMM')}
+                </p>
+                <p className="text-sm font-bold text-teal-600">
+                  {format(currentMonth, 'yyyy')}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={goToNextMonth}
+              disabled={!canGoForward}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                canGoForward
+                  ? 'bg-white/70 border-2 border-white/80 shadow-md hover:bg-white/90 hover:shadow-lg text-teal-600'
+                  : 'bg-white/30 border border-white/40 text-muted-foreground/40 cursor-not-allowed'
+              }`}
+            >
+              <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+            </motion.button>
           </motion.div>
 
           {/* Stats */}
@@ -161,10 +243,10 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
           >
             <motion.div
               whileHover={{ scale: 1.05, y: -2 }}
-              className="text-center p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-sm"
+              className="text-center p-4 rounded-2xl bg-teal-50/80 backdrop-blur-sm border border-teal-200/50 shadow-sm"
             >
               <div className="flex items-center justify-center mb-2">
-                <Activity className="w-4 h-4 text-blue-600 mr-1.5" />
+                <Activity className="w-4 h-4 text-teal-600 mr-1.5" />
                 <span className="text-2xl font-black text-foreground">
                   {stats.trackedDays}
                 </span>
