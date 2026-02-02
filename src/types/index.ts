@@ -21,7 +21,8 @@ export type SocialSetting = 'solo' | 'with_others';
 export type RatingStatus = 'pending' | 'completed' | 'skipped';
 
 // ============================================================
-// OFFICIAL TRIGGER TAXONOMY (12 Categories)
+// OFFICIAL TRIGGER TAXONOMY (9 Categories)
+// Catchy names with strict non-overlapping food assignments
 // These are the ONLY categories the AI can detect and users can select
 // ============================================================
 
@@ -30,82 +31,113 @@ export interface TriggerCategory {
   displayName: string;
   examples: string;
   color: string;
+  emoji: string;
+  threat: string;        // The primary issue (e.g., "Fermentation & Gas")
+  mechanism: string;     // Technical term (e.g., "FODMAPs - Fructans/GOS")
 }
 
 export const TRIGGER_CATEGORIES: TriggerCategory[] = [
   {
-    id: 'grains',
-    displayName: 'Savory Carbs',
-    examples: 'Wheat, bread, onions, garlic',
-    color: '#FF6B6B'
+    id: 'veggie-vengeance',
+    displayName: 'Veggie Vengeance',
+    examples: 'Onions, garlic, beans, broccoli, cauliflower',
+    color: '#7FB069',    // Sage green
+    emoji: '🥦',
+    threat: 'Fermentation & Gas',
+    mechanism: 'FODMAPs - Fructans/GOS'
   },
   {
-    id: 'beans',
-    displayName: 'Beans',
-    examples: 'Beans, lentils, chickpeas',
-    color: '#FF8E53'
+    id: 'fruit-fury',
+    displayName: 'Fruit Fury',
+    examples: 'Apples, pears, mango, watermelon, dried fruits',
+    color: '#FF6B6B',    // Coral red
+    emoji: '🍎',
+    threat: 'Sugar Overload',
+    mechanism: 'Fructose malabsorption'
   },
   {
-    id: 'dairy',
-    displayName: 'Dairy',
-    examples: 'Milk, cheese, yogurt',
-    color: '#FFA07A'
+    id: 'gluten-gang',
+    displayName: 'Gluten Gang',
+    examples: 'Bread, pasta, wheat, barley, rye',
+    color: '#FFB347',    // Warm wheat
+    emoji: '🌾',
+    threat: 'Digestion Difficulty',
+    mechanism: 'Gluten proteins'
   },
   {
-    id: 'fruit',
-    displayName: 'Fruit',
-    examples: 'Apples, mango, pears',
-    color: '#FFB347'
+    id: 'dairy-drama',
+    displayName: 'Dairy Drama',
+    examples: 'Milk, ice cream, soft cheese, yogurt',
+    color: '#87CEEB',    // Sky blue
+    emoji: '🧀',
+    threat: 'Enzyme Deficiency',
+    mechanism: 'Lactose intolerance'
   },
   {
-    id: 'sweeteners',
-    displayName: 'Sweeteners',
-    examples: 'Sugar-free gum, candy',
-    color: '#FFCC5C'
+    id: 'bad-beef',
+    displayName: 'Bad Beef',
+    examples: 'Bacon, sausages, deli meats, hot dogs',
+    color: '#CD5C5C',    // Indian red
+    emoji: '🥓',
+    threat: 'Preservatives & Histamines',
+    mechanism: 'Processed meat additives'
   },
   {
-    id: 'gluten',
-    displayName: 'Gluten',
-    examples: 'Wheat, barley, rye',
-    color: '#95E1D3'
+    id: 'chemical-chaos',
+    displayName: 'Chemical Chaos',
+    examples: 'Sugar-free gum, diet foods, protein bars',
+    color: '#9D84B7',    // Lavender
+    emoji: '⚗️',
+    threat: 'Gut Rejection',
+    mechanism: 'Sugar alcohols & additives'
   },
   {
-    id: 'veggies',
-    displayName: 'Veggies',
-    examples: 'Broccoli, cabbage',
-    color: '#7FB069'
+    id: 'grease-gridlock',
+    displayName: 'Grease Gridlock',
+    examples: 'Fried foods, butter, fatty meats, pizza',
+    color: '#C77DFF',    // Purple
+    emoji: '🍟',
+    threat: 'Slow Digestion',
+    mechanism: 'High fat content'
   },
   {
-    id: 'fatty-food',
-    displayName: 'Fatty Food',
-    examples: 'Fried foods, greasy meat',
-    color: '#C77DFF'
+    id: 'spice-strike',
+    displayName: 'Spice Strike',
+    examples: 'Hot peppers, sriracha, jalapeños, curry',
+    color: '#FF8E53',    // Orange
+    emoji: '🌶️',
+    threat: 'Physical Irritation',
+    mechanism: 'Capsaicin & acids'
   },
   {
-    id: 'carbonated',
-    displayName: 'Carbonated',
-    examples: 'Soda, sparkling water',
-    color: '#9D84B7'
-  },
-  {
-    id: 'sugar',
-    displayName: 'Sugar',
-    examples: 'Candy, pastries',
-    color: '#E0ACD5'
-  },
-  {
-    id: 'alcohol',
-    displayName: 'Alcohol',
-    examples: 'Beer, wine',
-    color: '#F3B0C3'
-  },
-  {
-    id: 'processed',
-    displayName: 'Processed',
-    examples: 'Packaged snacks, cereals',
-    color: '#FFB6D9'
+    id: 'bubble-trouble',
+    displayName: 'Bubble Trouble',
+    examples: 'Soda, beer, sparkling water, straws',
+    color: '#95E1D3',    // Mint
+    emoji: '🫧',
+    threat: 'Trapped Air',
+    mechanism: 'Carbonation & air swallowing'
   }
 ];
+
+// ============================================================
+// LEGACY CATEGORY MIGRATION MAP
+// Maps old category IDs to new ones for existing data
+// ============================================================
+export const LEGACY_CATEGORY_MAP: Record<string, string> = {
+  'grains': 'gluten-gang',      // Wheat/bread → Gluten Gang (onions/garlic handled by food detection)
+  'beans': 'veggie-vengeance',  // Beans/legumes → Veggie Vengeance
+  'dairy': 'dairy-drama',       // Direct mapping
+  'fruit': 'fruit-fury',        // Direct mapping
+  'sweeteners': 'chemical-chaos', // Sugar alcohols → Chemical Chaos
+  'gluten': 'gluten-gang',      // Direct mapping
+  'veggies': 'veggie-vengeance', // Direct mapping
+  'fatty-food': 'grease-gridlock', // Direct mapping
+  'carbonated': 'bubble-trouble', // Direct mapping
+  'sugar': 'fruit-fury',        // Sugar → Fruit Fury (fructose connection)
+  'alcohol': 'bubble-trouble',  // Beer/wine carbonation → Bubble Trouble
+  'processed': 'bad-beef'       // Processed foods → Bad Beef (closest match)
+};
 
 // Valid category IDs for validation
 export const VALID_TRIGGER_IDS = TRIGGER_CATEGORIES.map(c => c.id);
@@ -163,24 +195,46 @@ export interface MealEntry {
   entry_method: EntryMethod;
 }
 
-// Common triggers for manual text entry
+// Common triggers for manual text entry (updated for new taxonomy)
 export const COMMON_TRIGGERS = [
-  { id: 'wheat', name: 'Wheat/Bread', category: 'grains' },
-  { id: 'onions', name: 'Onions', category: 'grains' },
-  { id: 'garlic', name: 'Garlic', category: 'grains' },
-  { id: 'beans', name: 'Beans/Lentils', category: 'beans' },
-  { id: 'milk', name: 'Milk', category: 'dairy' },
-  { id: 'yogurt', name: 'Yogurt', category: 'dairy' },
-  { id: 'cheese', name: 'Cheese', category: 'dairy' },
-  { id: 'apples', name: 'Apples', category: 'fruit' },
-  { id: 'pears', name: 'Pears', category: 'fruit' },
-  { id: 'watermelon', name: 'Watermelon', category: 'fruit' },
-  { id: 'mushrooms', name: 'Mushrooms', category: 'sweeteners' },
-  { id: 'cauliflower', name: 'Cauliflower', category: 'sweeteners' },
-  { id: 'fried', name: 'Fried Food', category: 'fatty-food' },
-  { id: 'soda', name: 'Soda/Fizzy Drinks', category: 'carbonated' },
-  { id: 'candy', name: 'Candy/Sweets', category: 'sugar' },
-  { id: 'alcohol', name: 'Alcohol', category: 'alcohol' }
+  // Veggie Vengeance
+  { id: 'onions', name: 'Onions', category: 'veggie-vengeance' },
+  { id: 'garlic', name: 'Garlic', category: 'veggie-vengeance' },
+  { id: 'beans', name: 'Beans/Lentils', category: 'veggie-vengeance' },
+  { id: 'broccoli', name: 'Broccoli', category: 'veggie-vengeance' },
+  { id: 'cauliflower', name: 'Cauliflower', category: 'veggie-vengeance' },
+  { id: 'mushrooms', name: 'Mushrooms', category: 'veggie-vengeance' },
+  // Fruit Fury
+  { id: 'apples', name: 'Apples', category: 'fruit-fury' },
+  { id: 'pears', name: 'Pears', category: 'fruit-fury' },
+  { id: 'watermelon', name: 'Watermelon', category: 'fruit-fury' },
+  { id: 'mango', name: 'Mango', category: 'fruit-fury' },
+  // Gluten Gang
+  { id: 'wheat', name: 'Wheat/Bread', category: 'gluten-gang' },
+  { id: 'pasta', name: 'Pasta', category: 'gluten-gang' },
+  // Dairy Drama
+  { id: 'milk', name: 'Milk', category: 'dairy-drama' },
+  { id: 'yogurt', name: 'Yogurt', category: 'dairy-drama' },
+  { id: 'cheese', name: 'Soft Cheese', category: 'dairy-drama' },
+  { id: 'icecream', name: 'Ice Cream', category: 'dairy-drama' },
+  // Bad Beef
+  { id: 'bacon', name: 'Bacon', category: 'bad-beef' },
+  { id: 'sausage', name: 'Sausages', category: 'bad-beef' },
+  { id: 'deli', name: 'Deli Meats', category: 'bad-beef' },
+  // Chemical Chaos
+  { id: 'sugarfree', name: 'Sugar-Free Gum', category: 'chemical-chaos' },
+  { id: 'dietfood', name: 'Diet Foods', category: 'chemical-chaos' },
+  // Grease Gridlock
+  { id: 'fried', name: 'Fried Food', category: 'grease-gridlock' },
+  { id: 'pizza', name: 'Pizza', category: 'grease-gridlock' },
+  // Spice Strike
+  { id: 'spicy', name: 'Spicy Food', category: 'spice-strike' },
+  { id: 'hotsauce', name: 'Hot Sauce', category: 'spice-strike' },
+  // Bubble Trouble
+  { id: 'soda', name: 'Soda/Fizzy Drinks', category: 'bubble-trouble' },
+  { id: 'beer', name: 'Beer', category: 'bubble-trouble' },
+  { id: 'sparkling', name: 'Sparkling Water', category: 'bubble-trouble' },
+  { id: 'straw', name: 'Drinking with Straw', category: 'bubble-trouble' }
 ];
 
 // Quick note chips for context

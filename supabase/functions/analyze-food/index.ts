@@ -100,21 +100,21 @@ Return ONLY valid JSON (no markdown, no code blocks):
   "creative_title": "Sweet Pancake Stack",
   "meal_description": "Fluffy buttermilk pancakes topped with fresh strawberries, blueberries, and whipped cream, drizzled with maple syrup and dusted with powdered sugar. Served with a side of crispy bacon.",
   "ingredients": [
-    {"name": "Pancakes", "detail": "wheat-based", "is_trigger": true, "trigger_category": "grains"},
-    {"name": "Buttermilk", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy"},
-    {"name": "Whipped cream", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy"},
-    {"name": "Maple syrup", "detail": "contains fructose", "is_trigger": true, "trigger_category": "fruit"},
-    {"name": "Bacon", "detail": "fatty meat", "is_trigger": true, "trigger_category": "fatty-food"},
+    {"name": "Pancakes", "detail": "wheat-based", "is_trigger": true, "trigger_category": "gluten-gang"},
+    {"name": "Buttermilk", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy-drama"},
+    {"name": "Whipped cream", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy-drama"},
+    {"name": "Maple syrup", "detail": "contains fructose", "is_trigger": true, "trigger_category": "fruit-fury"},
+    {"name": "Bacon", "detail": "processed meat", "is_trigger": true, "trigger_category": "bad-beef"},
     {"name": "Strawberries", "detail": "low FODMAP fruit", "is_trigger": false, "trigger_category": null},
-    {"name": "Powdered sugar", "detail": "refined sugar", "is_trigger": true, "trigger_category": "sugar"}
+    {"name": "Butter", "detail": "high fat", "is_trigger": true, "trigger_category": "grease-gridlock"}
   ],
   "triggers": [
-    {"category": "grains", "food": "wheat bread"},
-    {"category": "dairy", "food": "milk"},
-    {"category": "dairy", "food": "cream"},
-    {"category": "fruit", "food": "maple syrup"},
-    {"category": "fatty-food", "food": "bacon"},
-    {"category": "sugar", "food": "sugar"}
+    {"category": "gluten-gang", "food": "wheat bread"},
+    {"category": "dairy-drama", "food": "milk"},
+    {"category": "dairy-drama", "food": "cream"},
+    {"category": "fruit-fury", "food": "maple syrup"},
+    {"category": "bad-beef", "food": "bacon"},
+    {"category": "grease-gridlock", "food": "butter"}
   ]
 }
 
@@ -134,29 +134,48 @@ TRIGGER FOOD NAMING RULES:
 - Avoid partial phrases or unclear terms
 - Bad examples: "glaze on", "with cream", "in sauce", "broccoli florets", "cauliflower florets"
 
-VALID CATEGORY VALUES (use ONLY these exact strings):
-- "grains" - Wheat products (bread, pasta, tortillas, crackers, baked goods, wheat noodles), onions, garlic, shallots, leeks
-- "beans" - Beans, lentils, chickpeas, hummus, legumes
-- "dairy" - Milk, cream, cheese (all types), yogurt, ice cream, butter
-- "fruit" - Apples, honey, mango, agave, high-fructose corn syrup, pears, certain fruits
-- "sweeteners" - Sugar-free items with sweeteners (sorbitol, mannitol), stone fruits (peaches, plums, cherries)
-- "gluten" - ONLY use for: barley, rye, beer (NOT wheat products - those are grains)
-- "veggies" - Broccoli, cabbage, Brussels sprouts, kale, bok choy, cauliflower, mushrooms
-- "fatty-food" - Fried foods, fatty meats, heavy cream, oils, butter, greasy foods
-- "carbonated" - Soda, sparkling water, fizzy drinks
-- "sugar" - Candy, pastries, white sugar, syrups, desserts
-- "alcohol" - Beer, wine, spirits, cocktails
-- "processed" - Packaged snacks, cereals, processed foods
+=== 9 TRIGGER CATEGORIES (use ONLY these exact strings) ===
 
-IMPORTANT CATEGORIZATION RULES:
-- Wheat-based foods (bread, pasta, flour products) should ALWAYS be categorized as "grains", NOT "gluten"
-- Only use "gluten" for barley, rye, or beer (which contain gluten but are not wheat-based)
-- All dairy products (milk, cheese, yogurt) should be categorized as "dairy"
-- When in doubt between overlapping categories, prefer the most specific category
+1. "veggie-vengeance" - High-FODMAP vegetables & legumes
+   → Onions, garlic, shallots, leeks, beans, lentils, chickpeas, broccoli, cauliflower, Brussels sprouts, cabbage, asparagus, mushrooms, peas
+
+2. "fruit-fury" - High-fructose fruits & sweeteners
+   → Apples, pears, mango, watermelon, honey, agave, dried fruits, high-fructose corn syrup, fruit juice
+
+3. "gluten-gang" - Wheat, barley, rye products
+   → Bread, pasta, pizza crust, crackers, bagels, muffins, cookies, cakes, wheat noodles, couscous, barley, rye, beer, soy sauce
+
+4. "dairy-drama" - High-lactose milk products
+   → Milk, ice cream, soft cheese (ricotta, cottage, cream cheese), yogurt, cream, condensed milk
+
+5. "bad-beef" - Processed/cured/aged meats
+   → Bacon, sausages, hot dogs, deli meats, salami, pepperoni, ham, jerky, canned fish, smoked meats
+
+6. "chemical-chaos" - Artificial sweeteners & additives
+   → Sugar-free gum, diet soda, protein bars, xylitol, sorbitol, maltitol, erythritol, inulin, chicory root
+
+7. "grease-gridlock" - High-fat & fried foods
+   → French fries, fried chicken, pizza, burgers, fatty meats (ribeye, pork belly), butter (large amounts), mayo, cream sauces
+
+8. "spice-strike" - Hot peppers & irritating acids
+   → Jalapeños, hot sauce, sriracha, habanero, cayenne, chili, curry, vinegar (large amounts)
+
+9. "bubble-trouble" - Carbonation & air-swallowing
+   → Soda, sparkling water, beer, champagne, energy drinks, kombucha, drinking through straws
+
+=== CATEGORIZATION RULES ===
+- Each food goes in ONE category only (primary trigger mechanism)
+- Onions and garlic → "veggie-vengeance" (fructans, NOT gluten)
+- Wheat/bread/pasta → "gluten-gang"
+- Fresh meat (chicken, beef, fish) → NOT a trigger unless fried or processed
+- Pizza → "grease-gridlock" (fat is the primary issue)
+- Beer → "bubble-trouble" (carbonation is primary)
+- Ice cream → "dairy-drama" (lactose is primary)
+- If you see a STRAW in the image → add {"category": "bubble-trouble", "food": "straw"}
 
 IMPORTANT:
 - Be thorough with ingredient detection, but prefer SIMPLE BASE NAMES
-- Include compound ingredients (e.g., if pizza, list: "wheat bread", "tomato sauce", "cheese", "pepperoni")
+- Include compound ingredients (e.g., if pizza, list: "wheat bread", "cheese", "pepperoni")
 - Use base ingredient names: "broccoli" not "broccoli florets", "rice" not "jasmine rice"
 - List each trigger separately even if multiple items share a category
 - Only include foods you can actually see or reasonably infer
@@ -233,10 +252,10 @@ IMPORTANT:
       console.error('Failed to parse AI response:', parseError);
     }
 
-    // Validate trigger categories
+    // Validate trigger categories (new 9-category taxonomy)
     const validCategories = [
-      'grains', 'beans', 'dairy', 'fruit', 'sweeteners',
-      'gluten', 'veggies', 'fatty-food', 'carbonated', 'sugar', 'alcohol', 'processed'
+      'veggie-vengeance', 'fruit-fury', 'gluten-gang', 'dairy-drama',
+      'bad-beef', 'chemical-chaos', 'grease-gridlock', 'spice-strike', 'bubble-trouble'
     ];
     
     result.triggers = result.triggers.filter((trigger: any) => {
