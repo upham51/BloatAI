@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { MealEntry } from '@/types';
 import { format, subDays, startOfDay, isSameDay } from 'date-fns';
-import { TrendingUp, TrendingDown, Minus, Sparkles, Calendar, Activity, Zap, Star, Target } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Activity, Star, Zap, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface WeeklyProgressChartProps {
@@ -11,8 +11,23 @@ interface WeeklyProgressChartProps {
 export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const chartRef = useRef<SVGSVGElement>(null);
+  const [chartDimensions, setChartDimensions] = useState({ width: 300, height: 160 });
 
-  const { chartData, trend, avgBloating, goodDays, bloatedDays, bestDay, worstDay } = useMemo(() => {
+  // Responsive chart dimensions
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (chartRef.current) {
+        const rect = chartRef.current.getBoundingClientRect();
+        setChartDimensions({ width: rect.width || 300, height: 160 });
+      }
+    };
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  const { chartData, trend, avgBloating, goodDays, bloatedDays } = useMemo(() => {
     const today = startOfDay(new Date());
 
     // Filter entries that have bloating ratings
@@ -23,17 +38,15 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       e.bloating_rating <= 5
     );
 
-    // Find the earliest date with data
     const datesWithData = completedEntries.map(e => startOfDay(new Date(e.created_at)));
 
     if (datesWithData.length === 0) {
-      return { chartData: [], trend: 'neutral' as const, avgBloating: 0, goodDays: 0, bloatedDays: 0, bestDay: null, worstDay: null };
+      return { chartData: [], trend: 'neutral' as const, avgBloating: 0, goodDays: 0, bloatedDays: 0 };
     }
 
-    // Always show full 7-day week (last 7 days) to ensure Sunday is included
+    // Always show full 7-day week
     const daysToShow = 7;
 
-    // Create array of days to display - always show last 7 days
     const displayDays = Array.from({ length: daysToShow }, (_, i) => {
       const date = subDays(today, daysToShow - 1 - i);
       return {
@@ -45,13 +58,12 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       };
     });
 
-    // First pass: collect actual data for each day
+    // Collect actual data for each day
     const rawData = displayDays.map((day, index) => {
       const dayEntries = completedEntries.filter(e =>
         isSameDay(new Date(e.created_at), day.date)
       );
 
-      // Count ALL meals for the day, not just completed ones
       const allDayEntries = entries.filter(e =>
         isSameDay(new Date(e.created_at), day.date)
       );
@@ -73,26 +85,8 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       };
     });
 
-    // Second pass: fill in gaps by carrying forward/backward
-    const firstDataIndex = rawData.findIndex(d => d.hasData);
-    const firstValue = firstDataIndex >= 0 ? rawData[firstDataIndex].bloating : null;
-
-    let lastKnownBloating: number | null = firstValue;
-    const data = rawData.map((day, index) => {
-      if (day.hasData) {
-        lastKnownBloating = day.bloating;
-        return day;
-      } else {
-        const bloatingValue = index < firstDataIndex ? firstValue : lastKnownBloating;
-        return {
-          ...day,
-          bloating: bloatingValue,
-        };
-      }
-    });
-
-    // Calculate trend (comparing first half vs second half of week)
-    const validData = data.filter(d => d.bloating !== null);
+    // Calculate trend
+    const validData = rawData.filter(d => d.bloating !== null);
     const firstHalf = validData.slice(0, Math.ceil(validData.length / 2));
     const secondHalf = validData.slice(Math.ceil(validData.length / 2));
 
@@ -114,78 +108,21 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       ? validData.reduce((sum, d) => sum + (d.bloating || 0), 0) / validData.length
       : 0;
 
-    const good = data.filter(d => d.hasData && (d.bloating || 0) <= 2).length;
-    const bloated = data.filter(d => d.hasData && (d.bloating || 0) >= 4).length;
-
-    // Find best and worst days
-    const daysWithActualData = data.filter(d => d.hasData);
-    const best = daysWithActualData.length > 0
-      ? daysWithActualData.reduce((a, b) => (a.bloating || 5) < (b.bloating || 5) ? a : b)
-      : null;
-    const worst = daysWithActualData.length > 0
-      ? daysWithActualData.reduce((a, b) => (a.bloating || 0) > (b.bloating || 0) ? a : b)
-      : null;
+    const good = rawData.filter(d => d.hasData && (d.bloating || 0) <= 2).length;
+    const bloated = rawData.filter(d => d.hasData && (d.bloating || 0) >= 4).length;
 
     return {
-      chartData: data,
+      chartData: rawData,
       trend: trendDirection,
       avgBloating: Math.round(overallAvg * 10) / 10,
       goodDays: good,
       bloatedDays: bloated,
-      bestDay: best,
-      worstDay: worst,
     };
   }, [entries]);
 
   const hasData = chartData.some(d => d.bloating !== null);
 
-  // Get color based on bloating level - enhanced premium gradients
-  const getBloatingColor = (bloating: number | null, hasData: boolean) => {
-    if (!hasData || bloating === null) return {
-      bg: 'bg-gradient-to-t from-slate-200/60 to-slate-100/40',
-      ring: 'ring-slate-300/50',
-      text: 'text-slate-400',
-      glow: 'rgba(148, 163, 184, 0.3)',
-      accent: '#94a3b8'
-    };
-    if (bloating <= 1.5) return {
-      bg: 'bg-gradient-to-t from-emerald-500 via-emerald-400 to-teal-300',
-      ring: 'ring-emerald-400/60',
-      text: 'text-emerald-600',
-      glow: 'rgba(16, 185, 129, 0.5)',
-      accent: '#10b981'
-    };
-    if (bloating <= 2.5) return {
-      bg: 'bg-gradient-to-t from-teal-500 via-cyan-400 to-sky-300',
-      ring: 'ring-teal-400/60',
-      text: 'text-teal-600',
-      glow: 'rgba(20, 184, 166, 0.5)',
-      accent: '#14b8a6'
-    };
-    if (bloating <= 3.5) return {
-      bg: 'bg-gradient-to-t from-amber-500 via-yellow-400 to-orange-300',
-      ring: 'ring-amber-400/60',
-      text: 'text-amber-600',
-      glow: 'rgba(245, 158, 11, 0.5)',
-      accent: '#f59e0b'
-    };
-    if (bloating <= 4.5) return {
-      bg: 'bg-gradient-to-t from-orange-500 via-orange-400 to-rose-400',
-      ring: 'ring-orange-400/60',
-      text: 'text-orange-600',
-      glow: 'rgba(249, 115, 22, 0.5)',
-      accent: '#f97316'
-    };
-    return {
-      bg: 'bg-gradient-to-t from-rose-600 via-rose-500 to-red-400',
-      ring: 'ring-rose-400/60',
-      text: 'text-rose-600',
-      glow: 'rgba(244, 63, 94, 0.5)',
-      accent: '#f43f5e'
-    };
-  };
-
-  // Get trend info with enhanced styling
+  // Get trend info
   const getTrendInfo = () => {
     if (trend === 'down') return {
       icon: TrendingDown,
@@ -193,7 +130,6 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       color: 'text-emerald-600',
       bg: 'bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/15',
       border: 'border-emerald-400/30',
-      glow: '0 0 20px rgba(16, 185, 129, 0.3)'
     };
     if (trend === 'up') return {
       icon: TrendingUp,
@@ -201,7 +137,6 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       color: 'text-rose-600',
       bg: 'bg-gradient-to-r from-rose-500/15 via-red-500/10 to-rose-500/15',
       border: 'border-rose-400/30',
-      glow: '0 0 20px rgba(244, 63, 94, 0.3)'
     };
     return {
       icon: Minus,
@@ -209,33 +144,71 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       color: 'text-blue-600',
       bg: 'bg-gradient-to-r from-blue-500/15 via-indigo-500/10 to-blue-500/15',
       border: 'border-blue-400/30',
-      glow: '0 0 20px rgba(59, 130, 246, 0.3)'
     };
   };
 
   const trendInfo = getTrendInfo();
   const TrendIcon = trendInfo.icon;
 
-  // Calculate bar heights (inverted - lower bloating = taller bar for positive visualization)
-  const getBarHeight = (bloating: number | null) => {
-    if (bloating === null) return 15;
-    // Invert: 5 bloating = 20%, 1 bloating = 100%
-    const inverted = 6 - bloating;
-    return Math.max(20, (inverted / 5) * 100);
+  // Calculate SVG path for smooth line chart
+  const getLinePath = () => {
+    const padding = { left: 10, right: 10, top: 20, bottom: 30 };
+    const chartWidth = chartDimensions.width - padding.left - padding.right;
+    const chartHeight = chartDimensions.height - padding.top - padding.bottom;
+
+    // Get points for days with data
+    const points: { x: number; y: number; index: number; hasData: boolean; bloating: number | null }[] = [];
+
+    chartData.forEach((day, index) => {
+      const x = padding.left + (index / (chartData.length - 1)) * chartWidth;
+      // Invert Y: lower bloating = higher on chart (better)
+      const bloating = day.bloating ?? 3; // Default to middle if no data
+      const y = padding.top + ((bloating - 1) / 4) * chartHeight;
+      points.push({ x, y, index, hasData: day.hasData, bloating: day.bloating });
+    });
+
+    if (points.length < 2) return { linePath: '', areaPath: '', points };
+
+    // Create smooth bezier curve path
+    let linePath = `M ${points[0].x} ${points[0].y}`;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(0, i - 1)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(points.length - 1, i + 2)];
+
+      // Calculate control points for smooth curve
+      const tension = 0.3;
+      const cp1x = p1.x + (p2.x - p0.x) * tension;
+      const cp1y = p1.y + (p2.y - p0.y) * tension;
+      const cp2x = p2.x - (p3.x - p1.x) * tension;
+      const cp2y = p2.y - (p3.y - p1.y) * tension;
+
+      linePath += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+
+    // Create area path for gradient fill
+    const areaPath = linePath +
+      ` L ${points[points.length - 1].x} ${chartDimensions.height - padding.bottom}` +
+      ` L ${points[0].x} ${chartDimensions.height - padding.bottom} Z`;
+
+    return { linePath, areaPath, points };
+  };
+
+  const { linePath, areaPath, points } = getLinePath();
+  const activeDay = selectedDay ?? hoveredDay;
+
+  // Get color for a point based on bloating level
+  const getPointColor = (bloating: number | null) => {
+    if (bloating === null) return '#94a3b8';
+    if (bloating <= 2) return '#10b981';
+    if (bloating <= 3) return '#f59e0b';
+    return '#f43f5e';
   };
 
   if (!hasData) {
-    // Premium ghost data for empty state visualization
-    const ghostData = [
-      { day: 'Mon', dayShort: 'Mon', value: 2.5, index: 0 },
-      { day: 'Tue', dayShort: 'Tue', value: 2.8, index: 1 },
-      { day: 'Wed', dayShort: 'Wed', value: 2.2, index: 2 },
-      { day: 'Thu', dayShort: 'Thu', value: 3.1, index: 3 },
-      { day: 'Fri', dayShort: 'Fri', value: 2.7, index: 4 },
-      { day: 'Sat', dayShort: 'Sat', value: 2.0, index: 5 },
-      { day: 'Sun', dayShort: 'Sun', value: 1.8, index: 6 },
-    ];
-
+    // Empty state with ghost visualization
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -243,312 +216,329 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="relative overflow-hidden rounded-[2rem] shadow-2xl"
       >
-        {/* Premium gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-100/90 via-blue-50/80 to-indigo-100/90" />
-
-        {/* Animated orbs */}
         <motion.div
           animate={{ scale: [1, 1.3, 1], x: [0, 20, 0], y: [0, -10, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -top-20 -right-20 w-56 h-56 bg-gradient-to-br from-blue-400/20 to-indigo-400/15 rounded-full blur-3xl"
         />
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], x: [0, -15, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute -bottom-20 -left-20 w-48 h-48 bg-gradient-to-tr from-purple-400/15 to-pink-400/10 rounded-full blur-3xl"
-        />
-
-        {/* Glass overlay */}
-        <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/90">
-          <div className="p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center border border-white/50"
-                >
-                  <span className="text-2xl">🌊</span>
-                </motion.div>
-                <div>
-                  <h3 className="font-black text-xl text-foreground tracking-tight">Your Wellness Canvas</h3>
-                  <p className="text-xs font-bold text-muted-foreground/70">Waiting for your first week of data</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Ghost chart bars */}
-            <div className="relative h-48 mb-6">
-              <div className="absolute inset-0 flex items-end justify-between gap-2 px-2">
-                {ghostData.map((item, index) => (
-                  <motion.div
-                    key={item.day}
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: `${(6 - item.value) / 5 * 80}%`, opacity: 0.3 }}
-                    transition={{ delay: index * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="flex-1 bg-gradient-to-t from-slate-300/50 to-slate-200/30 rounded-t-2xl relative overflow-hidden"
-                  >
-                    {/* Shimmer effect */}
-                    <motion.div
-                      animate={{ x: ['-100%', '200%'] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear", delay: index * 0.15 }}
-                      className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                    />
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Day labels - Ghost state */}
-              <div className="absolute -bottom-8 left-0 right-0 flex justify-between px-2">
-                {ghostData.map((item) => (
-                  <div key={item.day} className="flex-1 text-center">
-                    <span className="text-xs font-bold text-slate-400/60">{item.dayShort}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Call to action */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="mt-10 text-center"
+        <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/90 p-6">
+          <div className="text-center py-8">
+            <motion.span
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              className="text-5xl block mb-4"
             >
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-500/20"
-              >
-                <Sparkles className="w-5 h-5 text-blue-500" />
-                <p className="text-sm font-bold text-blue-600">Track meals to unlock your wellness wave</p>
-              </motion.div>
-              <p className="text-xs text-muted-foreground mt-3 max-w-xs mx-auto">
-                Your personalized bloating insights will appear here after logging meals for 3 days
-              </p>
-            </motion.div>
+              📊
+            </motion.span>
+            <h3 className="font-black text-xl text-foreground mb-2">Your Wellness Journey</h3>
+            <p className="text-sm text-muted-foreground">Track meals to see your progress</p>
           </div>
         </div>
       </motion.div>
     );
   }
 
-  const activeDay = selectedDay !== null ? selectedDay : hoveredDay;
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-3xl shadow-lg shadow-slate-200/50"
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-indigo-500/10"
     >
-      {/* Clean gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50/80 to-indigo-50/30" />
+      {/* Premium gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-indigo-50/50" />
 
-      {/* Subtle accent orbs */}
-      <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-indigo-200/20 to-purple-200/10 rounded-full blur-3xl" />
-      <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-tr from-emerald-200/15 to-teal-200/10 rounded-full blur-3xl" />
+      {/* Animated accent orbs */}
+      <motion.div
+        animate={{ scale: [1, 1.2, 1], x: [0, 15, 0] }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br from-indigo-300/20 to-purple-300/15 rounded-full blur-3xl"
+      />
+      <motion.div
+        animate={{ scale: [1, 1.15, 1], x: [0, -10, 0] }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="absolute -bottom-20 -left-20 w-48 h-48 bg-gradient-to-tr from-emerald-300/15 to-teal-300/10 rounded-full blur-3xl"
+      />
 
       {/* Glass container */}
-      <div className="relative backdrop-blur-sm bg-white/70 border border-white/80">
+      <div className="relative backdrop-blur-sm bg-white/80 border border-white/60">
         <div className="p-5 sm:p-6">
-          {/* Clean Header Section */}
-          <div className="flex items-center justify-between mb-6">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              {/* Compact animated icon */}
               <motion.div
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, rotate: 5 }}
                 className="relative"
               >
-                <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-                  <Activity className="w-6 h-6 text-white" strokeWidth={2.5} />
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                  <Activity className="w-5 h-5 text-white" strokeWidth={2.5} />
                 </div>
               </motion.div>
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                <h2 className="text-lg sm:text-xl font-black text-foreground tracking-tight">
                   Weekly Progress
                 </h2>
-                <p className="text-xs font-semibold text-muted-foreground/60">Your 7-day wellness journey</p>
+                <p className="text-[11px] font-semibold text-muted-foreground/60">Your 7-day wellness journey</p>
               </div>
             </div>
 
-            {/* Compact Trend Badge */}
+            {/* Trend Badge */}
             <motion.div
               whileHover={{ scale: 1.03 }}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl ${trendInfo.bg} ${trendInfo.border} border backdrop-blur-sm`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${trendInfo.bg} ${trendInfo.border} border backdrop-blur-sm`}
             >
-              <TrendIcon className={`w-4 h-4 ${trendInfo.color}`} strokeWidth={2.5} />
-              <span className={`text-xs font-bold ${trendInfo.color}`}>{trendInfo.label}</span>
+              <TrendIcon className={`w-3.5 h-3.5 ${trendInfo.color}`} strokeWidth={2.5} />
+              <span className={`text-[11px] font-bold ${trendInfo.color}`}>{trendInfo.label}</span>
             </motion.div>
           </div>
 
-          {/* Clean Stats Cards Row */}
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mb-6">
-            {/* Weekly Average */}
-            <div className="relative overflow-hidden rounded-xl bg-white/60 border border-slate-200/60 p-3 sm:p-4">
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-gradient-to-br from-indigo-400/10 to-purple-400/10 rounded-full blur-xl" />
-              <div className="relative">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <Target className="w-3.5 h-3.5 text-indigo-500/60" strokeWidth={2.5} />
-                  <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wide">Average</span>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    {avgBloating}
-                  </span>
-                  <span className="text-xs font-semibold text-muted-foreground/40">/5</span>
-                </div>
+          {/* Stats Row */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5">
+            {/* Average */}
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white to-slate-50/80 border border-slate-100 p-3">
+              <div className="flex items-center gap-1 mb-1">
+                <Target className="w-3 h-3 text-indigo-500/60" strokeWidth={2.5} />
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wide">Avg</span>
+              </div>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  {avgBloating}
+                </span>
+                <span className="text-[10px] font-semibold text-muted-foreground/40">/5</span>
               </div>
             </div>
 
             {/* Good Days */}
-            <div className="relative overflow-hidden rounded-xl bg-emerald-50/60 border border-emerald-200/40 p-3 sm:p-4">
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-gradient-to-br from-emerald-400/15 to-teal-400/10 rounded-full blur-xl" />
-              <div className="relative">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <Star className="w-3.5 h-3.5 text-emerald-500/60" strokeWidth={2.5} />
-                  <span className="text-[9px] sm:text-[10px] font-bold text-emerald-600/60 uppercase tracking-wide">Good</span>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl sm:text-3xl font-black text-emerald-600">
-                    {goodDays}
-                  </span>
-                  <span className="text-xs font-semibold text-emerald-500/40">days</span>
-                </div>
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-100/60 p-3">
+              <div className="flex items-center gap-1 mb-1">
+                <Star className="w-3 h-3 text-emerald-500/60" strokeWidth={2.5} />
+                <span className="text-[9px] font-bold text-emerald-600/60 uppercase tracking-wide">Good</span>
+              </div>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-xl sm:text-2xl font-black text-emerald-600">{goodDays}</span>
+                <span className="text-[10px] font-semibold text-emerald-500/40">days</span>
               </div>
             </div>
 
             {/* Bloated Days */}
-            <div className="relative overflow-hidden rounded-xl bg-rose-50/60 border border-rose-200/40 p-3 sm:p-4">
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-gradient-to-br from-rose-400/15 to-orange-400/10 rounded-full blur-xl" />
-              <div className="relative">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <Zap className="w-3.5 h-3.5 text-rose-500/60" strokeWidth={2.5} />
-                  <span className="text-[9px] sm:text-[10px] font-bold text-rose-600/60 uppercase tracking-wide">Bloated</span>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl sm:text-3xl font-black text-rose-600">
-                    {bloatedDays}
-                  </span>
-                  <span className="text-xs font-semibold text-rose-500/40">days</span>
-                </div>
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-50/80 to-orange-50/60 border border-rose-100/60 p-3">
+              <div className="flex items-center gap-1 mb-1">
+                <Zap className="w-3 h-3 text-rose-500/60" strokeWidth={2.5} />
+                <span className="text-[9px] font-bold text-rose-600/60 uppercase tracking-wide">High</span>
+              </div>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-xl sm:text-2xl font-black text-rose-600">{bloatedDays}</span>
+                <span className="text-[10px] font-semibold text-rose-500/40">days</span>
               </div>
             </div>
           </div>
 
-          {/* Clean Chart Section */}
-          <div className="relative bg-gradient-to-b from-slate-50/50 to-white/30 rounded-2xl p-4 sm:p-5 border border-slate-100">
-            {/* Minimal grid lines */}
-            <div className="absolute inset-x-4 top-4 h-40 flex flex-col justify-between pointer-events-none">
-              {[5, 3, 1].map((level) => (
-                <div key={level} className="flex items-center gap-2">
-                  <span className="w-3 text-[9px] font-medium text-slate-300 text-right">{level}</span>
-                  <div className="flex-1 border-t border-slate-200/30" />
-                </div>
-              ))}
+          {/* Premium Line Chart */}
+          <div className="relative bg-gradient-to-b from-slate-50/60 to-white rounded-2xl p-3 sm:p-4 border border-slate-100/80">
+            {/* Y-axis labels */}
+            <div className="absolute left-1 top-3 bottom-8 flex flex-col justify-between text-[9px] font-medium text-slate-300">
+              <span>5</span>
+              <span>3</span>
+              <span>1</span>
             </div>
 
-            {/* THE CHART */}
-            <div className="relative h-40 flex items-end justify-between gap-1.5 sm:gap-2 pl-6 pr-0.5">
-              {chartData.map((item, index) => {
-                const colors = getBloatingColor(item.bloating, item.hasData);
-                const height = getBarHeight(item.bloating);
+            {/* SVG Chart */}
+            <svg
+              ref={chartRef}
+              className="w-full h-40"
+              viewBox={`0 0 ${chartDimensions.width} ${chartDimensions.height}`}
+              preserveAspectRatio="none"
+            >
+              {/* Gradient definitions */}
+              <defs>
+                {/* Main area gradient */}
+                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
+                  <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#a855f7" stopOpacity="0.02" />
+                </linearGradient>
+
+                {/* Line gradient */}
+                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="50%" stopColor="#8b5cf6" />
+                  <stop offset="100%" stopColor="#a855f7" />
+                </linearGradient>
+
+                {/* Glow filter */}
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+
+                {/* Point glow */}
+                <filter id="pointGlow" x="-100%" y="-100%" width="300%" height="300%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Horizontal grid lines */}
+              {[1, 2, 3, 4, 5].map((level) => {
+                const y = 20 + ((level - 1) / 4) * 110;
+                return (
+                  <line
+                    key={level}
+                    x1="10"
+                    y1={y}
+                    x2={chartDimensions.width - 10}
+                    y2={y}
+                    stroke="#e2e8f0"
+                    strokeWidth="1"
+                    strokeDasharray={level === 3 ? "0" : "4 4"}
+                    opacity={level === 3 ? 0.6 : 0.3}
+                  />
+                );
+              })}
+
+              {/* Area fill with gradient */}
+              <motion.path
+                d={areaPath}
+                fill="url(#areaGradient)"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 0.3 }}
+              />
+
+              {/* Main line */}
+              <motion.path
+                d={linePath}
+                fill="none"
+                stroke="url(#lineGradient)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#glow)"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+              />
+
+              {/* Data points */}
+              {points.map((point, index) => {
+                const isActive = activeDay === index;
+                const color = getPointColor(chartData[index]?.bloating);
+                const hasData = chartData[index]?.hasData;
+
+                return (
+                  <g key={index}>
+                    {/* Outer glow ring for active point */}
+                    {isActive && hasData && (
+                      <motion.circle
+                        cx={point.x}
+                        cy={point.y}
+                        r="16"
+                        fill={color}
+                        opacity="0.15"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    )}
+
+                    {/* Point */}
+                    <motion.circle
+                      cx={point.x}
+                      cy={point.y}
+                      r={isActive ? 8 : hasData ? 6 : 4}
+                      fill={hasData ? color : '#cbd5e1'}
+                      stroke="white"
+                      strokeWidth={isActive ? 3 : 2}
+                      filter={hasData ? "url(#pointGlow)" : undefined}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.5 + index * 0.08, duration: 0.4, type: "spring" }}
+                      style={{ cursor: 'pointer' }}
+                      onMouseEnter={() => setHoveredDay(index)}
+                      onMouseLeave={() => setHoveredDay(null)}
+                      onClick={() => setSelectedDay(selectedDay === index ? null : index)}
+                    />
+
+                    {/* Value label on hover */}
+                    {isActive && hasData && (
+                      <motion.g
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <rect
+                          x={point.x - 18}
+                          y={point.y - 32}
+                          width="36"
+                          height="22"
+                          rx="6"
+                          fill="white"
+                          stroke={color}
+                          strokeWidth="1.5"
+                          filter="drop-shadow(0 2px 4px rgba(0,0,0,0.1))"
+                        />
+                        <text
+                          x={point.x}
+                          y={point.y - 17}
+                          textAnchor="middle"
+                          fontSize="12"
+                          fontWeight="800"
+                          fill={color}
+                        >
+                          {chartData[index]?.bloating}
+                        </text>
+                      </motion.g>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* Day labels */}
+            <div className="flex justify-between px-1 mt-2">
+              {chartData.map((day, index) => {
                 const isActive = activeDay === index;
 
                 return (
                   <motion.div
-                    key={item.day}
-                    className="flex-1 h-full flex flex-col items-center justify-end"
+                    key={day.day}
+                    className="flex flex-col items-center gap-1 cursor-pointer"
+                    whileHover={{ scale: 1.05 }}
                     onMouseEnter={() => setHoveredDay(index)}
                     onMouseLeave={() => setHoveredDay(null)}
                     onClick={() => setSelectedDay(selectedDay === index ? null : index)}
                   >
-                    {/* Bar Container */}
-                    <div className="relative w-full h-full flex items-end justify-center">
-                      {/* The bar */}
+                    <span className={`text-[10px] sm:text-xs font-bold transition-colors ${
+                      isActive ? 'text-indigo-600' : day.isToday ? 'text-indigo-500' : 'text-slate-400'
+                    }`}>
+                      {day.dayShort}
+                    </span>
+                    {day.isToday && (
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{
-                          height: `${height}%`,
-                          opacity: 1,
-                          scale: isActive ? 1.05 : 1,
-                        }}
-                        transition={{
-                          height: { delay: index * 0.06, duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-                          scale: { duration: 0.15 },
-                          opacity: { delay: index * 0.06, duration: 0.4 }
-                        }}
-                        className={`w-full max-w-[40px] cursor-pointer relative overflow-hidden rounded-xl ${item.hasData ? colors.bg : 'bg-gradient-to-t from-slate-200/50 to-slate-100/30'} ${isActive ? 'shadow-lg' : 'shadow-sm'}`}
-                        style={{
-                          minHeight: '12%',
-                        }}
-                      >
-                        {/* Subtle gradient overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-white/15" />
-
-                        {/* Value tooltip on hover */}
-                        <AnimatePresence>
-                          {isActive && item.hasData && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 3 }}
-                              className="absolute top-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg shadow-md"
-                            >
-                              <span className="text-sm font-bold text-foreground">{item.bloating}</span>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    </div>
+                        layoutId="todayIndicator"
+                        className="w-1.5 h-1.5 rounded-full bg-indigo-500"
+                      />
+                    )}
+                    {!day.isToday && day.hasData && (
+                      <div
+                        className="w-1 h-1 rounded-full"
+                        style={{ backgroundColor: getPointColor(day.bloating) }}
+                      />
+                    )}
                   </motion.div>
-                );
-              })}
-            </div>
-
-            {/* Clean Day Labels */}
-            <div className="flex justify-between gap-1 sm:gap-1.5 pl-6 pr-0.5 mt-3">
-              {chartData.map((item, index) => {
-                const isActive = activeDay === index;
-
-                return (
-                  <div
-                    key={`label-${item.day}`}
-                    className="flex-1 flex flex-col items-center gap-1"
-                  >
-                    {/* Day label */}
-                    <div
-                      className={`w-full py-1.5 px-0.5 rounded-lg text-center cursor-pointer transition-all ${
-                        isActive
-                          ? 'bg-indigo-500 shadow-sm'
-                          : item.isToday
-                            ? 'bg-indigo-100 border border-indigo-200'
-                            : 'bg-white/60 border border-slate-100'
-                      }`}
-                    >
-                      <span className={`text-[10px] sm:text-xs font-bold ${
-                        isActive ? 'text-white' : item.isToday ? 'text-indigo-600' : 'text-slate-500'
-                      }`}>
-                        {item.dayShort}
-                      </span>
-                    </div>
-
-                    {/* Today badge */}
-                    {item.isToday && (
-                      <span className="text-[8px] font-bold text-indigo-500 uppercase">Today</span>
-                    )}
-
-                    {/* Data dot */}
-                    {item.hasData && !item.isToday && (
-                      <div className={`w-1.5 h-1.5 rounded-full ${getBloatingColor(item.bloating, item.hasData).bg}`} />
-                    )}
-                  </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Day Detail Card */}
+          {/* Selected Day Detail */}
           <AnimatePresence>
             {selectedDay !== null && chartData[selectedDay] && (
               <motion.div
@@ -557,23 +547,21 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
                 exit={{ opacity: 0, y: 5, height: 0 }}
                 className="mt-4 overflow-hidden"
               >
-                <div className="p-4 rounded-xl bg-white/60 border border-slate-100">
+                <div className="p-4 rounded-xl bg-gradient-to-r from-white to-slate-50/80 border border-slate-100">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                        <Calendar className="w-5 h-5 text-indigo-500" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-base text-foreground">{chartData[selectedDay].fullDate}</h4>
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {chartData[selectedDay].count} meal{chartData[selectedDay].count !== 1 ? 's' : ''} logged
-                        </p>
-                      </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground">{chartData[selectedDay].fullDate}</h4>
+                      <p className="text-[11px] font-medium text-muted-foreground">
+                        {chartData[selectedDay].count} meal{chartData[selectedDay].count !== 1 ? 's' : ''} logged
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wide mb-0.5">Bloating</p>
                       <div className="flex items-baseline gap-0.5">
-                        <span className={`text-2xl font-black ${getBloatingColor(chartData[selectedDay].bloating, chartData[selectedDay].hasData).text}`}>
+                        <span
+                          className="text-2xl font-black"
+                          style={{ color: getPointColor(chartData[selectedDay].bloating) }}
+                        >
                           {chartData[selectedDay].hasData ? chartData[selectedDay].bloating : '—'}
                         </span>
                         <span className="text-sm text-muted-foreground/50">/5</span>
@@ -581,8 +569,8 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
                     </div>
                   </div>
                   {!chartData[selectedDay].hasData && (
-                    <p className="mt-3 text-xs text-amber-600 font-medium bg-amber-50 px-3 py-2 rounded-lg">
-                      * Estimated from previous day data
+                    <p className="mt-2 text-[11px] text-amber-600 font-medium bg-amber-50 px-3 py-1.5 rounded-lg">
+                      No bloating data recorded
                     </p>
                   )}
                 </div>
