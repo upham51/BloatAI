@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Settings, Shield, User, Sparkles, BarChart3, Compass } from 'lucide-react';
+import { Flame, Settings, Shield, User, Sparkles } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -9,7 +9,6 @@ import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
 import { InsightsOrb } from '@/components/insights/InsightsOrb';
-import { TodaySnapshot } from '@/components/insights/TodaySnapshot';
 import { CorrelationTeaser } from '@/components/insights/CorrelationTeaser';
 import { MealPhoto } from '@/components/meals/MealPhoto';
 import { motion } from 'framer-motion';
@@ -469,136 +468,6 @@ export default function DashboardPage() {
               </StaggerItem>
             )}
 
-            {/* PREMIUM BENTO GRID - Next-level Layout */}
-            {hasEnoughDataForInsights && (
-              <>
-                {/* Quick Actions Grid - Enhanced spacing */}
-                <StaggerItem>
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Log Meal - Ultra-Premium CTA Card */}
-                    <motion.div
-                      whileHover={{ scale: 1.04, y: -6 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => navigate('/add-entry')}
-                      className="relative overflow-hidden rounded-[2rem] cursor-pointer group col-span-2 h-36 shadow-2xl shadow-teal-500/20"
-                    >
-                      {/* Multi-layer gradient background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-teal-100/80 via-cyan-100/70 to-blue-100/80" />
-
-                      {/* Multiple animated orbs for depth */}
-                      <motion.div
-                        animate={{
-                          scale: [1, 1.3, 1],
-                          x: [0, 20, 0],
-                          rotate: [0, 90, 0],
-                        }}
-                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute -right-12 -top-12 w-48 h-48 bg-gradient-to-br from-primary/25 to-teal-400/20 rounded-full blur-2xl"
-                      />
-
-                      <motion.div
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          x: [0, -10, 0],
-                        }}
-                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        className="absolute -left-8 -bottom-8 w-40 h-40 bg-gradient-to-tr from-mint/20 to-sky/15 rounded-full blur-2xl"
-                      />
-
-                      {/* Premium glass overlay */}
-                      <div className="relative h-full backdrop-blur-2xl bg-white/60 border-2 border-white/80 group-hover:bg-white/70 transition-all duration-500">
-                        <div className="h-full px-6 py-5 flex items-center justify-between">
-                          <div className="flex items-center gap-5">
-                            <motion.div
-                              whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
-                              transition={{ duration: 0.5 }}
-                              className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-white/90 to-white/70 flex items-center justify-center shadow-xl shadow-teal-500/20 border-2 border-white/95"
-                            >
-                              <span className="text-5xl drop-shadow-lg">✨</span>
-                            </motion.div>
-                            <div className="text-left">
-                              <h3 className="text-3xl font-black text-foreground mb-1 tracking-tight" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>Log a Meal</h3>
-                              <p className="text-sm font-bold text-foreground/60">Track your wellness</p>
-                            </div>
-                          </div>
-                          <motion.div
-                            animate={{ x: [0, 6, 0] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                            className="mr-2"
-                          >
-                            <svg className="w-7 h-7 text-primary drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                          </motion.div>
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    {/* Insights Card - Enhanced */}
-                    <motion.div
-                      whileHover={{ scale: 1.06, y: -4 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => navigate('/insights')}
-                      className="relative overflow-hidden rounded-[1.75rem] cursor-pointer group h-36 shadow-xl shadow-purple-500/15"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-100/80 via-pink-100/70 to-lavender/80" />
-
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
-                        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                        className="absolute -right-8 -top-8 w-32 h-32 bg-purple-400/20 rounded-full blur-2xl"
-                      />
-
-                      <div className="relative h-full backdrop-blur-2xl bg-white/60 border-2 border-white/80 group-hover:bg-white/70 transition-all duration-500">
-                        <div className="h-full p-5 flex flex-col justify-between">
-                          <motion.div
-                            whileHover={{ rotate: 5, scale: 1.1 }}
-                            className="w-14 h-14 rounded-[1.25rem] bg-white/80 flex items-center justify-center shadow-lg shadow-purple-500/20 border-2 border-white/90"
-                          >
-                            <BarChart3 className="w-7 h-7 text-purple-600 drop-shadow-sm" strokeWidth={2.5} />
-                          </motion.div>
-                          <div>
-                            <h3 className="text-xl font-black text-foreground tracking-tight">Insights</h3>
-                            <p className="text-xs font-bold text-foreground/60 mt-0.5">View patterns</p>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    {/* History Card - Enhanced */}
-                    <motion.div
-                      whileHover={{ scale: 1.06, y: -4 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => navigate('/history')}
-                      className="relative overflow-hidden rounded-[1.75rem] cursor-pointer group h-36 shadow-xl shadow-orange-500/15"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-orange-100/80 via-peach/70 to-amber-100/80" />
-
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1], x: [0, 15, 0] }}
-                        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute -left-8 -bottom-8 w-32 h-32 bg-orange-400/20 rounded-full blur-2xl"
-                      />
-
-                      <div className="relative h-full backdrop-blur-2xl bg-white/60 border-2 border-white/80 group-hover:bg-white/70 transition-all duration-500">
-                        <div className="h-full p-5 flex flex-col justify-between">
-                          <motion.div
-                            whileHover={{ rotate: -5, scale: 1.1 }}
-                            className="w-14 h-14 rounded-[1.25rem] bg-white/80 flex items-center justify-center shadow-lg shadow-orange-500/20 border-2 border-white/90"
-                          >
-                            <Compass className="w-7 h-7 text-orange-600 drop-shadow-sm" strokeWidth={2.5} />
-                          </motion.div>
-                          <div>
-                            <h3 className="text-xl font-black text-foreground tracking-tight">History</h3>
-                            <p className="text-xs font-bold text-foreground/60 mt-0.5">Past meals</p>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </div>
-                </StaggerItem>
-              </>
-            )}
 
             {/* Ultra-Premium Welcome section - show for brand new users with no meals */}
             {completedCount === 0 && (
@@ -807,77 +676,76 @@ export default function DashboardPage() {
                           Log meals with bloating ratings across <span className="font-black text-primary text-lg">{3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''}</span> to unlock your wellness insights
                         </p>
 
-                        {/* Liquid-style circular progress indicator */}
+                        {/* Progress indicator with aligned markers */}
                         <div className="w-full mb-4">
                           <div className="flex justify-between items-center mb-3 text-sm">
                             <span className="font-extrabold text-muted-foreground/70 uppercase tracking-[0.12em]">Progress</span>
                             <span className="font-black text-primary text-lg">{daysWithData}/3 <span className="text-sm font-bold text-muted-foreground">days</span></span>
                           </div>
 
-                          {/* Liquid progress bar with organic feel */}
-                          <div className="relative w-full h-6 rounded-full overflow-hidden backdrop-blur-md bg-white/70 border-2 border-white/90 shadow-inner">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${(daysWithData / 3) * 100}%` }}
-                              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                              className="h-full rounded-full relative overflow-hidden shadow-lg"
-                              style={{
-                                background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)',
-                              }}
-                            >
-                              {/* Liquid wave effect */}
+                          {/* Progress bar container with markers */}
+                          <div className="relative">
+                            {/* Progress track */}
+                            <div className="relative w-full h-3 rounded-full overflow-hidden backdrop-blur-md bg-white/70 border-2 border-white/90 shadow-inner">
                               <motion.div
-                                animate={{
-                                  x: ['-100%', '100%'],
-                                }}
-                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                className="absolute inset-0 w-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: daysWithData === 0 ? '0%' : daysWithData === 1 ? '0%' : daysWithData === 2 ? '50%' : '100%' }}
+                                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                                className="h-full rounded-full relative overflow-hidden shadow-lg"
                                 style={{
-                                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+                                  background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)',
                                 }}
-                              />
-                              {/* Bubble effects */}
-                              <motion.div
-                                animate={{ y: [10, -10, 10], x: [0, 5, 0] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute right-2 top-1 w-2 h-2 rounded-full bg-white/50"
-                              />
-                              <motion.div
-                                animate={{ y: [8, -8, 8], x: [0, -3, 0] }}
-                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-                                className="absolute right-6 top-2 w-1.5 h-1.5 rounded-full bg-white/40"
-                              />
-                            </motion.div>
+                              >
+                                {/* Shimmer effect */}
+                                <motion.div
+                                  animate={{ x: ['-100%', '100%'] }}
+                                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                  className="absolute inset-0 w-full"
+                                  style={{
+                                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+                                  }}
+                                />
+                              </motion.div>
+                            </div>
+
+                            {/* Milestone markers - positioned absolutely to align with progress */}
+                            <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex justify-between pointer-events-none">
+                              {[1, 2, 3].map((day) => (
+                                <motion.div
+                                  key={day}
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ delay: 0.4 + day * 0.1, duration: 0.5 }}
+                                  className="pointer-events-auto"
+                                >
+                                  <motion.div
+                                    whileHover={{ scale: 1.2 }}
+                                    animate={daysWithData >= day ? {
+                                      boxShadow: ['0 0 0 0 rgba(99, 102, 241, 0.4)', '0 0 0 6px rgba(99, 102, 241, 0)', '0 0 0 0 rgba(99, 102, 241, 0.4)']
+                                    } : {}}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                    className={`w-5 h-5 rounded-full border-2 cursor-default ${
+                                      daysWithData >= day
+                                        ? 'bg-gradient-to-br from-indigo-500 to-purple-500 border-white shadow-lg'
+                                        : 'bg-white border-muted-foreground/20'
+                                    }`}
+                                  />
+                                </motion.div>
+                              ))}
+                            </div>
                           </div>
 
-                          {/* Organic milestone markers */}
-                          <div className="flex justify-between mt-4 px-2">
+                          {/* Day labels below */}
+                          <div className="flex justify-between mt-3">
                             {[1, 2, 3].map((day) => (
-                              <motion.div
+                              <span
                                 key={day}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.4 + day * 0.1, duration: 0.5 }}
-                                whileHover={{ scale: 1.15, y: -3 }}
-                                className={`flex flex-col items-center ${
-                                  daysWithData >= day ? 'opacity-100' : 'opacity-40'
-                                } transition-all cursor-default`}
-                              >
-                                <motion.div
-                                  animate={daysWithData >= day ? {
-                                    boxShadow: ['0 0 0 0 rgba(99, 102, 241, 0.4)', '0 0 0 8px rgba(99, 102, 241, 0)', '0 0 0 0 rgba(99, 102, 241, 0.4)']
-                                  } : {}}
-                                  transition={{ duration: 2, repeat: Infinity }}
-                                  className={`w-5 h-5 rounded-full border-2 ${
-                                    daysWithData >= day
-                                      ? 'bg-gradient-to-br from-indigo-500 to-purple-500 border-white shadow-lg'
-                                      : 'bg-white/50 border-muted-foreground/20'
-                                  }`}
-                                />
-                                <span className={`text-xs font-black mt-2 ${
+                                className={`text-xs font-black ${
                                   daysWithData >= day ? 'text-foreground' : 'text-muted-foreground/50'
-                                }`}>Day {day}</span>
-                              </motion.div>
+                                }`}
+                              >
+                                Day {day}
+                              </span>
                             ))}
                           </div>
                         </div>
@@ -886,25 +754,6 @@ export default function DashboardPage() {
                   </motion.div>
                 </StaggerItem>
 
-                {/* Today's Snapshot - Show instant value */}
-                <StaggerItem>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
-                    className="relative overflow-hidden rounded-[2rem] shadow-xl shadow-teal-500/10"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-teal-100/80 via-cyan-100/70 to-blue-100/80" />
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1], x: [0, 15, 0] }}
-                      transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute -right-12 -top-12 w-40 h-40 bg-teal-400/20 rounded-full blur-2xl"
-                    />
-                    <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 p-6">
-                      <TodaySnapshot entries={entries} />
-                    </div>
-                  </motion.div>
-                </StaggerItem>
 
                 {/* Correlation Teaser - Show pattern insights */}
                 <StaggerItem>
