@@ -244,16 +244,16 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-indigo-500/10"
+      className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-teal-500/10"
     >
       {/* Premium gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-indigo-50/50" />
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-teal-50/50" />
 
       {/* Animated accent orbs */}
       <motion.div
         animate={{ scale: [1, 1.2, 1], x: [0, 15, 0] }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br from-indigo-300/20 to-purple-300/15 rounded-full blur-3xl"
+        className="absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br from-teal-300/20 to-cyan-300/15 rounded-full blur-3xl"
       />
       <motion.div
         animate={{ scale: [1, 1.15, 1], x: [0, -10, 0] }}
@@ -271,7 +271,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
                 whileHover={{ scale: 1.05, rotate: 5 }}
                 className="relative"
               >
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-teal-500 via-cyan-500 to-teal-400 flex items-center justify-center shadow-lg shadow-teal-500/30">
                   <Activity className="w-5 h-5 text-white" strokeWidth={2.5} />
                 </div>
               </motion.div>
@@ -298,11 +298,11 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
             {/* Average */}
             <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white to-slate-50/80 border border-slate-100 p-3">
               <div className="flex items-center gap-1 mb-1">
-                <Target className="w-3 h-3 text-indigo-500/60" strokeWidth={2.5} />
+                <Target className="w-3 h-3 text-teal-500/60" strokeWidth={2.5} />
                 <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wide">Avg</span>
               </div>
               <div className="flex items-baseline gap-0.5">
-                <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                   {avgBloating}
                 </span>
                 <span className="text-[10px] font-semibold text-muted-foreground/40">/5</span>
@@ -336,11 +336,23 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
 
           {/* Premium Line Chart */}
           <div className="relative bg-gradient-to-b from-slate-50/60 to-white rounded-2xl p-3 sm:p-4 border border-slate-100/80">
-            {/* Y-axis labels */}
-            <div className="absolute left-1 top-3 bottom-8 flex flex-col justify-between text-[9px] font-medium text-slate-300">
-              <span>5</span>
-              <span>3</span>
-              <span>1</span>
+            {/* Y-axis labels with context */}
+            <div className="absolute left-0 top-3 bottom-8 flex flex-col justify-between text-[8px] sm:text-[9px] font-medium">
+              <div className="flex flex-col items-start">
+                <div className="flex items-center gap-0.5">
+                  <span className="text-emerald-500 font-semibold">1</span>
+                  <span className="text-emerald-400 text-[7px]">↑</span>
+                </div>
+                <span className="text-[6px] sm:text-[7px] text-emerald-400/80">Better</span>
+              </div>
+              <span className="text-slate-300">3</span>
+              <div className="flex flex-col items-start">
+                <div className="flex items-center gap-0.5">
+                  <span className="text-rose-400 font-semibold">5</span>
+                  <span className="text-rose-300 text-[7px]">↓</span>
+                </div>
+                <span className="text-[6px] sm:text-[7px] text-rose-400/80">Worse</span>
+              </div>
             </div>
 
             {/* SVG Chart */}
@@ -352,18 +364,18 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
             >
               {/* Gradient definitions */}
               <defs>
-                {/* Main area gradient */}
+                {/* Main area gradient - teal/cyan theme */}
                 <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
-                  <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="#a855f7" stopOpacity="0.02" />
+                  <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.25" />
+                  <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.12" />
+                  <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.02" />
                 </linearGradient>
 
-                {/* Line gradient */}
+                {/* Line gradient - teal/cyan theme */}
                 <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#6366f1" />
-                  <stop offset="50%" stopColor="#8b5cf6" />
-                  <stop offset="100%" stopColor="#a855f7" />
+                  <stop offset="0%" stopColor="#0d9488" />
+                  <stop offset="50%" stopColor="#14b8a6" />
+                  <stop offset="100%" stopColor="#06b6d4" />
                 </linearGradient>
 
                 {/* Glow filter */}
@@ -516,14 +528,14 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
                     onClick={() => setSelectedDay(selectedDay === index ? null : index)}
                   >
                     <span className={`text-[10px] sm:text-xs font-bold transition-colors ${
-                      isActive ? 'text-indigo-600' : day.isToday ? 'text-indigo-500' : 'text-slate-400'
+                      isActive ? 'text-teal-600' : day.isToday ? 'text-teal-500' : 'text-slate-400'
                     }`}>
                       {day.dayShort}
                     </span>
                     {day.isToday && (
                       <motion.div
                         layoutId="todayIndicator"
-                        className="w-1.5 h-1.5 rounded-full bg-indigo-500"
+                        className="w-1.5 h-1.5 rounded-full bg-teal-500"
                       />
                     )}
                     {!day.isToday && day.hasData && (
