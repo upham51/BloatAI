@@ -43,28 +43,54 @@ export function BottomNav() {
             {({ isActive }) => (
               <>
                 {isCenter ? (
-                  /* Center FAB-style button with spring animation */
+                  /* Center FAB-style button with glow and spring animation */
                   <motion.div
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    animate={isActive ? { scale: 1.05, rotate: 0 } : { scale: 1, rotate: 0 }}
+                    whileHover={{ scale: 1.15, y: -4 }}
+                    whileTap={{ scale: 0.92 }}
+                    animate={isActive ? { scale: 1.08, rotate: 0 } : { scale: 1, rotate: 0 }}
                     transition={{
                       type: 'spring',
                       stiffness: 400,
                       damping: 25,
                     }}
-                    className="relative flex items-center justify-center w-14 h-14 -mt-6 rounded-full bg-primary"
-                    style={{
-                      boxShadow: isActive
-                        ? '0 8px 24px -4px hsl(var(--primary) / 0.5), 0 4px 12px -2px hsl(var(--primary) / 0.3)'
-                        : '0 4px 16px -4px hsl(var(--primary) / 0.4)'
-                    }}
+                    className="relative flex items-center justify-center w-16 h-16 -mt-8 rounded-full bg-gradient-to-br from-primary via-emerald-500 to-teal-500"
                   >
+                    {/* Animated glow ring */}
                     <motion.div
-                      animate={isActive ? { rotate: 90 } : { rotate: 0 }}
+                      className="absolute inset-0 rounded-full"
+                      animate={{
+                        boxShadow: [
+                          '0 0 20px 4px hsl(var(--primary) / 0.4), 0 0 40px 8px hsl(var(--primary) / 0.2)',
+                          '0 0 30px 8px hsl(var(--primary) / 0.5), 0 0 60px 12px hsl(var(--primary) / 0.3)',
+                          '0 0 20px 4px hsl(var(--primary) / 0.4), 0 0 40px 8px hsl(var(--primary) / 0.2)',
+                        ],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                    />
+                    {/* Outer pulse ring */}
+                    <motion.div
+                      className="absolute inset-[-4px] rounded-full border-2 border-primary/30"
+                      animate={{
+                        scale: [1, 1.15, 1],
+                        opacity: [0.5, 0, 0.5],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeOut',
+                      }}
+                    />
+                    {/* Button content */}
+                    <motion.div
+                      animate={isActive ? { rotate: 135 } : { rotate: 0 }}
                       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      className="relative z-10"
                     >
-                      <Icon className="w-7 h-7 text-primary-foreground" strokeWidth={2.5} />
+                      <Icon className="w-8 h-8 text-primary-foreground drop-shadow-lg" strokeWidth={2.5} />
                     </motion.div>
                   </motion.div>
                 ) : (

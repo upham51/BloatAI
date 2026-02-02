@@ -8,6 +8,9 @@ import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
+import { InsightsOrb } from '@/components/insights/InsightsOrb';
+import { TodaySnapshot } from '@/components/insights/TodaySnapshot';
+import { CorrelationTeaser } from '@/components/insights/CorrelationTeaser';
 import { MealPhoto } from '@/components/meals/MealPhoto';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -747,136 +750,182 @@ export default function DashboardPage() {
 
             {/* Ultra-Premium Building insights state - show when some meals logged but not enough */}
             {!hasEnoughDataForInsights && completedCount > 0 && (
-              <StaggerItem>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-indigo-500/15"
-                >
-                  {/* Enhanced gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/80 via-purple-100/70 to-pink-100/80" />
-
-                  {/* Multiple animated gradient orbs */}
+              <>
+                <StaggerItem>
                   <motion.div
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      rotate: [0, 180, 360],
-                    }}
-                    transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-indigo-400/20 to-purple-400/15 rounded-full blur-3xl"
-                  />
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-indigo-500/15"
+                  >
+                    {/* Enhanced gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/80 via-purple-100/70 to-pink-100/80" />
 
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.4, 1],
-                      rotate: [0, -120, 0],
-                    }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                    className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-pink-400/15 to-rose-400/10 rounded-full blur-3xl"
-                  />
+                    {/* Multiple animated gradient orbs */}
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.3, 1],
+                        rotate: [0, 180, 360],
+                      }}
+                      transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-indigo-400/20 to-purple-400/15 rounded-full blur-3xl"
+                    />
 
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 90, 180],
-                    }}
-                    transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-lavender/15 to-purple-300/10 rounded-full blur-3xl"
-                  />
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.4, 1],
+                        rotate: [0, -120, 0],
+                      }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                      className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-pink-400/15 to-rose-400/10 rounded-full blur-3xl"
+                    />
 
-                  {/* Premium glass overlay */}
-                  <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80">
-                    <div className="p-10 text-center">
-                      <motion.div
-                        animate={{
-                          scale: [1, 1.15, 1],
-                          rotate: [0, 8, -8, 0],
-                        }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                        <span className="text-7xl block mb-5 drop-shadow-lg">📊</span>
-                      </motion.div>
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 90, 180],
+                      }}
+                      transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-lavender/15 to-purple-300/10 rounded-full blur-3xl"
+                    />
 
-                      <h3 className="font-black text-foreground text-3xl mb-3 tracking-tight" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.06)' }}>
-                        Building Your Insights
-                      </h3>
-                      <p className="text-base text-muted-foreground font-bold mb-8 max-w-md mx-auto leading-relaxed">
-                        Log meals with bloating ratings across <span className="font-black text-primary text-lg">{3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''}</span> to unlock your wellness insights
-                      </p>
-
-                      {/* Premium progress bar */}
-                      <div className="w-full mb-8">
-                        <div className="flex justify-between items-center mb-4 text-sm">
-                          <span className="font-extrabold text-muted-foreground/70 uppercase tracking-[0.12em]">Progress</span>
-                          <span className="font-black text-primary text-lg">{daysWithData}/3 <span className="text-sm font-bold text-muted-foreground">days</span></span>
+                    {/* Premium glass overlay */}
+                    <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80">
+                      <div className="p-8 text-center">
+                        {/* Dynamic InsightsOrb replacing stock emoji */}
+                        <div className="flex justify-center mb-4">
+                          <InsightsOrb
+                            bloatLevel={weeklyBloating || undefined}
+                            size={100}
+                          />
                         </div>
-                        <div className="relative w-full h-5 rounded-full overflow-hidden backdrop-blur-md bg-white/70 border-2 border-white/90 shadow-inner">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(daysWithData / 3) * 100}%` }}
-                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                            className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full relative overflow-hidden shadow-lg"
-                            style={{
-                              backgroundSize: '200% 100%',
-                              animation: 'gradientShift 3s ease infinite',
-                            }}
-                          >
-                            {/* Enhanced shimmer effect */}
+
+                        <h3 className="font-black text-foreground text-3xl mb-3 tracking-tight" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.06)' }}>
+                          Building Your Insights
+                        </h3>
+                        <p className="text-base text-muted-foreground font-bold mb-6 max-w-md mx-auto leading-relaxed">
+                          Log meals with bloating ratings across <span className="font-black text-primary text-lg">{3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''}</span> to unlock your wellness insights
+                        </p>
+
+                        {/* Liquid-style circular progress indicator */}
+                        <div className="w-full mb-4">
+                          <div className="flex justify-between items-center mb-3 text-sm">
+                            <span className="font-extrabold text-muted-foreground/70 uppercase tracking-[0.12em]">Progress</span>
+                            <span className="font-black text-primary text-lg">{daysWithData}/3 <span className="text-sm font-bold text-muted-foreground">days</span></span>
+                          </div>
+
+                          {/* Liquid progress bar with organic feel */}
+                          <div className="relative w-full h-6 rounded-full overflow-hidden backdrop-blur-md bg-white/70 border-2 border-white/90 shadow-inner">
                             <motion.div
-                              animate={{ x: ['-100%', '200%'] }}
-                              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
-                              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/60 to-transparent"
-                            />
-                          </motion.div>
-                        </div>
-                        {/* Premium milestone markers */}
-                        <div className="flex justify-between mt-5">
-                          {[1, 2, 3].map((day) => (
-                            <motion.div
-                              key={day}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: 0.4 + day * 0.1, duration: 0.5 }}
-                              whileHover={{ scale: 1.1, y: -2 }}
-                              className={`flex flex-col items-center ${
-                                daysWithData >= day ? 'opacity-100' : 'opacity-40'
-                              } transition-all`}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(daysWithData / 3) * 100}%` }}
+                              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                              className="h-full rounded-full relative overflow-hidden shadow-lg"
+                              style={{
+                                background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)',
+                              }}
                             >
-                              <div className={`w-4 h-4 rounded-full border-2 ${
-                                daysWithData >= day
-                                  ? 'bg-gradient-to-br from-indigo-500 to-purple-500 border-white shadow-xl shadow-indigo-500/50'
-                                  : 'bg-muted border-muted-foreground/30'
-                              }`} />
-                              <span className={`text-xs font-black mt-2 ${
-                                daysWithData >= day ? 'text-foreground' : 'text-muted-foreground/60'
-                              }`}>Day {day}</span>
+                              {/* Liquid wave effect */}
+                              <motion.div
+                                animate={{
+                                  x: ['-100%', '100%'],
+                                }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-0 w-full"
+                                style={{
+                                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+                                }}
+                              />
+                              {/* Bubble effects */}
+                              <motion.div
+                                animate={{ y: [10, -10, 10], x: [0, 5, 0] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute right-2 top-1 w-2 h-2 rounded-full bg-white/50"
+                              />
+                              <motion.div
+                                animate={{ y: [8, -8, 8], x: [0, -3, 0] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+                                className="absolute right-6 top-2 w-1.5 h-1.5 rounded-full bg-white/40"
+                              />
                             </motion.div>
-                          ))}
+                          </div>
+
+                          {/* Organic milestone markers */}
+                          <div className="flex justify-between mt-4 px-2">
+                            {[1, 2, 3].map((day) => (
+                              <motion.div
+                                key={day}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.4 + day * 0.1, duration: 0.5 }}
+                                whileHover={{ scale: 1.15, y: -3 }}
+                                className={`flex flex-col items-center ${
+                                  daysWithData >= day ? 'opacity-100' : 'opacity-40'
+                                } transition-all cursor-default`}
+                              >
+                                <motion.div
+                                  animate={daysWithData >= day ? {
+                                    boxShadow: ['0 0 0 0 rgba(99, 102, 241, 0.4)', '0 0 0 8px rgba(99, 102, 241, 0)', '0 0 0 0 rgba(99, 102, 241, 0.4)']
+                                  } : {}}
+                                  transition={{ duration: 2, repeat: Infinity }}
+                                  className={`w-5 h-5 rounded-full border-2 ${
+                                    daysWithData >= day
+                                      ? 'bg-gradient-to-br from-indigo-500 to-purple-500 border-white shadow-lg'
+                                      : 'bg-white/50 border-muted-foreground/20'
+                                  }`}
+                                />
+                                <span className={`text-xs font-black mt-2 ${
+                                  daysWithData >= day ? 'text-foreground' : 'text-muted-foreground/50'
+                                }`}>Day {day}</span>
+                              </motion.div>
+                            ))}
+                          </div>
                         </div>
                       </div>
-
-                      <motion.div
-                        whileHover={{ scale: 1.06, y: -3 }}
-                        whileTap={{ scale: 0.97 }}
-                      >
-                        <Button
-                          onClick={() => navigate('/add-entry')}
-                          className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-[1.5rem] px-10 py-7 text-lg font-black shadow-2xl hover:shadow-3xl transition-all border-2 border-white/50"
-                          style={{
-                            backgroundSize: '200% 100%',
-                            animation: 'gradientShift 3s ease infinite',
-                          }}
-                        >
-                          <span className="mr-3 text-2xl">✨</span>
-                          Continue Logging
-                        </Button>
-                      </motion.div>
-
                     </div>
-                  </div>
-                </motion.div>
-              </StaggerItem>
+                  </motion.div>
+                </StaggerItem>
+
+                {/* Today's Snapshot - Show instant value */}
+                <StaggerItem>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3, duration: 0.6 }}
+                    className="relative overflow-hidden rounded-[2rem] shadow-xl shadow-teal-500/10"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-teal-100/80 via-cyan-100/70 to-blue-100/80" />
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1], x: [0, 15, 0] }}
+                      transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute -right-12 -top-12 w-40 h-40 bg-teal-400/20 rounded-full blur-2xl"
+                    />
+                    <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 p-6">
+                      <TodaySnapshot entries={entries} />
+                    </div>
+                  </motion.div>
+                </StaggerItem>
+
+                {/* Correlation Teaser - Show pattern insights */}
+                <StaggerItem>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                    className="relative overflow-hidden rounded-[2rem] shadow-xl shadow-purple-500/10"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-100/80 via-pink-100/70 to-rose-100/80" />
+                    <motion.div
+                      animate={{ scale: [1, 1.15, 1], rotate: [0, 45, 0] }}
+                      transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute -left-12 -bottom-12 w-40 h-40 bg-purple-400/20 rounded-full blur-2xl"
+                    />
+                    <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 p-6">
+                      <CorrelationTeaser entries={entries} />
+                    </div>
+                  </motion.div>
+                </StaggerItem>
+              </>
             )}
 
           </StaggerContainer>
