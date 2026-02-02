@@ -8,12 +8,10 @@ import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
-import { MilestonesCard } from '@/components/milestones/MilestonesCard';
 import { MealPhoto } from '@/components/meals/MealPhoto';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
-import { useMilestones } from '@/contexts/MilestonesContext';
 import { useProfile } from '@/hooks/useProfile';
 import { format, subDays, isAfter, differenceInCalendarDays, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -67,7 +65,6 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { entries, getPendingEntry, updateRating, skipRating, getCompletedCount } = useMeals();
-  const { getPendingExperimentMealId, completeExperiment } = useMilestones();
   const { toast } = useToast();
   const { data: userProfile, refetch: refetchProfile } = useProfile(user?.id);
 
@@ -190,19 +187,7 @@ export default function DashboardPage() {
     if (!pendingEntry) return;
     try {
       await updateRating(pendingEntry.id, rating);
-
-      // Check if this is a pending experiment meal
-      const pendingExperimentMealId = getPendingExperimentMealId();
-      if (pendingExperimentMealId && pendingExperimentMealId === pendingEntry.id) {
-        // Complete the experiment with this rating
-        await completeExperiment(pendingEntry.id, rating);
-        toast({
-          title: 'Experiment Complete!',
-          description: 'Check your Experiments tab to see the results.'
-        });
-      } else {
-        toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
-      }
+      toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
     } catch (error) {
       console.error('Failed to save rating:', error);
       toast({
@@ -473,11 +458,6 @@ export default function DashboardPage() {
                 </motion.div>
               </StaggerItem>
             )}
-
-            {/* Milestones Card - Your Gut Health Journey */}
-            <StaggerItem>
-              <MilestonesCard />
-            </StaggerItem>
 
             {/* Weekly Progress Chart - Ultra-Premium Card - Now shows after rating */}
             {hasEnoughDataForInsights && (

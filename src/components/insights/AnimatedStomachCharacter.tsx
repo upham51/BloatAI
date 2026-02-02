@@ -127,12 +127,12 @@ export function AnimatedStomachCharacter({ healthScore }: AnimatedStomachCharact
     <div
       className="relative flex items-center justify-center animate-breathe"
       style={{
-        width: '240px',
-        height: '240px',
+        width: '268px',
+        height: '268px',
       }}
     >
-      {/* Simple container for video/character */}
-      <div className="relative w-full h-full flex items-center justify-center rounded-full overflow-hidden bg-white/50">
+      {/* Simple container for video/character - fill the circle */}
+      <div className="relative w-full h-full flex items-center justify-center rounded-full overflow-hidden">
         {shouldLoadVideo && (!videoError || retryCount < MAX_RETRIES) ? (
           <video
             ref={videoRef}

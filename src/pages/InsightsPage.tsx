@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Sparkles, UtensilsCrossed } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -10,54 +10,22 @@ import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
-import { InsightsTabBar } from '@/components/insights/InsightsTabBar';
-import { ExperimentsTab } from '@/components/insights/ExperimentsTab';
-import { AIGuideTab } from '@/components/insights/AIGuideTab';
-import { BlueprintTab } from '@/components/insights/BlueprintTab';
 import { useMeals } from '@/contexts/MealContext';
-import { useMilestones } from '@/contexts/MilestonesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { getIconForTrigger } from '@/lib/triggerUtils';
 import { generateComprehensiveInsight, generateAdvancedInsights } from '@/lib/insightsAnalysis';
 import { GrainTexture } from '@/components/ui/grain-texture';
-import { InsightTab } from '@/types/milestones';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { data: userProfile } = useProfile(user?.id);
   const { entries, getCompletedCount } = useMeals();
-  const { isTabUnlocked } = useMilestones();
   const completedCount = getCompletedCount();
   const neededForInsights = 3;
   // Check completed entries for insights, not just total entries
   const hasEnoughData = completedCount >= neededForInsights;
-
-  // Tab state from URL or default to 'analysis'
-  const tabFromUrl = searchParams.get('tab') as InsightTab | null;
-  const [activeTab, setActiveTab] = useState<InsightTab>(tabFromUrl || 'analysis');
-
-  // Update tab when URL changes, but redirect to analysis if tab is locked
-  useEffect(() => {
-    if (tabFromUrl && ['analysis', 'experiments', 'ai_guide', 'blueprint'].includes(tabFromUrl)) {
-      // Only allow navigation to unlocked tabs (analysis is always unlocked for display)
-      if (tabFromUrl === 'analysis' || isTabUnlocked(tabFromUrl)) {
-        setActiveTab(tabFromUrl);
-      } else {
-        // Redirect to analysis tab if requested tab is locked
-        setActiveTab('analysis');
-        setSearchParams({ tab: 'analysis' });
-      }
-    }
-  }, [tabFromUrl, isTabUnlocked, setSearchParams]);
-
-  // Handle tab change
-  const handleTabChange = (tab: InsightTab) => {
-    setActiveTab(tab);
-    setSearchParams({ tab });
-  };
 
   // Loading state for AI magic animation
   const [isAnalyzing, setIsAnalyzing] = useState(true);
@@ -302,27 +270,7 @@ export default function InsightsPage() {
               </motion.header>
             </StaggerItem>
 
-            {/* Tab Bar */}
-            <StaggerItem>
-              <InsightsTabBar activeTab={activeTab} onTabChange={handleTabChange} />
-            </StaggerItem>
-
-            {/* Tab Content */}
-            {activeTab === 'experiments' && isTabUnlocked('experiments') && (
-              <ExperimentsTab />
-            )}
-
-            {activeTab === 'ai_guide' && isTabUnlocked('ai_guide') && (
-              <AIGuideTab />
-            )}
-
-            {activeTab === 'blueprint' && isTabUnlocked('blueprint') && (
-              <BlueprintTab />
-            )}
-
-            {/* Analysis Tab Content (default) */}
-            {activeTab === 'analysis' && (
-              <>
+            {/* Analysis Content */}
             {/* 1. HERO SECTION - Bloat Health Score */}
             {insights && (
               <StaggerItem>
@@ -416,8 +364,6 @@ export default function InsightsPage() {
             <StaggerItem>
               <BloatingGuide />
             </StaggerItem>
-              </>
-            )}
           </StaggerContainer>
         </div>
       </PageTransition>
