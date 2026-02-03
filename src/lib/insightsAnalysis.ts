@@ -1,7 +1,21 @@
-import { MealEntry, TRIGGER_CATEGORIES } from '@/types';
+import { MealEntry, TRIGGER_CATEGORIES, LEGACY_CATEGORY_MAP } from '@/types';
 import { isHighBloating, isLowBloating } from './bloatingUtils';
 import { deduplicateFoods, getSafeAlternatives, validatePercentage } from './triggerUtils';
 import { getTriggerCategory } from '@/types';
+
+// ============================================================
+// LEGACY CATEGORY MAPPING HELPER
+// Maps old category IDs to new ones for backwards compatibility
+// ============================================================
+
+function mapLegacyCategory(categoryId: string): string {
+  // If it's a legacy category, map to the new one
+  if (LEGACY_CATEGORY_MAP[categoryId]) {
+    return LEGACY_CATEGORY_MAP[categoryId];
+  }
+  // Otherwise return as-is (it's already a new category or unknown)
+  return categoryId;
+}
 
 // ============================================================
 // NOTES PATTERN ANALYSIS
@@ -95,23 +109,26 @@ export function analyzeTriggerFrequency(entries: MealEntry[]): TriggerFrequency[
 
   completedEntries.forEach(entry => {
     entry.detected_triggers?.forEach(trigger => {
-      if (!triggerMealCounts[trigger.category]) {
-        triggerMealCounts[trigger.category] = {
+      // Map legacy category IDs to new ones for backwards compatibility
+      const categoryId = mapLegacyCategory(trigger.category);
+
+      if (!triggerMealCounts[categoryId]) {
+        triggerMealCounts[categoryId] = {
           mealsWithTrigger: new Set(),
           foods: new Map(),
           highBloatingMealsWithTrigger: new Set()
         };
       }
 
-      triggerMealCounts[trigger.category].mealsWithTrigger.add(entry.id);
+      triggerMealCounts[categoryId].mealsWithTrigger.add(entry.id);
 
       if (trigger.food) {
-        const currentCount = triggerMealCounts[trigger.category].foods.get(trigger.food) || 0;
-        triggerMealCounts[trigger.category].foods.set(trigger.food, currentCount + 1);
+        const currentCount = triggerMealCounts[categoryId].foods.get(trigger.food) || 0;
+        triggerMealCounts[categoryId].foods.set(trigger.food, currentCount + 1);
       }
 
       if (isHighBloating(entry.bloating_rating)) {
-        triggerMealCounts[trigger.category].highBloatingMealsWithTrigger.add(entry.id);
+        triggerMealCounts[categoryId].highBloatingMealsWithTrigger.add(entry.id);
       }
     });
   });
@@ -475,21 +492,24 @@ function collectTriggerStats(
     const isRecent = entryDate > sevenDaysAgo;
 
     entry.detected_triggers?.forEach(trigger => {
-      // Ensure stats exist for this category (handles categories not in TRIGGER_CATEGORIES)
-      ensureCategoryStats(trigger.category);
+      // Map legacy category IDs to new ones for backwards compatibility
+      const categoryId = mapLegacyCategory(trigger.category);
 
-      triggersInMeal.add(trigger.category);
+      // Ensure stats exist for this category (handles categories not in TRIGGER_CATEGORIES)
+      ensureCategoryStats(categoryId);
+
+      triggersInMeal.add(categoryId);
 
       if (entry.bloating_rating) {
-        triggerStats[trigger.category].bloatingScores.push(entry.bloating_rating);
+        triggerStats[categoryId].bloatingScores.push(entry.bloating_rating);
 
         if (entry.bloating_rating >= 4) {
-          triggerStats[trigger.category].highBloatingCount++;
+          triggerStats[categoryId].highBloatingCount++;
         }
       }
 
       if (trigger.food) {
-        triggerStats[trigger.category].foods.add(trigger.food);
+        triggerStats[categoryId].foods.add(trigger.food);
       }
     });
 
@@ -508,17 +528,20 @@ function collectTriggerStats(
     const isRecent = entryDate > sevenDaysAgo;
 
     entry.detected_triggers?.forEach(trigger => {
-      if (!counted.has(trigger.category)) {
-        // Ensure stats exist (defensive check)
-        ensureCategoryStats(trigger.category);
+      // Map legacy category IDs to new ones for backwards compatibility
+      const categoryId = mapLegacyCategory(trigger.category);
 
-        triggerStats[trigger.category].occurrences++;
+      if (!counted.has(categoryId)) {
+        // Ensure stats exist (defensive check)
+        ensureCategoryStats(categoryId);
+
+        triggerStats[categoryId].occurrences++;
 
         if (isRecent) {
-          triggerStats[trigger.category].recentOccurrences++;
+          triggerStats[categoryId].recentOccurrences++;
         }
 
-        counted.add(trigger.category);
+        counted.add(categoryId);
       }
     });
   });
@@ -765,7 +788,8 @@ export function analyzeCombinations(entries: MealEntry[]): CombinationInsight[] 
   const singleTriggerStats: Record<string, number[]> = {};
 
   completedEntries.forEach(entry => {
-    const triggers = entry.detected_triggers?.map(t => t.category) || [];
+    // Map legacy category IDs to new ones for backwards compatibility
+    const triggers = entry.detected_triggers?.map(t => mapLegacyCategory(t.category)) || [];
 
     if (triggers.length >= 2 && entry.bloating_rating) {
       // Sort to ensure consistent combination keys
@@ -874,20 +898,20 @@ export function analyzeWeeklyComparison(entries: MealEntry[]): WeeklyComparison 
   const olderTriggers = new Set<string>();
 
   thisWeekEntries.forEach(e => {
-    e.detected_triggers?.forEach(t => thisWeekTriggers.add(t.category));
+    e.detected_triggers?.forEach(t => thisWeekTriggers.add(mapLegacyCategory(t.category)));
   });
 
   olderEntries.forEach(e => {
-    e.detected_triggers?.forEach(t => olderTriggers.add(t.category));
+    e.detected_triggers?.forEach(t => olderTriggers.add(mapLegacyCategory(t.category)));
   });
 
   thisWeekTriggers.forEach(trigger => {
     const thisWeekCount = thisWeekEntries.filter(e =>
-      e.detected_triggers?.some(t => t.category === trigger)
+      e.detected_triggers?.some(t => mapLegacyCategory(t.category) === trigger)
     ).length;
 
     const olderCount = olderEntries.filter(e =>
-      e.detected_triggers?.some(t => t.category === trigger)
+      e.detected_triggers?.some(t => mapLegacyCategory(t.category) === trigger)
     ).length;
 
     // New trigger or significant increase
@@ -973,7 +997,7 @@ export function calculateSuccessMetrics(entries: MealEntry[]): SuccessMetrics {
 
   // Calculate avoidance rate
   const recentWithHighTriggers = recent.filter(e =>
-    e.detected_triggers?.some(t => highConfidenceTriggers.includes(t.category))
+    e.detected_triggers?.some(t => highConfidenceTriggers.includes(mapLegacyCategory(t.category)))
   ).length;
 
   const avoidanceRate = recent.length > 0
@@ -1005,7 +1029,9 @@ export function generateTestingRecommendations(entries: MealEntry[]): TestingRec
   // Track when each food was last eaten
   completedEntries.forEach(entry => {
     entry.detected_triggers?.forEach(trigger => {
-      const food = trigger.food || trigger.category;
+      // Map legacy category IDs to new ones for backwards compatibility
+      const categoryId = mapLegacyCategory(trigger.category);
+      const food = trigger.food || categoryId;
       const entryDate = new Date(entry.created_at);
 
       if (!foodLastSeen[food] || entryDate > foodLastSeen[food]) {
@@ -1021,7 +1047,7 @@ export function generateTestingRecommendations(entries: MealEntry[]): TestingRec
     if (daysAvoided >= 10 && daysAvoided <= 30) {
       // Find if this food had high bloating before
       const entriesWithFood = completedEntries.filter(e =>
-        e.detected_triggers?.some(t => (t.food || t.category) === food)
+        e.detected_triggers?.some(t => (t.food || mapLegacyCategory(t.category)) === food)
       );
 
       const hadHighBloating = entriesWithFood.some(e => isHighBloating(e.bloating_rating));
@@ -1055,7 +1081,7 @@ export function generateTestingRecommendations(entries: MealEntry[]): TestingRec
   recentTriggers.forEach(trigger => {
     const recentEntries = completedEntries.slice(0, 10);
     const stillEating = recentEntries.some(e =>
-      e.detected_triggers?.some(t => t.category === trigger.category)
+      e.detected_triggers?.some(t => mapLegacyCategory(t.category) === trigger.category)
     );
 
     if (stillEating) {
