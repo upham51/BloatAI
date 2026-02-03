@@ -315,7 +315,7 @@ IMPORTANT:
     if (result.triggers.length === 0 && result.meal_description) {
       console.log('Running keyword-based trigger detection fallback...');
       const description = result.meal_description.toLowerCase();
-      const keywordTriggers: Array<{category: string, food: string}> = [];
+      const keywordTriggers: Array<{category: string, food: string, confidence: number}> = [];
 
       // Common trigger keywords mapped to categories
       const triggerKeywords: Record<string, Array<{keywords: string[], food: string}>> = {
@@ -395,7 +395,7 @@ IMPORTANT:
             // Avoid duplicates
             const exists = keywordTriggers.some(t => t.category === category && t.food === item.food);
             if (!exists) {
-              keywordTriggers.push({ category, food: item.food });
+              keywordTriggers.push({ category, food: item.food, confidence: 0.85 });
             }
           }
         }
