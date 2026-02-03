@@ -122,28 +122,40 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
 
   const hasData = chartData.some(d => d.bloating !== null);
 
-  // Get trend info
+  // Get trend info with clear, user-friendly messaging
   const getTrendInfo = () => {
     if (trend === 'down') return {
       icon: TrendingDown,
       label: 'Improving',
+      message: 'Your bloating is getting better!',
+      emoji: '🎉',
       color: 'text-emerald-600',
       bg: 'bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/15',
       border: 'border-emerald-400/30',
+      messageBg: 'bg-gradient-to-r from-emerald-50 to-teal-50',
+      messageBorder: 'border-emerald-200',
     };
     if (trend === 'up') return {
       icon: TrendingUp,
       label: 'Increasing',
+      message: 'Bloating trending up this week',
+      emoji: '📈',
       color: 'text-rose-600',
       bg: 'bg-gradient-to-r from-rose-500/15 via-red-500/10 to-rose-500/15',
       border: 'border-rose-400/30',
+      messageBg: 'bg-gradient-to-r from-rose-50 to-orange-50',
+      messageBorder: 'border-rose-200',
     };
     return {
       icon: Minus,
       label: 'Steady',
+      message: 'Bloating levels are stable',
+      emoji: '⚖️',
       color: 'text-blue-600',
       bg: 'bg-gradient-to-r from-blue-500/15 via-indigo-500/10 to-blue-500/15',
       border: 'border-blue-400/30',
+      messageBg: 'bg-gradient-to-r from-blue-50 to-indigo-50',
+      messageBorder: 'border-blue-200',
     };
   };
 
@@ -293,6 +305,21 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
             </motion.div>
           </div>
 
+          {/* PROMINENT Trend Summary - Easy to understand at a glance */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className={`mb-5 p-4 rounded-2xl ${trendInfo.messageBg} ${trendInfo.messageBorder} border-2`}
+          >
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-2xl">{trendInfo.emoji}</span>
+              <p className={`text-base sm:text-lg font-bold ${trendInfo.color}`}>
+                {trendInfo.message}
+              </p>
+            </div>
+          </motion.div>
+
           {/* Stats Row */}
           <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5">
             {/* Average */}
@@ -336,24 +363,22 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
 
           {/* Premium Line Chart */}
           <div className="relative bg-gradient-to-b from-slate-50/60 to-white rounded-2xl p-3 sm:p-4 border border-slate-100/80">
-            {/* Y-axis labels with context */}
-            <div className="absolute left-0 top-3 bottom-8 flex flex-col justify-between text-[8px] sm:text-[9px] font-medium">
-              <div className="flex flex-col items-start">
-                <div className="flex items-center gap-0.5">
-                  <span className="text-emerald-500 font-semibold">1</span>
-                  <span className="text-emerald-400 text-[7px]">↑</span>
+            {/* Chart with Better/Worse indicators */}
+            <div className="flex gap-2 sm:gap-3">
+              {/* Y-axis labels - LARGE and clear */}
+              <div className="flex flex-col justify-between py-2 flex-shrink-0">
+                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-emerald-100/80">
+                  <span className="text-emerald-600 text-sm sm:text-base font-bold">↑</span>
+                  <span className="text-xs sm:text-sm font-bold text-emerald-600">Better</span>
                 </div>
-                <span className="text-[6px] sm:text-[7px] text-emerald-400/80">Better</span>
-              </div>
-              <span className="text-slate-300">3</span>
-              <div className="flex flex-col items-start">
-                <div className="flex items-center gap-0.5">
-                  <span className="text-rose-400 font-semibold">5</span>
-                  <span className="text-rose-300 text-[7px]">↓</span>
+                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-rose-100/80">
+                  <span className="text-rose-500 text-sm sm:text-base font-bold">↓</span>
+                  <span className="text-xs sm:text-sm font-bold text-rose-500">Worse</span>
                 </div>
-                <span className="text-[6px] sm:text-[7px] text-rose-400/80">Worse</span>
               </div>
-            </div>
+
+              {/* Chart area */}
+              <div className="flex-1 min-w-0">
 
             {/* SVG Chart */}
             <svg
@@ -513,7 +538,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
               })}
             </svg>
 
-            {/* Day labels */}
+            {/* Day labels - simplified, no confusing dots */}
             <div className="flex justify-between px-1 mt-2">
               {chartData.map((day, index) => {
                 const isActive = activeDay === index;
@@ -521,32 +546,22 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
                 return (
                   <motion.div
                     key={day.day}
-                    className="flex flex-col items-center gap-1 cursor-pointer"
+                    className="flex flex-col items-center cursor-pointer"
                     whileHover={{ scale: 1.05 }}
                     onMouseEnter={() => setHoveredDay(index)}
                     onMouseLeave={() => setHoveredDay(null)}
                     onClick={() => setSelectedDay(selectedDay === index ? null : index)}
                   >
-                    <span className={`text-[10px] sm:text-xs font-bold transition-colors ${
-                      isActive ? 'text-teal-600' : day.isToday ? 'text-teal-500' : 'text-slate-400'
+                    <span className={`text-xs sm:text-sm font-bold transition-colors ${
+                      isActive ? 'text-teal-600' : day.isToday ? 'text-teal-500 underline underline-offset-2' : 'text-slate-400'
                     }`}>
                       {day.dayShort}
                     </span>
-                    {day.isToday && (
-                      <motion.div
-                        layoutId="todayIndicator"
-                        className="w-1.5 h-1.5 rounded-full bg-teal-500"
-                      />
-                    )}
-                    {!day.isToday && day.hasData && (
-                      <div
-                        className="w-1 h-1 rounded-full"
-                        style={{ backgroundColor: getPointColor(day.bloating) }}
-                      />
-                    )}
                   </motion.div>
                 );
               })}
+            </div>
+              </div>
             </div>
           </div>
 
