@@ -6,14 +6,16 @@ import { getFoodImage } from '@/lib/pexelsApi';
 import { ChevronDown, ChevronUp, Eye, Zap, AlertTriangle, Leaf, Check, ChefHat, AlertCircle, Sparkles } from 'lucide-react';
 
 // Safe alternatives data integrated from SafeAlternativesCards
+// Uses NEW category IDs with legacy mappings for backwards compatibility
 const SAFE_ALTERNATIVES_DATA: Record<string, {
   title: string;
   description: string;
   betterOptions: { title: string; items: string[] }[];
   quickRecipes: { name: string; description: string }[];
 }> = {
-  grains: {
-    title: 'Savory Carbs & Gluten',
+  // NEW CATEGORY: gluten-gang (replaces grains, gluten)
+  'gluten-gang': {
+    title: 'Gluten Gang',
     description: 'Many savory carbs (pasta, bread, pizza crusts) are wheat-based and high in fructans, which commonly trigger bloating.',
     betterOptions: [
       { title: 'Gluten-free grains', items: ['White rice', 'Quinoa', 'Oats', 'Corn', 'Buckwheat', 'Potatoes'] },
@@ -26,36 +28,24 @@ const SAFE_ALTERNATIVES_DATA: Record<string, {
       { name: 'Crispy Potato Wedges', description: 'Roast potatoes in olive oil with salt, pepper, and herbs' }
     ]
   },
-  gluten: {
-    title: 'Savory Carbs & Gluten',
-    description: 'Many savory carbs (pasta, bread, pizza crusts) are wheat-based and high in fructans, which commonly trigger bloating.',
+  // NEW CATEGORY: veggie-vengeance (replaces beans, veggies)
+  'veggie-vengeance': {
+    title: 'Veggie Vengeance',
+    description: 'Onions, garlic, beans, broccoli, and mushrooms are classic bloat bombs due to FODMAP content.',
     betterOptions: [
-      { title: 'Gluten-free grains', items: ['White rice', 'Quinoa', 'Oats', 'Corn', 'Buckwheat', 'Potatoes'] },
-      { title: 'Gluten-free products', items: ['Gluten-free pasta', 'Sourdough bread', 'Gluten-free orzo'] },
-      { title: 'Cooking tips', items: ['Swap butter with olive oil'] }
+      { title: 'Gentler vegetables', items: ['Carrots', 'Cucumber', 'Eggplant', 'Green beans', 'Lettuce', 'Spinach', 'Zucchini', 'Bell peppers'] },
+      { title: 'Flavor alternatives', items: ['Garlic-infused oil instead of whole garlic or onion'] },
+      { title: 'Protein alternatives', items: ['Eggs', 'Chicken', 'Fish', 'Tofu', 'Firm tempeh'] }
     ],
     quickRecipes: [
-      { name: 'Lemon Herb Quinoa Bowl', description: 'Quinoa + grilled chicken + cucumber + tomatoes + olive oil, lemon, and herbs' },
-      { name: 'Gluten-Free Orzo Salad', description: 'Gluten-free orzo + cucumber + tomato + lemon vinaigrette' },
-      { name: 'Crispy Potato Wedges', description: 'Roast potatoes in olive oil with salt, pepper, and herbs' }
-    ]
-  },
-  beans: {
-    title: 'Beans & Other Legumes',
-    description: 'Beans are rich in galacto-oligosaccharides (GOS), a FODMAP class that can cause gas and bloating.',
-    betterOptions: [
-      { title: 'Small portions', items: ['Well-rinsed canned lentils or chickpeas in modest amounts'] },
-      { title: 'Protein alternatives', items: ['Eggs', 'Chicken', 'Fish', 'Tofu', 'Firm tempeh'] },
-      { title: 'Texture substitutes', items: ['Quinoa', 'Rice', 'Roasted chickpeas (modest portions)'] }
-    ],
-    quickRecipes: [
-      { name: 'Chicken & Red Lentil Skillet', description: 'Small portion of red lentils + chicken thighs + broth + carrots + spices over rice' },
+      { name: 'Asian Chicken Salad', description: 'Shredded chicken + cabbage + bell peppers + cucumber + peanuts with soy-lime-ginger dressing' },
       { name: 'Tofu Banh Mi Bowl', description: 'Rice + marinated tofu + pickled carrots/daikon + cabbage and cilantro' },
-      { name: 'Crunchy Roasted Chickpeas', description: 'Rinse canned chickpeas, toss with olive oil and spices, roast until crisp' }
+      { name: 'Herbed Popcorn', description: 'Air-popped popcorn + olive oil + rosemary + paprika' }
     ]
   },
-  dairy: {
-    title: 'Dairy',
+  // NEW CATEGORY: dairy-drama (replaces dairy)
+  'dairy-drama': {
+    title: 'Dairy Drama',
     description: 'Lactose in milk, soft cheeses, and ice cream is a common bloating trigger.',
     betterOptions: [
       { title: 'Lactose-free options', items: ['Lactose-free milk and yogurt', 'Small amounts of cream'] },
@@ -68,8 +58,9 @@ const SAFE_ALTERNATIVES_DATA: Record<string, {
       { name: 'Cheese & Rice Crackers', description: 'Hard cheese slices with gluten-free rice crackers' }
     ]
   },
-  fruit: {
-    title: 'Fruit & Sugar',
+  // NEW CATEGORY: fruit-fury (replaces fruit, sugar)
+  'fruit-fury': {
+    title: 'Fruit Fury',
     description: 'Fructose and sugar alcohols in fruit and sweeteners can ferment and cause bloating.',
     betterOptions: [
       { title: 'Lower-FODMAP fruits', items: ['Bananas', 'Blueberries', 'Strawberries', 'Grapes', 'Kiwi', 'Oranges'] },
@@ -82,36 +73,9 @@ const SAFE_ALTERNATIVES_DATA: Record<string, {
       { name: 'Low-FODMAP Energy Balls', description: 'Oats + peanut butter + chia seeds + maple syrup rolled into bites' }
     ]
   },
-  sugar: {
-    title: 'Fruit & Sugar',
-    description: 'Fructose and sugar alcohols in fruit and sweeteners can ferment and cause bloating.',
-    betterOptions: [
-      { title: 'Lower-FODMAP fruits', items: ['Bananas', 'Blueberries', 'Strawberries', 'Grapes', 'Kiwi', 'Oranges'] },
-      { title: 'Limit these', items: ['Apples', 'Pears', 'Mango', 'Watermelon', 'Dried fruit'] },
-      { title: 'Better sweeteners', items: ['Table sugar (small amounts)', 'Maple syrup', 'Rice syrup'] }
-    ],
-    quickRecipes: [
-      { name: 'Strawberry-Banana Smoothie', description: 'Banana + frozen strawberries + lactose-free yogurt + dairy-free milk' },
-      { name: 'Protein Waffles', description: 'Oat or buckwheat-based waffle + maple syrup + berries' },
-      { name: 'Low-FODMAP Energy Balls', description: 'Oats + peanut butter + chia seeds + maple syrup rolled into bites' }
-    ]
-  },
-  veggies: {
-    title: 'Veggies & Other "Healthy" Triggers',
-    description: 'Onions, garlic, certain crucifers, and mushrooms are classic bloat bombs due to FODMAP content.',
-    betterOptions: [
-      { title: 'Gentler vegetables', items: ['Carrots', 'Cucumber', 'Eggplant', 'Green beans', 'Lettuce', 'Spinach', 'Zucchini', 'Bell peppers'] },
-      { title: 'Flavor alternatives', items: ['Garlic-infused oil instead of whole garlic or onion'] },
-      { title: 'Other swaps', items: ['Still water vs carbonated', 'Baking/grilling vs frying'] }
-    ],
-    quickRecipes: [
-      { name: 'Asian Chicken Salad', description: 'Shredded chicken + cabbage + bell peppers + cucumber + peanuts with soy-lime-ginger dressing' },
-      { name: 'Brussels Sprout Salad', description: 'Shredded Brussels sprouts + pomegranate seeds + parsley + lemon-mustard vinaigrette' },
-      { name: 'Herbed Popcorn', description: 'Air-popped popcorn + olive oil + rosemary + paprika' }
-    ]
-  },
-  sweeteners: {
-    title: 'Sweeteners & Sugar Alcohols',
+  // NEW CATEGORY: chemical-chaos (replaces sweeteners)
+  'chemical-chaos': {
+    title: 'Chemical Chaos',
     description: 'Artificial sweeteners (sorbitol, xylitol, mannitol) and high-fructose corn syrup can cause gas and bloating.',
     betterOptions: [
       { title: 'Better sweeteners', items: ['Pure maple syrup', 'Table sugar (small amounts)', 'Stevia', 'Rice malt syrup'] },
@@ -124,8 +88,9 @@ const SAFE_ALTERNATIVES_DATA: Record<string, {
       { name: 'Vanilla Chia Pudding', description: 'Chia seeds + almond milk + vanilla + maple syrup + strawberries' }
     ]
   },
-  'fatty-food': {
-    title: 'Fatty & Fried Foods',
+  // NEW CATEGORY: grease-gridlock (replaces fatty-food)
+  'grease-gridlock': {
+    title: 'Grease Gridlock',
     description: 'Fatty and fried foods slow gastric emptying and can worsen bloating.',
     betterOptions: [
       { title: 'Cooking methods', items: ['Baking', 'Grilling', 'Air-frying', 'Steaming', 'Poaching'] },
@@ -138,9 +103,10 @@ const SAFE_ALTERNATIVES_DATA: Record<string, {
       { name: 'Air-Fried Sweet Potato Fries', description: 'Sweet potato wedges + light olive oil spray + paprika + salt' }
     ]
   },
-  carbonated: {
-    title: 'Carbonated Drinks',
-    description: 'Carbonated drinks introduce gas bubbles into the digestive system, which can get trapped and cause bloating.',
+  // NEW CATEGORY: bubble-trouble (replaces carbonated, alcohol)
+  'bubble-trouble': {
+    title: 'Bubble Trouble',
+    description: 'Carbonated drinks and beer introduce gas bubbles into the digestive system, which can get trapped and cause bloating.',
     betterOptions: [
       { title: 'Better drinks', items: ['Still water', 'Herbal teas', 'Water with citrus', 'Coconut water', 'Fresh juice (diluted)'] },
       { title: 'Avoid these', items: ['Soda', 'Sparkling water', 'Beer', 'Champagne', 'Energy drinks'] },
@@ -152,32 +118,34 @@ const SAFE_ALTERNATIVES_DATA: Record<string, {
       { name: 'Berry Infusion', description: 'Still water + crushed strawberries + blueberries + basil' }
     ]
   },
-  alcohol: {
-    title: 'Alcohol & Cocktails',
-    description: 'Beer and sugary cocktails can be especially gassy. Beer contains carbonation and fermentable carbs.',
+  // NEW CATEGORY: bad-beef (replaces processed)
+  'bad-beef': {
+    title: 'Bad Beef',
+    description: 'Processed meats contain preservatives, high sodium, and additives that can trigger bloating and digestive issues.',
     betterOptions: [
-      { title: 'If tolerated (small amounts)', items: ['Dry wine (red or white)', 'Clear spirits with water', 'Vodka soda with lime'] },
-      { title: 'Avoid these', items: ['Beer', 'Sugary cocktails', 'Sweet mixed drinks', 'Champagne', 'Cider'] },
-      { title: 'Better mixers', items: ['Still water', 'Fresh lemon/lime juice', 'Cranberry juice (small amounts)'] }
-    ],
-    quickRecipes: [
-      { name: 'Simple Wine Spritzer', description: 'Small dry wine portion + still water + fresh lemon' },
-      { name: 'Clean Vodka Tonic', description: 'Vodka + still water + lime + fresh mint' },
-      { name: 'Mocktail Alternative', description: 'Still water + muddled berries + lime + mint' }
-    ]
-  },
-  processed: {
-    title: 'Processed Foods',
-    description: 'Highly processed foods often contain artificial additives, high sodium, and hidden FODMAPs that worsen bloating.',
-    betterOptions: [
-      { title: 'Whole food swaps', items: ['Fresh vegetables', 'Lean meats', 'Plain rice', 'Potatoes', 'Fresh fish', 'Eggs'] },
-      { title: 'Minimally processed', items: ['Plain yogurt (lactose-free)', 'Canned beans (rinsed)', 'Frozen vegetables', 'Plain oats'] },
-      { title: 'Cooking from scratch', items: ['Simple sauces with herbs', 'Homemade dressings', 'Fresh-cooked meals'] }
+      { title: 'Fresh protein swaps', items: ['Fresh chicken', 'Fresh fish', 'Eggs', 'Lean beef', 'Turkey breast'] },
+      { title: 'Better prepared options', items: ['Rotisserie chicken', 'Fresh deli turkey', 'Homemade burger patties'] },
+      { title: 'Plant proteins', items: ['Tofu', 'Tempeh', 'Legumes (if tolerated)', 'Nuts'] }
     ],
     quickRecipes: [
       { name: 'Simple Grilled Protein', description: 'Chicken or fish + fresh herbs + lemon + extra-virgin olive oil' },
       { name: 'Rice & Veggie Bowl', description: 'Plain white rice + steamed carrots + zucchini + grilled chicken' },
-      { name: 'Homemade Salad Dressing', description: 'Olive oil + lemon juice + Dijon mustard + salt + pepper' }
+      { name: 'Homemade Turkey Patties', description: 'Ground turkey + herbs + garlic-infused oil + grilled to perfection' }
+    ]
+  },
+  // NEW CATEGORY: spice-strike
+  'spice-strike': {
+    title: 'Spice Strike',
+    description: 'Hot peppers and spicy foods can irritate the digestive tract and speed up gut motility, causing discomfort.',
+    betterOptions: [
+      { title: 'Milder seasonings', items: ['Paprika', 'Cumin', 'Turmeric', 'Ginger', 'Herbs'] },
+      { title: 'Flavor builders', items: ['Garlic-infused oil', 'Lemon zest', 'Fresh herbs', 'Mild curry'] },
+      { title: 'Gradual exposure', items: ['Start with small amounts', 'Build tolerance slowly'] }
+    ],
+    quickRecipes: [
+      { name: 'Herb-Crusted Chicken', description: 'Chicken + oregano + thyme + rosemary + olive oil' },
+      { name: 'Ginger Turmeric Rice', description: 'White rice + turmeric + fresh ginger + coconut oil' },
+      { name: 'Mild Curry Bowl', description: 'Coconut milk + turmeric + cumin + chicken + vegetables' }
     ]
   }
 };
