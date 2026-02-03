@@ -454,6 +454,20 @@ function collectTriggerStats(
     mealsWithoutTrigger[categoryInfo.id] = [];
   });
 
+  // Helper to ensure a category has initialized stats
+  const ensureCategoryStats = (category: string) => {
+    if (!triggerStats[category]) {
+      triggerStats[category] = {
+        occurrences: 0,
+        bloatingScores: [],
+        foods: new Set(),
+        highBloatingCount: 0,
+        recentOccurrences: 0,
+      };
+      mealsWithoutTrigger[category] = [];
+    }
+  };
+
   // Collect trigger stats from entries
   completedEntries.forEach(entry => {
     const triggersInMeal = new Set<string>();
@@ -461,6 +475,9 @@ function collectTriggerStats(
     const isRecent = entryDate > sevenDaysAgo;
 
     entry.detected_triggers?.forEach(trigger => {
+      // Ensure stats exist for this category (handles categories not in TRIGGER_CATEGORIES)
+      ensureCategoryStats(trigger.category);
+
       triggersInMeal.add(trigger.category);
 
       if (entry.bloating_rating) {
@@ -492,6 +509,9 @@ function collectTriggerStats(
 
     entry.detected_triggers?.forEach(trigger => {
       if (!counted.has(trigger.category)) {
+        // Ensure stats exist (defensive check)
+        ensureCategoryStats(trigger.category);
+
         triggerStats[trigger.category].occurrences++;
 
         if (isRecent) {
