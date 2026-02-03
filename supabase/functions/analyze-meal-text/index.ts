@@ -140,11 +140,28 @@ TRIGGER FOOD NAMING RULES:
 - Ice cream → "dairy-drama" (lactose is primary)
 - If user mentions STRAW → add {"category": "bubble-trouble", "food": "straw"}
 
+=== CRITICAL: ALWAYS DETECT THESE COMMON TRIGGERS ===
+You MUST detect and add triggers for these foods if mentioned:
+- ANY onion (green onion, scallion, red onion, yellow onion) → "veggie-vengeance"
+- Garlic → "veggie-vengeance"
+- Broccoli → "veggie-vengeance"
+- Cauliflower → "veggie-vengeance"
+- Mushrooms → "veggie-vengeance"
+- Beans/lentils/chickpeas → "veggie-vengeance"
+- Ice cream → "dairy-drama"
+- Milk/cream/dairy → "dairy-drama"
+- Cheese (soft types like cream cheese, ricotta) → "dairy-drama"
+- Bread/pasta/noodles/wheat → "gluten-gang"
+- Fried foods → "grease-gridlock"
+
+DO NOT return empty triggers if ANY of these foods are mentioned!
+Most meals contain at least one trigger - analyze carefully.
+
 IMPORTANT:
 - Be thorough but use SIMPLE BASE NAMES for all foods
 - List each trigger separately even if multiple items share a category
 - Only include foods you can reasonably infer from the description
-- If the meal seems safe/low-trigger, return an empty triggers array
+- Only return empty triggers if the meal truly contains NO trigger foods (e.g., plain rice, plain grilled chicken, steamed vegetables without onions/garlic)
 - When in doubt between specific variety vs. base name, ALWAYS choose the base name`
           }
         ],

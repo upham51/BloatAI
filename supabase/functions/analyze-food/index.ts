@@ -173,6 +173,23 @@ TRIGGER FOOD NAMING RULES:
 - Ice cream → "dairy-drama" (lactose is primary)
 - If you see a STRAW in the image → add {"category": "bubble-trouble", "food": "straw"}
 
+=== CRITICAL: ALWAYS DETECT THESE COMMON TRIGGERS ===
+You MUST detect and add triggers for these foods if visible:
+- ANY onion (green onion, scallion, red onion, yellow onion) → "veggie-vengeance"
+- Garlic → "veggie-vengeance"
+- Broccoli → "veggie-vengeance"
+- Cauliflower → "veggie-vengeance"
+- Mushrooms → "veggie-vengeance"
+- Beans/lentils/chickpeas → "veggie-vengeance"
+- Ice cream → "dairy-drama"
+- Milk/cream → "dairy-drama"
+- Cheese (soft types) → "dairy-drama"
+- Bread/pasta/noodles → "gluten-gang"
+- Fried foods → "grease-gridlock"
+
+DO NOT return empty triggers if ANY of these foods are visible!
+Most meals contain at least one trigger - analyze carefully.
+
 IMPORTANT:
 - Be thorough with ingredient detection, but prefer SIMPLE BASE NAMES
 - Include compound ingredients (e.g., if pizza, list: "wheat bread", "cheese", "pepperoni")
@@ -276,6 +293,22 @@ IMPORTANT:
       }
       return ingredient;
     });
+
+    // FALLBACK: If triggers array is empty but ingredients have triggers, extract them
+    if (result.triggers.length === 0 && result.ingredients.length > 0) {
+      console.log('Triggers array empty, extracting from ingredients...');
+      const ingredientTriggers = result.ingredients
+        .filter((ing: any) => ing.is_trigger && ing.trigger_category && validCategories.includes(ing.trigger_category))
+        .map((ing: any) => ({
+          category: ing.trigger_category,
+          food: ing.name?.toLowerCase() || ing.trigger_category
+        }));
+
+      if (ingredientTriggers.length > 0) {
+        console.log(`Extracted ${ingredientTriggers.length} triggers from ingredients`);
+        result.triggers = ingredientTriggers;
+      }
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
