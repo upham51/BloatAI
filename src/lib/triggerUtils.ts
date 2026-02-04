@@ -1,21 +1,8 @@
-import { getTriggerCategory, LEGACY_CATEGORY_MAP } from '@/types';
+import { getTriggerCategory } from '@/types';
 
 // Trigger icon mapping based on category
 export const TRIGGER_ICONS: Record<string, string> = {
-  // ============================================================
-  // NEW 9-CATEGORY TAXONOMY
-  // ============================================================
-  'veggie-vengeance': '🥦',
-  'fruit-fury': '🍎',
-  'gluten-gang': '🌾',
-  'dairy-drama': '🧀',
-  'bad-beef': '🥓',
-  'chemical-chaos': '⚗️',
-  'grease-gridlock': '🍟',
-  'spice-strike': '🌶️',
-  'bubble-trouble': '🫧',
-
-  // Legacy category mappings (for backwards compatibility)
+  // Simplified categories
   'grains': '🌾',
   'beans': '🫘',
   'dairy': '🥛',
@@ -291,7 +278,7 @@ export const TRIGGER_ICONS: Record<string, string> = {
   'jalapeño': '🌶️',
   'salt': '🧂',
 
-  // Beverages & Bubble Trouble
+  // Beverages
   'sparkling': '🫧',
   'soda': '🥤',
   'cola': '🥤',
@@ -305,53 +292,6 @@ export const TRIGGER_ICONS: Record<string, string> = {
   'beer': '🍺',
   'cocktail': '🍹',
   'water': '💧',
-  'straw': '🥤',
-  'drinking straw': '🥤',
-  'energy drink': '⚡',
-  'red bull': '⚡',
-  'monster': '⚡',
-  'celsius': '⚡',
-  'champagne': '🍾',
-  'prosecco': '🍾',
-  'cider': '🍺',
-  'kombucha': '🫧',
-  'seltzer': '🫧',
-  'tonic': '🫧',
-  'club soda': '🫧',
-
-  // Bad Beef (Processed Meats)
-  'hot dog': '🌭',
-  'sausage': '🌭',
-  'bratwurst': '🌭',
-  'bologna': '🥩',
-  'deli meat': '🥩',
-  'spam': '🥫',
-  'jerky': '🥩',
-  'canned tuna': '🐟',
-  'smoked fish': '🐟',
-
-  // Chemical Chaos (Artificial stuff)
-  'sugar-free': '⚗️',
-  'diet': '⚗️',
-  'protein bar': '⚗️',
-  'low carb': '⚗️',
-  'skinny': '⚗️',
-  'xylitol': '⚗️',
-  'sorbitol': '⚗️',
-  'maltitol': '⚗️',
-  'erythritol': '⚗️',
-  'inulin': '⚗️',
-  'chicory': '⚗️',
-
-  // Spice Strike
-  'sriracha': '🌶️',
-  'tabasco': '🌶️',
-  'buffalo': '🌶️',
-  'habanero': '🌶️',
-  'ghost pepper': '🌶️',
-  'cayenne': '🌶️',
-  'wasabi': '🌶️',
-  'horseradish': '🌶️',
 
   // Prepared Foods
   'pizza': '🍕',
@@ -792,62 +732,37 @@ export interface FormattedTrigger {
   category: string;
 }
 
-/**
- * Migrate a legacy category ID to the new 9-category taxonomy
- */
-export function migrateLegacyCategory(category: string): string {
-  // If it's already a new category, return as-is
-  const newCategories = [
-    'veggie-vengeance', 'fruit-fury', 'gluten-gang', 'dairy-drama',
-    'bad-beef', 'chemical-chaos', 'grease-gridlock', 'spice-strike', 'bubble-trouble'
-  ];
-  if (newCategories.includes(category)) {
-    return category;
-  }
-  // Otherwise, map from legacy to new
-  return LEGACY_CATEGORY_MAP[category] || category;
-}
-
 export function formatTriggerDisplay(
   triggers: Array<{ category: string; food?: string }>
 ): FormattedTrigger[] {
   if (!triggers || triggers.length === 0) return [];
 
   return triggers.map(trigger => {
-    // Migrate legacy category if needed
-    const migratedCategory = migrateLegacyCategory(trigger.category);
-
     // Get the trigger category info
-    const categoryInfo = getTriggerCategory(migratedCategory);
+    const categoryInfo = getTriggerCategory(trigger.category);
     let displayName = categoryInfo?.displayName || trigger.category;
 
-    // For new categories, we can show the food name if it's more specific
-    if (trigger.food && categoryInfo) {
+    // Special handling for onion and garlic - show as "Onion (Fructans)" or "Garlic (Fructans)"
+    if (trigger.food) {
       const foodLower = trigger.food.toLowerCase();
-      // Show specific food names for common triggers
-      if (migratedCategory === 'veggie-vengeance') {
-        if (foodLower.includes('onion')) displayName = 'Onion';
-        else if (foodLower.includes('garlic')) displayName = 'Garlic';
-        else if (foodLower.includes('bean')) displayName = 'Beans';
-        else if (foodLower.includes('broccoli')) displayName = 'Broccoli';
-      } else if (migratedCategory === 'bubble-trouble') {
-        if (foodLower.includes('straw')) displayName = 'Straw';
-        else if (foodLower.includes('soda') || foodLower.includes('cola')) displayName = 'Soda';
-        else if (foodLower.includes('beer')) displayName = 'Beer';
+      if (foodLower.includes('onion') && trigger.category === 'grains') {
+        displayName = 'Onion (Fructans)';
+      } else if (foodLower.includes('garlic') && trigger.category === 'grains') {
+        displayName = 'Garlic (Fructans)';
       }
     }
 
     return {
-      icon: getIconForTrigger(trigger.food || migratedCategory),
+      icon: getIconForTrigger(trigger.food || trigger.category),
       name: displayName,
-      category: migratedCategory,
+      category: trigger.category,
     };
   });
 }
 
 // ============================================================
-// SAFE ALTERNATIVES - Comprehensive low-bloat options
-// Based on the 9-category trigger taxonomy
+// SAFE ALTERNATIVES - Comprehensive FODMAP-friendly options
+// Based on Monash University research and clinical validation
 // ============================================================
 
 export interface SafeAlternativeItem {
@@ -862,351 +777,171 @@ export interface TriggerAlternativesData {
   protip: string;
 }
 
-// Comprehensive safe alternatives mapping for all 9 trigger categories
+// Comprehensive safe alternatives mapping for all 12 trigger categories
 const SAFE_ALTERNATIVES_DETAILED: Record<string, TriggerAlternativesData> = {
-  // ============================================================
-  // 01. VEGGIE VENGEANCE - High-FODMAP Vegetables & Legumes
-  // ============================================================
-  'veggie-vengeance': {
-    alternatives: [
-      { name: 'Carrots', notes: 'Unlimited, great raw or cooked' },
-      { name: 'Cucumber', notes: 'Hydrating, unlimited' },
-      { name: 'Eggplant/Aubergine', notes: 'Unlimited' },
-      { name: 'Green Beans', notes: 'Safe alternative to legumes' },
-      { name: 'Lettuce (all types)', notes: 'Unlimited' },
-      { name: 'Potatoes', notes: 'Easy to digest' },
-      { name: 'Tomatoes', notes: 'Unlimited' },
-      { name: 'Zucchini/Courgette', notes: 'Versatile, unlimited' },
-      { name: 'Bok Choy', notes: 'Asian greens' },
-      { name: 'Spinach', notes: 'Nutrient-dense' },
-      { name: 'Bell Peppers', notes: 'All colors, unlimited' },
-      { name: 'Kale', notes: 'Superfood' },
-      { name: 'Radishes', notes: 'Crunchy, low FODMAP' },
-      { name: 'Scallions (GREEN part only)', notes: 'Safe for flavor' },
-      { name: 'Ginger', notes: 'Anti-inflammatory' },
-      { name: 'Chives', portion: 'small amounts', notes: 'Safe herb' },
-      { name: 'Firm Tofu', notes: 'Plant protein alternative' },
-      { name: 'Tempeh', notes: 'Fermented soy' },
-      { name: 'Eggs', notes: 'Complete protein' },
-    ],
-    keyBrands: ['FODY Foods (garlic-free sauces)'],
-    protip: 'Onions and garlic are the biggest culprits. Use garlic-infused oil (FODMAPs don\'t transfer to oil) and green scallion tops for flavor without the bloat.',
-  },
-
-  // ============================================================
-  // 02. FRUIT FURY - High-Fructose Fruits & Sweeteners
-  // ============================================================
-  'fruit-fury': {
-    alternatives: [
-      { name: 'Bananas (unripe)', notes: 'Green-tipped are best' },
-      { name: 'Blueberries', portion: '1 cup', notes: 'Antioxidant-rich' },
-      { name: 'Strawberries', portion: '10 berries', notes: 'Low fructose' },
-      { name: 'Raspberries', portion: '⅓ cup', notes: 'High fiber' },
-      { name: 'Cantaloupe', portion: '¾ cup', notes: 'Hydrating' },
-      { name: 'Honeydew Melon', notes: 'Safe melon choice' },
-      { name: 'Kiwi', portion: '2 kiwis', notes: 'Digestive enzymes' },
-      { name: 'Oranges', portion: '1 orange', notes: 'Vitamin C' },
-      { name: 'Mandarins', notes: 'Easy to digest' },
-      { name: 'Lemons', notes: 'For flavor' },
-      { name: 'Limes', notes: 'For flavor' },
-      { name: 'Grapes', notes: 'Unlimited' },
-      { name: 'Pineapple', portion: '1 cup', notes: 'Anti-inflammatory' },
-      { name: 'Papaya', notes: 'Digestive enzymes' },
-      { name: 'Passion Fruit', notes: 'Tropical safe option' },
-      { name: 'Maple Syrup', notes: 'Safe sweetener' },
-      { name: 'Rice Malt Syrup', notes: 'Fructose-free' },
-      { name: 'Table Sugar (sucrose)', portion: 'small amounts', notes: 'Safer than fructose' },
-      { name: 'Stevia', notes: 'Zero calorie' },
-    ],
-    keyBrands: [],
-    protip: 'Avoid apples, pears, mango, watermelon, and all dried fruits. Fresh berries are your best friends!',
-  },
-
-  // ============================================================
-  // 03. GLUTEN GANG - Wheat, Barley, Rye Products
-  // ============================================================
-  'gluten-gang': {
-    alternatives: [
-      { name: 'Rice (white, brown)', notes: 'Unlimited, easily digested' },
-      { name: 'Quinoa', notes: 'Complete protein' },
-      { name: 'Corn/Polenta', notes: 'Naturally GF' },
-      { name: 'Buckwheat', notes: 'Despite the name, GF' },
-      { name: 'Millet', notes: 'Ancient grain, safe' },
-      { name: 'Tapioca', notes: 'GF starch' },
-      { name: 'Gluten-free Oats', notes: 'Certified GF only' },
-      { name: 'Gluten-free Bread', notes: 'Check for FODMAP ingredients' },
-      { name: 'Rice Pasta', notes: 'Great pasta alternative' },
-      { name: 'Gluten-free Pasta', notes: 'Many options available' },
-      { name: 'Rice Cakes', notes: 'Light snack' },
-      { name: 'Corn Tortillas', notes: 'Naturally GF' },
-      { name: 'Rice Noodles', notes: 'Asian dishes' },
-      { name: 'Potato Flour', notes: 'For baking' },
-      { name: 'Almond Flour', notes: 'Low carb baking' },
-      { name: 'Coconut Flour', notes: 'High fiber baking' },
-    ],
-    keyBrands: ['Udi\'s', 'Canyon Bakehouse', 'Schär', 'Barilla GF'],
-    protip: 'Gluten-free doesn\'t always mean low FODMAP. Check labels for onion, garlic, honey, and high-FODMAP flours.',
-  },
-
-  // ============================================================
-  // 04. DAIRY DRAMA - High-Lactose Milk Products
-  // ============================================================
-  'dairy-drama': {
-    alternatives: [
-      { name: 'Lactose-free Milk', notes: 'Real dairy, no lactose' },
-      { name: 'Lactose-free Yogurt', notes: 'Good for probiotics' },
-      { name: 'Hard Aged Cheeses', notes: 'Cheddar, Swiss, Parmesan - very low lactose' },
-      { name: 'Brie', notes: 'Aged soft cheese, low lactose' },
-      { name: 'Camembert', notes: 'Aged soft cheese, low lactose' },
-      { name: 'Mozzarella (aged)', notes: 'Not fresh mozzarella' },
-      { name: 'Feta', notes: 'Moderate lactose, small portions' },
-      { name: 'Goat Cheese (aged)', notes: 'Easier to digest' },
-      { name: 'Havarti', notes: 'Semi-hard, low lactose' },
-      { name: 'Almond Milk', notes: 'Dairy-free option' },
-      { name: 'Coconut Milk', notes: 'Creamy alternative' },
-      { name: 'Rice Milk', notes: 'Light option' },
-      { name: 'Oat Milk', notes: 'Check for additives' },
-    ],
-    keyBrands: ['Lactaid', 'Fairlife', 'Green Valley Creamery'],
-    protip: 'Hard aged cheeses like cheddar and parmesan have almost no lactose. The longer the aging, the better! Avoid soft fresh cheeses like ricotta and cottage cheese.',
-  },
-
-  // ============================================================
-  // 05. BAD BEEF - Processed/Cured/Aged Meats
-  // ============================================================
-  'bad-beef': {
-    alternatives: [
-      { name: 'Grilled Chicken', notes: 'Fresh, unprocessed' },
-      { name: 'Baked Fish (fresh)', notes: 'Not canned or smoked' },
-      { name: 'Plain Cooked Beef', notes: 'Fresh cuts, not deli' },
-      { name: 'Plain Cooked Pork', notes: 'Fresh, not bacon/ham' },
-      { name: 'Plain Cooked Lamb', notes: 'Fresh cuts' },
-      { name: 'Plain Cooked Turkey', notes: 'Fresh, not deli' },
-      { name: 'Fresh Seafood', notes: 'Shrimp, prawns, lobster' },
-      { name: 'Mussels', notes: 'Fresh, not canned' },
-      { name: 'Oysters', notes: 'Fresh' },
-      { name: 'Eggs', notes: 'Versatile protein' },
-      { name: 'Firm Tofu', notes: 'Plant protein' },
-      { name: 'Tempeh', notes: 'Fermented option' },
-      { name: 'Pea Protein', notes: 'Plant-based powder' },
-    ],
-    keyBrands: [],
-    protip: 'The key is FRESH meat without preservatives. Avoid deli counters, cured meats, and anything with nitrates/nitrites. Cook your own protein!',
-  },
-
-  // ============================================================
-  // 06. CHEMICAL CHAOS - Artificial Sweeteners & Additives
-  // ============================================================
-  'chemical-chaos': {
-    alternatives: [
-      { name: 'Fresh Whole Foods', notes: 'Best option always' },
-      { name: 'Homemade Foods', notes: 'Control ingredients' },
-      { name: 'Maple Syrup', notes: 'Natural sweetener' },
-      { name: 'Rice Malt Syrup', notes: 'Fructose-free' },
-      { name: 'Table Sugar', portion: 'small amounts', notes: 'Better than sugar alcohols' },
-      { name: 'Stevia', notes: 'Natural zero-calorie' },
-      { name: 'Fresh Fruits', notes: 'Low FODMAP options' },
-      { name: 'Unsulphured Dried Fruits', notes: 'No sulfites added' },
-      { name: 'Regular Gum', notes: 'Not sugar-free' },
-      { name: 'Dark Chocolate', portion: '30g', notes: 'No sugar alcohols' },
-    ],
-    keyBrands: ['FODY Foods (no artificial additives)'],
-    protip: 'Avoid anything ending in "-ol" (sorbitol, xylitol, maltitol, erythritol). Also watch out for inulin/chicory root fiber in "healthy" products - major bloat trigger!',
-  },
-
-  // ============================================================
-  // 07. GREASE GRIDLOCK - High-Fat & Fried Foods
-  // ============================================================
-  'grease-gridlock': {
-    alternatives: [
-      { name: 'Grilled Proteins', notes: 'Chicken, fish, lean meat' },
-      { name: 'Baked Proteins', notes: 'Oven-roasted' },
-      { name: 'White Fish', notes: 'Cod, tilapia - very lean' },
-      { name: 'Steamed Vegetables', notes: 'No added fat' },
-      { name: 'Air-fried Options', notes: 'Less oil, same crunch' },
-      { name: 'Lean Meats', notes: 'Chicken breast, turkey' },
-      { name: 'Olive Oil', portion: 'small amounts', notes: 'Light cooking' },
-      { name: 'Moderate Portions', notes: 'Smaller servings of fatty foods' },
-    ],
-    keyBrands: [],
-    protip: 'High fat slows digestion, causing food to ferment longer in your gut. Steam, bake, grill, or air-fry instead of deep-frying. Pizza is a triple threat: fat + wheat + cheese!',
-  },
-
-  // ============================================================
-  // 08. SPICE STRIKE - Hot Peppers & Irritating Acids
-  // ============================================================
-  'spice-strike': {
-    alternatives: [
-      { name: 'Basil', notes: 'Mild, aromatic' },
-      { name: 'Oregano', notes: 'Mediterranean flavor' },
-      { name: 'Thyme', notes: 'Subtle herb' },
-      { name: 'Ginger', portion: 'small amounts', notes: 'Actually helps digestion' },
-      { name: 'Turmeric', notes: 'Anti-inflammatory' },
-      { name: 'Paprika (mild)', notes: 'Not hot paprika' },
-      { name: 'Fresh Herbs', notes: 'Parsley, cilantro, dill' },
-      { name: 'Lemon Juice', portion: 'for flavor', notes: 'Small amounts' },
-      { name: 'Cumin', notes: 'Warm, not hot' },
-      { name: 'Coriander', notes: 'Mild spice' },
-    ],
-    keyBrands: [],
-    protip: 'Capsaicin in hot peppers literally irritates your stomach lining. Vinegar and tomato paste (concentrated) can do the same. Build tolerance slowly if you love spice!',
-  },
-
-  // ============================================================
-  // 09. BUBBLE TROUBLE - Carbonation & Air-Swallowing
-  // ============================================================
-  'bubble-trouble': {
-    alternatives: [
-      { name: 'Still Water', notes: 'Best hydration' },
-      { name: 'Herbal Teas', notes: 'Peppermint soothes digestion' },
-      { name: 'Ginger Tea', notes: 'Anti-bloating' },
-      { name: 'Coffee', notes: 'No carbonation' },
-      { name: 'Regular Tea', notes: 'Still beverage' },
-      { name: 'Non-carbonated Flavored Water', notes: 'Infused water' },
-      { name: 'Fresh Juice', notes: 'Low FODMAP fruits' },
-      { name: 'Eat Slowly', notes: 'Chew 20-30 times per bite' },
-      { name: 'Calm Environment', notes: 'Avoid eating while stressed' },
-      { name: 'No Straws', notes: 'Drink from the glass' },
-      { name: 'Stop at 80% Full', notes: 'Don\'t overeat' },
-    ],
-    keyBrands: [],
-    protip: 'It\'s not just soda - beer, sparkling water, and even drinking through straws introduce air. Eating too fast and talking while eating are sneaky culprits too!',
-  },
-
-  // ============================================================
-  // LEGACY MAPPINGS (for backwards compatibility)
-  // ============================================================
   'grains': {
     alternatives: [
       { name: 'Sourdough bread', portion: '2 slices', notes: 'Long fermented' },
       { name: 'Gluten-free bread', notes: 'Rice/corn-based' },
+      { name: 'Chickpea pasta', portion: '1 cup', notes: 'Highest protein' },
       { name: 'Rice pasta', notes: 'Easy to digest' },
       { name: 'White rice', notes: 'Unlimited' },
       { name: 'Quinoa', notes: 'Unlimited' },
       { name: 'Garlic-infused oil', notes: 'For flavor' },
       { name: 'Scallions', notes: 'Green parts only' },
     ],
-    keyBrands: ['Udi\'s', 'Barilla GF'],
-    protip: 'Sourdough\'s fermentation naturally breaks down fructans.',
+    keyBrands: ['Udi\'s', 'Simple Kneads', 'Barilla GF', 'Dr. Schar'],
+    protip: 'Sourdough\'s fermentation naturally breaks down fructans, making it easier to digest than regular bread.',
   },
   'beans': {
     alternatives: [
-      { name: 'Edamame', portion: '½ cup', notes: 'Lowest FODMAP' },
+      { name: 'Edamame', portion: '½ cup', notes: 'Lowest FODMAP, 9g protein' },
       { name: 'Canned lentils', portion: '¼ cup', notes: 'Rinse well' },
-      { name: 'Firm tofu', notes: 'Unlimited' },
+      { name: 'Canned chickpeas', portion: '¼ cup', notes: 'Rinse well' },
+      { name: 'Firm tofu', notes: 'Unlimited, 10g protein per serving' },
       { name: 'Tempeh', portion: '100g', notes: 'Fermented soy' },
       { name: 'Eggs', notes: 'Unlimited protein' },
     ],
     keyBrands: [],
-    protip: 'Canned beans have fewer FODMAPs than dried. Rinse well.',
+    protip: 'Canned beans have 60-70% fewer FODMAPs than dried. Always rinse thoroughly to remove the liquid.',
   },
   'dairy': {
     alternatives: [
-      { name: 'Lactose-free milk', notes: 'Real dairy' },
-      { name: 'Hard cheeses', notes: 'Cheddar, parmesan' },
-      { name: 'Almond milk', notes: 'Dairy-free' },
+      { name: 'Cashew milk', notes: 'Bloat score: 1 (best)' },
+      { name: 'Almond milk', notes: 'Bloat score: 2' },
+      { name: 'Coconut milk', notes: 'Bloat score: 3' },
+      { name: 'Lactose-free milk', notes: 'Real dairy, no lactose' },
+      { name: 'Hard cheeses', notes: 'Cheddar, parmesan - very low lactose' },
+      { name: 'Lactose-free yogurt', notes: 'Good for probiotics' },
     ],
-    keyBrands: ['Lactaid', 'Fairlife'],
-    protip: 'Aged cheeses have almost no lactose.',
+    keyBrands: ['Lactaid', 'Fairlife', 'Green Valley'],
+    protip: 'Hard aged cheeses like cheddar and parmesan have almost no lactose. The longer the aging, the better!',
   },
   'fruit': {
     alternatives: [
-      { name: 'Blueberries', portion: '1 cup' },
-      { name: 'Strawberries', portion: '10 berries' },
-      { name: 'Oranges', portion: '1 orange' },
+      { name: 'Blueberries', portion: '1 cup', notes: 'Antioxidant-rich' },
+      { name: 'Strawberries', portion: '10 berries', notes: 'Low FODMAP' },
+      { name: 'Raspberries', portion: '⅓ cup', notes: 'High fiber' },
+      { name: 'Oranges', portion: '1 orange', notes: 'Vitamin C' },
+      { name: 'Kiwi', portion: '2 kiwis', notes: 'Digestive enzymes' },
       { name: 'Grapes', notes: 'Unlimited' },
+      { name: 'Pineapple', portion: '1 cup', notes: 'Anti-inflammatory' },
+      { name: 'Cantaloupe', portion: '¾ cup', notes: 'Hydrating' },
     ],
     keyBrands: [],
-    protip: 'Avoid apples, pears, mango, and watermelon.',
+    protip: 'Avoid apples, pears, mango, and watermelon - they\'re high in fructose and can cause bloating.',
   },
   'sweeteners': {
     alternatives: [
-      { name: 'Maple syrup', notes: 'Natural' },
-      { name: 'Table sugar', notes: 'Safe in moderation' },
-      { name: 'Stevia', notes: 'Zero calorie' },
+      { name: 'Maple syrup', notes: 'Natural, low FODMAP' },
+      { name: 'White/brown sugar', notes: 'Table sugar is safe' },
+      { name: 'Rice malt syrup', notes: 'Fructose-free' },
+      { name: 'Stevia', portion: '2 tsp', notes: 'Zero calorie' },
+      { name: 'Glucose', notes: 'Pure glucose' },
     ],
     keyBrands: [],
-    protip: 'Avoid all sugar alcohols ending in "-ol".',
+    protip: 'Avoid all sugar alcohols (sorbitol, xylitol, mannitol, erythritol) - they\'re major bloating triggers.',
   },
   'gluten': {
     alternatives: [
-      { name: 'Rice', notes: 'Unlimited' },
+      { name: 'White rice', notes: 'Unlimited, easily digested' },
       { name: 'Quinoa', notes: 'Complete protein' },
-      { name: 'Gluten-free bread' },
+      { name: 'Oats', notes: 'Certified GF oats' },
+      { name: 'Gluten-free bread', notes: 'Check for low FODMAP' },
+      { name: 'Sourdough', portion: '2 slices', notes: 'Fermentation breaks down gluten' },
+      { name: 'Rice pasta', notes: 'Great pasta alternative' },
       { name: 'Corn tortillas', notes: 'Naturally GF' },
     ],
-    keyBrands: ['Udi\'s', 'Schär'],
-    protip: 'GF doesn\'t always mean low FODMAP.',
+    keyBrands: ['Udi\'s', 'Canyon Bakehouse', 'Schär'],
+    protip: 'Gluten-free doesn\'t always mean low FODMAP. Check labels for onion, garlic, honey, and high-FODMAP flours.',
   },
   'veggies': {
     alternatives: [
-      { name: 'Bell peppers', notes: 'Unlimited' },
-      { name: 'Carrots', notes: 'Unlimited' },
-      { name: 'Zucchini', notes: 'Unlimited' },
-      { name: 'Spinach', notes: 'Nutrient-dense' },
+      { name: 'Bell peppers', notes: 'All colors, unlimited' },
+      { name: 'Carrots', notes: 'Unlimited, great raw or cooked' },
+      { name: 'Zucchini', notes: 'Unlimited, versatile' },
+      { name: 'Cucumber', notes: 'Hydrating, unlimited' },
+      { name: 'Spinach', notes: 'Nutrient-dense, unlimited' },
+      { name: 'Eggplant', notes: 'Unlimited' },
+      { name: 'Sweet potatoes', notes: 'Complex carbs' },
+      { name: 'Tomatoes', notes: 'Unlimited' },
+      { name: 'Bok choy', notes: 'Asian greens' },
+      { name: 'Kale', notes: 'Superfood' },
     ],
     keyBrands: [],
-    protip: 'Avoid onions, garlic, and cruciferous veggies in large amounts.',
+    protip: 'Cruciferous veggies like broccoli and cabbage are okay in small amounts (¾ cup), but unlimited bell peppers, carrots, and zucchini are safer bets.',
   },
   'fatty-food': {
     alternatives: [
-      { name: 'Grilled chicken', notes: 'Lean protein' },
-      { name: 'Baked fish', notes: 'Not fried' },
-      { name: 'Air-fried options', notes: 'Less oil' },
+      { name: 'Grilled chicken breast', notes: 'Lean protein' },
+      { name: 'Baked salmon', notes: 'Omega-3s, bake instead of fry' },
+      { name: 'Air-fried options', notes: 'Less oil, same crunch' },
+      { name: 'Turkey', notes: 'Lean protein' },
+      { name: 'Cod or tilapia', notes: 'White fish, very lean' },
+      { name: 'Firm tofu', notes: 'Plant-based protein' },
+      { name: 'Olive oil', notes: 'Small amounts for cooking' },
     ],
     keyBrands: [],
-    protip: 'Bake, grill, or air-fry instead of deep-frying.',
+    protip: 'High fat slows digestion, causing food to ferment longer in your gut. Bake, grill, or air-fry instead of deep-frying.',
   },
   'carbonated': {
     alternatives: [
       { name: 'Still water', notes: 'Best hydration' },
-      { name: 'Herbal tea', notes: 'Peppermint, ginger' },
-      { name: 'Infused water', notes: 'Cucumber, mint' },
+      { name: 'Peppermint tea', notes: 'Soothes digestion' },
+      { name: 'Ginger tea', notes: 'Anti-inflammatory' },
+      { name: 'Rooibos tea', notes: 'Caffeine-free' },
+      { name: 'Lactose-free milk', notes: 'Calcium source' },
+      { name: 'Almond milk', notes: 'Dairy-free' },
+      { name: 'Cranberry juice', notes: 'Low FODMAP in moderation' },
+      { name: 'Infused water', notes: 'Cucumber, mint, lemon' },
     ],
     keyBrands: [],
-    protip: 'CO₂ causes bloating even in low FODMAP drinks.',
+    protip: 'The CO₂ gas in carbonated drinks causes bloating for many people, even if the drink itself is low FODMAP.',
   },
   'sugar': {
     alternatives: [
-      { name: 'Dark chocolate', portion: '30g' },
+      { name: 'Dark chocolate', portion: '30g', notes: '70%+ cocoa' },
+      { name: 'Lactose-free ice cream', notes: 'Real ice cream, no lactose' },
+      { name: 'Plain potato chips', notes: 'Check ingredients' },
+      { name: 'Popcorn', portion: '7 cups', notes: 'Air-popped or light oil' },
+      { name: 'Rice crackers', notes: 'With peanut butter' },
       { name: 'Fresh fruit', notes: 'Low FODMAP options' },
+      { name: 'Maple syrup treats', notes: 'Homemade with safe sweeteners' },
     ],
-    keyBrands: [],
-    protip: 'Use maple syrup instead of honey.',
+    keyBrands: ['Walker\'s GF shortbread', 'Made Good cookies (check ingredients)'],
+    protip: 'Satisfy your sweet tooth with dark chocolate or lactose-free ice cream. Homemade treats with maple syrup are great too!',
   },
   'alcohol': {
     alternatives: [
-      { name: 'Red/white wine', portion: '5 oz' },
-      { name: 'Vodka', portion: '1 shot' },
-      { name: 'Gin', portion: '1 shot' },
+      { name: 'Red wine', portion: '5 oz', notes: 'Low FODMAP' },
+      { name: 'White wine', portion: '5 oz', notes: 'Low FODMAP' },
+      { name: 'Sparkling wine', portion: '5 oz', notes: 'May cause some bloating' },
+      { name: 'Vodka', portion: '1 shot', notes: 'Mix with cranberry juice' },
+      { name: 'Gin', portion: '1 shot', notes: 'Try a gin & soda' },
+      { name: 'Whiskey', portion: '1 shot', notes: 'Neat or on rocks' },
+      { name: 'Tequila', portion: '1 shot', notes: 'Margarita with fresh lime' },
     ],
     keyBrands: [],
-    protip: 'Avoid beer and rum.',
+    protip: 'Avoid regular beer (high FODMAPs) and rum (high fructose). Stick to wine or distilled spirits with low FODMAP mixers.',
   },
   'processed': {
     alternatives: [
-      { name: 'Plain potato chips', notes: 'Check ingredients' },
-      { name: 'Popcorn', notes: 'Air-popped' },
-      { name: 'Rice crackers' },
+      { name: 'Plain potato chips', notes: 'Check for onion/garlic powder' },
+      { name: 'Popcorn', notes: 'Air-popped, lightly salted' },
+      { name: 'Rice crackers', notes: 'Simple ingredients' },
+      { name: 'Corn tortilla chips', notes: 'Plain, unseasoned' },
+      { name: 'Hard-boiled eggs', notes: 'Protein-packed snack' },
+      { name: 'Cheese cubes', notes: 'Hard cheeses' },
+      { name: 'FODY Foods snacks', notes: 'Certified low FODMAP' },
+      { name: 'Skinny Pop', notes: 'Clean popcorn' },
     ],
-    keyBrands: ['FODY Foods', 'Skinny Pop'],
-    protip: 'Check for hidden onion/garlic powder.',
+    keyBrands: ['FODY Foods', 'Skinny Pop', 'Nature Valley PB bars'],
+    protip: 'Check labels for hidden triggers: onion/garlic powder, honey, agave, HFCS, inulin, and sugar alcohols.',
   },
 };
 
-// Simple alternatives array (includes both new and legacy categories)
+// Legacy simple alternatives array for backward compatibility
 const SAFE_ALTERNATIVES: Record<string, string[]> = {
-  // New 9-category taxonomy
-  'veggie-vengeance': ['carrots', 'cucumber', 'bell peppers', 'zucchini', 'spinach', 'lettuce', 'tomatoes', 'potatoes', 'green beans', 'scallions (green part)'],
-  'fruit-fury': ['blueberries (1 cup)', 'strawberries (10)', 'oranges', 'grapes', 'kiwi', 'pineapple (1 cup)', 'bananas (unripe)', 'cantaloupe'],
-  'gluten-gang': ['rice', 'quinoa', 'gluten-free bread', 'corn tortillas', 'rice pasta', 'buckwheat', 'gluten-free oats'],
-  'dairy-drama': ['lactose-free milk', 'hard aged cheeses', 'almond milk', 'coconut milk', 'lactose-free yogurt', 'oat milk'],
-  'bad-beef': ['grilled chicken', 'baked fish', 'fresh beef', 'fresh pork', 'eggs', 'tofu', 'tempeh', 'fresh seafood'],
-  'chemical-chaos': ['fresh whole foods', 'maple syrup', 'table sugar', 'stevia', 'homemade foods', 'regular gum'],
-  'grease-gridlock': ['grilled proteins', 'baked fish', 'steamed vegetables', 'air-fried options', 'lean meats', 'white fish'],
-  'spice-strike': ['basil', 'oregano', 'thyme', 'ginger', 'turmeric', 'mild paprika', 'fresh herbs', 'cumin'],
-  'bubble-trouble': ['still water', 'herbal tea', 'ginger tea', 'coffee', 'fresh juice', 'eat slowly', 'no straws'],
-  // Legacy categories
   'grains': ['sourdough (2 slices)', 'gluten-free bread', 'rice pasta', 'quinoa', 'garlic-infused oil', 'scallions (green parts)'],
   'beans': ['edamame (½ cup)', 'canned lentils (¼ cup, rinsed)', 'firm tofu', 'tempeh', 'eggs'],
   'dairy': ['cashew milk', 'almond milk', 'lactose-free milk', 'hard cheeses', 'coconut milk'],
@@ -1430,110 +1165,4 @@ export function analyzeHighBloatingMeals(
       };
     })
     .sort((a, b) => b.count - a.count);
-}
-
-/**
- * Client-side fallback trigger detection from text description
- * Scans meal description for common trigger keywords and returns detected triggers
- * This runs when the AI fails to detect triggers
- */
-export function detectTriggersFromText(text: string): Array<{category: string, food: string, confidence: number}> {
-  if (!text) return [];
-
-  const description = text.toLowerCase();
-  const detectedTriggers: Array<{category: string, food: string, confidence: number}> = [];
-
-  // Common trigger keywords mapped to categories
-  const triggerKeywords: Record<string, Array<{keywords: string[], food: string}>> = {
-    'veggie-vengeance': [
-      { keywords: ['onion', 'onions', 'green onion', 'scallion', 'shallot'], food: 'onion' },
-      { keywords: ['garlic'], food: 'garlic' },
-      { keywords: ['broccoli'], food: 'broccoli' },
-      { keywords: ['cauliflower'], food: 'cauliflower' },
-      { keywords: ['mushroom', 'mushrooms'], food: 'mushrooms' },
-      { keywords: ['beans', 'bean', 'lentil', 'lentils', 'chickpea', 'hummus'], food: 'beans' },
-      { keywords: ['cabbage', 'sauerkraut', 'coleslaw'], food: 'cabbage' },
-      { keywords: ['asparagus'], food: 'asparagus' },
-      { keywords: ['artichoke'], food: 'artichoke' },
-      { keywords: ['leek', 'leeks'], food: 'leek' },
-      { keywords: ['peas', 'snow peas', 'snap peas'], food: 'peas' },
-    ],
-    'dairy-drama': [
-      { keywords: ['ice cream', 'icecream', 'gelato', 'frozen yogurt'], food: 'ice cream' },
-      { keywords: ['milk', 'milkshake', 'latte', 'cappuccino'], food: 'milk' },
-      { keywords: ['cream', 'creamy', 'whipped cream', 'sour cream'], food: 'cream' },
-      { keywords: ['cheese', 'cheesy', 'mozzarella', 'cheddar', 'parmesan', 'ricotta', 'cottage cheese', 'cream cheese'], food: 'cheese' },
-      { keywords: ['yogurt', 'yoghurt'], food: 'yogurt' },
-      { keywords: ['butter', 'buttery'], food: 'butter' },
-    ],
-    'gluten-gang': [
-      { keywords: ['bread', 'toast', 'sandwich', 'bun', 'roll', 'bagel', 'croissant'], food: 'bread' },
-      { keywords: ['pasta', 'spaghetti', 'noodle', 'noodles', 'macaroni', 'penne', 'fettuccine', 'linguine', 'ramen', 'udon'], food: 'pasta' },
-      { keywords: ['wheat', 'flour', 'tortilla', 'wrap'], food: 'wheat' },
-      { keywords: ['pizza', 'calzone'], food: 'pizza crust' },
-      { keywords: ['pancake', 'pancakes', 'waffle', 'waffles', 'crepe'], food: 'pancakes' },
-      { keywords: ['cake', 'cupcake', 'muffin', 'cookie', 'cookies', 'brownie', 'pastry', 'donut', 'doughnut'], food: 'baked goods' },
-      { keywords: ['cereal', 'oatmeal', 'granola'], food: 'cereal' },
-    ],
-    'fruit-fury': [
-      { keywords: ['apple', 'apples'], food: 'apple' },
-      { keywords: ['pear', 'pears'], food: 'pear' },
-      { keywords: ['mango', 'mangoes'], food: 'mango' },
-      { keywords: ['watermelon'], food: 'watermelon' },
-      { keywords: ['dried fruit', 'raisins', 'dates', 'prunes', 'dried apricot'], food: 'dried fruit' },
-      { keywords: ['honey'], food: 'honey' },
-      { keywords: ['agave'], food: 'agave' },
-      { keywords: ['peach', 'peaches', 'nectarine'], food: 'peach' },
-      { keywords: ['cherry', 'cherries'], food: 'cherry' },
-      { keywords: ['plum', 'plums'], food: 'plum' },
-    ],
-    'grease-gridlock': [
-      { keywords: ['fried', 'deep fried', 'deep-fried', 'crispy', 'battered'], food: 'fried food' },
-      { keywords: ['french fries', 'fries', 'chips'], food: 'fries' },
-      { keywords: ['bacon'], food: 'bacon' },
-      { keywords: ['sausage', 'sausages', 'hot dog', 'hotdog'], food: 'sausage' },
-      { keywords: ['fatty', 'greasy', 'oily'], food: 'fatty food' },
-      { keywords: ['pizza'], food: 'pizza' },
-    ],
-    'spice-strike': [
-      { keywords: ['spicy', 'hot sauce', 'sriracha', 'tabasco', 'chili', 'jalapeño', 'jalapeno', 'habanero', 'cayenne'], food: 'spicy food' },
-      { keywords: ['curry', 'curried'], food: 'curry' },
-      { keywords: ['wasabi'], food: 'wasabi' },
-      { keywords: ['pepper', 'peppers', 'hot pepper'], food: 'hot pepper' },
-    ],
-    'bubble-trouble': [
-      { keywords: ['soda', 'cola', 'coke', 'pepsi', 'sprite', 'fanta', 'fizzy', 'carbonated'], food: 'soda' },
-      { keywords: ['beer', 'lager', 'ale'], food: 'beer' },
-      { keywords: ['sparkling water', 'seltzer', 'tonic', 'sparkling'], food: 'sparkling water' },
-      { keywords: ['champagne', 'prosecco'], food: 'champagne' },
-      { keywords: ['energy drink', 'red bull', 'monster'], food: 'energy drink' },
-    ],
-    'bad-beef': [
-      { keywords: ['deli meat', 'deli', 'cold cuts', 'salami', 'pepperoni', 'ham', 'prosciutto', 'pastrami'], food: 'deli meat' },
-      { keywords: ['processed meat', 'spam', 'bologna'], food: 'processed meat' },
-      { keywords: ['hot dog', 'hotdog', 'frankfurter'], food: 'hot dog' },
-    ],
-    'chemical-chaos': [
-      { keywords: ['sugar-free', 'sugar free', 'diet soda', 'diet coke', 'zero sugar', 'no sugar'], food: 'sugar-free product' },
-      { keywords: ['protein bar', 'energy bar'], food: 'protein bar' },
-      { keywords: ['gum', 'chewing gum'], food: 'gum' },
-      { keywords: ['artificial sweetener', 'aspartame', 'sucralose', 'stevia', 'xylitol', 'sorbitol'], food: 'artificial sweetener' },
-    ],
-  };
-
-  // Scan description for trigger keywords
-  for (const [category, items] of Object.entries(triggerKeywords)) {
-    for (const item of items) {
-      const found = item.keywords.some(keyword => description.includes(keyword));
-      if (found) {
-        // Avoid duplicates
-        const exists = detectedTriggers.some(t => t.category === category && t.food === item.food);
-        if (!exists) {
-          detectedTriggers.push({ category, food: item.food, confidence: 0.85 });
-        }
-      }
-    }
-  }
-
-  return detectedTriggers;
 }

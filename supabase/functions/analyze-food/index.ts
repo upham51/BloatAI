@@ -100,21 +100,21 @@ Return ONLY valid JSON (no markdown, no code blocks):
   "creative_title": "Sweet Pancake Stack",
   "meal_description": "Fluffy buttermilk pancakes topped with fresh strawberries, blueberries, and whipped cream, drizzled with maple syrup and dusted with powdered sugar. Served with a side of crispy bacon.",
   "ingredients": [
-    {"name": "Pancakes", "detail": "wheat-based", "is_trigger": true, "trigger_category": "gluten-gang"},
-    {"name": "Buttermilk", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy-drama"},
-    {"name": "Whipped cream", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy-drama"},
-    {"name": "Maple syrup", "detail": "contains fructose", "is_trigger": true, "trigger_category": "fruit-fury"},
-    {"name": "Bacon", "detail": "processed meat", "is_trigger": true, "trigger_category": "bad-beef"},
+    {"name": "Pancakes", "detail": "wheat-based", "is_trigger": true, "trigger_category": "grains"},
+    {"name": "Buttermilk", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy"},
+    {"name": "Whipped cream", "detail": "dairy", "is_trigger": true, "trigger_category": "dairy"},
+    {"name": "Maple syrup", "detail": "contains fructose", "is_trigger": true, "trigger_category": "fruit"},
+    {"name": "Bacon", "detail": "fatty meat", "is_trigger": true, "trigger_category": "fatty-food"},
     {"name": "Strawberries", "detail": "low FODMAP fruit", "is_trigger": false, "trigger_category": null},
-    {"name": "Butter", "detail": "high fat", "is_trigger": true, "trigger_category": "grease-gridlock"}
+    {"name": "Powdered sugar", "detail": "refined sugar", "is_trigger": true, "trigger_category": "sugar"}
   ],
   "triggers": [
-    {"category": "gluten-gang", "food": "wheat bread"},
-    {"category": "dairy-drama", "food": "milk"},
-    {"category": "dairy-drama", "food": "cream"},
-    {"category": "fruit-fury", "food": "maple syrup"},
-    {"category": "bad-beef", "food": "bacon"},
-    {"category": "grease-gridlock", "food": "butter"}
+    {"category": "grains", "food": "wheat bread"},
+    {"category": "dairy", "food": "milk"},
+    {"category": "dairy", "food": "cream"},
+    {"category": "fruit", "food": "maple syrup"},
+    {"category": "fatty-food", "food": "bacon"},
+    {"category": "sugar", "food": "sugar"}
   ]
 }
 
@@ -134,65 +134,29 @@ TRIGGER FOOD NAMING RULES:
 - Avoid partial phrases or unclear terms
 - Bad examples: "glaze on", "with cream", "in sauce", "broccoli florets", "cauliflower florets"
 
-=== 9 TRIGGER CATEGORIES (use ONLY these exact strings) ===
+VALID CATEGORY VALUES (use ONLY these exact strings):
+- "grains" - Wheat products (bread, pasta, tortillas, crackers, baked goods, wheat noodles), onions, garlic, shallots, leeks
+- "beans" - Beans, lentils, chickpeas, hummus, legumes
+- "dairy" - Milk, cream, cheese (all types), yogurt, ice cream, butter
+- "fruit" - Apples, honey, mango, agave, high-fructose corn syrup, pears, certain fruits
+- "sweeteners" - Sugar-free items with sweeteners (sorbitol, mannitol), stone fruits (peaches, plums, cherries)
+- "gluten" - ONLY use for: barley, rye, beer (NOT wheat products - those are grains)
+- "veggies" - Broccoli, cabbage, Brussels sprouts, kale, bok choy, cauliflower, mushrooms
+- "fatty-food" - Fried foods, fatty meats, heavy cream, oils, butter, greasy foods
+- "carbonated" - Soda, sparkling water, fizzy drinks
+- "sugar" - Candy, pastries, white sugar, syrups, desserts
+- "alcohol" - Beer, wine, spirits, cocktails
+- "processed" - Packaged snacks, cereals, processed foods
 
-1. "veggie-vengeance" - High-FODMAP vegetables & legumes
-   → Onions, garlic, shallots, leeks, beans, lentils, chickpeas, broccoli, cauliflower, Brussels sprouts, cabbage, asparagus, mushrooms, peas
-
-2. "fruit-fury" - High-fructose fruits & sweeteners
-   → Apples, pears, mango, watermelon, honey, agave, dried fruits, high-fructose corn syrup, fruit juice
-
-3. "gluten-gang" - Wheat, barley, rye products
-   → Bread, pasta, pizza crust, crackers, bagels, muffins, cookies, cakes, wheat noodles, couscous, barley, rye, beer, soy sauce
-
-4. "dairy-drama" - High-lactose milk products
-   → Milk, ice cream, soft cheese (ricotta, cottage, cream cheese), yogurt, cream, condensed milk
-
-5. "bad-beef" - Processed/cured/aged meats
-   → Bacon, sausages, hot dogs, deli meats, salami, pepperoni, ham, jerky, canned fish, smoked meats
-
-6. "chemical-chaos" - Artificial sweeteners & additives
-   → Sugar-free gum, diet soda, protein bars, xylitol, sorbitol, maltitol, erythritol, inulin, chicory root
-
-7. "grease-gridlock" - High-fat & fried foods
-   → French fries, fried chicken, pizza, burgers, fatty meats (ribeye, pork belly), butter (large amounts), mayo, cream sauces
-
-8. "spice-strike" - Hot peppers & irritating acids
-   → Jalapeños, hot sauce, sriracha, habanero, cayenne, chili, curry, vinegar (large amounts)
-
-9. "bubble-trouble" - Carbonation & air-swallowing
-   → Soda, sparkling water, beer, champagne, energy drinks, kombucha, drinking through straws
-
-=== CATEGORIZATION RULES ===
-- Each food goes in ONE category only (primary trigger mechanism)
-- Onions and garlic → "veggie-vengeance" (fructans, NOT gluten)
-- Wheat/bread/pasta → "gluten-gang"
-- Fresh meat (chicken, beef, fish) → NOT a trigger unless fried or processed
-- Pizza → "grease-gridlock" (fat is the primary issue)
-- Beer → "bubble-trouble" (carbonation is primary)
-- Ice cream → "dairy-drama" (lactose is primary)
-- If you see a STRAW in the image → add {"category": "bubble-trouble", "food": "straw"}
-
-=== CRITICAL: ALWAYS DETECT THESE COMMON TRIGGERS ===
-You MUST detect and add triggers for these foods if visible:
-- ANY onion (green onion, scallion, red onion, yellow onion) → "veggie-vengeance"
-- Garlic → "veggie-vengeance"
-- Broccoli → "veggie-vengeance"
-- Cauliflower → "veggie-vengeance"
-- Mushrooms → "veggie-vengeance"
-- Beans/lentils/chickpeas → "veggie-vengeance"
-- Ice cream → "dairy-drama"
-- Milk/cream → "dairy-drama"
-- Cheese (soft types) → "dairy-drama"
-- Bread/pasta/noodles → "gluten-gang"
-- Fried foods → "grease-gridlock"
-
-DO NOT return empty triggers if ANY of these foods are visible!
-Most meals contain at least one trigger - analyze carefully.
+IMPORTANT CATEGORIZATION RULES:
+- Wheat-based foods (bread, pasta, flour products) should ALWAYS be categorized as "grains", NOT "gluten"
+- Only use "gluten" for barley, rye, or beer (which contain gluten but are not wheat-based)
+- All dairy products (milk, cheese, yogurt) should be categorized as "dairy"
+- When in doubt between overlapping categories, prefer the most specific category
 
 IMPORTANT:
 - Be thorough with ingredient detection, but prefer SIMPLE BASE NAMES
-- Include compound ingredients (e.g., if pizza, list: "wheat bread", "cheese", "pepperoni")
+- Include compound ingredients (e.g., if pizza, list: "wheat bread", "tomato sauce", "cheese", "pepperoni")
 - Use base ingredient names: "broccoli" not "broccoli florets", "rice" not "jasmine rice"
 - List each trigger separately even if multiple items share a category
 - Only include foods you can actually see or reasonably infer
@@ -269,10 +233,10 @@ IMPORTANT:
       console.error('Failed to parse AI response:', parseError);
     }
 
-    // Validate trigger categories (new 9-category taxonomy)
+    // Validate trigger categories
     const validCategories = [
-      'veggie-vengeance', 'fruit-fury', 'gluten-gang', 'dairy-drama',
-      'bad-beef', 'chemical-chaos', 'grease-gridlock', 'spice-strike', 'bubble-trouble'
+      'grains', 'beans', 'dairy', 'fruit', 'sweeteners',
+      'gluten', 'veggies', 'fatty-food', 'carbonated', 'sugar', 'alcohol', 'processed'
     ];
     
     result.triggers = result.triggers.filter((trigger: any) => {
@@ -293,119 +257,6 @@ IMPORTANT:
       }
       return ingredient;
     });
-
-    // FALLBACK 1: If triggers array is empty but ingredients have triggers, extract them
-    if (result.triggers.length === 0 && result.ingredients.length > 0) {
-      console.log('Triggers array empty, extracting from ingredients...');
-      const ingredientTriggers = result.ingredients
-        .filter((ing: any) => ing.is_trigger && ing.trigger_category && validCategories.includes(ing.trigger_category))
-        .map((ing: any) => ({
-          category: ing.trigger_category,
-          food: ing.name?.toLowerCase() || ing.trigger_category
-        }));
-
-      if (ingredientTriggers.length > 0) {
-        console.log(`Extracted ${ingredientTriggers.length} triggers from ingredients`);
-        result.triggers = ingredientTriggers;
-      }
-    }
-
-    // FALLBACK 2: Keyword-based trigger detection from meal description
-    // This catches triggers even when AI completely fails to detect them
-    if (result.triggers.length === 0 && result.meal_description) {
-      console.log('Running keyword-based trigger detection fallback...');
-      const description = result.meal_description.toLowerCase();
-      const keywordTriggers: Array<{category: string, food: string, confidence: number}> = [];
-
-      // Common trigger keywords mapped to categories
-      const triggerKeywords: Record<string, Array<{keywords: string[], food: string}>> = {
-        'veggie-vengeance': [
-          { keywords: ['onion', 'onions', 'green onion', 'scallion', 'shallot'], food: 'onion' },
-          { keywords: ['garlic'], food: 'garlic' },
-          { keywords: ['broccoli'], food: 'broccoli' },
-          { keywords: ['cauliflower'], food: 'cauliflower' },
-          { keywords: ['mushroom', 'mushrooms'], food: 'mushrooms' },
-          { keywords: ['beans', 'bean', 'lentil', 'lentils', 'chickpea', 'hummus'], food: 'beans' },
-          { keywords: ['cabbage', 'sauerkraut', 'coleslaw'], food: 'cabbage' },
-          { keywords: ['asparagus'], food: 'asparagus' },
-          { keywords: ['artichoke'], food: 'artichoke' },
-          { keywords: ['leek', 'leeks'], food: 'leek' },
-        ],
-        'dairy-drama': [
-          { keywords: ['ice cream', 'icecream', 'gelato', 'frozen yogurt'], food: 'ice cream' },
-          { keywords: ['milk', 'milkshake', 'latte', 'cappuccino'], food: 'milk' },
-          { keywords: ['cream', 'creamy', 'whipped cream', 'sour cream'], food: 'cream' },
-          { keywords: ['cheese', 'cheesy', 'mozzarella', 'cheddar', 'parmesan', 'ricotta', 'cottage cheese', 'cream cheese'], food: 'cheese' },
-          { keywords: ['yogurt', 'yoghurt'], food: 'yogurt' },
-          { keywords: ['butter', 'buttery'], food: 'butter' },
-        ],
-        'gluten-gang': [
-          { keywords: ['bread', 'toast', 'sandwich', 'bun', 'roll', 'bagel', 'croissant'], food: 'bread' },
-          { keywords: ['pasta', 'spaghetti', 'noodle', 'noodles', 'macaroni', 'penne', 'fettuccine', 'linguine', 'ramen'], food: 'pasta' },
-          { keywords: ['wheat', 'flour', 'tortilla', 'wrap'], food: 'wheat' },
-          { keywords: ['pizza', 'calzone'], food: 'pizza crust' },
-          { keywords: ['pancake', 'pancakes', 'waffle', 'waffles', 'crepe'], food: 'pancakes' },
-          { keywords: ['cake', 'cupcake', 'muffin', 'cookie', 'cookies', 'brownie', 'pastry', 'croissant', 'donut', 'doughnut'], food: 'baked goods' },
-          { keywords: ['cereal', 'oatmeal', 'granola'], food: 'cereal' },
-        ],
-        'fruit-fury': [
-          { keywords: ['apple', 'apples'], food: 'apple' },
-          { keywords: ['pear', 'pears'], food: 'pear' },
-          { keywords: ['mango', 'mangoes'], food: 'mango' },
-          { keywords: ['watermelon'], food: 'watermelon' },
-          { keywords: ['dried fruit', 'raisins', 'dates', 'prunes', 'dried apricot'], food: 'dried fruit' },
-          { keywords: ['honey'], food: 'honey' },
-          { keywords: ['agave'], food: 'agave' },
-        ],
-        'grease-gridlock': [
-          { keywords: ['fried', 'deep fried', 'deep-fried', 'crispy', 'battered'], food: 'fried food' },
-          { keywords: ['french fries', 'fries', 'chips'], food: 'fries' },
-          { keywords: ['bacon'], food: 'bacon' },
-          { keywords: ['sausage', 'sausages', 'hot dog', 'hotdog'], food: 'sausage' },
-          { keywords: ['fatty', 'greasy', 'oily'], food: 'fatty food' },
-        ],
-        'spice-strike': [
-          { keywords: ['spicy', 'hot sauce', 'sriracha', 'tabasco', 'chili', 'jalapeño', 'jalapeno', 'habanero', 'cayenne'], food: 'spicy food' },
-          { keywords: ['curry', 'curried'], food: 'curry' },
-          { keywords: ['wasabi'], food: 'wasabi' },
-        ],
-        'bubble-trouble': [
-          { keywords: ['soda', 'cola', 'coke', 'pepsi', 'sprite', 'fanta', 'fizzy', 'carbonated'], food: 'soda' },
-          { keywords: ['beer', 'lager', 'ale'], food: 'beer' },
-          { keywords: ['sparkling water', 'seltzer', 'tonic'], food: 'sparkling water' },
-          { keywords: ['champagne', 'prosecco'], food: 'champagne' },
-        ],
-        'bad-beef': [
-          { keywords: ['deli meat', 'deli', 'cold cuts', 'salami', 'pepperoni', 'ham', 'prosciutto', 'pastrami'], food: 'deli meat' },
-          { keywords: ['processed meat', 'spam', 'bologna'], food: 'processed meat' },
-        ],
-        'chemical-chaos': [
-          { keywords: ['sugar-free', 'sugar free', 'diet soda', 'diet coke', 'zero sugar', 'no sugar'], food: 'sugar-free product' },
-          { keywords: ['protein bar', 'energy bar'], food: 'protein bar' },
-          { keywords: ['gum', 'chewing gum'], food: 'gum' },
-          { keywords: ['artificial sweetener', 'aspartame', 'sucralose', 'stevia', 'xylitol', 'sorbitol'], food: 'artificial sweetener' },
-        ],
-      };
-
-      // Scan description for trigger keywords
-      for (const [category, items] of Object.entries(triggerKeywords)) {
-        for (const item of items) {
-          const found = item.keywords.some(keyword => description.includes(keyword));
-          if (found) {
-            // Avoid duplicates
-            const exists = keywordTriggers.some(t => t.category === category && t.food === item.food);
-            if (!exists) {
-              keywordTriggers.push({ category, food: item.food, confidence: 0.85 });
-            }
-          }
-        }
-      }
-
-      if (keywordTriggers.length > 0) {
-        console.log(`Keyword fallback detected ${keywordTriggers.length} triggers:`, keywordTriggers);
-        result.triggers = keywordTriggers;
-      }
-    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

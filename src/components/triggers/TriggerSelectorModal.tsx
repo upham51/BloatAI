@@ -21,36 +21,29 @@ export function TriggerSelectorModal({ isOpen, onClose, onAdd }: TriggerSelector
 
   const handleAdd = () => {
     if (!selectedCategory) return;
-
+    
     onAdd({
       category: selectedCategory,
       food: specificFood.trim() || '',
       confidence: 100,
     });
-
+    
     setSelectedCategory('');
     setSpecificFood('');
     onClose();
   };
 
-  // Primary food triggers
-  const foodCategories = TRIGGER_CATEGORIES.filter(c =>
-    ['veggie-vengeance', 'fruit-fury', 'gluten-gang', 'dairy-drama', 'bad-beef'].includes(c.id)
-  );
-
-  // Lifestyle/additive triggers
-  const otherCategories = TRIGGER_CATEGORIES.filter(c =>
-    ['chemical-chaos', 'grease-gridlock', 'spice-strike', 'bubble-trouble'].includes(c.id)
-  );
+  const fodmapCategories = TRIGGER_CATEGORIES.filter(c => c.id.startsWith('fodmaps'));
+  const otherCategories = TRIGGER_CATEGORIES.filter(c => !c.id.startsWith('fodmaps'));
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
-      <div
+      <div 
         className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
         onClick={onClose}
       />
-
+      
       {/* Modal */}
       <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-3xl border border-border/50 max-h-[85vh] flex flex-col animate-slide-up"
            style={{ boxShadow: '0 -8px 40px hsl(var(--foreground) / 0.15)' }}>
@@ -77,28 +70,25 @@ export function TriggerSelectorModal({ isOpen, onClose, onAdd }: TriggerSelector
               className="w-full h-12 px-4 rounded-2xl border border-border bg-card text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             >
               <option value="">Choose a category...</option>
-
-              <optgroup label="🍽️ Food Triggers">
-                {foodCategories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.emoji} {cat.displayName}</option>
+              
+              <optgroup label="FODMAPs">
+                {fodmapCategories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.displayName}</option>
                 ))}
               </optgroup>
-
-              <optgroup label="⚡ Other Triggers">
+              
+              <optgroup label="Other Triggers">
                 {otherCategories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.emoji} {cat.displayName}</option>
+                  <option key={cat.id} value={cat.id}>{cat.displayName}</option>
                 ))}
               </optgroup>
             </select>
 
-            {/* Show category info when selected */}
+            {/* Show examples when category selected */}
             {selectedCategoryInfo && (
               <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
                 <Lightbulb className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm text-primary font-medium">{selectedCategoryInfo.threat}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{selectedCategoryInfo.examples}</p>
-                </div>
+                <span className="text-sm text-primary">{selectedCategoryInfo.examples}</span>
               </div>
             )}
           </div>
@@ -109,7 +99,7 @@ export function TriggerSelectorModal({ isOpen, onClose, onAdd }: TriggerSelector
             <Input
               id="food"
               type="text"
-              placeholder="e.g., garlic, cheddar cheese, straw"
+              placeholder="e.g., garlic, cheddar cheese"
               value={specificFood}
               onChange={(e) => setSpecificFood(e.target.value)}
               className="h-12 rounded-2xl border-border bg-card"

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, ChevronDown, ChevronUp, Info, Scan } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { Textarea } from '@/components/ui/textarea';
 import { FODMAPGuide } from '@/components/triggers/FODMAPGuide';
 import { TriggerSelectorModal } from '@/components/triggers/TriggerSelectorModal';
@@ -15,7 +14,7 @@ import { useMilestones } from '@/contexts/MilestonesContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { DetectedTrigger, validateTriggers, getTriggerCategory } from '@/types';
-import { getIconForTrigger, abbreviateIngredient, deduplicateTriggers, detectTriggersFromText } from '@/lib/triggerUtils';
+import { getIconForTrigger, abbreviateIngredient, deduplicateTriggers } from '@/lib/triggerUtils';
 import { haptics } from '@/lib/haptics';
 import { validateMealDescription, retryWithBackoff } from '@/lib/bloatingUtils';
 import { GrainTexture } from '@/components/ui/grain-texture';
@@ -179,18 +178,7 @@ export default function AddEntryPage() {
       const triggers = Array.isArray(data?.triggers) ? data.triggers : [];
       const validTriggers = validateTriggers(triggers);
       // Deduplicate triggers to avoid showing redundant items (e.g., "French Toast" and "Bread" both as fructans)
-      let deduplicatedTriggers = deduplicateTriggers(validTriggers);
-
-      // CLIENT-SIDE FALLBACK: If AI returned no triggers, scan the description for trigger keywords
-      if (deduplicatedTriggers.length === 0 && description) {
-        console.log('No triggers from AI, running client-side keyword detection...');
-        const keywordTriggers = detectTriggersFromText(description);
-        if (keywordTriggers.length > 0) {
-          console.log(`Client-side fallback detected ${keywordTriggers.length} triggers:`, keywordTriggers);
-          deduplicatedTriggers = keywordTriggers;
-        }
-      }
-
+      const deduplicatedTriggers = deduplicateTriggers(validTriggers);
       setDetectedTriggers(deduplicatedTriggers);
       setPhotoAnalyzed(true);
       if (deduplicatedTriggers.length > 0) {
@@ -361,282 +349,155 @@ export default function AddEntryPage() {
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
 
       {/* Photo Mode - No Toggle */}
-      {entryMode === 'photo' && !photoUrl ? (/* Premium Photo Upload UI - Matches Dashboard Aesthetic */
-    <div className="flex-1 flex flex-col relative overflow-hidden min-h-screen">
-          {/* Premium Gradient Background - Like Dashboard */}
-          <div className="absolute inset-0 bg-gradient-to-br from-mint/30 via-lavender/25 to-sky/30" />
+      {entryMode === 'photo' && !photoUrl ? (/* Premium Photo Upload UI - Clean & Modern */
+    <div className="flex-1 flex flex-col px-6 py-8 relative overflow-hidden">
+          {/* Back button - Clean minimal design */}
+          <button onClick={() => navigate(-1)} className="absolute top-6 left-6 p-2.5 rounded-full bg-muted/80 backdrop-blur-sm transition-all duration-200 hover:bg-muted active:scale-95 z-10">
+            <X className="w-5 h-5 text-foreground" />
+          </button>
 
-          {/* Animated gradient orbs for depth - Dashboard style */}
-          <motion.div
-            animate={{
-              scale: [1, 1.3, 1],
-              x: [0, 30, 0],
-              y: [0, -20, 0],
-            }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-32 -right-32 w-80 h-80 bg-gradient-to-br from-primary/25 to-mint/20 rounded-full blur-3xl"
-          />
+          {/* Header Section with stagger animation */}
+          <div className="mt-12 mb-8 animate-slide-down">
+            <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">
+              Log Your Meal
+            </h1>
+            <p className="text-base text-muted-foreground">
+              Snap a photo to analyze your food
+            </p>
+          </div>
 
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              x: [0, -25, 0],
-              y: [0, 20, 0],
-            }}
-            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute -bottom-32 -left-32 w-80 h-80 bg-gradient-to-tr from-lavender/30 to-peach/25 rounded-full blur-3xl"
-          />
-
-          <motion.div
-            animate={{
-              scale: [1, 1.15, 1],
-              rotate: [0, 180, 360],
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            className="absolute top-1/3 left-1/2 -translate-x-1/2 w-64 h-64 bg-gradient-to-br from-sky/20 to-mint/15 rounded-full blur-2xl"
-          />
-
-          {/* Content with glassmorphic styling */}
-          <div className="relative z-10 flex-1 flex flex-col px-5 pt-4 pb-8">
-            {/* Premium Header Card - Like Dashboard Hero */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="relative overflow-hidden rounded-[2rem] mb-6 shadow-xl shadow-primary/10"
-            >
-              {/* Header gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-mint/30 to-lavender/25" />
-
-              {/* Animated shimmer effect */}
-              <motion.div
-                animate={{
-                  x: ['-100%', '100%'],
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-              />
-
-              {/* Glassmorphic overlay */}
-              <div className="relative backdrop-blur-2xl bg-white/50 border-2 border-white/70">
-                <div className="p-6">
-                  {/* Close button */}
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => navigate(-1)}
-                    className="absolute top-4 right-4 p-2.5 rounded-xl bg-white/70 backdrop-blur-sm border border-white/80 shadow-lg transition-all duration-200 hover:bg-white/90"
-                  >
-                    <X className="w-5 h-5 text-foreground/70" />
-                  </motion.button>
-
-                  {/* Title content */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.6 }}
-                  >
-                    <span className="text-[0.65rem] font-extrabold text-primary/70 tracking-[0.2em] uppercase mb-1 block">
-                      AI-POWERED
-                    </span>
-                    <h1 className="text-3xl font-black text-foreground tracking-tight leading-tight mb-1">
-                      Log Your Meal
-                    </h1>
-                    <p className="text-sm text-muted-foreground font-medium">
-                      Snap a photo to analyze your food
-                    </p>
-                  </motion.div>
+          {/* Action Cards - Clean Card Design like MyFitnessPal */}
+          <div className="flex-1 flex flex-col justify-center space-y-3 max-w-md mx-auto w-full">
+            {/* Camera Card - Primary Action */}
+            <button onClick={openCamera} disabled={isAnalyzing} className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up" style={{
+          animationDelay: '100ms'
+        }}>
+              <div className="flex items-center gap-4">
+                {/* Icon */}
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Camera className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
                 </div>
+
+                {/* Text */}
+                <div className="flex-1 text-left">
+                  <h3 className="text-lg font-bold text-foreground mb-0.5">Camera</h3>
+                  <p className="text-sm text-muted-foreground">Take a photo of your meal</p>
+                </div>
+
+                {/* Arrow indicator */}
+                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
               </div>
-            </motion.div>
+            </button>
 
-            {/* Premium Action Cards */}
-            <div className="flex-1 flex flex-col justify-center space-y-3 max-w-md mx-auto w-full">
-              {/* Camera Card - Primary Action with Gradient */}
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ scale: 1.02, y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={openCamera}
-                disabled={isAnalyzing}
-                className="group relative overflow-hidden rounded-[1.5rem] shadow-xl shadow-primary/15 transition-shadow duration-300 hover:shadow-2xl hover:shadow-primary/25"
-              >
-                {/* Card gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-mint/20 to-primary/15" />
-
-                {/* Glassmorphic content */}
-                <div className="relative backdrop-blur-xl bg-white/70 border-2 border-white/80 p-5">
-                  <div className="flex items-center gap-4">
-                    {/* Premium Icon Container */}
-                    <motion.div
-                      whileHover={{ rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.5 }}
-                      className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30"
-                    >
-                      <Camera className="w-6 h-6 text-white" />
-                    </motion.div>
-
-                    {/* Text */}
-                    <div className="flex-1 text-left">
-                      <h3 className="text-lg font-bold text-foreground mb-0.5">Camera</h3>
-                      <p className="text-sm text-muted-foreground">Take a photo of your meal</p>
-                    </div>
-
-                    {/* Arrow with animation */}
-                    <motion.div
-                      className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"
-                      whileHover={{ x: 4 }}
-                    >
-                      <ArrowRight className="w-5 h-5 text-primary" />
-                    </motion.div>
-                  </div>
+            {/* Gallery Card */}
+            <button onClick={openGallery} disabled={isAnalyzing} className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up" style={{
+          animationDelay: '200ms'
+        }}>
+              <div className="flex items-center gap-4">
+                {/* Icon */}
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <ImageIcon className="w-7 h-7 text-blue-600 dark:text-blue-400" />
                 </div>
-              </motion.button>
 
-              {/* Gallery Card */}
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ scale: 1.02, y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={openGallery}
-                disabled={isAnalyzing}
-                className="group relative overflow-hidden rounded-[1.5rem] shadow-lg shadow-sky/10 transition-shadow duration-300 hover:shadow-xl hover:shadow-sky/20"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-sky/15 via-sky-light/20 to-lavender/10" />
-
-                <div className="relative backdrop-blur-xl bg-white/70 border-2 border-white/80 p-5">
-                  <div className="flex items-center gap-4">
-                    <motion.div
-                      whileHover={{ rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.5 }}
-                      className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-sky to-sky/70 flex items-center justify-center shadow-lg shadow-sky/30"
-                    >
-                      <ImageIcon className="w-6 h-6 text-white" />
-                    </motion.div>
-
-                    <div className="flex-1 text-left">
-                      <h3 className="text-lg font-bold text-foreground mb-0.5">Gallery</h3>
-                      <p className="text-sm text-muted-foreground">Choose from your photos</p>
-                    </div>
-
-                    <motion.div
-                      className="w-10 h-10 rounded-xl bg-sky/10 flex items-center justify-center"
-                      whileHover={{ x: 4 }}
-                    >
-                      <ArrowRight className="w-5 h-5 text-sky" />
-                    </motion.div>
-                  </div>
+                {/* Text */}
+                <div className="flex-1 text-left">
+                  <h3 className="text-lg font-bold text-foreground mb-0.5">Gallery</h3>
+                  <p className="text-sm text-muted-foreground">Choose from your photos</p>
                 </div>
-              </motion.button>
 
-              {/* Barcode Scanner Card */}
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ scale: 1.02, y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/barcode-scanner')}
-                className="group relative overflow-hidden rounded-[1.5rem] shadow-lg shadow-peach/10 transition-shadow duration-300 hover:shadow-xl hover:shadow-peach/20"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-peach/20 via-coral/15 to-peach-light/15" />
+                {/* Arrow indicator */}
+                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
 
-                <div className="relative backdrop-blur-xl bg-white/70 border-2 border-white/80 p-5">
-                  <div className="flex items-center gap-4">
-                    <motion.div
-                      whileHover={{ rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.5 }}
-                      className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-coral to-peach flex items-center justify-center shadow-lg shadow-coral/30"
-                    >
-                      <Scan className="w-6 h-6 text-white" />
-                    </motion.div>
-
-                    <div className="flex-1 text-left">
-                      <h3 className="text-lg font-bold text-foreground mb-0.5">Scan Barcode</h3>
-                      <p className="text-sm text-muted-foreground">Scan product ingredients</p>
-                    </div>
-
-                    <motion.div
-                      className="w-10 h-10 rounded-xl bg-coral/10 flex items-center justify-center"
-                      whileHover={{ x: 4 }}
-                    >
-                      <ArrowRight className="w-5 h-5 text-coral" />
-                    </motion.div>
-                  </div>
+            {/* Barcode Scanner Card */}
+            <button onClick={() => navigate('/barcode-scanner')} className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up" style={{
+          animationDelay: '250ms'
+        }}>
+              <div className="flex items-center gap-4">
+                {/* Icon */}
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-orange-500/10 dark:bg-orange-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Scan className="w-7 h-7 text-orange-600 dark:text-orange-400" />
                 </div>
-              </motion.button>
 
-              {/* Premium Divider */}
-              <motion.div
-                initial={{ opacity: 0, scaleX: 0 }}
-                animate={{ opacity: 1, scaleX: 1 }}
-                transition={{ delay: 0.45, duration: 0.5 }}
-                className="flex items-center gap-4 py-2"
-              >
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-                <span className="text-xs text-muted-foreground font-semibold tracking-wider px-2 py-1 rounded-full bg-white/50 backdrop-blur-sm border border-white/60">OR</span>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-              </motion.div>
-
-              {/* Text Entry Card */}
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.55, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ scale: 1.02, y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setEntryMode('text')}
-                className="group relative overflow-hidden rounded-[1.5rem] shadow-lg shadow-lavender/10 transition-shadow duration-300 hover:shadow-xl hover:shadow-lavender/20"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-lavender/20 via-lavender-light/20 to-mint/10" />
-
-                <div className="relative backdrop-blur-xl bg-white/70 border-2 border-white/80 p-5">
-                  <div className="flex items-center gap-4">
-                    <motion.div
-                      whileHover={{ rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.5 }}
-                      className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-lavender flex items-center justify-center shadow-lg shadow-purple-500/30"
-                    >
-                      <Pencil className="w-6 h-6 text-white" />
-                    </motion.div>
-
-                    <div className="flex-1 text-left">
-                      <h3 className="text-lg font-bold text-foreground mb-0.5">Type It Out</h3>
-                      <p className="text-sm text-muted-foreground">Describe your meal with text</p>
-                    </div>
-
-                    <motion.div
-                      className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center"
-                      whileHover={{ x: 4 }}
-                    >
-                      <ArrowRight className="w-5 h-5 text-purple-500" />
-                    </motion.div>
-                  </div>
+                {/* Text */}
+                <div className="flex-1 text-left">
+                  <h3 className="text-lg font-bold text-foreground mb-0.5">Scan Barcode</h3>
+                  <p className="text-sm text-muted-foreground">Scan product ingredients</p>
                 </div>
-              </motion.button>
+
+                {/* Arrow indicator */}
+                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+
+            {/* Divider with text */}
+            <div className="flex items-center gap-4 py-3 animate-fade-in-up" style={{
+          animationDelay: '300ms'
+        }}>
+              <div className="flex-1 h-px bg-border"></div>
+              <span className="text-xs text-muted-foreground font-medium">OR</span>
+              <div className="flex-1 h-px bg-border"></div>
             </div>
 
-            {/* Premium Pro Tip */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
-              className="mt-6 px-2"
-            >
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60">
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-mint/30 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-primary" />
+            {/* Text Entry Card */}
+            <button onClick={() => setEntryMode('text')} className="group relative bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up" style={{
+          animationDelay: '400ms'
+        }}>
+              <div className="flex items-center gap-4">
+                {/* Icon */}
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Pencil className="w-7 h-7 text-purple-600 dark:text-purple-400" />
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  <span className="font-semibold text-foreground">Pro tip:</span> Photos help our AI detect potential triggers more accurately
-                </p>
+
+                {/* Text */}
+                <div className="flex-1 text-left">
+                  <h3 className="text-lg font-bold text-foreground mb-0.5">Type It Out</h3>
+                  <p className="text-sm text-muted-foreground">Describe your meal with text</p>
+                </div>
+
+                {/* Arrow indicator */}
+                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
               </div>
-            </motion.div>
+            </button>
           </div>
+
+          {/* Pro Tip - Bottom */}
+          
+
+          {/* Animation keyframes */}
+          <style>{`
+            @keyframes slide-down {
+              from {
+                opacity: 0;
+                transform: translateY(-20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+
+            @keyframes fade-in-up {
+              from {
+                opacity: 0;
+                transform: translateY(20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+
+            .animate-slide-down {
+              animation: slide-down 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .animate-fade-in-up {
+              animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+              animation-fill-mode: both;
+            }
+          `}</style>
         </div>) : entryMode === 'text' && !photoUrl ? (/* Text Only Mode */
     <TextOnlyModeWrapper onBack={() => setEntryMode('photo')} />) : <>
           <section className="relative w-full aspect-[4/3] overflow-hidden flex-shrink-0">
