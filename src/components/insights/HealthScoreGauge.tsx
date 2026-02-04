@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts';
 import { TrendingDown, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface HealthScoreGaugeProps {
   avgBloating: number; // 0-5 scale
@@ -24,198 +24,236 @@ export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount, hi
     return Math.round(Math.max(0, Math.min(100, composite)));
   }, [avgBloating, totalMeals, lowBloatingCount]);
 
-  const { level, color, bgColor, ringColor } = useMemo(() => {
+  const { level, orbClass, ringColor, textColor, bgColor } = useMemo(() => {
     if (healthScore >= 70) {
       return {
         level: 'Healthy',
-        color: 'hsl(var(--primary))',
-        bgColor: 'bg-primary/10',
-        ringColor: '#10b981', // Green
+        orbClass: 'ambient-orb-healthy',
+        ringColor: '#1A4D2E', // forest
+        textColor: 'text-forest',
+        bgColor: 'bg-forest/10',
       };
     } else if (healthScore >= 41) {
       return {
         level: 'Moderate',
-        color: 'hsl(var(--peach))',
-        bgColor: 'bg-peach/10',
-        ringColor: '#f97316', // Orange
+        orbClass: 'ambient-orb-moderate',
+        ringColor: '#E07A5F', // burnt
+        textColor: 'text-burnt',
+        bgColor: 'bg-burnt/10',
       };
     } else {
       return {
         level: 'Needs Attention',
-        color: 'hsl(var(--coral))',
-        bgColor: 'bg-coral/10',
-        ringColor: '#ef4444', // Red
+        orbClass: 'ambient-orb-alert',
+        ringColor: '#C45A3F', // burnt-dark
+        textColor: 'text-burnt-dark',
+        bgColor: 'bg-burnt/15',
       };
     }
   }, [healthScore]);
 
-  // Calculate weekly progress (simulated for now - in production, this would compare with previous week's data)
+  // Calculate weekly progress (simulated)
   const weeklyChange = useMemo(() => {
-    // Simulate weekly change based on current score
-    // In a real implementation, you'd calculate this from historical data
     const change = Math.round((healthScore - 50) * 0.1);
     return change;
   }, [healthScore]);
 
-  const chartData = [
-    {
-      name: 'Health Score',
-      value: healthScore,
-      fill: ringColor,
-    },
-  ];
-
   const goalScore = 60;
 
+  // SVG ring parameters
+  const size = 200;
+  const strokeWidth = 8;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * Math.PI; // Half circle
+  const progress = (healthScore / 100) * circumference;
+
   return (
-    <div className="premium-card p-5">
-      {/* Header */}
-      <div className="mb-4">
-        <h3 className="font-bold text-foreground text-lg">Your Bloat Health Score</h3>
-        <p className="text-xs text-muted-foreground">
-          Based on your bloating patterns
-        </p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="glass-card p-6 relative overflow-hidden"
+    >
+      {/* Ambient orb background */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <motion.div
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className={`w-64 h-64 ambient-orb ${orbClass} opacity-30`}
+        />
       </div>
 
-      {/* Ring Chart */}
-      <div className="relative mb-6">
-        <ResponsiveContainer width="100%" height={200}>
-          <RadialBarChart
-            cx="50%"
-            cy="50%"
-            innerRadius="75%"
-            outerRadius="100%"
-            data={chartData}
-            startAngle={180}
-            endAngle={0}
+      <div className="relative">
+        {/* Header */}
+        <div className="mb-6">
+          <h3 className="font-display text-xl font-bold text-charcoal">Your Gut Health Score</h3>
+          <p className="text-xs text-charcoal/50 font-medium">
+            Based on your bloating patterns
+          </p>
+        </div>
+
+        {/* Elegant Ring Gauge */}
+        <div className="relative mb-6 flex justify-center">
+          <svg
+            width={size}
+            height={size / 2 + 20}
+            viewBox={`0 0 ${size} ${size / 2 + 20}`}
+            className="overflow-visible"
           >
+            {/* Glow filter for the ring */}
             <defs>
-              {/* Zone gradients */}
-              <linearGradient id="redZone" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
-                <stop offset="100%" stopColor="#ef4444" stopOpacity={1} />
-              </linearGradient>
-              <linearGradient id="orangeZone" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#f97316" stopOpacity={0.8} />
-                <stop offset="100%" stopColor="#f97316" stopOpacity={1} />
-              </linearGradient>
-              <linearGradient id="greenZone" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.8} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={1} />
+              <filter id="ringGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+
+              {/* Gradient for the ring */}
+              <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor={ringColor} stopOpacity="0.6" />
+                <stop offset="100%" stopColor={ringColor} stopOpacity="1" />
               </linearGradient>
             </defs>
 
-            <PolarAngleAxis
-              type="number"
-              domain={[0, 100]}
-              angleAxisId={0}
-              tick={false}
+            {/* Background track */}
+            <path
+              d={`M ${strokeWidth / 2 + 10} ${size / 2 + 10}
+                  A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2 - 10} ${size / 2 + 10}`}
+              fill="none"
+              stroke="#D4DED4"
+              strokeWidth={strokeWidth - 2}
+              strokeLinecap="round"
+              opacity="0.3"
             />
 
-            {/* Background with zones */}
-            <RadialBar
-              background={{ fill: 'hsl(var(--muted))', opacity: 0.15 }}
-              dataKey="value"
-              cornerRadius={8}
-              fill={
-                healthScore >= 70 ? 'url(#greenZone)' :
-                healthScore >= 41 ? 'url(#orangeZone)' :
-                'url(#redZone)'
-              }
-              animationDuration={3500}
-              animationBegin={200}
+            {/* Progress arc */}
+            <motion.path
+              d={`M ${strokeWidth / 2 + 10} ${size / 2 + 10}
+                  A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2 - 10} ${size / 2 + 10}`}
+              fill="none"
+              stroke="url(#ringGradient)"
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={circumference - progress}
+              filter="url(#ringGlow)"
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset: circumference - progress }}
+              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
             />
-          </RadialBarChart>
-        </ResponsiveContainer>
 
-        {/* Center Score Display */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <div
-            className="text-5xl font-bold mb-1 transition-all duration-500"
-            style={{ color: ringColor }}
-          >
-            {healthScore}
-          </div>
-          <div className="text-xs text-muted-foreground font-medium">out of 100</div>
-          <div
-            className={`mt-2 px-3 py-1 rounded-full text-xs font-semibold ${bgColor}`}
-            style={{ color: ringColor }}
-          >
-            {level}
+            {/* Glowing tip */}
+            <motion.circle
+              cx={strokeWidth / 2 + 10 + (progress / circumference) * (size - strokeWidth - 20)}
+              cy={size / 2 + 10 - Math.sin((progress / circumference) * Math.PI) * radius}
+              r={strokeWidth / 2 + 2}
+              fill={ringColor}
+              filter="url(#ringGlow)"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 1.5 }}
+            />
+          </svg>
+
+          {/* Center Score Display */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pt-8">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-center"
+            >
+              <span
+                className="text-5xl font-bold"
+                style={{ color: ringColor }}
+              >
+                {healthScore}
+              </span>
+              <div className="text-xs text-charcoal/40 font-medium">out of 100</div>
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className={`mt-2 px-4 py-1.5 rounded-full text-xs font-bold ${bgColor} ${textColor}`}
+              >
+                {level}
+              </motion.div>
+            </motion.div>
           </div>
         </div>
-      </div>
 
-      {/* Weekly Progress & Goal */}
-      <div className="space-y-3 mb-4">
-        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/10">
-          <span className="text-sm text-muted-foreground">This week:</span>
-          <div className="flex items-center gap-1.5">
-            {weeklyChange >= 0 ? (
-              <TrendingUp className="w-4 h-4 text-primary" />
-            ) : (
-              <TrendingDown className="w-4 h-4 text-coral" />
-            )}
-            <span className={`text-sm font-bold ${weeklyChange >= 0 ? 'text-primary' : 'text-coral'}`}>
-              {weeklyChange >= 0 ? '+' : ''}{weeklyChange} points
+        {/* Weekly Progress & Goal */}
+        <div className="space-y-3 mb-5">
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50">
+            <span className="text-sm text-charcoal/60 font-medium">This week:</span>
+            <div className="flex items-center gap-1.5">
+              {weeklyChange >= 0 ? (
+                <TrendingUp className="w-4 h-4 text-forest" />
+              ) : (
+                <TrendingDown className="w-4 h-4 text-burnt" />
+              )}
+              <span className={`text-sm font-bold ${weeklyChange >= 0 ? 'text-forest' : 'text-burnt'}`}>
+                {weeklyChange >= 0 ? '+' : ''}{weeklyChange} points
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50">
+            <span className="text-sm text-charcoal/60 font-medium">Your goal:</span>
+            <span className="text-sm font-bold text-charcoal">{goalScore}+ (Low risk)</span>
+          </div>
+        </div>
+
+        {/* Zone Legend */}
+        <div className="flex items-center justify-center gap-5 mb-5 text-xs pt-4 border-t border-charcoal/10">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-burnt-dark" />
+            <span className="text-charcoal/50 font-medium">0-40</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-burnt" />
+            <span className="text-charcoal/50 font-medium">41-69</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-forest" />
+            <span className="text-charcoal/50 font-medium">70-100</span>
+          </div>
+        </div>
+
+        {/* Improvement Plan Button */}
+        <motion.button
+          whileHover={{ scale: 1.02, y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          className={`w-full py-3 px-4 rounded-2xl font-semibold text-sm transition-all ${bgColor} hover:opacity-80 tactile-press ${textColor}`}
+          onClick={() => {
+            console.log('View Improvement Plan clicked');
+          }}
+        >
+          View Improvement Plan →
+        </motion.button>
+
+        {/* Score Breakdown */}
+        <div className="mt-5 pt-4 border-t border-charcoal/10 space-y-2.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-charcoal/50 font-medium">Avg Bloating Score</span>
+            <span className="font-bold text-charcoal">{avgBloating.toFixed(1)}/5</span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-charcoal/50 font-medium">Comfortable Meals</span>
+            <span className="font-bold text-charcoal">
+              {lowBloatingCount}/{totalMeals} ({Math.round((lowBloatingCount / totalMeals) * 100)}%)
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-charcoal/50 font-medium">Uncomfortable Meals</span>
+            <span className="font-bold text-charcoal">
+              {highBloatingCount}/{totalMeals} ({Math.round((highBloatingCount / totalMeals) * 100)}%)
             </span>
           </div>
         </div>
-
-        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/10">
-          <span className="text-sm text-muted-foreground">Your goal:</span>
-          <span className="text-sm font-bold text-foreground">{goalScore}+ (Low risk)</span>
-        </div>
       </div>
-
-      {/* Zone Legend */}
-      <div className="flex items-center justify-center gap-4 mb-4 text-xs pt-3 border-t border-border/30">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-[#ef4444]" />
-          <span className="text-muted-foreground">0-40</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-[#f97316]" />
-          <span className="text-muted-foreground">41-69</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-[#10b981]" />
-          <span className="text-muted-foreground">70-100</span>
-        </div>
-      </div>
-
-      {/* Improvement Plan Button */}
-      <button
-        className={`w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all ${bgColor} hover:opacity-80`}
-        style={{ color: ringColor }}
-        onClick={() => {
-          // Navigate to improvement plan or show modal
-          // This can be implemented based on app's routing
-          console.log('View Improvement Plan clicked');
-        }}
-      >
-        View Improvement Plan →
-      </button>
-
-      {/* Score Breakdown - Collapsible or minimal */}
-      <div className="mt-4 pt-4 border-t border-border/30 space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Avg Bloating Score</span>
-          <span className="font-semibold text-foreground">{avgBloating.toFixed(1)}/5</span>
-        </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Comfortable Meals</span>
-          <span className="font-semibold text-foreground">
-            {lowBloatingCount}/{totalMeals} ({Math.round((lowBloatingCount / totalMeals) * 100)}%)
-          </span>
-        </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Uncomfortable Meals</span>
-          <span className="font-semibold text-foreground">
-            {highBloatingCount}/{totalMeals} ({Math.round((highBloatingCount / totalMeals) * 100)}%)
-          </span>
-        </div>
-      </div>
-    </div>
+    </motion.div>
   );
 }

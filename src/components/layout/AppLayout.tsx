@@ -9,8 +9,8 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, showNav = true }: AppLayoutProps) {
   return (
-    <div className="min-h-screen">
-      <main className={cn("max-w-lg mx-auto", showNav && "pb-20")}>
+    <div className="min-h-screen bg-mesh-gradient">
+      <main className={cn("max-w-lg mx-auto", showNav && "pb-28")}>
         {children}
       </main>
       {showNav && <BottomNav />}
