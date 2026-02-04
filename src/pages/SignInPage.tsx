@@ -1,8 +1,14 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthBackground } from '@/components/auth/AuthBackground';
+import { GlassCard } from '@/components/auth/GlassCard';
+import { PremiumInput } from '@/components/auth/PremiumInput';
+import { PremiumButton } from '@/components/auth/PremiumButton';
+import { Mail, Lock, ArrowLeft, Sparkles } from 'lucide-react';
 
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -11,7 +17,6 @@ export default function SignInPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [showPassword, setShowPassword] = useState(false);
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
@@ -90,264 +95,180 @@ export default function SignInPage() {
     }
   };
 
+  // Animation variants for staggered children
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.23, 1, 0.32, 1],
+      },
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-400 via-teal-400 to-emerald-400 relative overflow-hidden flex items-center justify-center p-4">
-      {/* Healthy lifestyle background pattern */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
-        <div className="absolute top-10 left-10 text-6xl">🥑</div>
-        <div className="absolute top-32 right-20 text-5xl">🥗</div>
-        <div className="absolute bottom-40 left-16 text-5xl">🍎</div>
-        <div className="absolute bottom-20 right-32 text-6xl">🥤</div>
-        <div className="absolute top-1/2 right-10 text-4xl">🥕</div>
-        <div className="absolute top-1/3 left-1/4 text-5xl">🫐</div>
-      </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <AuthBackground />
 
-      {/* Main Card with wooden texture effect */}
-      <div className="relative w-full max-w-md animate-fade-in-up">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border-4 border-amber-100 p-8 md:p-10 relative overflow-hidden">
-          {/* Wooden texture overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 via-transparent to-orange-50/30 pointer-events-none" />
+      <GlassCard>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Back button */}
+          <motion.button
+            variants={itemVariants}
+            onClick={() => navigate('/')}
+            className="group flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300 mb-8"
+            whileHover={{ x: -4 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-medium">Back</span>
+          </motion.button>
 
-          <div className="relative z-10">
-            {/* Back Button */}
-            <button
-              onClick={() => navigate('/')}
-              className="group mb-6 flex items-center gap-2 text-emerald-700 hover:text-emerald-900 transition-colors"
+          {/* Logo */}
+          <motion.div
+            variants={itemVariants}
+            className="flex justify-center mb-8"
+          >
+            <motion.div
+              className="relative"
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              transition={{ type: 'spring', stiffness: 300 }}
             >
-              <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="text-sm font-medium">Back</span>
-            </button>
+              {/* Glow effect */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 blur-xl opacity-50" />
 
-            {/* Logo with healthy icon */}
-            <div className="flex justify-center mb-6 animate-scale-in">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity" />
-                <div className="relative bg-gradient-to-br from-white to-amber-50 p-4 rounded-2xl shadow-lg border-2 border-amber-200">
-                  <img
-                    src="/bloat-ai-logo.svg"
-                    alt="Bloat AI"
-                    className="w-12 h-12 object-contain"
-                  />
-                </div>
+              {/* Logo container */}
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <img
+                  src="/bloat-ai-logo.svg"
+                  alt="Bloat AI"
+                  className="w-12 h-12 object-contain"
+                />
               </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Heading */}
+          <motion.div variants={itemVariants} className="text-center mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">
+              Welcome back
+            </h1>
+            <p className="text-gray-400 flex items-center justify-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              Continue your healthy journey
+            </p>
+          </motion.div>
+
+          {/* Form */}
+          <motion.form
+            variants={containerVariants}
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
+            <PremiumInput
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@example.com"
+              icon={<Mail className="w-5 h-5" />}
+              error={errors.email}
+              autoComplete="email"
+            />
+
+            <PremiumInput
+              label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              icon={<Lock className="w-5 h-5" />}
+              error={errors.password}
+              showPasswordToggle
+              autoComplete="current-password"
+            />
+
+            {/* Forgot password */}
+            <motion.div
+              variants={itemVariants}
+              className="flex justify-end"
+            >
+              <motion.button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-gray-400 hover:text-indigo-400 font-medium transition-colors duration-300"
+                whileHover={{ x: 2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Forgot password?
+              </motion.button>
+            </motion.div>
+
+            {/* Submit button */}
+            <div className="pt-2">
+              <PremiumButton type="submit" isLoading={isLoading}>
+                Sign In
+              </PremiumButton>
             </div>
+          </motion.form>
 
-            {/* Heading */}
-            <div className="text-center mb-8 animate-fade-in">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent mb-2">
-                Welcome back
-              </h1>
-              <p className="text-emerald-600 font-medium">
-                Continue your healthy journey
-              </p>
+          {/* Divider */}
+          <motion.div
+            variants={itemVariants}
+            className="relative my-8"
+          >
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/10" />
             </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email Input */}
-              <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                <label className="block text-sm font-semibold text-emerald-800 mb-2">
-                  Email
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                    </svg>
-                  </div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@example.com"
-                    className={`w-full pl-12 pr-4 py-3.5 rounded-xl border-2 ${
-                      errors.email ? 'border-red-400 bg-red-50/50' : 'border-amber-200 bg-gradient-to-br from-white to-amber-50/30'
-                    } focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 focus:outline-none transition-all duration-200 placeholder:text-emerald-400 font-medium`}
-                    autoComplete="email"
-                  />
-                </div>
-                {errors.email && (
-                  <p className="mt-2 text-sm text-red-500 flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {errors.email}
-                  </p>
-                )}
-              </div>
-
-              {/* Password Input */}
-              <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                <label className="block text-sm font-semibold text-emerald-800 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className={`w-full pl-12 pr-12 py-3.5 rounded-xl border-2 ${
-                      errors.password ? 'border-red-400 bg-red-50/50' : 'border-amber-200 bg-gradient-to-br from-white to-amber-50/30'
-                    } focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 focus:outline-none transition-all duration-200 placeholder:text-emerald-400 font-medium`}
-                    autoComplete="current-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 hover:text-emerald-700 transition-colors"
-                  >
-                    {showPassword ? (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="mt-2 text-sm text-red-500 flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {errors.password}
-                  </p>
-                )}
-              </div>
-
-              {/* Forgot Password */}
-              <div className="flex justify-end animate-slide-up" style={{ animationDelay: '0.3s' }}>
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="text-sm text-emerald-700 hover:text-emerald-800 font-semibold transition-colors"
-                >
-                  Forgot password?
-                </button>
-              </div>
-
-              {/* Sign In Button */}
-              <div className="pt-2 animate-slide-up" style={{ animationDelay: '0.4s' }}>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="group relative w-full px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white font-bold shadow-lg shadow-emerald-500/40 hover:shadow-xl hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 overflow-hidden border-2 border-white/20"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="relative flex items-center justify-center gap-2">
-                    {isLoading ? (
-                      <>
-                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        Signing in...
-                      </>
-                    ) : (
-                      <>
-                        Sign In
-                        <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </>
-                    )}
-                  </span>
-                </button>
-              </div>
-            </form>
-
-            {/* Sign Up Link */}
-            <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '0.5s' }}>
-              <p className="text-emerald-700 font-medium">
-                Don't have an account?{' '}
-                <Link
-                  to="/signup"
-                  className="text-emerald-800 hover:text-emerald-900 font-bold transition-colors underline decoration-2 decoration-emerald-500/50 hover:decoration-emerald-500"
-                >
-                  Create account
-                </Link>
-              </p>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-transparent text-gray-500">
+                New to Bloat AI?
+              </span>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
 
-      <style>{`
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        @keyframes scale-in {
-          from {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-float {
-          animation: float 8s ease-in-out infinite;
-        }
-
-        .animate-float-delayed {
-          animation: float-delayed 10s ease-in-out infinite;
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 0.8s ease-out forwards;
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.8s ease-out forwards;
-          opacity: 0;
-        }
-
-        .animate-scale-in {
-          animation: scale-in 0.6s ease-out forwards;
-        }
-
-        .animate-slide-up {
-          animation: slide-up 0.6s ease-out forwards;
-          opacity: 0;
-        }
-      `}</style>
+          {/* Sign up link */}
+          <motion.div variants={itemVariants} className="text-center">
+            <Link
+              to="/signup"
+              className="group inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"
+            >
+              <span>Create an account</span>
+              <motion.svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                whileHover={{ x: 4 }}
+                transition={{ duration: 0.2 }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </motion.svg>
+            </Link>
+          </motion.div>
+        </motion.div>
+      </GlassCard>
     </div>
   );
 }
