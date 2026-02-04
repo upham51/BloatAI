@@ -32,8 +32,7 @@ export function BottomNav() {
             to={to}
             className={({ isActive }) =>
               cn(
-                'relative flex items-center justify-center transition-all duration-300',
-                isCenter ? 'mx-1' : ''
+                'relative flex items-center justify-center transition-all duration-300 w-16'
               )
             }
           >
