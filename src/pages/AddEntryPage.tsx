@@ -15,7 +15,7 @@ import { useMilestones } from '@/contexts/MilestonesContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { DetectedTrigger, validateTriggers, getTriggerCategory } from '@/types';
-import { getIconForTrigger, abbreviateIngredient, deduplicateTriggers } from '@/lib/triggerUtils';
+import { getIconForTrigger, abbreviateIngredient, deduplicateTriggers, detectTriggersFromText } from '@/lib/triggerUtils';
 import { haptics } from '@/lib/haptics';
 import { validateMealDescription, retryWithBackoff } from '@/lib/bloatingUtils';
 import { GrainTexture } from '@/components/ui/grain-texture';
@@ -179,7 +179,18 @@ export default function AddEntryPage() {
       const triggers = Array.isArray(data?.triggers) ? data.triggers : [];
       const validTriggers = validateTriggers(triggers);
       // Deduplicate triggers to avoid showing redundant items (e.g., "French Toast" and "Bread" both as fructans)
-      const deduplicatedTriggers = deduplicateTriggers(validTriggers);
+      let deduplicatedTriggers = deduplicateTriggers(validTriggers);
+
+      // CLIENT-SIDE FALLBACK: If AI returned no triggers, scan the description for trigger keywords
+      if (deduplicatedTriggers.length === 0 && description) {
+        console.log('No triggers from AI, running client-side keyword detection...');
+        const keywordTriggers = detectTriggersFromText(description);
+        if (keywordTriggers.length > 0) {
+          console.log(`Client-side fallback detected ${keywordTriggers.length} triggers:`, keywordTriggers);
+          deduplicatedTriggers = keywordTriggers;
+        }
+      }
+
       setDetectedTriggers(deduplicatedTriggers);
       setPhotoAnalyzed(true);
       if (deduplicatedTriggers.length > 0) {

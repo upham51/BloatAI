@@ -232,6 +232,103 @@ IMPORTANT:
       confidence: 0.9 // AI-detected triggers have high confidence
     }));
 
+    // FALLBACK: Keyword-based trigger detection from meal text
+    // This catches triggers even when AI completely fails to detect them
+    if (result.triggers.length === 0 && mealText) {
+      console.log('Running keyword-based trigger detection fallback...');
+      const description = mealText.toLowerCase();
+      const keywordTriggers: Array<{category: string, food: string, confidence: number}> = [];
+
+      // Common trigger keywords mapped to categories
+      const triggerKeywords: Record<string, Array<{keywords: string[], food: string}>> = {
+        'veggie-vengeance': [
+          { keywords: ['onion', 'onions', 'green onion', 'scallion', 'shallot'], food: 'onion' },
+          { keywords: ['garlic'], food: 'garlic' },
+          { keywords: ['broccoli'], food: 'broccoli' },
+          { keywords: ['cauliflower'], food: 'cauliflower' },
+          { keywords: ['mushroom', 'mushrooms'], food: 'mushrooms' },
+          { keywords: ['beans', 'bean', 'lentil', 'lentils', 'chickpea', 'hummus'], food: 'beans' },
+          { keywords: ['cabbage', 'sauerkraut', 'coleslaw'], food: 'cabbage' },
+          { keywords: ['asparagus'], food: 'asparagus' },
+          { keywords: ['artichoke'], food: 'artichoke' },
+          { keywords: ['leek', 'leeks'], food: 'leek' },
+        ],
+        'dairy-drama': [
+          { keywords: ['ice cream', 'icecream', 'gelato', 'frozen yogurt'], food: 'ice cream' },
+          { keywords: ['milk', 'milkshake', 'latte', 'cappuccino'], food: 'milk' },
+          { keywords: ['cream', 'creamy', 'whipped cream', 'sour cream'], food: 'cream' },
+          { keywords: ['cheese', 'cheesy', 'mozzarella', 'cheddar', 'parmesan', 'ricotta', 'cottage cheese', 'cream cheese'], food: 'cheese' },
+          { keywords: ['yogurt', 'yoghurt'], food: 'yogurt' },
+          { keywords: ['butter', 'buttery'], food: 'butter' },
+        ],
+        'gluten-gang': [
+          { keywords: ['bread', 'toast', 'sandwich', 'bun', 'roll', 'bagel', 'croissant'], food: 'bread' },
+          { keywords: ['pasta', 'spaghetti', 'noodle', 'noodles', 'macaroni', 'penne', 'fettuccine', 'linguine', 'ramen'], food: 'pasta' },
+          { keywords: ['wheat', 'flour', 'tortilla', 'wrap'], food: 'wheat' },
+          { keywords: ['pizza', 'calzone'], food: 'pizza crust' },
+          { keywords: ['pancake', 'pancakes', 'waffle', 'waffles', 'crepe'], food: 'pancakes' },
+          { keywords: ['cake', 'cupcake', 'muffin', 'cookie', 'cookies', 'brownie', 'pastry', 'croissant', 'donut', 'doughnut'], food: 'baked goods' },
+          { keywords: ['cereal', 'oatmeal', 'granola'], food: 'cereal' },
+        ],
+        'fruit-fury': [
+          { keywords: ['apple', 'apples'], food: 'apple' },
+          { keywords: ['pear', 'pears'], food: 'pear' },
+          { keywords: ['mango', 'mangoes'], food: 'mango' },
+          { keywords: ['watermelon'], food: 'watermelon' },
+          { keywords: ['dried fruit', 'raisins', 'dates', 'prunes', 'dried apricot'], food: 'dried fruit' },
+          { keywords: ['honey'], food: 'honey' },
+          { keywords: ['agave'], food: 'agave' },
+        ],
+        'grease-gridlock': [
+          { keywords: ['fried', 'deep fried', 'deep-fried', 'crispy', 'battered'], food: 'fried food' },
+          { keywords: ['french fries', 'fries', 'chips'], food: 'fries' },
+          { keywords: ['bacon'], food: 'bacon' },
+          { keywords: ['sausage', 'sausages', 'hot dog', 'hotdog'], food: 'sausage' },
+          { keywords: ['fatty', 'greasy', 'oily'], food: 'fatty food' },
+        ],
+        'spice-strike': [
+          { keywords: ['spicy', 'hot sauce', 'sriracha', 'tabasco', 'chili', 'jalapeño', 'jalapeno', 'habanero', 'cayenne'], food: 'spicy food' },
+          { keywords: ['curry', 'curried'], food: 'curry' },
+          { keywords: ['wasabi'], food: 'wasabi' },
+        ],
+        'bubble-trouble': [
+          { keywords: ['soda', 'cola', 'coke', 'pepsi', 'sprite', 'fanta', 'fizzy', 'carbonated'], food: 'soda' },
+          { keywords: ['beer', 'lager', 'ale'], food: 'beer' },
+          { keywords: ['sparkling water', 'seltzer', 'tonic'], food: 'sparkling water' },
+          { keywords: ['champagne', 'prosecco'], food: 'champagne' },
+        ],
+        'bad-beef': [
+          { keywords: ['deli meat', 'deli', 'cold cuts', 'salami', 'pepperoni', 'ham', 'prosciutto', 'pastrami'], food: 'deli meat' },
+          { keywords: ['processed meat', 'spam', 'bologna'], food: 'processed meat' },
+        ],
+        'chemical-chaos': [
+          { keywords: ['sugar-free', 'sugar free', 'diet soda', 'diet coke', 'zero sugar', 'no sugar'], food: 'sugar-free product' },
+          { keywords: ['protein bar', 'energy bar'], food: 'protein bar' },
+          { keywords: ['gum', 'chewing gum'], food: 'gum' },
+          { keywords: ['artificial sweetener', 'aspartame', 'sucralose', 'stevia', 'xylitol', 'sorbitol'], food: 'artificial sweetener' },
+        ],
+      };
+
+      // Scan description for trigger keywords
+      for (const [category, items] of Object.entries(triggerKeywords)) {
+        for (const item of items) {
+          const found = item.keywords.some(keyword => description.includes(keyword));
+          if (found) {
+            // Avoid duplicates
+            const exists = keywordTriggers.some(t => t.category === category && t.food === item.food);
+            if (!exists) {
+              keywordTriggers.push({ category, food: item.food, confidence: 0.9 });
+            }
+          }
+        }
+      }
+
+      if (keywordTriggers.length > 0) {
+        console.log(`Keyword fallback detected ${keywordTriggers.length} triggers:`, keywordTriggers);
+        result.triggers = keywordTriggers;
+      }
+    }
+
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
