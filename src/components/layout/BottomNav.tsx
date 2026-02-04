@@ -22,7 +22,7 @@ export function BottomNav() {
     >
       {/* Floating Dock Container - Glass Island */}
       <motion.div
-        className="floating-dock flex items-center gap-1 px-3 py-2"
+        className="floating-dock flex items-center justify-evenly px-2 py-2 min-w-[340px]"
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.3 }}
       >
@@ -32,7 +32,7 @@ export function BottomNav() {
             to={to}
             className={({ isActive }) =>
               cn(
-                'relative flex items-center justify-center transition-all duration-300 w-16'
+                'relative flex items-center justify-center transition-all duration-300 flex-1'
               )
             }
           >
