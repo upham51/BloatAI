@@ -325,6 +325,22 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
             </div>
           </div>
 
+          {/* Chart Legend - Quick Reference */}
+          <div className="flex items-center justify-center gap-4 mb-3 px-2">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-forest" />
+              <span className="text-[10px] font-semibold text-charcoal/60">Good (1-2)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+              <span className="text-[10px] font-semibold text-charcoal/60">OK (3)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-burnt" />
+              <span className="text-[10px] font-semibold text-charcoal/60">High (4-5)</span>
+            </div>
+          </div>
+
           {/* Premium Line Chart */}
           <div className="relative bg-white/50 backdrop-blur-sm rounded-2xl p-3 sm:p-4 border border-white/60">
             {/* Y-axis labels with context */}
@@ -519,36 +535,65 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
               })}
             </svg>
 
-            {/* Day labels */}
-            <div className="flex justify-between px-1 mt-2">
+            {/* Day labels with bloating level bars */}
+            <div className="flex justify-between px-1 mt-3">
               {chartData.map((day, index) => {
                 const isActive = activeDay === index;
+                const bloatingLevel = day.bloating;
+                const barColor = getPointColor(bloatingLevel);
+
+                // Determine status text and styling
+                const getStatusInfo = () => {
+                  if (!day.hasData) return { label: '—', color: 'text-charcoal/30', bgColor: 'bg-charcoal/10' };
+                  if (bloatingLevel !== null && bloatingLevel <= 2) return { label: 'Good', color: 'text-forest', bgColor: 'bg-forest/20' };
+                  if (bloatingLevel !== null && bloatingLevel <= 3) return { label: 'OK', color: 'text-amber-600', bgColor: 'bg-amber-100' };
+                  return { label: 'High', color: 'text-burnt', bgColor: 'bg-burnt/20' };
+                };
+
+                const statusInfo = getStatusInfo();
 
                 return (
                   <motion.div
                     key={day.day}
-                    className="flex flex-col items-center gap-1 cursor-pointer"
-                    whileHover={{ scale: 1.05 }}
+                    className={`flex flex-col items-center gap-1.5 cursor-pointer rounded-xl px-2 py-2 transition-all ${
+                      isActive ? 'bg-forest/10' : 'hover:bg-charcoal/5'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onMouseEnter={() => setHoveredDay(index)}
                     onMouseLeave={() => setHoveredDay(null)}
                     onClick={() => setSelectedDay(selectedDay === index ? null : index)}
                   >
+                    {/* Day name */}
                     <span className={`text-[10px] sm:text-xs font-bold transition-colors ${
-                      isActive ? 'text-forest' : day.isToday ? 'text-forest/70' : 'text-charcoal/30'
+                      isActive ? 'text-forest' : day.isToday ? 'text-forest' : 'text-charcoal/50'
                     }`}>
                       {day.dayShort}
                     </span>
+
+                    {/* Bloating level indicator bar */}
+                    <div className="w-full h-1.5 rounded-full bg-charcoal/10 overflow-hidden">
+                      {day.hasData && bloatingLevel !== null && (
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{ backgroundColor: barColor }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(bloatingLevel / 5) * 100}%` }}
+                          transition={{ delay: 0.3 + index * 0.05, duration: 0.5, ease: "easeOut" }}
+                        />
+                      )}
+                    </div>
+
+                    {/* Status badge */}
+                    <span className={`text-[8px] sm:text-[9px] font-bold ${statusInfo.color} ${statusInfo.bgColor} px-1.5 py-0.5 rounded-md`}>
+                      {statusInfo.label}
+                    </span>
+
+                    {/* Today indicator */}
                     {day.isToday && (
-                      <motion.div
-                        layoutId="todayIndicator"
-                        className="w-1.5 h-1.5 rounded-full bg-forest"
-                      />
-                    )}
-                    {!day.isToday && day.hasData && (
-                      <div
-                        className="w-1 h-1 rounded-full"
-                        style={{ backgroundColor: getPointColor(day.bloating) }}
-                      />
+                      <span className="text-[7px] font-bold text-forest bg-forest/20 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                        Today
+                      </span>
                     )}
                   </motion.div>
                 );
