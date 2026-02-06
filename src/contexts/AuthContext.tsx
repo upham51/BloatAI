@@ -10,6 +10,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<{ error: string | null }>;
+  deleteAccount: () => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,8 +75,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const deleteAccount = async (): Promise<{ error: string | null }> => {
+    const { data, error } = await supabase.functions.invoke('delete-account');
+    if (error) return { error: error.message };
+    if (data?.error) return { error: data.error };
+    await supabase.auth.signOut();
+    return { error: null };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, signIn, signUp, signOut, signInWithGoogle }}>
+    <AuthContext.Provider value={{ user, session, isLoading, signIn, signUp, signOut, signInWithGoogle, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

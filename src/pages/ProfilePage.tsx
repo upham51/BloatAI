@@ -4,6 +4,16 @@ import { User, Mail, Bell, LogOut, Trash2, ChevronRight, Shield, CreditCard, Cro
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription, STRIPE_PLANS } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
@@ -13,13 +23,15 @@ import { StorageManager } from '@/components/profile/StorageManager';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, deleteAccount } = useAuth();
   const { hasAccess, plan, subscriptionEnd, openCustomerPortal, isLoading } = useSubscription();
   const { toast } = useToast();
   
   const [pushEnabled, setPushEnabled] = useState(true);
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -46,12 +58,33 @@ export default function ProfilePage() {
     }
   };
 
-  const handleDeleteAccount = () => {
-    toast({
-      variant: 'destructive',
-      title: 'Not available',
-      description: 'Account deletion coming soon. Contact support for now.',
-    });
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await deleteAccount();
+      if (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Deletion failed',
+          description: error,
+        });
+        return;
+      }
+      toast({
+        title: 'Account deleted',
+        description: 'Your account and all associated data have been permanently deleted.',
+      });
+      navigate('/');
+    } catch {
+      toast({
+        variant: 'destructive',
+        title: 'Deletion failed',
+        description: 'Something went wrong. Please try again or contact support.',
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+    }
   };
 
   return (
@@ -219,8 +252,8 @@ export default function ProfilePage() {
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
               
-              <button 
-                onClick={handleDeleteAccount}
+              <button
+                onClick={() => setDeleteDialogOpen(true)}
                 className="flex items-center justify-between w-full px-5 py-4 hover:bg-destructive/5 transition-colors text-left group"
               >
                 <div className="flex items-center gap-3">
@@ -239,6 +272,35 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action is permanent and cannot be undone. All your meal logs,
+              insights, and personal data will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Account'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
