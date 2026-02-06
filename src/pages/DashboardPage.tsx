@@ -7,17 +7,15 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
-import { InsightsOrb } from '@/components/insights/InsightsOrb';
 import { CorrelationTeaser } from '@/components/insights/CorrelationTeaser';
-import { MealPhoto } from '@/components/meals/MealPhoto';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMeals } from '@/contexts/MealContext';
 import { useProfile } from '@/hooks/useProfile';
-import { format, subDays, isAfter, differenceInCalendarDays, parseISO } from 'date-fns';
+import { format, subDays, differenceInCalendarDays, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getTimeBasedGreeting } from '@/lib/quotes';
-import { getTimeBasedHeroBackground, getTimePeriod } from '@/lib/pexels';
+import { getTimeBasedHeroBackground, getTimePeriod, getInsightsNatureBackground } from '@/lib/pexels';
 
 const RATING_LABELS: Record<number, string> = {
   1: 'None',
@@ -64,13 +62,16 @@ export default function DashboardPage() {
 
   // Get time-based hero background
   const [heroBackground] = useState(() => getTimeBasedHeroBackground());
+  const [natureBackground] = useState(() => getInsightsNatureBackground());
   const timePeriod = getTimePeriod();
 
-  // Preload hero background
+  // Preload hero and nature backgrounds
   useEffect(() => {
     const img = new Image();
     img.src = heroBackground.src;
-  }, [heroBackground]);
+    const img2 = new Image();
+    img2.src = natureBackground.src;
+  }, [heroBackground, natureBackground]);
 
   // Show onboarding for new users
   useEffect(() => {
@@ -119,45 +120,13 @@ export default function DashboardPage() {
 
   const completedCount = getCompletedCount();
 
-  // Calculate number of unique days with rated meals
-  const daysWithData = useMemo(() => {
-    const ratedMeals = entries.filter(e =>
-      e.bloating_rating !== null &&
-      e.bloating_rating !== undefined &&
-      e.bloating_rating >= 1 &&
-      e.bloating_rating <= 5
-    );
-
-    const uniqueDays = new Set(
-      ratedMeals.map(e => format(new Date(e.created_at), 'yyyy-MM-dd'))
-    );
-
-    return uniqueDays.size;
-  }, [entries]);
-
-  const hasEnoughDataForInsights = daysWithData >= 3;
+  const neededForInsights = 3;
+  const hasEnoughDataForInsights = completedCount >= neededForInsights;
 
   // Calculate today's meals
   const todaysMeals = useMemo(() => {
     const today = format(new Date(), 'yyyy-MM-dd');
     return entries.filter(e => format(new Date(e.created_at), 'yyyy-MM-dd') === today).length;
-  }, [entries]);
-
-  // Calculate average bloating for the week
-  const weeklyBloating = useMemo(() => {
-    const weekAgo = subDays(new Date(), 7);
-    const weekMeals = entries.filter(e =>
-      isAfter(new Date(e.created_at), weekAgo) &&
-      e.bloating_rating !== null &&
-      e.bloating_rating !== undefined &&
-      e.bloating_rating >= 1 &&
-      e.bloating_rating <= 5
-    );
-
-    if (weekMeals.length === 0) return 0;
-
-    const total = weekMeals.reduce((sum, meal) => sum + (meal.bloating_rating || 0), 0);
-    return total / weekMeals.length;
   }, [entries]);
 
   const handleRate = async (rating: number) => {
@@ -482,7 +451,7 @@ export default function DashboardPage() {
                       <div className="flex-1">
                         <h4 className="font-bold text-charcoal text-base mb-1">Pro Tip</h4>
                         <p className="text-sm text-charcoal/60 font-medium leading-relaxed">
-                          Log meals consistently for at least <span className="font-bold text-forest">3 days</span> to identify patterns and get meaningful insights.
+                          Log and rate at least <span className="font-bold text-forest">3 meals</span> to identify patterns and get meaningful insights.
                         </p>
                       </div>
                     </div>
@@ -496,82 +465,107 @@ export default function DashboardPage() {
               <>
                 <StaggerItem>
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                    className="premium-card p-8 text-center relative overflow-hidden"
+                    initial={{ opacity: 0, scale: 0.96, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative overflow-hidden rounded-[32px] shadow-glass-xl"
                   >
-                    {/* Ambient orb */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <motion.div
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                        className="w-48 h-48 ambient-orb ambient-orb-healthy"
-                      />
-                    </div>
+                    {/* Nature Background Image */}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${natureBackground.src})` }}
+                    />
 
-                    <div className="relative">
-                      <div className="flex justify-center mb-4">
-                        <InsightsOrb
-                          bloatLevel={weeklyBloating || undefined}
-                          size={100}
-                        />
+                    {/* Gradient overlays for readability */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-charcoal/30 via-charcoal/20 to-charcoal/70" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-forest/20 via-transparent to-transparent" />
+
+                    {/* Content */}
+                    <div className="relative p-7 pb-6">
+                      {/* Top section */}
+                      <div className="text-center mb-5">
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2, duration: 0.6 }}
+                          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 mb-4"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-white" />
+                          <span className="text-[11px] font-bold text-white uppercase tracking-widest">Building Insights</span>
+                        </motion.div>
+
+                        <motion.h3
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3, duration: 0.6 }}
+                          className="font-display text-2xl font-bold text-white mb-2"
+                          style={{ textShadow: '0 2px 16px rgba(0,0,0,0.3)' }}
+                        >
+                          {neededForInsights - completedCount} more meal{neededForInsights - completedCount !== 1 ? 's' : ''} to go
+                        </motion.h3>
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.4, duration: 0.6 }}
+                          className="text-sm text-white/80 font-medium max-w-xs mx-auto"
+                          style={{ textShadow: '0 1px 8px rgba(0,0,0,0.2)' }}
+                        >
+                          Rate your meals to unlock personalized wellness insights
+                        </motion.p>
                       </div>
 
-                      <h3 className="font-display text-2xl font-bold text-charcoal mb-2">
-                        Building Your Insights
-                      </h3>
-                      <p className="text-sm text-charcoal/60 font-medium mb-6 max-w-xs mx-auto leading-relaxed">
-                        Log meals with bloating ratings across <span className="font-bold text-forest">{3 - daysWithData} more day{3 - daysWithData !== 1 ? 's' : ''}</span> to unlock your wellness insights
-                      </p>
-
-                      {/* Progress indicator */}
-                      <div className="w-full">
+                      {/* Progress section with glass background */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.6 }}
+                        className="rounded-2xl bg-white/15 backdrop-blur-xl border border-white/20 p-4"
+                      >
                         <div className="flex justify-between items-center mb-3 text-xs">
-                          <span className="font-bold text-charcoal/50 uppercase tracking-wider">Progress</span>
-                          <span className="font-bold text-forest">{daysWithData}/3 <span className="text-charcoal/50">days</span></span>
+                          <span className="font-bold text-white/70 uppercase tracking-wider">Progress</span>
+                          <span className="font-bold text-white">{completedCount}/{neededForInsights}</span>
                         </div>
 
                         <div className="relative">
                           {/* Progress track */}
-                          <div className="relative w-full h-2.5 rounded-full overflow-hidden bg-sage border border-sage-dark/20">
+                          <div className="relative w-full h-2.5 rounded-full overflow-hidden bg-white/20">
                             <motion.div
                               initial={{ width: 0 }}
-                              animate={{ width: daysWithData === 0 ? '0%' : daysWithData === 1 ? '0%' : daysWithData === 2 ? '50%' : '100%' }}
+                              animate={{ width: `${(completedCount / neededForInsights) * 100}%` }}
                               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                              className="h-full rounded-full bg-gradient-to-r from-forest to-forest-light"
+                              className="h-full rounded-full bg-white/90"
                             />
                           </div>
 
                           {/* Milestone markers */}
                           <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex justify-between pointer-events-none px-0">
-                            {[1, 2, 3].map((day) => (
+                            {[1, 2, 3].map((meal) => (
                               <motion.div
-                                key={day}
+                                key={meal}
                                 className={`w-4 h-4 rounded-full border-2 ${
-                                  daysWithData >= day
-                                    ? 'bg-forest border-white'
-                                    : 'bg-white border-sage-dark/30'
+                                  completedCount >= meal
+                                    ? 'bg-white border-white/50 shadow-lg shadow-white/30'
+                                    : 'bg-white/20 border-white/30'
                                 }`}
                               />
                             ))}
                           </div>
                         </div>
 
-                        {/* Day labels */}
+                        {/* Meal labels */}
                         <div className="flex justify-between mt-3">
-                          {[1, 2, 3].map((day) => (
+                          {[1, 2, 3].map((meal) => (
                             <span
-                              key={day}
+                              key={meal}
                               className={`text-xs font-bold ${
-                                daysWithData >= day ? 'text-forest' : 'text-charcoal/30'
+                                completedCount >= meal ? 'text-white' : 'text-white/40'
                               }`}
                             >
-                              Day {day}
+                              Meal {meal}
                             </span>
                           ))}
                         </div>
-                      </div>
+                      </motion.div>
                     </div>
                   </motion.div>
                 </StaggerItem>

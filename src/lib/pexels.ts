@@ -41,6 +41,23 @@ export const heroBackgrounds = {
   ],
 };
 
+// Minimalistic nature backgrounds for insights progress card
+export const insightsNatureBackgrounds = [
+  { id: 301, src: 'https://images.pexels.com/photos/3225517/pexels-photo-3225517.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Misty mountain forest at dawn', photographer: 'Luca Bravo' },
+  { id: 302, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm lake surrounded by forest', photographer: 'Eberhard Grossgasteiger' },
+  { id: 303, src: 'https://images.pexels.com/photos/1761279/pexels-photo-1761279.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Soft green fern leaves', photographer: 'Pixabay' },
+  { id: 304, src: 'https://images.pexels.com/photos/2387793/pexels-photo-2387793.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene mountain valley landscape', photographer: 'Julius Silver' },
+  { id: 305, src: 'https://images.pexels.com/photos/1486974/pexels-photo-1486974.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Aerial view of lush green forest', photographer: 'Luca Bravo' },
+];
+
+/**
+ * Get a random minimalistic nature background for insights progress card
+ */
+export function getInsightsNatureBackground(): PexelsPhoto {
+  const randomIndex = Math.floor(Math.random() * insightsNatureBackgrounds.length);
+  return insightsNatureBackgrounds[randomIndex];
+}
+
 // Meal card texture backgrounds (dark, moody aesthetic)
 export const mealTextures = [
   { id: 101, src: 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=600', alt: 'Dark marble texture', category: 'marble' },
