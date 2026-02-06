@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import InsightsLoader from '@/components/shared/InsightsLoader';
-import { EmptyState } from '@/components/shared/EmptyState';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
@@ -16,6 +15,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { getIconForTrigger } from '@/lib/triggerUtils';
 import { generateComprehensiveInsight, generateAdvancedInsights } from '@/lib/insightsAnalysis';
 import { GrainTexture } from '@/components/ui/grain-texture';
+import { getInsightsNatureBackground } from '@/lib/pexels';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
@@ -26,6 +26,15 @@ export default function InsightsPage() {
   const neededForInsights = 3;
   // Check completed entries for insights, not just total entries
   const hasEnoughData = completedCount >= neededForInsights;
+
+  // Nature background for progress card
+  const [natureBackground] = useState(() => getInsightsNatureBackground());
+
+  // Preload nature background
+  useEffect(() => {
+    const img = new Image();
+    img.src = natureBackground.src;
+  }, [natureBackground]);
 
   // Loading state for AI magic animation
   const [isAnalyzing, setIsAnalyzing] = useState(true);
@@ -76,36 +85,12 @@ export default function InsightsPage() {
     return (
       <AppLayout>
         <PageTransition>
-          <div className="min-h-screen relative">
-            {/* Premium animated background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-lavender/20 via-mint/15 to-background" />
-
-            {/* Animated gradient orbs */}
-            <motion.div
-              animate={{
-                scale: [1, 1.3, 1],
-                x: [0, 25, 0],
-                y: [0, -15, 0],
-              }}
-              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-20 left-10 w-60 h-60 bg-gradient-to-br from-primary/20 to-mint/15 rounded-full blur-3xl pointer-events-none"
-            />
-
-            <motion.div
-              animate={{
-                scale: [1, 1.2, 1],
-                x: [0, -20, 0],
-                y: [0, 15, 0],
-              }}
-              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-              className="absolute top-60 right-5 w-48 h-48 bg-gradient-to-tr from-lavender/25 to-purple-300/15 rounded-full blur-3xl pointer-events-none"
-            />
-
+          <div className="min-h-screen relative bg-mesh-gradient">
             <GrainTexture />
 
-            <StaggerContainer className="relative z-10 p-5 pt-8 max-w-lg mx-auto">
+            <StaggerContainer className="relative z-10 px-5 pt-8 pb-36 max-w-lg mx-auto space-y-6">
               <StaggerItem>
-                <header className="mb-8">
+                <header className="mb-2">
                   <motion.h1
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -126,80 +111,127 @@ export default function InsightsPage() {
                 </header>
               </StaggerItem>
 
-              <StaggerItem>
-                <EmptyState
-                  IconComponent={Sparkles}
-                  title="Insights Coming Soon!"
-                  description={`Rate ${neededForInsights - completedCount} more meal${neededForInsights - completedCount !== 1 ? 's' : ''} to unlock your personalized analysis.`}
-                  actionLabel="Log a Meal"
-                  onAction={() => navigate('/add-entry')}
-                />
-              </StaggerItem>
-
+              {/* Nature image progress card - matches dashboard style */}
               <StaggerItem>
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
-                  className="mt-6 relative overflow-hidden rounded-[2rem] shadow-xl"
+                  initial={{ opacity: 0, scale: 0.96, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  className="relative overflow-hidden rounded-[32px] shadow-glass-xl"
                 >
-                  {/* Gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/80 via-purple-100/70 to-pink-100/80" />
-
-                  {/* Animated orb */}
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1], x: [0, 15, 0] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-12 -right-12 w-40 h-40 bg-gradient-to-br from-indigo-400/20 to-purple-400/15 rounded-full blur-2xl"
+                  {/* Nature Background Image */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${natureBackground.src})` }}
                   />
 
-                  {/* Glass overlay */}
-                  <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/80 rounded-[2rem] p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-muted-foreground font-bold">Progress</span>
-                      <span className="font-black text-primary text-lg">{completedCount}/{neededForInsights}</span>
-                    </div>
-                    <div className="relative h-4 rounded-full overflow-hidden bg-white/60 border border-white/80 shadow-inner">
+                  {/* Gradient overlays for readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-charcoal/30 via-charcoal/20 to-charcoal/70" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-forest/20 via-transparent to-transparent" />
+
+                  {/* Content */}
+                  <div className="relative p-7 pb-6">
+                    {/* Top section */}
+                    <div className="text-center mb-5">
                       <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(completedCount / neededForInsights) * 100}%` }}
-                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full relative overflow-hidden"
-                        style={{
-                          backgroundSize: '200% 100%',
-                          animation: 'gradientShift 3s ease infinite',
-                        }}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.6 }}
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 mb-4"
                       >
-                        <motion.div
-                          animate={{ x: ['-100%', '200%'] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                          className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/50 to-transparent"
-                        />
+                        <Sparkles className="w-3.5 h-3.5 text-white" />
+                        <span className="text-[11px] font-bold text-white uppercase tracking-widest">Building Insights</span>
                       </motion.div>
+
+                      <motion.h3
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.6 }}
+                        className="font-display text-2xl font-bold text-white mb-2"
+                        style={{ textShadow: '0 2px 16px rgba(0,0,0,0.3)' }}
+                      >
+                        {neededForInsights - completedCount} more meal{neededForInsights - completedCount !== 1 ? 's' : ''} to go
+                      </motion.h3>
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.6 }}
+                        className="text-sm text-white/80 font-medium max-w-xs mx-auto"
+                        style={{ textShadow: '0 1px 8px rgba(0,0,0,0.2)' }}
+                      >
+                        Rate your meals to unlock personalized wellness insights
+                      </motion.p>
                     </div>
-                    {/* Milestone markers */}
-                    <div className="flex justify-between mt-4">
-                      {[1, 2, 3].map((day) => (
-                        <motion.div
-                          key={day}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.5 + day * 0.1, duration: 0.4 }}
-                          className={`flex flex-col items-center ${
-                            completedCount >= day ? 'opacity-100' : 'opacity-40'
-                          } transition-all`}
-                        >
-                          <div className={`w-3 h-3 rounded-full border-2 ${
-                            completedCount >= day
-                              ? 'bg-gradient-to-br from-indigo-500 to-purple-500 border-white shadow-lg shadow-indigo-500/50'
-                              : 'bg-muted border-muted-foreground/30'
-                          }`} />
-                          <span className={`text-xs font-bold mt-2 ${
-                            completedCount >= day ? 'text-foreground' : 'text-muted-foreground/60'
-                          }`}>Meal {day}</span>
-                        </motion.div>
-                      ))}
-                    </div>
+
+                    {/* Progress section with glass background */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5, duration: 0.6 }}
+                      className="rounded-2xl bg-white/15 backdrop-blur-xl border border-white/20 p-4"
+                    >
+                      <div className="flex justify-between items-center mb-3 text-xs">
+                        <span className="font-bold text-white/70 uppercase tracking-wider">Progress</span>
+                        <span className="font-bold text-white">{completedCount}/{neededForInsights}</span>
+                      </div>
+
+                      <div className="relative">
+                        {/* Progress track */}
+                        <div className="relative w-full h-2.5 rounded-full overflow-hidden bg-white/20">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(completedCount / neededForInsights) * 100}%` }}
+                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                            className="h-full rounded-full bg-white/90"
+                          />
+                        </div>
+
+                        {/* Milestone markers */}
+                        <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex justify-between pointer-events-none px-0">
+                          {[1, 2, 3].map((meal) => (
+                            <motion.div
+                              key={meal}
+                              className={`w-4 h-4 rounded-full border-2 ${
+                                completedCount >= meal
+                                  ? 'bg-white border-white/50 shadow-lg shadow-white/30'
+                                  : 'bg-white/20 border-white/30'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Meal labels */}
+                      <div className="flex justify-between mt-3">
+                        {[1, 2, 3].map((meal) => (
+                          <span
+                            key={meal}
+                            className={`text-xs font-bold ${
+                              completedCount >= meal ? 'text-white' : 'text-white/40'
+                            }`}
+                          >
+                            Meal {meal}
+                          </span>
+                        ))}
+                      </div>
+                    </motion.div>
+
+                    {/* CTA Button */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6, duration: 0.6 }}
+                      className="mt-5 flex justify-center"
+                    >
+                      <motion.button
+                        whileHover={{ scale: 1.04, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => navigate('/add-entry')}
+                        className="px-8 py-3 rounded-2xl bg-white/95 backdrop-blur-sm text-charcoal font-bold text-sm shadow-glass border border-white/50 hover:bg-white transition-all duration-300"
+                      >
+                        Log a Meal
+                      </motion.button>
+                    </motion.div>
                   </div>
                 </motion.div>
               </StaggerItem>
