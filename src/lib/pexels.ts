@@ -2,10 +2,23 @@
  * Pexels API Integration for Premium Imagery
  *
  * Provides high-quality, curated imagery for:
- * - Time-based hero backgrounds
+ * - Time-based hero backgrounds (live API + static fallback)
  * - Food texture overlays for meal cards
  * - Editorial food photos for list items
  */
+
+const PEXELS_API_KEY = import.meta.env.VITE_PEXELS_API_KEY || '';
+const PEXELS_API_URL = 'https://api.pexels.com/v1/search';
+const HERO_CACHE_PREFIX = 'pexels_hero_';
+const HERO_CACHE_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
+
+// Time-based Pexels search queries for hero backgrounds
+const timeBasedSearchQueries: Record<'morning' | 'afternoon' | 'evening' | 'night', string> = {
+  morning: 'foggy forest minimal, white mist nature, soft sunrise, calm lake, zen morning',
+  afternoon: 'aerial forest, pine tree pattern, green nature texture, clear sky, minimal mountains',
+  evening: 'minimal sunset silhouette, dusk gradient, calm horizon, soft golden hour, simple landscape',
+  night: 'dark forest minimal, moon silhouette, deep blue night, simple stars, black nature',
+};
 
 // Curated Pexels photo collections for organic modernism aesthetic
 // Pre-selected IDs for consistent, premium imagery without API calls
@@ -134,6 +147,75 @@ export function getTimeBasedHeroBackground(): PexelsPhoto {
   const randomIndex = Math.floor(Math.random() * backgrounds.length);
 
   return backgrounds[randomIndex];
+}
+
+/**
+ * Fetch a time-based hero background from the Pexels API.
+ * Uses the current time period to select an appropriate search query,
+ * caches the result in localStorage, and falls back to static images on failure.
+ */
+export async function fetchTimeBasedHeroBackground(): Promise<PexelsPhoto> {
+  const timePeriod = getTimePeriod();
+  const query = timeBasedSearchQueries[timePeriod];
+
+  // Check localStorage cache first
+  try {
+    const cacheKey = HERO_CACHE_PREFIX + timePeriod;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached) as { photo: PexelsPhoto; timestamp: number };
+      if (Date.now() - parsed.timestamp < HERO_CACHE_EXPIRY_MS) {
+        return parsed.photo;
+      }
+      localStorage.removeItem(cacheKey);
+    }
+  } catch {
+    // Ignore cache read errors
+  }
+
+  // Attempt Pexels API call
+  if (PEXELS_API_KEY) {
+    try {
+      const params = new URLSearchParams({
+        query,
+        per_page: '5',
+        orientation: 'landscape',
+      });
+
+      const response = await fetch(`${PEXELS_API_URL}?${params}`, {
+        headers: { Authorization: PEXELS_API_KEY },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.photos && data.photos.length > 0) {
+          const randomIndex = Math.floor(Math.random() * data.photos.length);
+          const apiPhoto = data.photos[randomIndex];
+          const photo: PexelsPhoto = {
+            id: apiPhoto.id,
+            src: apiPhoto.src.large2x || apiPhoto.src.large || apiPhoto.src.original,
+            alt: apiPhoto.alt || `${timePeriod} background`,
+            photographer: apiPhoto.photographer,
+          };
+
+          // Cache the result
+          try {
+            const cacheKey = HERO_CACHE_PREFIX + timePeriod;
+            localStorage.setItem(cacheKey, JSON.stringify({ photo, timestamp: Date.now() }));
+          } catch {
+            // Ignore cache write errors
+          }
+
+          return photo;
+        }
+      }
+    } catch (error) {
+      console.error('Pexels API fetch failed for hero background:', error);
+    }
+  }
+
+  // Fallback to static images
+  return getTimeBasedHeroBackground();
 }
 
 /**
