@@ -246,7 +246,8 @@ export default function HistoryPage() {
                 initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="relative overflow-hidden rounded-[2.5rem] h-44 shadow-2xl shadow-orange-500/15"
+                className="relative overflow-hidden rounded-[2.5rem] h-44"
+                style={{ boxShadow: '0 12px 40px rgba(234,88,12,0.12), 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.4)' }}
               >
                 {/* Enhanced gradient background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-100/80 via-amber-100/70 to-peach/80" />
@@ -282,14 +283,14 @@ export default function HistoryPage() {
                 />
 
                 {/* Premium glassmorphic overlay */}
-                <div className="relative h-full backdrop-blur-2xl bg-white/50 border-2 border-white/70 shadow-inner">
+                <div className="relative h-full backdrop-blur-2xl bg-white/35 border border-white/20 ring-1 ring-black/[0.03]">
                   <div className="relative h-full p-7 flex flex-col justify-between">
                     {/* Icon badge - top right */}
                     <div className="absolute top-5 right-5">
                       <motion.div
                         whileHover={{ scale: 1.08, rotate: 5 }}
                         whileTap={{ scale: 0.96 }}
-                        className="w-14 h-14 rounded-[1.25rem] bg-gradient-to-br from-white/90 via-white/70 to-white/80 backdrop-blur-md border-2 border-white/95 shadow-xl flex items-center justify-center"
+                        className="w-14 h-14 rounded-[1.25rem] bg-gradient-to-br from-white/70 via-white/50 to-white/60 backdrop-blur-md ring-1 ring-black/[0.06] shadow-xl flex items-center justify-center"
                       >
                         <History className="w-7 h-7 text-orange-600 drop-shadow-sm" strokeWidth={2.5} />
                       </motion.div>
@@ -327,7 +328,7 @@ export default function HistoryPage() {
                     >
                       <motion.div
                         whileHover={{ scale: 1.05, y: -2 }}
-                        className="flex items-center gap-2.5 px-5 py-2.5 rounded-[1.25rem] bg-white/90 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-orange-500/10"
+                        className="flex items-center gap-2.5 px-5 py-2.5 rounded-[1.25rem] bg-white/60 backdrop-blur-md ring-1 ring-black/[0.06] shadow-lg shadow-orange-500/10"
                       >
                         <span className="text-2xl drop-shadow-sm">📝</span>
                         <div className="flex flex-col leading-tight">
@@ -338,7 +339,7 @@ export default function HistoryPage() {
                       {stats.highBloatingCount > 0 && (
                         <motion.div
                           whileHover={{ scale: 1.05, y: -2 }}
-                          className="flex items-center gap-2.5 px-5 py-2.5 rounded-[1.25rem] bg-white/90 backdrop-blur-md border-2 border-white/95 shadow-xl shadow-rose-500/10"
+                          className="flex items-center gap-2.5 px-5 py-2.5 rounded-[1.25rem] bg-white/60 backdrop-blur-md ring-1 ring-black/[0.06] shadow-lg shadow-rose-500/10"
                         >
                           <span className="text-2xl drop-shadow-sm">🔥</span>
                           <div className="flex flex-col leading-tight">
@@ -360,7 +361,8 @@ export default function HistoryPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.6 }}
-                  className="relative overflow-hidden rounded-[2rem] shadow-xl shadow-purple-500/10"
+                  className="relative overflow-hidden rounded-[2rem]"
+                  style={{ boxShadow: '0 8px 32px rgba(147,51,234,0.1), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.4)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-100/80 via-lavender/70 to-pink-100/80" />
 
@@ -370,7 +372,7 @@ export default function HistoryPage() {
                     className="absolute -right-12 -top-12 w-40 h-40 bg-purple-400/15 rounded-full blur-2xl"
                   />
 
-                  <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80">
+                  <div className="relative backdrop-blur-2xl bg-white/40 border border-white/20 ring-1 ring-black/[0.04]">
                     <div className="p-5 flex gap-4">
                       <div className="flex-1 text-center">
                         <p className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em] mb-1">Avg This Week</p>
@@ -416,11 +418,12 @@ export default function HistoryPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="relative overflow-hidden rounded-[1.5rem] shadow-lg"
+                className="relative overflow-hidden rounded-[1.5rem]"
+                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.4)' }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-100/80 via-white/70 to-gray-50/80" />
 
-                <div className="relative backdrop-blur-xl bg-white/70 border-2 border-white/80 p-2 flex gap-2">
+                <div className="relative backdrop-blur-xl bg-white/45 border border-white/20 ring-1 ring-black/[0.04] p-2 flex gap-2">
                   {[
                     { key: 'all' as FilterType, label: `All (${entries.length})`, icon: null },
                     { key: 'high-bloating' as FilterType, label: `High (${stats.highBloatingCount})`, icon: <Flame className="w-3.5 h-3.5" /> },
@@ -1061,7 +1064,8 @@ function PremiumEntryCard({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       whileHover={{ scale: 1.02, y: -4 }}
-      className={`relative overflow-hidden rounded-[1.75rem] cursor-pointer group shadow-xl ${style.shadow}`}
+      className="relative overflow-hidden rounded-[1.75rem] cursor-pointer group"
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5)' }}
     >
       {/* Gradient Background */}
       <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient}`} />
@@ -1085,7 +1089,7 @@ function PremiumEntryCard({
       />
 
       {/* Premium glass overlay */}
-      <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 group-hover:bg-white/70 transition-all duration-500">
+      <div className="relative backdrop-blur-2xl bg-white/40 border border-white/20 ring-1 ring-black/[0.04] group-hover:bg-white/50 transition-all duration-500">
         {/* Rating Indicator Badge - Top Right */}
         {rating ? (
           <motion.div
@@ -1102,7 +1106,7 @@ function PremiumEntryCard({
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute top-3 right-3 px-3 py-2 rounded-xl bg-gradient-to-br from-gray-100/90 to-slate-100/90 backdrop-blur-md border border-white/60 shadow-md z-10"
+            className="absolute top-3 right-3 px-3 py-2 rounded-xl bg-gradient-to-br from-gray-100/80 to-slate-100/80 backdrop-blur-md ring-1 ring-black/[0.06] shadow-md z-10"
           >
             <span className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wide">No rating</span>
           </motion.div>
@@ -1118,7 +1122,7 @@ function PremiumEntryCard({
             >
               <MealPhoto
                 photoUrl={entry.photo_url}
-                className="w-20 h-20 rounded-2xl shadow-lg cursor-pointer object-cover flex-shrink-0 border-2 border-white/80"
+                className="w-20 h-20 rounded-2xl shadow-lg cursor-pointer object-cover flex-shrink-0 ring-1 ring-black/[0.06]"
                 priority={isFirstPhoto}
                 thumbnail={true}
               />
@@ -1126,7 +1130,7 @@ function PremiumEntryCard({
           ) : (
             <motion.div
               whileHover={{ scale: 1.05, rotate: 5 }}
-              className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${style.iconBg} flex items-center justify-center shadow-lg cursor-pointer flex-shrink-0 border-2 border-white/80`}
+              className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${style.iconBg} flex items-center justify-center shadow-lg cursor-pointer flex-shrink-0 ring-1 ring-black/[0.06]`}
             >
               <span className="text-3xl drop-shadow-sm">
                 {entry.entry_method === 'text' ? '✍️' : displayEmoji}
@@ -1201,7 +1205,7 @@ function PremiumEntryCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-xl bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-white/60 shadow-sm"
+                className="h-8 w-8 rounded-xl bg-white/40 hover:bg-white/60 backdrop-blur-sm ring-1 ring-black/[0.06] shadow-sm"
                 onClick={(e) => e.stopPropagation()}
               >
                 <MoreVertical className="w-4 h-4" />
