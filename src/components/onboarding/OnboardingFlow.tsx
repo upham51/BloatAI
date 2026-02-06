@@ -366,7 +366,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
       <AnimatePresence mode="wait">
         {/* ── STEP: START ── */}
         {step === 'start' && (
-          <StepContainer stepKey="start">
+          <StepContainer key="start" stepKey="start">
             <div className="flex-1 flex flex-col items-center justify-center relative">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -411,12 +411,16 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
               <FloatingCards visible={showCards} />
             </div>
+
+            <div className="pb-10">
+              <ContinueButton onClick={goNext} label="Get Started" />
+            </div>
           </StepContainer>
         )}
 
         {/* ── STEP: DISCOVER ── */}
         {step === 'discover' && (
-          <StepContainer stepKey="discover">
+          <StepContainer key="discover" stepKey="discover">
             <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -470,7 +474,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
         {/* ── STEP: TRACK ── */}
         {step === 'track' && (
-          <StepContainer stepKey="track">
+          <StepContainer key="track" stepKey="track">
             <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
               <motion.div
                 initial={{ opacity: 0, scale: 0.5 }}
@@ -520,7 +524,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
         {/* ── STEP: PATTERNS ── */}
         {step === 'patterns' && (
-          <StepContainer stepKey="patterns">
+          <StepContainer key="patterns" stepKey="patterns">
             <div className="flex-1 flex flex-col justify-center px-2">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
@@ -567,7 +571,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
         {/* ── STEP: NAME ── */}
         {step === 'name' && (
-          <StepContainer stepKey="name">
+          <StepContainer key="name" stepKey="name">
             <div className="flex-1 flex flex-col justify-center px-2">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
@@ -621,7 +625,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
         {/* ── STEP: GOAL ── */}
         {step === 'goal' && (
-          <StepContainer stepKey="goal">
+          <StepContainer key="goal" stepKey="goal">
             <div className="flex-1 flex flex-col justify-center px-2">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
@@ -682,7 +686,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
         {/* ── STEP: FINISH ── */}
         {step === 'finish' && (
-          <StepContainer stepKey="finish">
+          <StepContainer key="finish" stepKey="finish">
             <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
               {/* Celebration glow */}
               <motion.div
