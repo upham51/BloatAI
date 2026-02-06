@@ -4,8 +4,7 @@ import { Flame, Settings, Shield, User, Sparkles, Leaf } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
-import { AnimatedOnboarding } from '@/components/onboarding/AnimatedOnboarding';
+import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { WeeklyProgressChart } from '@/components/insights/WeeklyProgressChart';
 import { InsightsOrb } from '@/components/insights/InsightsOrb';
@@ -61,8 +60,7 @@ export default function DashboardPage() {
 
   const pendingEntry = getPendingEntry();
   const [greeting, setGreeting] = useState(getTimeBasedGreeting());
-  const [showAnimatedOnboarding, setShowAnimatedOnboarding] = useState(false);
-  const [showDataCollection, setShowDataCollection] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Get time-based hero background
   const [heroBackground] = useState(() => getTimeBasedHeroBackground());
@@ -74,10 +72,10 @@ export default function DashboardPage() {
     img.src = heroBackground.src;
   }, [heroBackground]);
 
-  // Show animated onboarding first, then data collection for new users
+  // Show onboarding for new users
   useEffect(() => {
     if (userProfile && !userProfile.onboarding_completed) {
-      setShowAnimatedOnboarding(true);
+      setShowOnboarding(true);
     }
   }, [userProfile]);
 
@@ -596,23 +594,12 @@ export default function DashboardPage() {
         </div>
       </PageTransition>
 
-      {/* Animated Onboarding */}
-      {showAnimatedOnboarding && (
-        <AnimatedOnboarding
-          onComplete={() => {
-            setShowAnimatedOnboarding(false);
-            setShowDataCollection(true);
-          }}
-        />
-      )}
-
-      {/* Data Collection Modal */}
-      {user && (
-        <OnboardingModal
-          isOpen={showDataCollection}
+      {/* Onboarding Flow */}
+      {showOnboarding && user && (
+        <OnboardingFlow
           userId={user.id}
           onComplete={() => {
-            setShowDataCollection(false);
+            setShowOnboarding(false);
             refetchProfile();
           }}
         />
