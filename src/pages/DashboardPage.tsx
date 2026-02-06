@@ -15,7 +15,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { format, subDays, differenceInCalendarDays, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getTimeBasedGreeting } from '@/lib/quotes';
-import { getTimeBasedHeroBackground, fetchTimeBasedHeroBackground, getTimePeriod, getInsightsNatureBackground } from '@/lib/pexels';
+import { fetchTimeBasedHeroBackground, getTimePeriod, getInsightsNatureBackground, type PexelsPhoto } from '@/lib/pexels';
 
 const RATING_LABELS: Record<number, string> = {
   1: 'None',
@@ -60,12 +60,12 @@ export default function DashboardPage() {
   const [greeting, setGreeting] = useState(getTimeBasedGreeting());
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Get time-based hero background (static fallback, then async API upgrade)
-  const [heroBackground, setHeroBackground] = useState(() => getTimeBasedHeroBackground());
+  // Get time-based hero background (skeleton until API resolves)
+  const [heroBackground, setHeroBackground] = useState<PexelsPhoto | null>(null);
   const [natureBackground] = useState(() => getInsightsNatureBackground());
   const timePeriod = getTimePeriod();
 
-  // Fetch hero background from Pexels API (upgrades from static fallback)
+  // Fetch hero background from Pexels API
   useEffect(() => {
     let cancelled = false;
     fetchTimeBasedHeroBackground().then((photo) => {
@@ -76,10 +76,12 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // Preload hero and nature backgrounds
+  // Preload backgrounds once available
   useEffect(() => {
-    const img = new Image();
-    img.src = heroBackground.src;
+    if (heroBackground) {
+      const img = new Image();
+      img.src = heroBackground.src;
+    }
     const img2 = new Image();
     img2.src = natureBackground.src;
   }, [heroBackground, natureBackground]);
@@ -184,11 +186,18 @@ export default function DashboardPage() {
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="relative overflow-hidden rounded-[32px] h-52 shadow-glass-xl"
               >
-                {/* Pexels Background Image */}
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${heroBackground.src})` }}
-                />
+                {/* Skeleton / Background Image */}
+                {heroBackground ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${heroBackground.src})` }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-sage/30 animate-pulse" />
+                )}
 
                 {/* Organic gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-forest/40 via-forest/20 to-transparent" />
