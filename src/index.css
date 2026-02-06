@@ -152,6 +152,18 @@
     @apply touch-manipulation;
   }
 
+  /* Fix browser autofill white background on dark-themed auth inputs */
+  .auth-input:-webkit-autofill,
+  .auth-input:-webkit-autofill:hover,
+  .auth-input:-webkit-autofill:focus,
+  .auth-input:-webkit-autofill:active {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0 9999px transparent inset !important;
+    box-shadow: 0 0 0 9999px transparent inset !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+    caret-color: white;
+  }
+
   /* Premium Typography - Serif Headings */
   h1, h2, .font-display {
     font-family: "Playfair Display", Georgia, serif;

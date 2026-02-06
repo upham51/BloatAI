@@ -84,7 +84,7 @@ export const PremiumInput = forwardRef<HTMLInputElement, PremiumInputProps>(
               className={cn(
                 'w-full px-4 py-4 bg-transparent text-white placeholder-gray-500',
                 'focus:outline-none text-base font-medium',
-                'autofill:bg-transparent autofill:text-white',
+                'auth-input',
                 icon && 'pl-3',
                 (showPasswordToggle || isValid !== undefined) && 'pr-12',
                 className
