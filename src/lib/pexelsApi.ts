@@ -163,22 +163,45 @@ async function fetchFromPexels(searchQuery: string, includeFood: boolean = true)
 }
 
 /**
- * Get category-specific fallback images with VERY specific keywords
- * These are designed to get accurate, beautiful food category images
+ * Get a specific, high-quality Pexels search string for a trigger category.
+ * Uses moody/aesthetic queries to avoid generic stock photos.
+ */
+export function getCategorySearchQuery(category: string): string {
+  const CATEGORY_SEARCH_QUERIES: Record<string, string> = {
+    grains: 'rustic sourdough bread dark background, steaming rice bowl',
+    beans: 'lentils wooden spoon, dried chickpeas texture',
+    dairy: 'milk pour slow motion black background, artisan cheese',
+    fruit: 'sliced fig macro, fresh berries dark moody',
+    sweeteners: 'crystal rock candy, pastel hard candy aesthetic',
+    gluten: 'wheat stalks golden hour, flour dust explosion',
+    veggies: 'fresh broccoli dark moody, green cabbage texture macro',
+    'fatty-food': 'olive oil pour backlit, golden fried tempura',
+    carbonated: 'sparkling water bubbles macro, soda splash dark background',
+    sugar: 'macarons pastel dark background, powdered sugar dust',
+    alcohol: 'red wine glass silhouette, craft beer foam macro',
+    processed: 'pretzels wooden bowl, cookies stack aesthetic',
+  };
+
+  return CATEGORY_SEARCH_QUERIES[category] || 'gourmet food dark background aesthetic';
+}
+
+/**
+ * @deprecated Use getCategorySearchQuery() instead for moody/aesthetic image queries.
+ * Kept for backwards compatibility with non-trigger image fetching.
  */
 const CATEGORY_FALLBACKS: Record<string, string> = {
-  grains: 'artisan bread crackers pasta golden crispy',
-  beans: 'colorful beans legumes bowl chickpeas lentils',
-  dairy: 'cheese platter milk cream yogurt bowl',
-  fruit: 'fresh fruit bowl colorful berries sliced',
-  sweeteners: 'sugar cubes dessert sweet honey syrup',
-  gluten: 'fresh bread wheat loaf bakery artisan',
-  veggies: 'fresh vegetables colorful broccoli salad greens',
-  'fatty-food': 'fried food crispy golden fries appetizer',
-  carbonated: 'sparkling drink bubbles soda glass fizzy',
-  sugar: 'dessert cake sweet pastry chocolate',
-  alcohol: 'wine glass beer cocktail bar drink',
-  processed: 'snacks chips crackers packaged food',
+  grains: 'rustic sourdough bread dark background, steaming rice bowl',
+  beans: 'lentils wooden spoon, dried chickpeas texture',
+  dairy: 'milk pour slow motion black background, artisan cheese',
+  fruit: 'sliced fig macro, fresh berries dark moody',
+  sweeteners: 'crystal rock candy, pastel hard candy aesthetic',
+  gluten: 'wheat stalks golden hour, flour dust explosion',
+  veggies: 'fresh broccoli dark moody, green cabbage texture macro',
+  'fatty-food': 'olive oil pour backlit, golden fried tempura',
+  carbonated: 'sparkling water bubbles macro, soda splash dark background',
+  sugar: 'macarons pastel dark background, powdered sugar dust',
+  alcohol: 'red wine glass silhouette, craft beer foam macro',
+  processed: 'pretzels wooden bowl, cookies stack aesthetic',
 };
 
 /**
