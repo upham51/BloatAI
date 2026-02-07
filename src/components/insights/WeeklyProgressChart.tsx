@@ -142,7 +142,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
   };
 
   // Build SVG path
-  const padding = { left: 30, right: 30, top: 24, bottom: 16 };
+  const padding = { left: 20, right: 58, top: 20, bottom: 12 };
   const chartWidth = chartDimensions.width - padding.left - padding.right;
   const chartHeight = chartDimensions.height - padding.top - padding.bottom;
 
@@ -150,7 +150,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
     return chartData.map((day, index) => {
       const x = padding.left + (index / Math.max(chartData.length - 1, 1)) * chartWidth;
       const bloating = day.bloating ?? 3;
-      const y = padding.top + ((bloating - 1) / 4) * chartHeight;
+      const y = padding.top + ((5 - bloating) / 4) * chartHeight;
       return { x, y, index, hasData: day.hasData, bloating: day.bloating };
     });
   }, [chartData, chartWidth, chartHeight]);
@@ -219,32 +219,32 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
       transition={{ duration: 1.2, ease: easing }}
       className="glass-card overflow-hidden"
     >
-      <div className="p-5 sm:p-6">
-        {/* Header - clean and minimal */}
+      <div className="px-5 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5">
+        {/* Header - centered and clean */}
         <motion.div
-          className="flex items-center justify-between mb-6"
+          className="text-center mb-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.5, ease: easing }}
         >
-          <div>
-            <h2 className="font-display text-lg sm:text-xl font-bold text-charcoal tracking-tight">
-              Weekly Progress
-            </h2>
-            <p className="text-xs text-charcoal/40 mt-0.5">
+          <h2 className="font-display text-lg sm:text-xl font-bold text-charcoal tracking-tight">
+            Weekly Bloat
+          </h2>
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <p className="text-xs text-charcoal/40">
               Avg <span className="font-semibold text-charcoal/60">{avgBloating}</span>/5 this week
             </p>
+            <span className="text-charcoal/20 text-xs">·</span>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.5, delay: 0.3, ease: easing }}
+              className={`flex items-center gap-1 ${trendInfo.color}`}
+            >
+              <TrendIcon className="w-3 h-3" strokeWidth={2.5} />
+              <span className="text-xs font-semibold">{trendInfo.label}</span>
+            </motion.div>
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.5, delay: 0.3, ease: easing }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${trendInfo.bg}`}
-          >
-            <TrendIcon className={`w-3.5 h-3.5 ${trendInfo.color}`} strokeWidth={2} />
-            <span className={`text-xs font-semibold ${trendInfo.color}`}>{trendInfo.label}</span>
-          </motion.div>
         </motion.div>
 
         {/* Chart area */}
@@ -263,19 +263,41 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
               </linearGradient>
             </defs>
 
-            {/* Subtle horizontal guides - just the midline */}
-            <motion.line
-              x1={padding.left}
-              y1={padding.top + chartHeight / 2}
-              x2={chartDimensions.width - padding.right}
-              y2={padding.top + chartHeight / 2}
-              stroke="#D4DED4"
-              strokeWidth="1"
-              strokeDasharray="4 6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
-              transition={{ duration: 2, ease: easing }}
-            />
+            {/* Horizontal guide lines with y-axis labels */}
+            {[
+              { bloating: 5, label: 'severe' },
+              { bloating: 3, label: 'moderate' },
+              { bloating: 1, label: 'none' },
+            ].map(({ bloating, label }) => {
+              const guideY = padding.top + ((5 - bloating) / 4) * chartHeight;
+              return (
+                <g key={bloating}>
+                  <motion.line
+                    x1={padding.left}
+                    y1={guideY}
+                    x2={chartDimensions.width - padding.right}
+                    y2={guideY}
+                    stroke="#D4DED4"
+                    strokeWidth="0.75"
+                    strokeDasharray="3 5"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.35 }}
+                    transition={{ duration: 2, ease: easing }}
+                  />
+                  <motion.text
+                    x={chartDimensions.width - padding.right + 6}
+                    y={guideY + 3}
+                    fontSize="7.5"
+                    fill="#B0B8B0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.55 }}
+                    transition={{ duration: 2, delay: 0.5, ease: easing }}
+                  >
+                    {bloating} {label}
+                  </motion.text>
+                </g>
+              );
+            })}
 
             {/* Area fill - fades in after line draws */}
             <motion.path
@@ -307,10 +329,31 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
               const isActive = activeDay === index;
               const color = getPointColor(chartData[index]?.bloating);
               const hasDataPoint = chartData[index]?.hasData;
+              const isToday = chartData[index]?.isToday;
               const pointDelay = (index / (points.length - 1)) * ANIM_DURATION;
 
               return (
                 <g key={index}>
+                  {/* Current day soft glow ring */}
+                  {isToday && hasDataPoint && (
+                    <motion.circle
+                      cx={point.x}
+                      cy={point.y}
+                      r="10"
+                      fill="none"
+                      stroke={color}
+                      strokeWidth="1.5"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.35, 0.1, 0.35] }}
+                      transition={{
+                        delay: pointDelay + 0.4,
+                        duration: 2.5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    />
+                  )}
+
                   {/* Hover ring */}
                   {isActive && hasDataPoint && (
                     <motion.circle
@@ -329,16 +372,16 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
                   <motion.circle
                     cx={point.x}
                     cy={point.y}
-                    r={isActive ? 6 : hasDataPoint ? 4 : 3}
+                    r={isActive ? 6 : isToday && hasDataPoint ? 5 : hasDataPoint ? 4 : 3}
                     fill={hasDataPoint ? color : '#E2E8E2'}
                     stroke="white"
-                    strokeWidth="2"
+                    strokeWidth={isToday ? 2.5 : 2}
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{
                       delay: pointDelay,
                       duration: 0.6,
-                      ease: [0.34, 1.56, 0.64, 1], // slight bounce
+                      ease: [0.34, 1.56, 0.64, 1],
                     }}
                     style={{ cursor: 'pointer' }}
                     onMouseEnter={() => setHoveredDay(index)}
@@ -383,22 +426,23 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
 
           {/* Day labels */}
           <motion.div
-            className="flex justify-between px-[30px] mt-1"
+            className="flex justify-between mt-2"
+            style={{ paddingLeft: 20, paddingRight: 58 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.5, delay: 0.5, ease: easing }}
           >
             {chartData.map((day) => (
-              <div key={day.day} className="flex flex-col items-center">
-                <span className={`text-[11px] font-medium ${
-                  day.isToday ? 'text-forest font-bold' : 'text-charcoal/40'
-                }`}>
-                  {day.dayShort}
-                </span>
-                {day.isToday && (
-                  <div className="w-1 h-1 rounded-full bg-forest mt-1" />
-                )}
-              </div>
+              <span
+                key={day.day}
+                className={`text-[11px] ${
+                  day.isToday
+                    ? 'text-forest font-bold'
+                    : 'text-charcoal/40 font-medium'
+                }`}
+              >
+                {day.dayShort}
+              </span>
             ))}
           </motion.div>
         </div>
