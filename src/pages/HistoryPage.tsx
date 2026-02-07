@@ -17,7 +17,7 @@ import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTE
 import { formatDistanceToNow, format, isAfter, subDays, isToday, isYesterday, startOfDay } from 'date-fns';
 import { formatTriggerDisplay } from '@/lib/triggerUtils';
 import { haptics } from '@/lib/haptics';
-import { getHistoryHeroBackground } from '@/lib/pexels';
+import { getHistoryHeroBackground, fetchHistoryHeroBackground } from '@/lib/pexels';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -56,8 +56,17 @@ export default function HistoryPage() {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesInput, setNotesInput] = useState('');
 
-  // Calming hero background
-  const [heroBackground] = useState(() => getHistoryHeroBackground());
+  // Calming hero background (static fallback, then async collection upgrade)
+  const [heroBackground, setHeroBackground] = useState(() => getHistoryHeroBackground());
+
+  // Fetch hero background from Pexels collection
+  useEffect(() => {
+    let cancelled = false;
+    fetchHistoryHeroBackground().then((photo) => {
+      if (!cancelled) setHeroBackground(photo);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   // Preload hero background
   useEffect(() => {

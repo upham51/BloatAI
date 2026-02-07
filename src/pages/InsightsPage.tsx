@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { generateAdvancedInsights } from '@/lib/insightsAnalysis';
 import { GrainTexture } from '@/components/ui/grain-texture';
-import { getInsightsNatureBackground, getInsightsHeroBackground } from '@/lib/pexels';
+import { getInsightsNatureBackground, getInsightsHeroBackground, fetchInsightsNatureBackground, fetchInsightsHeroBackground } from '@/lib/pexels';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
@@ -26,11 +26,23 @@ export default function InsightsPage() {
   // Check completed entries for insights, not just total entries
   const hasEnoughData = completedCount >= neededForInsights;
 
-  // Nature background for progress card
-  const [natureBackground] = useState(() => getInsightsNatureBackground());
+  // Nature background for progress card (static fallback, then async collection upgrade)
+  const [natureBackground, setNatureBackground] = useState(() => getInsightsNatureBackground());
 
-  // Hero background for insights page header
-  const [heroBackground] = useState(() => getInsightsHeroBackground());
+  // Hero background for insights page header (static fallback, then async collection upgrade)
+  const [heroBackground, setHeroBackground] = useState(() => getInsightsHeroBackground());
+
+  // Fetch backgrounds from Pexels collections
+  useEffect(() => {
+    let cancelled = false;
+    fetchInsightsNatureBackground().then((photo) => {
+      if (!cancelled) setNatureBackground(photo);
+    });
+    fetchInsightsHeroBackground().then((photo) => {
+      if (!cancelled) setHeroBackground(photo);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   // Preload backgrounds
   useEffect(() => {
