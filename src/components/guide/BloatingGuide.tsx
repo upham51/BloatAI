@@ -15,34 +15,10 @@ export function BloatingGuide() {
         whileHover={{ scale: 1.02, y: -4 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setIsModalOpen(true)}
-        className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-sky-500/10 cursor-pointer group"
+        className="relative overflow-hidden rounded-[2rem] shadow-xl cursor-pointer group"
       >
-        {/* Multi-layer gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-50/90 via-blue-50/80 to-indigo-50/90" />
-
-        {/* Animated gradient orbs */}
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, 25, 0],
-            y: [0, -15, 0],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-sky-400/25 to-blue-400/20 rounded-full blur-3xl"
-        />
-
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            x: [0, -20, 0],
-            y: [0, 15, 0],
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-indigo-400/20 to-blue-300/15 rounded-full blur-3xl"
-        />
-
-        {/* Premium glass overlay */}
-        <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 rounded-[2rem] group-hover:bg-white/70 transition-all duration-500">
+        {/* Clean white card */}
+        <div className="relative bg-white border border-border/40 rounded-[2rem] group-hover:bg-gray-50/80 transition-all duration-500">
           <div className="p-6">
             <div className="flex items-start gap-4">
               {/* Icon */}
@@ -79,7 +55,7 @@ export function BloatingGuide() {
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-4 pt-4 border-t border-white/50"
+              className="mt-4 pt-4 border-t border-border/30"
             >
               <p className="text-sm font-bold text-sky-600 group-hover:text-sky-700 transition-colors flex items-center gap-2">
                 <span>Learn more about your body</span>
