@@ -54,6 +54,23 @@ export const heroBackgrounds = {
   ],
 };
 
+// Calming wellness backgrounds for History page hero
+export const historyHeroBackgrounds: PexelsPhoto[] = [
+  { id: 401, src: 'https://images.pexels.com/photos/3560168/pexels-photo-3560168.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm morning wellness ritual', photographer: 'Lisa Fotios' },
+  { id: 402, src: 'https://images.pexels.com/photos/1761279/pexels-photo-1761279.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Soft green fern leaves', photographer: 'Pixabay' },
+  { id: 403, src: 'https://images.pexels.com/photos/1028598/pexels-photo-1028598.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Organic nature textures', photographer: 'Pixabay' },
+  { id: 404, src: 'https://images.pexels.com/photos/3225517/pexels-photo-3225517.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Misty mountain forest at dawn', photographer: 'Luca Bravo' },
+  { id: 405, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm lake surrounded by forest', photographer: 'Eberhard Grossgasteiger' },
+];
+
+/**
+ * Get a random calming background for History page hero
+ */
+export function getHistoryHeroBackground(): PexelsPhoto {
+  const randomIndex = Math.floor(Math.random() * historyHeroBackgrounds.length);
+  return historyHeroBackgrounds[randomIndex];
+}
+
 // Minimalistic nature backgrounds for insights progress card
 export const insightsNatureBackgrounds = [
   { id: 301, src: 'https://images.pexels.com/photos/3225517/pexels-photo-3225517.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Misty mountain forest at dawn', photographer: 'Luca Bravo' },
