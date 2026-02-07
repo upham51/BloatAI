@@ -764,58 +764,64 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                         whileHover={{ scale: 1.02, x: 4 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setExpandedIndex(isExpanded ? null : actualIndex)}
-                        className={`relative overflow-hidden rounded-2xl h-20 cursor-pointer group transition-all duration-300 shadow-lg ${colors.glow}`}
+                        className={`relative overflow-hidden rounded-2xl h-[5.5rem] cursor-pointer group transition-all duration-300 shadow-lg ${colors.glow}`}
                       >
-                        {/* Background Image */}
-                        {trigger.imageUrl && (
-                          <div
-                            className="absolute inset-0 bg-cover bg-center opacity-15 transition-transform duration-500 group-hover:scale-110 group-hover:opacity-25"
-                            style={{ backgroundImage: `url(${trigger.imageUrl})` }}
-                          />
+                        {/* Full-strength photography background */}
+                        {trigger.imageUrl ? (
+                          <>
+                            <div
+                              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                              style={{ backgroundImage: `url(${trigger.imageUrl})` }}
+                            />
+                            {/* Left-to-right scrim: dark shelf for text, photo reveals on right */}
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                background: 'linear-gradient(to right, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.15) 65%, transparent 85%)',
+                              }}
+                            />
+                          </>
+                        ) : (
+                          <div className={`absolute inset-0 bg-gradient-to-br ${colors.from} ${colors.to}`} />
                         )}
-
-                        {/* Gradient base */}
-                        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm" />
-
-                        {/* Gradient Overlay */}
-                        <div className={`absolute inset-0 bg-gradient-to-r ${colors.from} ${colors.to} opacity-10 group-hover:opacity-20 transition-opacity`} />
 
                         {/* Content */}
                         <div className="relative h-full flex items-center justify-between px-5">
-                          <div className="flex items-center gap-4">
-                            {/* Severity indicator with glow */}
+                          <div className="flex items-center gap-3.5">
+                            {/* Severity signal bars with glow */}
                             <div className="flex items-center gap-1" style={getSeverityGlowStyle(trigger.impactScore)}>
                               {[1, 2, 3].map((level) => (
                                 <div
                                   key={level}
                                   className={`w-1.5 rounded-full transition-all ${
                                     trigger.impactScore >= level * 0.7
-                                      ? `${getSeverityColor(trigger.impactScore)}`
-                                      : 'bg-gray-200 dark:bg-gray-700'
+                                      ? 'bg-white'
+                                      : 'bg-white/25'
                                   }`}
                                   style={{ height: `${10 + level * 4}px` }}
                                 />
                               ))}
                             </div>
                             <div>
-                              <div className="font-bold text-foreground">
+                              <div className="font-bold text-white text-[15px] drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
                                 {trigger.displayName}
                               </div>
-                              <div className="text-xs text-muted-foreground font-medium">
+                              <div className="text-xs text-white/70 font-medium drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
                                 {getSeverityLabel(trigger.impactScore)} • {trigger.occurrences} meals
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-3">
-                            <span className={`text-xs font-bold px-3 py-1.5 rounded-full border ${getSeverityBadgeColor(trigger.impactScore)}`}>
+                          <div className="flex items-center gap-2.5">
+                            {/* Glassmorphism score badge */}
+                            <span className={`text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-xl bg-black/25 text-white border ${getSeverityBorderColor(trigger.impactScore)} shadow-sm`}>
                               {trigger.avgBloatingWith.toFixed(1)}/5
                             </span>
                             <motion.div
                               animate={{ rotate: isExpanded ? 180 : 0 }}
                               transition={{ duration: 0.2 }}
                             >
-                              <ChevronDown size={18} className="text-muted-foreground" />
+                              <ChevronDown size={18} className="text-white/70 drop-shadow-md" />
                             </motion.div>
                           </div>
                         </div>
