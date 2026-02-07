@@ -326,62 +326,60 @@ export default function InsightsPage() {
 
                 {/* Glass content */}
                 <div className="relative h-full">
-                  <div className="relative h-full p-7 flex flex-col justify-between">
-                    {/* Title - bottom left with display serif font */}
-                    <div className="flex flex-col items-start gap-2 pr-16 mt-auto">
-                      <motion.span
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2, duration: 0.6 }}
-                        className="text-[11px] font-semibold text-white/80 tracking-[0.2em] uppercase font-body"
-                      >
-                        Your Story So Far
-                      </motion.span>
-                      <motion.h1
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3, duration: 0.6 }}
-                        className="text-display-xl font-display font-bold text-white leading-[0.95] drop-shadow-lg"
-                        style={{
-                          textShadow: '0 4px 24px rgba(0,0,0,0.3)'
-                        }}
-                      >
-                        Insights
-                      </motion.h1>
-                    </div>
+                  <div className="relative h-full p-7 flex flex-col justify-end">
+                    {/* Bottom row: Title left, badges right */}
+                    <div className="flex items-end justify-between gap-3">
+                      <div className="flex flex-col items-start gap-1 min-w-0">
+                        <motion.span
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.2, duration: 0.6 }}
+                          className="text-[11px] font-semibold text-white/80 tracking-[0.2em] uppercase font-body"
+                        >
+                          Your Story So Far
+                        </motion.span>
+                        <motion.h1
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.3, duration: 0.6 }}
+                          className="text-display-xl font-display font-bold text-white leading-[0.95] drop-shadow-lg"
+                          style={{
+                            textShadow: '0 4px 24px rgba(0,0,0,0.3)'
+                          }}
+                        >
+                          Insights
+                        </motion.h1>
+                      </div>
 
-                    {/* Stat badges - bottom right */}
-                    <motion.div
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5, duration: 0.6 }}
-                      className="absolute bottom-5 right-5 flex items-center gap-2"
-                    >
-                      {patternCount > 0 && (
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/95 backdrop-blur-sm shadow-glass border border-white/50"
-                        >
-                          <BarChart3 className="w-4 h-4 text-forest" />
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-base font-bold text-charcoal">{patternCount}</span>
-                            <span className="text-[10px] font-medium text-charcoal/60">patterns</span>
-                          </div>
-                        </motion.div>
-                      )}
-                      {triggerCount > 0 && (
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/95 backdrop-blur-sm shadow-glass border border-white/50"
-                        >
-                          <Flame className="w-4 h-4 text-burnt" />
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-base font-bold text-charcoal">{triggerCount}</span>
-                            <span className="text-[10px] font-medium text-charcoal/60">triggers</span>
-                          </div>
-                        </motion.div>
-                      )}
-                    </motion.div>
+                      {/* Stat badges */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.6 }}
+                        className="flex flex-col gap-1.5 flex-shrink-0"
+                      >
+                        {patternCount > 0 && (
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-sm shadow-glass border border-white/40"
+                          >
+                            <BarChart3 className="w-3.5 h-3.5 text-forest" />
+                            <span className="text-sm font-bold text-charcoal">{patternCount}</span>
+                            <span className="text-[10px] font-medium text-charcoal/50">patterns</span>
+                          </motion.div>
+                        )}
+                        {triggerCount > 0 && (
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-sm shadow-glass border border-white/40"
+                          >
+                            <Flame className="w-3.5 h-3.5 text-burnt" />
+                            <span className="text-sm font-bold text-charcoal">{triggerCount}</span>
+                            <span className="text-[10px] font-medium text-charcoal/50">triggers</span>
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
