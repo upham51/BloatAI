@@ -7,6 +7,7 @@ import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layo
 import InsightsLoader from '@/components/shared/InsightsLoader';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
+import { BloatInsightsCard } from '@/components/insights/BloatInsightsCard';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
 import { TimeOfDayPatterns } from '@/components/insights/TimeOfDayPatterns';
 import { useMeals } from '@/contexts/MealContext';
@@ -414,6 +415,11 @@ export default function InsightsPage() {
              *   </StaggerItem>
              * )}
              * ============================================================ */}
+
+            {/* 0. YOUR DAILY GUT CHECK - AI-powered personalized insights */}
+            <StaggerItem>
+              <BloatInsightsCard entries={entries} />
+            </StaggerItem>
 
             {/* 1. TOP SUSPECT FOODS - Likely triggers */}
             {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
