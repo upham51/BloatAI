@@ -6,7 +6,7 @@ import React from 'react';
 const { mockAuth } = vi.hoisted(() => ({
   mockAuth: {
     getSession: vi.fn(),
-    onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+    onAuthStateChange: vi.fn(),
     signInWithPassword: vi.fn(),
     signUp: vi.fn(),
     signOut: vi.fn(),

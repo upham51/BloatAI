@@ -115,7 +115,7 @@ export default function SignUpPage() {
       y: 0,
       transition: {
         duration: 0.5,
-        ease: [0.23, 1, 0.32, 1],
+        ease: "easeOut" as const,
       },
     },
   };

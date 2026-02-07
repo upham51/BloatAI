@@ -3,6 +3,9 @@ project_id = "anefzgdcqveejrxnsovm"
 [functions.analyze-food]
 verify_jwt = false
 
+[functions.analyze-meal-text]
+verify_jwt = false
+
 [functions.create-checkout]
 verify_jwt = false
 
@@ -10,4 +13,16 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.customer-portal]
+verify_jwt = false
+
+[functions.generate-insights]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
+
+[functions.admin-manage-roles]
+verify_jwt = false
+
+[functions.admin-update-subscription]
 verify_jwt = false
