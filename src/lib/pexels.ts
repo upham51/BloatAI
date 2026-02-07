@@ -1,27 +1,30 @@
 /**
- * Pexels API Integration for Premium Imagery
+ * Pexels Collection-Based Image Integration
  *
- * Provides high-quality, curated imagery for:
- * - Time-based hero backgrounds (live API + static fallback)
+ * Fetches curated imagery from Pexels collections for:
+ * - Time-based hero backgrounds (Morning, Afternoon, Evening, Night)
+ * - History page backgrounds
+ * - Insights page backgrounds
  * - Food texture overlays for meal cards
  * - Editorial food photos for list items
  */
 
 const PEXELS_API_KEY = import.meta.env.VITE_PEXELS_API_KEY || '';
-const PEXELS_API_URL = 'https://api.pexels.com/v1/search';
-const HERO_CACHE_PREFIX = 'pexels_hero_';
-const HERO_CACHE_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
+const PEXELS_COLLECTIONS_URL = 'https://api.pexels.com/v1/collections';
+const COLLECTION_CACHE_PREFIX = 'pexels_col_';
+const COLLECTION_CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-// Time-based Pexels search queries for hero backgrounds
-const timeBasedSearchQueries: Record<'morning' | 'afternoon' | 'evening' | 'night', string> = {
-  morning: 'foggy forest minimal, white mist nature, soft sunrise, calm lake, zen morning',
-  afternoon: 'aerial forest, pine tree pattern, green nature texture, clear sky, minimal mountains',
-  evening: 'minimal sunset silhouette, dusk gradient, calm horizon, soft golden hour, simple landscape',
-  night: 'dark forest minimal, moon silhouette, deep blue night, simple stars, black nature',
-};
+// Pexels Collection IDs from curated collections
+const COLLECTION_IDS = {
+  morning: 'ezu0shz',
+  afternoon: 'lwipi7f',
+  evening: '7fp9q2z',
+  night: 'g4f1tbc',
+  history: '89mjhkg',
+  insights: '89mjhkg',
+} as const;
 
-// Curated Pexels photo collections for organic modernism aesthetic
-// Pre-selected IDs for consistent, premium imagery without API calls
+type CollectionKey = keyof typeof COLLECTION_IDS;
 
 export interface PexelsPhoto {
   id: number;
@@ -30,79 +33,157 @@ export interface PexelsPhoto {
   photographer: string;
 }
 
-// Time-based hero backgrounds
-export const heroBackgrounds = {
-  morning: [
-    { id: 1, src: 'https://images.pexels.com/photos/1525041/pexels-photo-1525041.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene morning light through leaves', photographer: 'Pixabay' },
-    { id: 2, src: 'https://images.pexels.com/photos/1179229/pexels-photo-1179229.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Soft sunrise wellness', photographer: 'Dominika Roseclay' },
-    { id: 3, src: 'https://images.pexels.com/photos/3560168/pexels-photo-3560168.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Morning tea ritual', photographer: 'Lisa Fotios' },
-  ],
-  afternoon: [
-    { id: 4, src: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Fresh healthy lunch spread', photographer: 'Ella Olsson' },
-    { id: 5, src: 'https://images.pexels.com/photos/4033636/pexels-photo-4033636.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Natural light wellness', photographer: 'Taryn Elliott' },
-    { id: 6, src: 'https://images.pexels.com/photos/1028598/pexels-photo-1028598.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Organic nature textures', photographer: 'Pixabay' },
-  ],
-  evening: [
-    { id: 7, src: 'https://images.pexels.com/photos/3622614/pexels-photo-3622614.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Cozy evening ambiance', photographer: 'Taryn Elliott' },
-    { id: 8, src: 'https://images.pexels.com/photos/6957750/pexels-photo-6957750.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Warm herbal tea setting', photographer: 'Sora Shimazaki' },
-    { id: 9, src: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Evening kitchen warmth', photographer: 'Engin Akyurt' },
-  ],
-  night: [
-    { id: 10, src: 'https://images.pexels.com/photos/4033165/pexels-photo-4033165.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm night atmosphere', photographer: 'Taryn Elliott' },
-    { id: 11, src: 'https://images.pexels.com/photos/1379636/pexels-photo-1379636.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Restful night tea', photographer: 'Lisa Fotios' },
-    { id: 12, src: 'https://images.pexels.com/photos/1146760/pexels-photo-1146760.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Peaceful night scene', photographer: 'freestocks.org' },
-  ],
+// Minimal static fallbacks (one per category) used when API is unavailable
+const FALLBACK_PHOTOS: Record<CollectionKey, PexelsPhoto> = {
+  morning: { id: 1, src: 'https://images.pexels.com/photos/1525041/pexels-photo-1525041.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene morning light', photographer: 'Pixabay' },
+  afternoon: { id: 4, src: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Fresh healthy lunch', photographer: 'Ella Olsson' },
+  evening: { id: 7, src: 'https://images.pexels.com/photos/3622614/pexels-photo-3622614.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Cozy evening ambiance', photographer: 'Taryn Elliott' },
+  night: { id: 10, src: 'https://images.pexels.com/photos/4033165/pexels-photo-4033165.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm night atmosphere', photographer: 'Taryn Elliott' },
+  history: { id: 401, src: 'https://images.pexels.com/photos/3560168/pexels-photo-3560168.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm morning wellness', photographer: 'Lisa Fotios' },
+  insights: { id: 501, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm lake with mountains', photographer: 'Eberhard Grossgasteiger' },
 };
 
-// Calming wellness backgrounds for History page hero
-export const historyHeroBackgrounds: PexelsPhoto[] = [
-  { id: 401, src: 'https://images.pexels.com/photos/3560168/pexels-photo-3560168.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm morning wellness ritual', photographer: 'Lisa Fotios' },
-  { id: 402, src: 'https://images.pexels.com/photos/1761279/pexels-photo-1761279.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Soft green fern leaves', photographer: 'Pixabay' },
-  { id: 403, src: 'https://images.pexels.com/photos/1028598/pexels-photo-1028598.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Organic nature textures', photographer: 'Pixabay' },
-  { id: 404, src: 'https://images.pexels.com/photos/3225517/pexels-photo-3225517.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Misty mountain forest at dawn', photographer: 'Luca Bravo' },
-  { id: 405, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm lake surrounded by forest', photographer: 'Eberhard Grossgasteiger' },
-];
+/**
+ * Fetch all photos from a Pexels collection.
+ * Caches results in localStorage for 24 hours.
+ */
+async function fetchCollectionPhotos(collectionKey: CollectionKey): Promise<PexelsPhoto[]> {
+  const collectionId = COLLECTION_IDS[collectionKey];
+  const cacheKey = COLLECTION_CACHE_PREFIX + collectionKey;
+
+  // Check cache first
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached) as { photos: PexelsPhoto[]; timestamp: number };
+      if (Date.now() - parsed.timestamp < COLLECTION_CACHE_EXPIRY_MS) {
+        return parsed.photos;
+      }
+      localStorage.removeItem(cacheKey);
+    }
+  } catch {
+    // Ignore cache read errors
+  }
+
+  if (!PEXELS_API_KEY) {
+    return [];
+  }
+
+  try {
+    const response = await fetch(
+      `${PEXELS_COLLECTIONS_URL}/${collectionId}?type=photos&per_page=80`,
+      { headers: { Authorization: PEXELS_API_KEY } }
+    );
+
+    if (!response.ok) {
+      console.error(`Pexels collection fetch failed: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    const photos: PexelsPhoto[] = (data.media || [])
+      .filter((item: Record<string, unknown>) => item.type === 'Photo')
+      .map((item: Record<string, unknown>) => ({
+        id: item.id as number,
+        src: ((item.src as Record<string, string>)?.large2x ||
+              (item.src as Record<string, string>)?.large ||
+              (item.src as Record<string, string>)?.original || ''),
+        alt: (item.alt as string) || `${collectionKey} background`,
+        photographer: (item.photographer as string) || 'Unknown',
+      }));
+
+    if (photos.length > 0) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({ photos, timestamp: Date.now() }));
+      } catch {
+        // Ignore cache write errors
+      }
+    }
+
+    return photos;
+  } catch (error) {
+    console.error('Pexels collection fetch error:', error);
+    return [];
+  }
+}
 
 /**
- * Get a random calming background for History page hero
+ * Get a random photo from a Pexels collection.
+ * Falls back to a static image if the API is unavailable.
+ */
+async function getRandomCollectionPhoto(collectionKey: CollectionKey): Promise<PexelsPhoto> {
+  const photos = await fetchCollectionPhotos(collectionKey);
+  if (photos.length > 0) {
+    return photos[Math.floor(Math.random() * photos.length)];
+  }
+  return FALLBACK_PHOTOS[collectionKey];
+}
+
+/**
+ * Get current time period name for greeting
+ */
+export function getTimePeriod(): 'morning' | 'afternoon' | 'evening' | 'night' {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 21) return 'evening';
+  return 'night';
+}
+
+/**
+ * Get a static fallback hero background (sync, for initial render)
+ */
+export function getTimeBasedHeroBackground(): PexelsPhoto {
+  return FALLBACK_PHOTOS[getTimePeriod()];
+}
+
+/**
+ * Fetch a random hero background from the time-appropriate Pexels collection
+ */
+export async function fetchTimeBasedHeroBackground(): Promise<PexelsPhoto> {
+  return getRandomCollectionPhoto(getTimePeriod());
+}
+
+/**
+ * Get a static fallback for History page hero (sync)
  */
 export function getHistoryHeroBackground(): PexelsPhoto {
-  const randomIndex = Math.floor(Math.random() * historyHeroBackgrounds.length);
-  return historyHeroBackgrounds[randomIndex];
+  return FALLBACK_PHOTOS.history;
 }
 
-// Minimalistic nature backgrounds for insights progress card
-export const insightsNatureBackgrounds = [
-  { id: 301, src: 'https://images.pexels.com/photos/3225517/pexels-photo-3225517.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Misty mountain forest at dawn', photographer: 'Luca Bravo' },
-  { id: 302, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm lake surrounded by forest', photographer: 'Eberhard Grossgasteiger' },
-  { id: 303, src: 'https://images.pexels.com/photos/1761279/pexels-photo-1761279.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Soft green fern leaves', photographer: 'Pixabay' },
-  { id: 304, src: 'https://images.pexels.com/photos/2387793/pexels-photo-2387793.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene mountain valley landscape', photographer: 'Julius Silver' },
-  { id: 305, src: 'https://images.pexels.com/photos/1486974/pexels-photo-1486974.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Aerial view of lush green forest', photographer: 'Luca Bravo' },
-];
-
-// Nature-inspired hero backgrounds for Insights page header
-export const insightsHeroBackgrounds: PexelsPhoto[] = [
-  { id: 501, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm lake with mountain reflections', photographer: 'Eberhard Grossgasteiger' },
-  { id: 502, src: 'https://images.pexels.com/photos/3225517/pexels-photo-3225517.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Misty mountain forest at dawn', photographer: 'Luca Bravo' },
-  { id: 503, src: 'https://images.pexels.com/photos/2387793/pexels-photo-2387793.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene mountain valley landscape', photographer: 'Julius Silver' },
-  { id: 504, src: 'https://images.pexels.com/photos/1486974/pexels-photo-1486974.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Aerial view of lush green forest', photographer: 'Luca Bravo' },
-  { id: 505, src: 'https://images.pexels.com/photos/1525041/pexels-photo-1525041.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene morning light through leaves', photographer: 'Pixabay' },
-];
+/**
+ * Fetch a random background from the History Pexels collection
+ */
+export async function fetchHistoryHeroBackground(): Promise<PexelsPhoto> {
+  return getRandomCollectionPhoto('history');
+}
 
 /**
- * Get a random minimalistic nature background for insights progress card
+ * Get a static fallback for Insights nature background (sync)
  */
 export function getInsightsNatureBackground(): PexelsPhoto {
-  const randomIndex = Math.floor(Math.random() * insightsNatureBackgrounds.length);
-  return insightsNatureBackgrounds[randomIndex];
+  return FALLBACK_PHOTOS.insights;
 }
 
 /**
- * Get a random nature-inspired hero background for Insights page header
+ * Fetch a random background from the Insights Pexels collection
+ */
+export async function fetchInsightsNatureBackground(): Promise<PexelsPhoto> {
+  return getRandomCollectionPhoto('insights');
+}
+
+/**
+ * Get a static fallback for Insights hero background (sync)
  */
 export function getInsightsHeroBackground(): PexelsPhoto {
-  const randomIndex = Math.floor(Math.random() * insightsHeroBackgrounds.length);
-  return insightsHeroBackgrounds[randomIndex];
+  return FALLBACK_PHOTOS.insights;
+}
+
+/**
+ * Fetch a random background from the Insights Pexels collection
+ */
+export async function fetchInsightsHeroBackground(): Promise<PexelsPhoto> {
+  return getRandomCollectionPhoto('insights');
 }
 
 // Meal card texture backgrounds (dark, moody aesthetic)
@@ -158,99 +239,6 @@ export const foodPhotos: Record<string, PexelsPhoto> = {
   // Default fallback
   default: { id: 999, src: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=200', alt: 'Healthy food', photographer: 'Ella Olsson' },
 };
-
-/**
- * Get a time-based hero background image
- */
-export function getTimeBasedHeroBackground(): PexelsPhoto {
-  const hour = new Date().getHours();
-
-  let timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night';
-
-  if (hour >= 5 && hour < 12) {
-    timeOfDay = 'morning';
-  } else if (hour >= 12 && hour < 17) {
-    timeOfDay = 'afternoon';
-  } else if (hour >= 17 && hour < 21) {
-    timeOfDay = 'evening';
-  } else {
-    timeOfDay = 'night';
-  }
-
-  const backgrounds = heroBackgrounds[timeOfDay];
-  const randomIndex = Math.floor(Math.random() * backgrounds.length);
-
-  return backgrounds[randomIndex];
-}
-
-/**
- * Fetch a time-based hero background from the Pexels API.
- * Uses the current time period to select an appropriate search query,
- * caches the result in localStorage, and falls back to static images on failure.
- */
-export async function fetchTimeBasedHeroBackground(): Promise<PexelsPhoto> {
-  const timePeriod = getTimePeriod();
-  const query = timeBasedSearchQueries[timePeriod];
-
-  // Check localStorage cache first
-  try {
-    const cacheKey = HERO_CACHE_PREFIX + timePeriod;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const parsed = JSON.parse(cached) as { photo: PexelsPhoto; timestamp: number };
-      if (Date.now() - parsed.timestamp < HERO_CACHE_EXPIRY_MS) {
-        return parsed.photo;
-      }
-      localStorage.removeItem(cacheKey);
-    }
-  } catch {
-    // Ignore cache read errors
-  }
-
-  // Attempt Pexels API call
-  if (PEXELS_API_KEY) {
-    try {
-      const params = new URLSearchParams({
-        query,
-        per_page: '5',
-        orientation: 'landscape',
-      });
-
-      const response = await fetch(`${PEXELS_API_URL}?${params}`, {
-        headers: { Authorization: PEXELS_API_KEY },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.photos && data.photos.length > 0) {
-          const randomIndex = Math.floor(Math.random() * data.photos.length);
-          const apiPhoto = data.photos[randomIndex];
-          const photo: PexelsPhoto = {
-            id: apiPhoto.id,
-            src: apiPhoto.src.large2x || apiPhoto.src.large || apiPhoto.src.original,
-            alt: apiPhoto.alt || `${timePeriod} background`,
-            photographer: apiPhoto.photographer,
-          };
-
-          // Cache the result
-          try {
-            const cacheKey = HERO_CACHE_PREFIX + timePeriod;
-            localStorage.setItem(cacheKey, JSON.stringify({ photo, timestamp: Date.now() }));
-          } catch {
-            // Ignore cache write errors
-          }
-
-          return photo;
-        }
-      }
-    } catch (error) {
-      console.error('Pexels API fetch failed for hero background:', error);
-    }
-  }
-
-  // Fallback to static images
-  return getTimeBasedHeroBackground();
-}
 
 /**
  * Get a random meal texture for card backgrounds
@@ -348,16 +336,4 @@ export function preloadImages(photos: PexelsPhoto[]): void {
     const img = new Image();
     img.src = photo.src;
   });
-}
-
-/**
- * Get current time period name for greeting
- */
-export function getTimePeriod(): 'morning' | 'afternoon' | 'evening' | 'night' {
-  const hour = new Date().getHours();
-
-  if (hour >= 5 && hour < 12) return 'morning';
-  if (hour >= 12 && hour < 17) return 'afternoon';
-  if (hour >= 17 && hour < 21) return 'evening';
-  return 'night';
 }
