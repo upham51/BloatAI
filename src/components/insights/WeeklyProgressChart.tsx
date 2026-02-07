@@ -142,7 +142,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
   };
 
   // Build SVG path
-  const padding = { left: 20, right: 58, top: 20, bottom: 12 };
+  const padding = { left: 20, right: 66, top: 20, bottom: 12 };
   const chartWidth = chartDimensions.width - padding.left - padding.right;
   const chartHeight = chartDimensions.height - padding.top - padding.bottom;
 
@@ -285,15 +285,16 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
                     transition={{ duration: 2, ease: easing }}
                   />
                   <motion.text
-                    x={chartDimensions.width - padding.right + 6}
+                    x={chartDimensions.width - padding.right + 8}
                     y={guideY + 3}
-                    fontSize="7.5"
-                    fill="#B0B8B0"
+                    fontSize="8.5"
+                    fill="#8A948A"
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.55 }}
+                    animate={{ opacity: 0.7 }}
                     transition={{ duration: 2, delay: 0.5, ease: easing }}
                   >
-                    {bloating} {label}
+                    <tspan fontWeight="600">{bloating}</tspan>
+                    <tspan dx="4" fontSize="7.5" fill="#95A095">{label}</tspan>
                   </motion.text>
                 </g>
               );
@@ -334,7 +335,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
 
               return (
                 <g key={index}>
-                  {/* Current day soft glow ring */}
+                  {/* Current day soft glow ring — appears smoothly after line animation */}
                   {isToday && hasDataPoint && (
                     <motion.circle
                       cx={point.x}
@@ -346,7 +347,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: [1, 1.3, 1], opacity: [0.35, 0.1, 0.35] }}
                       transition={{
-                        delay: pointDelay + 0.4,
+                        delay: ANIM_DURATION + 1.2,
                         duration: 2.5,
                         repeat: Infinity,
                         ease: "easeInOut",
@@ -427,7 +428,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
           {/* Day labels */}
           <motion.div
             className="flex justify-between mt-2"
-            style={{ paddingLeft: 20, paddingRight: 58 }}
+            style={{ paddingLeft: 20, paddingRight: 66 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.5, delay: 0.5, ease: easing }}
