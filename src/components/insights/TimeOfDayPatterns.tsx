@@ -224,7 +224,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
           <div className="flex flex-col items-center mt-6 mb-2">
             <div className="w-full" style={{ maxWidth: CHART_WIDTH + 20 }}>
               <svg
-                viewBox={`-10 -30 ${CHART_WIDTH + 20} ${CHART_HEIGHT + 60}`}
+                viewBox={`-10 -30 ${CHART_WIDTH + 20} ${CHART_HEIGHT + 90}`}
                 width="100%"
                 preserveAspectRatio="xMidYMid meet"
                 className="overflow-visible"
@@ -328,8 +328,8 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                           opacity: isSelected ? 0.25 : isDominant && animationPhase === 'done' ? 0.15 : 0.08,
                         } : {}}
                         transition={{
-                          height: { duration: bar.duration, delay: bar.delay, ease: [0.34, 1.56, 0.64, 1] },
-                          y: { duration: bar.duration, delay: bar.delay, ease: [0.34, 1.56, 0.64, 1] },
+                          height: { duration: bar.duration, delay: bar.delay, ease: [0.22, 1, 0.36, 1] },
+                          y: { duration: bar.duration, delay: bar.delay, ease: [0.22, 1, 0.36, 1] },
                           opacity: { duration: 0.6, delay: bar.delay + bar.duration * 0.7 },
                         }}
                         style={{ filter: 'blur(8px)' }}
@@ -352,7 +352,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                         transition={{
                           duration: bar.duration,
                           delay: bar.delay,
-                          ease: [0.34, 1.56, 0.64, 1],
+                          ease: [0.22, 1, 0.36, 1],
                         }}
                         style={{
                           filter: isSelected ? `drop-shadow(0 0 10px ${bar.glowColor})` : 'none',
@@ -378,8 +378,8 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                           opacity: [0, 0, 0.8, 0],
                         } : {}}
                         transition={{
-                          height: { duration: bar.duration, delay: bar.delay, ease: [0.34, 1.56, 0.64, 1] },
-                          y: { duration: bar.duration, delay: bar.delay, ease: [0.34, 1.56, 0.64, 1] },
+                          height: { duration: bar.duration, delay: bar.delay, ease: [0.22, 1, 0.36, 1] },
+                          y: { duration: bar.duration, delay: bar.delay, ease: [0.22, 1, 0.36, 1] },
                           opacity: { duration: 1.2, delay: bar.delay + bar.duration * 0.6, ease: 'easeOut' },
                         }}
                       />
