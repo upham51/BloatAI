@@ -1,16 +1,20 @@
 import { forwardRef, ButtonHTMLAttributes, ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { motion, MotionProps } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface PremiumButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface PremiumButtonProps {
   isLoading?: boolean;
   children: ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost';
+  className?: string;
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  onClick?: () => void;
 }
 
 export const PremiumButton = forwardRef<HTMLButtonElement, PremiumButtonProps>(
-  ({ children, isLoading, disabled, variant = 'primary', className, ...props }, ref) => {
+  ({ children, isLoading, disabled, variant = 'primary', className, type = 'button', onClick }, ref) => {
     const isDisabled = disabled || isLoading;
 
     const variants = {
@@ -34,7 +38,9 @@ export const PremiumButton = forwardRef<HTMLButtonElement, PremiumButtonProps>(
     return (
       <motion.button
         ref={ref}
+        type={type}
         disabled={isDisabled}
+        onClick={onClick}
         className={cn(
           'relative w-full py-4 px-6 rounded-xl',
           'transition-all duration-300 ease-out',
@@ -48,8 +54,7 @@ export const PremiumButton = forwardRef<HTMLButtonElement, PremiumButtonProps>(
         whileTap={!isDisabled ? { scale: 0.98 } : undefined}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-        {...props}
+        transition={{ duration: 0.5, ease: "easeOut" }}
       >
         {/* Animated shimmer effect */}
         {variant === 'primary' && !isDisabled && (

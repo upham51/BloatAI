@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { MealEntry, DetectedTrigger } from '@/types';
 import React from 'react';
 
@@ -43,7 +44,7 @@ const { mockQueryChain, mockAuth, resetMockChain, setEqResult } = vi.hoisted(() 
     mockQueryChain: mockChain,
     mockAuth: {
       getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
-      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+      onAuthStateChange: vi.fn(),
       signInWithPassword: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),

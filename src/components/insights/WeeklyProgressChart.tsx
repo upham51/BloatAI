@@ -185,7 +185,7 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
 
   // 5-second cinematic animation config
   const ANIM_DURATION = 5;
-  const easing = [0.4, 0, 0.2, 1]; // smooth ease-in-out
+  const easing = "easeInOut" as const;
 
   if (!hasData) {
     return (
