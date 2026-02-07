@@ -57,10 +57,10 @@ export function BloatingGuide() {
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <h2 className="text-xl font-black text-foreground tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                  The Complete Guide to Bloating
+                  Why This Keeps Happening
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1.5 font-medium leading-relaxed">
-                  Feeling like you have a balloon in your belly after eating? You're not alone. Learn what causes bloating and how to manage it.
+                  Understand what's going on in your gut and what you can do about it. You're not alone in this.
                 </p>
               </div>
 
@@ -82,7 +82,7 @@ export function BloatingGuide() {
               className="mt-4 pt-4 border-t border-white/50"
             >
               <p className="text-sm font-bold text-sky-600 group-hover:text-sky-700 transition-colors flex items-center gap-2">
-                <span>Tap to read the complete guide</span>
+                <span>Learn more about your body</span>
                 <motion.span
                   animate={{ x: [0, 4, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}

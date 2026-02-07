@@ -315,7 +315,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
               <AlertTriangle className="w-6 h-6 text-rose-600" />
             </div>
             <h2 className="text-2xl font-black text-foreground tracking-tight">
-              Your Top Bloat Triggers
+              Top Suspect Foods
             </h2>
           </div>
           <div className="space-y-4">
@@ -348,7 +348,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
               <AlertTriangle className="w-6 h-6 text-rose-600" />
             </div>
             <h2 className="text-2xl font-black text-foreground tracking-tight">
-              Your Top Bloat Triggers
+              Top Suspect Foods
             </h2>
           </div>
           <p className="text-muted-foreground font-medium">
@@ -421,10 +421,10 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
             </motion.div>
             <div>
               <h2 className="text-2xl font-black text-foreground tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                Your Top Bloat Triggers
+                Top Suspect Foods
               </h2>
               <p className="text-xs text-muted-foreground font-semibold mt-0.5">
-                Based on your meal history
+                What your body may be reacting to
               </p>
             </div>
           </motion.div>

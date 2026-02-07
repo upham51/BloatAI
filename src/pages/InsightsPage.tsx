@@ -9,7 +9,6 @@ import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
 import { TimeOfDayPatterns } from '@/components/insights/TimeOfDayPatterns';
-import { MealLoggingConsistency } from '@/components/insights/MealLoggingConsistency';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -342,7 +341,7 @@ export default function InsightsPage() {
                         transition={{ delay: 0.2, duration: 0.6 }}
                         className="text-[11px] font-semibold text-white/80 tracking-[0.2em] uppercase font-body"
                       >
-                        Your Analysis
+                        Your Story So Far
                       </motion.span>
                       <motion.h1
                         initial={{ opacity: 0, x: -10 }}
@@ -412,19 +411,19 @@ export default function InsightsPage() {
              * )}
              * ============================================================ */}
 
-            {/* 1. SPOTIFY WRAPPED TRIGGERS - Premium Cards */}
+            {/* 1. YOUR BLOAT RHYTHM - Pattern awareness */}
+            <StaggerItem>
+              <BloatHeatmap entries={entries} />
+            </StaggerItem>
+
+            {/* 2. TOP SUSPECT FOODS - Likely triggers */}
             {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
               <StaggerItem>
                 <SpotifyWrappedTriggers triggerConfidence={advancedInsights.triggerConfidence} />
               </StaggerItem>
             )}
 
-            {/* 2. BLOAT HEATMAP CALENDAR */}
-            <StaggerItem>
-              <BloatHeatmap entries={entries} />
-            </StaggerItem>
-
-            {/* 3. TOP FOODS - Most logged */}
+            {/* 3. FOODS YOU EAT MOST - Eating patterns */}
             {insights?.topFoods && insights.topFoods.length > 0 && (
               <StaggerItem>
                 <motion.div
@@ -460,9 +459,9 @@ export default function InsightsPage() {
                       </motion.div>
                       <div>
                         <h2 className="font-black text-foreground text-xl tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                          Most Logged Foods
+                          Top Suspect Foods
                         </h2>
-                        <p className="text-xs text-muted-foreground font-semibold mt-0.5">Your eating patterns</p>
+                        <p className="text-xs text-muted-foreground font-semibold mt-0.5">Foods that show up most often</p>
                       </div>
                     </div>
 
@@ -476,6 +475,7 @@ export default function InsightsPage() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1, duration: 0.4 }}
                             whileHover={{ scale: 1.02, x: 4 }}
+                            whileTap={{ scale: 0.98 }}
                             className="flex items-center gap-4 p-4 rounded-2xl bg-white/70 backdrop-blur-sm border border-amber-100/80 hover:bg-white/90 hover:shadow-md hover:border-amber-200/80 transition-all cursor-pointer"
                           >
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 border border-amber-200/50 flex items-center justify-center text-lg shadow-sm">
@@ -494,17 +494,12 @@ export default function InsightsPage() {
               </StaggerItem>
             )}
 
-            {/* 4. TIME OF DAY PATTERNS */}
+            {/* 4. WHEN YOUR GUT SPEAKS UP - Timing insights */}
             <StaggerItem>
               <TimeOfDayPatterns entries={entries} />
             </StaggerItem>
 
-            {/* 5. MEAL LOGGING CONSISTENCY */}
-            <StaggerItem>
-              <MealLoggingConsistency entries={entries} />
-            </StaggerItem>
-
-            {/* 6. BLOATING GUIDE */}
+            {/* 5. WHY THIS KEEPS HAPPENING - Support & education */}
             <StaggerItem>
               <BloatingGuide />
             </StaggerItem>

@@ -172,10 +172,10 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
             </motion.div>
             <div>
               <h3 className="font-black text-foreground text-xl tracking-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                Bloat Calendar
+                Your Bloat Rhythm
               </h3>
               <p className="text-xs text-muted-foreground font-semibold mt-0.5">
-                Daily bloating patterns
+                How your days have been feeling
               </p>
             </div>
           </motion.div>
@@ -261,7 +261,7 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
                 <Smile className="w-4 h-4 text-emerald-600 mr-1.5" />
                 <span className="text-2xl font-black text-emerald-600">{stats.goodDays}</span>
               </div>
-              <div className="text-xs text-emerald-700 font-semibold">Good days</div>
+              <div className="text-xs text-emerald-700 font-semibold">Calm days</div>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.05, y: -2 }}
@@ -271,7 +271,7 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
                 <Frown className="w-4 h-4 text-rose-600 mr-1.5" />
                 <span className="text-2xl font-black text-rose-600">{stats.badDays}</span>
               </div>
-              <div className="text-xs text-rose-700 font-semibold">Bad days</div>
+              <div className="text-xs text-rose-700 font-semibold">Tough days</div>
             </motion.div>
           </motion.div>
 
@@ -303,7 +303,8 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4 + i * 0.01, duration: 0.3 }}
-                  whileHover={{ scale: 1.15, y: -2 }}
+                  whileHover={{ scale: 1.12, y: -1 }}
+                  whileTap={{ scale: 0.95 }}
                   className={`aspect-square rounded-xl ${day.color} flex items-center justify-center text-xs font-bold transition-all cursor-pointer group relative shadow-sm ${
                     isToday ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background' : ''
                   } ${day.bloatLevel !== null ? 'shadow-md' : ''}`}
@@ -353,15 +354,15 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
           >
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm" />
-              <span className="text-muted-foreground font-semibold">Minimal</span>
+              <span className="text-muted-foreground font-semibold">Feeling good</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 shadow-sm" />
-              <span className="text-muted-foreground font-semibold">Moderate</span>
+              <span className="text-muted-foreground font-semibold">So-so</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-rose-400 to-red-500 shadow-sm" />
-              <span className="text-muted-foreground font-semibold">Significant</span>
+              <span className="text-muted-foreground font-semibold">Rough day</span>
             </div>
           </motion.div>
         </div>
