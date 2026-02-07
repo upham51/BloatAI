@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MealEntry } from '@/types';
 import { Clock } from 'lucide-react';
@@ -75,23 +75,6 @@ function getDominantInsight(label: string, percentage: number): string {
   return `Some bloating happens in the ${label.toLowerCase()}`;
 }
 
-// SVG donut chart segment as an arc path
-function describeArc(
-  cx: number,
-  cy: number,
-  radius: number,
-  startAngle: number,
-  endAngle: number
-): string {
-  const start = polarToCartesian(cx, cy, radius, endAngle);
-  const end = polarToCartesian(cx, cy, radius, startAngle);
-  const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-  return [
-    'M', start.x, start.y,
-    'A', radius, radius, 0, largeArcFlag, 0, end.x, end.y,
-  ].join(' ');
-}
-
 function polarToCartesian(
   cx: number,
   cy: number,
@@ -107,6 +90,7 @@ function polarToCartesian(
 
 export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
   const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
+  const [animationPhase, setAnimationPhase] = useState<'waiting' | 'drawing' | 'done'>('waiting');
 
   const periodData = useMemo(() => {
     const completedEntries = entries.filter(
@@ -142,97 +126,106 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
     0
   );
 
-  // Build donut segments
-  const CHART_SIZE = 200;
+  // Chart dimensions
+  const CHART_SIZE = 240;
   const CENTER = CHART_SIZE / 2;
-  const RADIUS = 72;
-  const STROKE_WIDTH = 28;
-  const GAP_DEGREES = 3;
+  const RADIUS = 82;
+  const STROKE_WIDTH = 32;
+  const GAP_DEGREES = 4;
 
+  // Build segment data
   const segments = useMemo(() => {
     const totalPercentage = periodData.reduce((s, p) => s + p.percentage, 0);
     if (totalPercentage === 0) {
-      // Show equal empty segments
       return periodData.map((period, i) => ({
         ...period,
         startAngle: i * 90,
         endAngle: (i + 1) * 90 - GAP_DEGREES,
+        sweepAngle: 90 - GAP_DEGREES,
         isEmpty: true,
+        midAngle: i * 90 + 45,
       }));
     }
 
     let currentAngle = 0;
-    return periodData.map((period, i) => {
+    return periodData.map((period) => {
       const sweepAngle = (period.percentage / 100) * 360;
       const startAngle = currentAngle;
       const endAngle = currentAngle + Math.max(sweepAngle - GAP_DEGREES, 0);
+      const midAngle = currentAngle + sweepAngle / 2;
       currentAngle += sweepAngle;
       return {
         ...period,
         startAngle,
         endAngle,
+        sweepAngle: Math.max(sweepAngle - GAP_DEGREES, 0),
         isEmpty: period.percentage === 0,
+        midAngle,
       };
     });
   }, [periodData]);
 
+  // Start animation on mount
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimationPhase('drawing'), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (animationPhase === 'drawing') {
+      const timer = setTimeout(() => setAnimationPhase('done'), 5200);
+      return () => clearTimeout(timer);
+    }
+  }, [animationPhase]);
+
   const selectedData = selectedSegment !== null ? periodData[selectedSegment] : null;
+
+  // Calculate emoji positions on/near arcs
+  const emojiPositions = useMemo(() => {
+    return segments.map((seg) => {
+      const pos = polarToCartesian(CENTER, CENTER, RADIUS + STROKE_WIDTH / 2 + 20, seg.midAngle);
+      return pos;
+    });
+  }, [segments]);
+
+  // Cumulative animation delays - each segment starts after previous one finishes
+  // Total 5s animation: distribute proportionally by segment size
+  const segmentAnimations = useMemo(() => {
+    const TOTAL_DRAW_TIME = 4.5; // seconds for drawing
+    const BASE_DELAY = 0.5; // initial delay
+    const totalSweep = segments.reduce((s, seg) => s + (seg.isEmpty ? 0 : seg.sweepAngle), 0);
+
+    let cumulativeDelay = BASE_DELAY;
+    return segments.map((seg) => {
+      const delay = cumulativeDelay;
+      const duration = totalSweep > 0 && !seg.isEmpty
+        ? Math.max((seg.sweepAngle / totalSweep) * TOTAL_DRAW_TIME, 0.4)
+        : 0.4;
+      cumulativeDelay += duration;
+      return { delay, duration };
+    });
+  }, [segments]);
+
+  const circumference = 2 * Math.PI * RADIUS;
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.96, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-violet-500/10"
     >
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-violet-50/90 via-purple-50/80 to-indigo-50/90" />
 
-      {/* Animated orbs */}
-      <motion.div
-        animate={{
-          scale: [1, 1.3, 1],
-          x: [0, 25, 0],
-          y: [0, -15, 0],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-violet-400/20 to-purple-400/15 rounded-full blur-3xl"
-      />
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          x: [0, -20, 0],
-          y: [0, 15, 0],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: 'easeInOut',
-          delay: 2,
-        }}
-        className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-indigo-400/15 to-violet-300/10 rounded-full blur-3xl"
-      />
-
       {/* Glass overlay */}
       <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 rounded-[2rem]">
         <div className="p-6">
           {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="flex items-center gap-3 mb-2"
-          >
-            <motion.div
-              whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-              transition={{ duration: 0.5 }}
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-violet-500/20"
-            >
-              <Clock
-                className="w-6 h-6 text-violet-600"
-                strokeWidth={2.5}
-              />
-            </motion.div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-violet-500/20">
+              <Clock className="w-6 h-6 text-violet-600" strokeWidth={2.5} />
+            </div>
             <div>
               <h3
                 className="font-black text-foreground text-xl tracking-tight"
@@ -244,21 +237,18 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                 Bloating patterns by time of day
               </p>
             </div>
-          </motion.div>
+          </div>
 
           {/* Donut Chart */}
           <div className="flex flex-col items-center mt-4 mb-2">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            <div
               className="relative"
-              style={{ width: CHART_SIZE, height: CHART_SIZE }}
+              style={{ width: CHART_SIZE + 48, height: CHART_SIZE + 48 }}
             >
               <svg
-                viewBox={`0 0 ${CHART_SIZE} ${CHART_SIZE}`}
-                width={CHART_SIZE}
-                height={CHART_SIZE}
+                viewBox={`-24 -24 ${CHART_SIZE + 48} ${CHART_SIZE + 48}`}
+                width={CHART_SIZE + 48}
+                height={CHART_SIZE + 48}
                 className="overflow-visible"
               >
                 {/* Subtle background ring */}
@@ -267,21 +257,20 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                   cy={CENTER}
                   r={RADIUS}
                   fill="none"
-                  stroke="rgba(139, 92, 246, 0.08)"
+                  stroke="rgba(139, 92, 246, 0.06)"
                   strokeWidth={STROKE_WIDTH}
                 />
 
-                {/* Donut segments */}
+                {/* Donut segments - sequential draw animation */}
                 {segments.map((seg, i) => {
                   if (seg.isEmpty && totalMeals > 0) return null;
+                  if (seg.sweepAngle <= 0 && totalMeals > 0) return null;
+
+                  const segmentLength = (seg.sweepAngle / 360) * circumference;
+                  const offset = (seg.startAngle / 360) * circumference;
                   const isSelected = selectedSegment === i;
                   const isDominant = i === dominantIndex && totalMeals > 0;
-                  const sweepAngle = seg.endAngle - seg.startAngle;
-                  if (sweepAngle <= 0 && totalMeals > 0) return null;
-
-                  const circumference = 2 * Math.PI * RADIUS;
-                  const segmentLength = (sweepAngle / 360) * circumference;
-                  const offset = ((seg.startAngle) / 360) * circumference;
+                  const anim = segmentAnimations[i];
 
                   return (
                     <motion.circle
@@ -291,7 +280,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                       r={RADIUS}
                       fill="none"
                       stroke={seg.color}
-                      strokeWidth={isSelected ? STROKE_WIDTH + 6 : isDominant ? STROKE_WIDTH + 3 : STROKE_WIDTH}
+                      strokeWidth={isSelected ? STROKE_WIDTH + 8 : isDominant ? STROKE_WIDTH + 4 : STROKE_WIDTH}
                       strokeDasharray={`${segmentLength} ${circumference - segmentLength}`}
                       strokeDashoffset={-offset}
                       strokeLinecap="round"
@@ -300,21 +289,23 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                         transformOrigin: '50% 50%',
                         cursor: 'pointer',
                         filter: isSelected
-                          ? `drop-shadow(0 0 8px ${seg.color})`
-                          : isDominant
-                          ? `drop-shadow(0 0 4px ${seg.color})`
+                          ? `drop-shadow(0 0 12px ${seg.color}80)`
+                          : isDominant && animationPhase === 'done'
+                          ? `drop-shadow(0 0 6px ${seg.color}50)`
                           : 'none',
-                        transition: 'stroke-width 0.3s ease, filter 0.3s ease',
                       }}
-                      initial={{ strokeDasharray: `0 ${circumference}` }}
-                      animate={{
+                      initial={{ strokeDasharray: `0 ${circumference}`, opacity: 0.4 }}
+                      animate={animationPhase !== 'waiting' ? {
                         strokeDasharray: `${segmentLength} ${circumference - segmentLength}`,
                         opacity: seg.isEmpty ? 0.3 : 1,
+                      } : {
+                        strokeDasharray: `0 ${circumference}`,
+                        opacity: 0.4,
                       }}
                       transition={{
-                        duration: 1.2,
-                        delay: 0.4 + i * 0.15,
-                        ease: [0.16, 1, 0.3, 1],
+                        duration: anim.duration,
+                        delay: anim.delay,
+                        ease: [0.33, 1, 0.68, 1],
                       }}
                       onClick={() =>
                         setSelectedSegment(selectedSegment === i ? null : i)
@@ -322,75 +313,135 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                     />
                   );
                 })}
+
+                {/* Emoji labels positioned on the outside of each arc */}
+                {segments.map((seg, i) => {
+                  if (seg.isEmpty && totalMeals > 0) return null;
+                  if (seg.sweepAngle <= 0 && totalMeals > 0) return null;
+                  const pos = emojiPositions[i];
+                  const anim = segmentAnimations[i];
+                  const isSelected = selectedSegment === i;
+
+                  return (
+                    <motion.g
+                      key={`emoji-${seg.label}`}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={animationPhase !== 'waiting' ? { opacity: 1, scale: isSelected ? 1.3 : 1 } : { opacity: 0, scale: 0 }}
+                      transition={{
+                        opacity: { duration: 0.4, delay: anim.delay + anim.duration * 0.5 },
+                        scale: { duration: 0.5, delay: anim.delay + anim.duration * 0.5, type: 'spring', stiffness: 200, damping: 12 },
+                      }}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setSelectedSegment(selectedSegment === i ? null : i)}
+                    >
+                      <text
+                        x={pos.x}
+                        y={pos.y}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        style={{ fontSize: '20px' }}
+                      >
+                        {seg.emoji}
+                      </text>
+                    </motion.g>
+                  );
+                })}
+
+                {/* Percentage labels on the arc for segments large enough */}
+                {segments.map((seg, i) => {
+                  if (seg.isEmpty && totalMeals > 0) return null;
+                  if (seg.percentage < 15) return null; // Only show on segments with enough space
+                  const labelPos = polarToCartesian(CENTER, CENTER, RADIUS, seg.midAngle);
+                  const anim = segmentAnimations[i];
+
+                  return (
+                    <motion.text
+                      key={`pct-${seg.label}`}
+                      x={labelPos.x}
+                      y={labelPos.y}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fill="white"
+                      fontWeight="800"
+                      fontSize="12"
+                      style={{
+                        textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                        pointerEvents: 'none',
+                      }}
+                      initial={{ opacity: 0 }}
+                      animate={animationPhase !== 'waiting' ? { opacity: 1 } : { opacity: 0 }}
+                      transition={{
+                        duration: 0.4,
+                        delay: anim.delay + anim.duration * 0.7,
+                      }}
+                    >
+                      {seg.percentage}%
+                    </motion.text>
+                  );
+                })}
               </svg>
 
               {/* Center content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ padding: 24 }}>
                 <AnimatePresence mode="wait">
                   {selectedData ? (
                     <motion.div
                       key={`selected-${selectedSegment}`}
-                      initial={{ opacity: 0, scale: 0.9 }}
+                      initial={{ opacity: 0, scale: 0.85 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                       className="text-center"
                     >
-                      <span className="text-2xl">{selectedData.emoji}</span>
-                      <div className="text-2xl font-black text-foreground leading-tight">
+                      <span className="text-3xl">{selectedData.emoji}</span>
+                      <div className="text-3xl font-black text-foreground leading-tight mt-1">
                         {selectedData.percentage}%
                       </div>
-                      <div className="text-[10px] font-semibold text-muted-foreground mt-0.5">
+                      <div className="text-xs font-bold text-muted-foreground mt-1">
+                        {selectedData.label}
+                      </div>
+                      <div className="text-[10px] font-semibold text-muted-foreground">
                         {selectedData.count} {selectedData.count === 1 ? 'meal' : 'meals'}
                       </div>
                     </motion.div>
                   ) : (
                     <motion.div
                       key="total"
-                      initial={{ opacity: 0, scale: 0.9 }}
+                      initial={{ opacity: 0, scale: 0.85 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.25 }}
                       className="text-center"
                     >
-                      <div className="text-2xl font-black text-foreground leading-tight">
+                      <motion.div
+                        className="text-3xl font-black text-foreground leading-tight"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 3, duration: 0.8 }}
+                      >
                         {totalMeals}
-                      </div>
-                      <div className="text-[10px] font-semibold text-muted-foreground mt-0.5">
+                      </motion.div>
+                      <motion.div
+                        className="text-xs font-semibold text-muted-foreground mt-1"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 3.2, duration: 0.8 }}
+                      >
                         meals tracked
-                      </div>
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-
-              {/* Dominant segment pulse glow */}
-              {totalMeals > 0 && selectedSegment === null && (
-                <motion.div
-                  animate={{
-                    opacity: [0.3, 0.6, 0.3],
-                    scale: [1, 1.04, 1],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  className="absolute inset-0 rounded-full pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle, ${periodData[dominantIndex].color}10 0%, transparent 70%)`,
-                  }}
-                />
-              )}
-            </motion.div>
+            </div>
           </div>
 
-          {/* Legend / segment labels */}
+          {/* Legend - compact pill style */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.5 }}
-            className="grid grid-cols-2 gap-2 mt-3"
+            transition={{ delay: 4.5, duration: 0.6 }}
+            className="grid grid-cols-2 gap-2 mt-1"
           >
             {periodData.map((period, i) => {
               const isSelected = selectedSegment === i;
@@ -408,17 +459,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                       : 'bg-white/50 border-white/60 hover:bg-white/70'
                   }`}
                 >
-                  <motion.div
-                    animate={
-                      isDominant && !isSelected
-                        ? { scale: [1, 1.15, 1] }
-                        : {}
-                    }
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
+                  <div
                     className="w-3.5 h-3.5 rounded-full flex-shrink-0"
                     style={{
                       backgroundColor: period.color,
@@ -476,7 +517,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.4 }}
+            transition={{ delay: 5 }}
             className="flex items-center justify-center gap-2 text-xs pt-4 mt-4 border-t border-white/50"
           >
             <span className="text-muted-foreground font-semibold">
