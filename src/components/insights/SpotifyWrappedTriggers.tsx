@@ -245,6 +245,24 @@ function getSeverityGlowStyle(impactScore: number): React.CSSProperties {
   return { filter: 'drop-shadow(0 0 6px rgba(52,211,153,0.7)) drop-shadow(0 0 12px rgba(52,211,153,0.4))' };
 }
 
+function getBarSeverity(impactScore: number): { filledBars: number; barColor: string; glowStyle: React.CSSProperties } {
+  if (impactScore >= 1.0) return {
+    filledBars: 3,
+    barColor: 'bg-red-500',
+    glowStyle: { filter: 'drop-shadow(0 0 6px rgba(239,68,68,0.6)) drop-shadow(0 0 10px rgba(239,68,68,0.3))' },
+  };
+  if (impactScore >= 0.5) return {
+    filledBars: 2,
+    barColor: 'bg-yellow-400',
+    glowStyle: { filter: 'drop-shadow(0 0 6px rgba(250,204,21,0.6)) drop-shadow(0 0 10px rgba(250,204,21,0.3))' },
+  };
+  return {
+    filledBars: 1,
+    barColor: 'bg-emerald-500',
+    glowStyle: { filter: 'drop-shadow(0 0 6px rgba(16,185,129,0.6)) drop-shadow(0 0 10px rgba(16,185,129,0.3))' },
+  };
+}
+
 export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTriggersProps) {
   const [topTriggers, setTopTriggers] = useState<TriggerCardData[]>([]);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -439,20 +457,16 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                     </span>
                   </motion.div>
 
-                  {/* Severity indicator bar with glow effect */}
-                  <div className="flex items-center gap-1.5" style={getSeverityGlowStyle(topTrigger.impactScore)}>
-                    {[1, 2, 3, 4, 5].map((level) => (
+                  {/* Severity indicator bars - #1 trigger always all red */}
+                  <div className="flex items-end gap-1.5" style={{ filter: 'drop-shadow(0 0 8px rgba(239,68,68,0.7)) drop-shadow(0 0 14px rgba(239,68,68,0.4))' }}>
+                    {[1, 2, 3].map((level) => (
                       <motion.div
                         key={level}
-                        initial={{ scaleY: 0 }}
-                        animate={{ scaleY: 1 }}
-                        transition={{ delay: 0.6 + level * 0.1, duration: 0.3 }}
-                        className={`w-2 rounded-full ${
-                          topTrigger.impactScore >= level * 0.5
-                            ? 'bg-white'
-                            : 'bg-white/30'
-                        }`}
-                        style={{ height: `${8 + level * 4}px` }}
+                        initial={{ scaleY: 0, opacity: 0 }}
+                        animate={{ scaleY: 1, opacity: 1 }}
+                        transition={{ delay: 0.6 + level * 0.12, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                        className="w-2.5 rounded-full bg-red-500"
+                        style={{ height: `${10 + level * 5}px`, transformOrigin: 'bottom' }}
                       />
                     ))}
                   </div>
@@ -743,19 +757,24 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                         {/* Content */}
                         <div className="relative h-full flex items-center justify-between px-5">
                           <div className="flex items-center gap-3.5">
-                            {/* Severity signal bars with glow */}
-                            <div className="flex items-center gap-1" style={getSeverityGlowStyle(trigger.impactScore)}>
-                              {[1, 2, 3].map((level) => (
-                                <div
-                                  key={level}
-                                  className={`w-1.5 rounded-full transition-all ${
-                                    trigger.impactScore >= level * 0.7
-                                      ? 'bg-white'
-                                      : 'bg-white/25'
-                                  }`}
-                                  style={{ height: `${10 + level * 4}px` }}
-                                />
-                              ))}
+                            {/* Severity signal bars - colored by severity */}
+                            <div className="flex items-end gap-1" style={getBarSeverity(trigger.impactScore).glowStyle}>
+                              {[1, 2, 3].map((level) => {
+                                const { filledBars, barColor } = getBarSeverity(trigger.impactScore);
+                                const isFilled = level <= filledBars;
+                                return (
+                                  <motion.div
+                                    key={level}
+                                    initial={{ scaleY: 0, opacity: 0 }}
+                                    animate={{ scaleY: 1, opacity: 1 }}
+                                    transition={{ delay: 0.7 + level * 0.1, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                                    className={`w-1.5 rounded-full transition-colors ${
+                                      isFilled ? barColor : 'bg-white/20'
+                                    }`}
+                                    style={{ height: `${10 + level * 4}px`, transformOrigin: 'bottom' }}
+                                  />
+                                );
+                              })}
                             </div>
                             <div>
                               <div className="font-bold text-white text-[15px] drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
