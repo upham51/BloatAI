@@ -80,12 +80,29 @@ export const insightsNatureBackgrounds = [
   { id: 305, src: 'https://images.pexels.com/photos/1486974/pexels-photo-1486974.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Aerial view of lush green forest', photographer: 'Luca Bravo' },
 ];
 
+// Nature-inspired hero backgrounds for Insights page header
+export const insightsHeroBackgrounds: PexelsPhoto[] = [
+  { id: 501, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm lake with mountain reflections', photographer: 'Eberhard Grossgasteiger' },
+  { id: 502, src: 'https://images.pexels.com/photos/3225517/pexels-photo-3225517.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Misty mountain forest at dawn', photographer: 'Luca Bravo' },
+  { id: 503, src: 'https://images.pexels.com/photos/2387793/pexels-photo-2387793.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene mountain valley landscape', photographer: 'Julius Silver' },
+  { id: 504, src: 'https://images.pexels.com/photos/1486974/pexels-photo-1486974.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Aerial view of lush green forest', photographer: 'Luca Bravo' },
+  { id: 505, src: 'https://images.pexels.com/photos/1525041/pexels-photo-1525041.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene morning light through leaves', photographer: 'Pixabay' },
+];
+
 /**
  * Get a random minimalistic nature background for insights progress card
  */
 export function getInsightsNatureBackground(): PexelsPhoto {
   const randomIndex = Math.floor(Math.random() * insightsNatureBackgrounds.length);
   return insightsNatureBackgrounds[randomIndex];
+}
+
+/**
+ * Get a random nature-inspired hero background for Insights page header
+ */
+export function getInsightsHeroBackground(): PexelsPhoto {
+  const randomIndex = Math.floor(Math.random() * insightsHeroBackgrounds.length);
+  return insightsHeroBackgrounds[randomIndex];
 }
 
 // Meal card texture backgrounds (dark, moody aesthetic)

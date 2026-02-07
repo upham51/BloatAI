@@ -1,21 +1,22 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, UtensilsCrossed } from 'lucide-react';
+import { Sparkles, UtensilsCrossed, BarChart3, Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import InsightsLoader from '@/components/shared/InsightsLoader';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
-import { VisualHealthScoreHero } from '@/components/insights/VisualHealthScoreHero';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
+import { TimeOfDayPatterns } from '@/components/insights/TimeOfDayPatterns';
+import { MealLoggingConsistency } from '@/components/insights/MealLoggingConsistency';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { getIconForTrigger } from '@/lib/triggerUtils';
 import { generateComprehensiveInsight, generateAdvancedInsights } from '@/lib/insightsAnalysis';
 import { GrainTexture } from '@/components/ui/grain-texture';
-import { getInsightsNatureBackground } from '@/lib/pexels';
+import { getInsightsNatureBackground, getInsightsHeroBackground } from '@/lib/pexels';
 
 export default function InsightsPage() {
   const navigate = useNavigate();
@@ -30,11 +31,16 @@ export default function InsightsPage() {
   // Nature background for progress card
   const [natureBackground] = useState(() => getInsightsNatureBackground());
 
-  // Preload nature background
+  // Hero background for insights page header
+  const [heroBackground] = useState(() => getInsightsHeroBackground());
+
+  // Preload backgrounds
   useEffect(() => {
     const img = new Image();
     img.src = natureBackground.src;
-  }, [natureBackground]);
+    const img2 = new Image();
+    img2.src = heroBackground.src;
+  }, [natureBackground, heroBackground]);
 
   // Loading state for AI magic animation
   const [isAnalyzing, setIsAnalyzing] = useState(true);
@@ -62,6 +68,23 @@ export default function InsightsPage() {
   const advancedInsights = useMemo(() => {
     return generateAdvancedInsights(entries);
   }, [entries]);
+
+  // Calculate pattern count for hero stat pill
+  const patternCount = useMemo(() => {
+    let count = 0;
+    if (advancedInsights?.triggerConfidence) {
+      count += advancedInsights.triggerConfidence.filter(t => t.occurrences >= 2).length;
+    }
+    return count;
+  }, [advancedInsights]);
+
+  // Calculate trigger count for hero stat pill
+  const triggerCount = useMemo(() => {
+    if (!advancedInsights?.triggerConfidence) return 0;
+    return advancedInsights.triggerConfidence.filter(
+      t => t.confidence === 'high' || t.confidence === 'investigating'
+    ).length;
+  }, [advancedInsights]);
 
   // Full-screen loading state
   if (isAnalyzing && hasEnoughData) {
@@ -246,88 +269,162 @@ export default function InsightsPage() {
     <AppLayout>
       <PageTransition>
         <div className="min-h-screen relative">
-          {/* Premium animated background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-lavender/15 via-mint/10 to-background" />
+          {/* Subtle botanical line art background - matching History page */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+            <svg
+              viewBox="0 0 200 700"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute -right-10 top-48 w-64 h-auto opacity-[0.035] text-forest"
+            >
+              <path
+                d="M100 700 Q95 580 100 480 Q105 380 95 280 Q88 180 100 60"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+              <path d="M100 580 Q125 560 145 568 Q125 578 100 580" fill="currentColor" opacity="0.4" />
+              <path d="M102 440 Q130 418 152 428 Q128 440 102 440" fill="currentColor" opacity="0.35" />
+              <path d="M100 300 Q126 280 146 292 Q124 302 100 300" fill="currentColor" opacity="0.3" />
+              <path d="M100 180 Q124 162 142 174 Q122 184 100 180" fill="currentColor" opacity="0.25" />
+              <path d="M98 520 Q72 502 55 514 Q74 524 98 520" fill="currentColor" opacity="0.35" />
+              <path d="M96 380 Q68 362 50 375 Q70 385 96 380" fill="currentColor" opacity="0.3" />
+              <path d="M98 240 Q72 222 56 236 Q74 246 98 240" fill="currentColor" opacity="0.25" />
+              <path d="M96 120 Q70 105 55 118 Q72 128 96 120" fill="currentColor" opacity="0.2" />
+            </svg>
+            <svg
+              viewBox="0 0 120 400"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute -left-8 bottom-32 w-32 h-auto opacity-[0.025] text-forest"
+            >
+              <path
+                d="M60 400 Q58 320 62 240 Q64 160 58 80"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeLinecap="round"
+              />
+              <path d="M62 340 Q80 325 92 332 Q78 342 62 340" fill="currentColor" opacity="0.35" />
+              <path d="M60 260 Q42 248 30 258 Q44 265 60 260" fill="currentColor" opacity="0.3" />
+              <path d="M62 180 Q78 168 90 178 Q76 186 62 180" fill="currentColor" opacity="0.25" />
+              <path d="M60 110 Q44 98 34 108 Q46 115 60 110" fill="currentColor" opacity="0.2" />
+            </svg>
+          </div>
 
-          {/* Animated gradient orbs */}
-          <motion.div
-            animate={{
-              scale: [1, 1.3, 1],
-              x: [0, 30, 0],
-              y: [0, -20, 0],
-            }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-20 left-5 w-72 h-72 bg-gradient-to-br from-primary/15 to-mint/10 rounded-full blur-3xl pointer-events-none"
-          />
+          <StaggerContainer className="relative z-10 px-5 pt-4 pb-32 max-w-lg mx-auto space-y-6 w-full">
 
-          <motion.div
-            animate={{
-              scale: [1, 1.25, 1],
-              x: [0, -25, 0],
-              y: [0, 20, 0],
-            }}
-            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute top-[400px] right-0 w-64 h-64 bg-gradient-to-tr from-coral/15 to-rose-300/10 rounded-full blur-3xl pointer-events-none"
-          />
-
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 180, 360],
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            className="absolute top-[800px] left-1/2 -translate-x-1/2 w-80 h-80 bg-gradient-to-br from-lavender/15 to-purple-300/10 rounded-full blur-3xl pointer-events-none"
-          />
-
-          <GrainTexture />
-
-          <StaggerContainer className="relative z-10 p-6 pb-32 max-w-2xl mx-auto space-y-6">
-            {/* Header */}
+            {/* ORGANIC MODERNISM Hero Section - matching Dashboard/History */}
             <StaggerItem>
-              <motion.header
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mb-2"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="relative overflow-hidden rounded-[32px] h-52 shadow-glass-xl"
               >
-                <h1
-                  className="text-4xl font-black text-foreground tracking-tight"
-                  style={{ textShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
-                >
-                  Insights
-                </h1>
-                <p className="text-muted-foreground font-semibold mt-1">
-                  Your personalized gut health analysis
-                </p>
-              </motion.header>
+                {/* Pexels Background Image */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${heroBackground.src})` }}
+                />
+
+                {/* Organic gradient overlays for depth and readability */}
+                <div className="absolute inset-0 bg-gradient-to-br from-forest/40 via-forest/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent" />
+
+                {/* Glass content */}
+                <div className="relative h-full">
+                  <div className="relative h-full p-7 flex flex-col justify-between">
+                    {/* Title - bottom left with display serif font */}
+                    <div className="flex flex-col items-start gap-2 pr-16 mt-auto">
+                      <motion.span
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2, duration: 0.6 }}
+                        className="text-[11px] font-semibold text-white/80 tracking-[0.2em] uppercase font-body"
+                      >
+                        Your Analysis
+                      </motion.span>
+                      <motion.h1
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3, duration: 0.6 }}
+                        className="text-display-xl font-display font-bold text-white leading-[0.95] drop-shadow-lg"
+                        style={{
+                          textShadow: '0 4px 24px rgba(0,0,0,0.3)'
+                        }}
+                      >
+                        Insights
+                      </motion.h1>
+                    </div>
+
+                    {/* Stat badges - bottom right */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5, duration: 0.6 }}
+                      className="absolute bottom-5 right-5 flex items-center gap-2"
+                    >
+                      {patternCount > 0 && (
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/95 backdrop-blur-sm shadow-glass border border-white/50"
+                        >
+                          <BarChart3 className="w-4 h-4 text-forest" />
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-base font-bold text-charcoal">{patternCount}</span>
+                            <span className="text-[10px] font-medium text-charcoal/60">patterns</span>
+                          </div>
+                        </motion.div>
+                      )}
+                      {triggerCount > 0 && (
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/95 backdrop-blur-sm shadow-glass border border-white/50"
+                        >
+                          <Flame className="w-4 h-4 text-burnt" />
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-base font-bold text-charcoal">{triggerCount}</span>
+                            <span className="text-[10px] font-medium text-charcoal/60">triggers</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
             </StaggerItem>
 
-            {/* Analysis Content */}
-            {/* 1. HERO SECTION - Bloat Health Score */}
-            {insights && (
-              <StaggerItem>
-                <VisualHealthScoreHero
-                  avgBloating={insights.avgBloating}
-                  totalMeals={insights.totalMeals}
-                  lowBloatingCount={insights.lowBloatingCount}
-                  highBloatingCount={insights.highBloatingCount}
-                />
-              </StaggerItem>
-            )}
+            {/* ============================================================
+             * BLOAT HEALTH SCORE - Commented out for potential later use
+             * ============================================================
+             * The VisualHealthScoreHero component displays a 0-100 health score
+             * with an animated stomach character. Preserved here for future use.
+             *
+             * {insights && (
+             *   <StaggerItem>
+             *     <VisualHealthScoreHero
+             *       avgBloating={insights.avgBloating}
+             *       totalMeals={insights.totalMeals}
+             *       lowBloatingCount={insights.lowBloatingCount}
+             *       highBloatingCount={insights.highBloatingCount}
+             *     />
+             *   </StaggerItem>
+             * )}
+             * ============================================================ */}
 
-            {/* 2. SPOTIFY WRAPPED TRIGGERS - Premium Cards */}
+            {/* 1. SPOTIFY WRAPPED TRIGGERS - Premium Cards */}
             {advancedInsights && advancedInsights.triggerConfidence.length > 0 && (
               <StaggerItem>
                 <SpotifyWrappedTriggers triggerConfidence={advancedInsights.triggerConfidence} />
               </StaggerItem>
             )}
 
-            {/* 3. BLOAT HEATMAP CALENDAR */}
+            {/* 2. BLOAT HEATMAP CALENDAR */}
             <StaggerItem>
               <BloatHeatmap entries={entries} />
             </StaggerItem>
 
-            {/* 5. TOP FOODS - Most logged */}
+            {/* 3. TOP FOODS - Most logged */}
             {insights?.topFoods && insights.topFoods.length > 0 && (
               <StaggerItem>
                 <motion.div
@@ -396,6 +493,16 @@ export default function InsightsPage() {
                 </motion.div>
               </StaggerItem>
             )}
+
+            {/* 4. TIME OF DAY PATTERNS */}
+            <StaggerItem>
+              <TimeOfDayPatterns entries={entries} />
+            </StaggerItem>
+
+            {/* 5. MEAL LOGGING CONSISTENCY */}
+            <StaggerItem>
+              <MealLoggingConsistency entries={entries} />
+            </StaggerItem>
 
             {/* 6. BLOATING GUIDE */}
             <StaggerItem>
