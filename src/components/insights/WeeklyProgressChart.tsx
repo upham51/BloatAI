@@ -331,7 +331,9 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
               const color = getPointColor(chartData[index]?.bloating);
               const hasDataPoint = chartData[index]?.hasData;
               const isToday = chartData[index]?.isToday;
-              const pointDelay = (index / (points.length - 1)) * ANIM_DURATION;
+              // Delay all circles until AFTER the line finishes drawing,
+              // then stagger them left-to-right so the endpoint isn't spoiled.
+              const pointDelay = ANIM_DURATION + 0.1 + (index / (points.length - 1)) * 0.6;
 
               return (
                 <g key={index}>
