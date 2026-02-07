@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, MoreVertical, Clock, Flame, Edit3, TrendingUp, Pencil, X, Check, FileText, Sparkles, History } from 'lucide-react';
+import { Trash2, MoreVertical, Clock, Flame, Edit3, TrendingUp, Pencil, X, Check, FileText, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,7 @@ import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTE
 import { formatDistanceToNow, format, isAfter, subDays, isToday, isYesterday, startOfDay } from 'date-fns';
 import { formatTriggerDisplay } from '@/lib/triggerUtils';
 import { haptics } from '@/lib/haptics';
+import { getHistoryHeroBackground } from '@/lib/pexels';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -54,6 +55,15 @@ export default function HistoryPage() {
   const [editTitleEntry, setEditTitleEntry] = useState<MealEntry | null>(null);
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesInput, setNotesInput] = useState('');
+
+  // Calming hero background
+  const [heroBackground] = useState(() => getHistoryHeroBackground());
+
+  // Preload hero background
+  useEffect(() => {
+    const img = new Image();
+    img.src = heroBackground.src;
+  }, [heroBackground]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -238,71 +248,82 @@ export default function HistoryPage() {
     <AppLayout>
       <PageTransition>
         <div className="min-h-screen relative">
+          {/* Subtle botanical line art - delicate branch silhouettes */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+            <svg
+              viewBox="0 0 200 700"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute -right-10 top-48 w-64 h-auto opacity-[0.035] text-forest"
+            >
+              {/* Main stem */}
+              <path
+                d="M100 700 Q95 580 100 480 Q105 380 95 280 Q88 180 100 60"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+              {/* Right leaves */}
+              <path d="M100 580 Q125 560 145 568 Q125 578 100 580" fill="currentColor" opacity="0.4" />
+              <path d="M102 440 Q130 418 152 428 Q128 440 102 440" fill="currentColor" opacity="0.35" />
+              <path d="M100 300 Q126 280 146 292 Q124 302 100 300" fill="currentColor" opacity="0.3" />
+              <path d="M100 180 Q124 162 142 174 Q122 184 100 180" fill="currentColor" opacity="0.25" />
+              {/* Left leaves */}
+              <path d="M98 520 Q72 502 55 514 Q74 524 98 520" fill="currentColor" opacity="0.35" />
+              <path d="M96 380 Q68 362 50 375 Q70 385 96 380" fill="currentColor" opacity="0.3" />
+              <path d="M98 240 Q72 222 56 236 Q74 246 98 240" fill="currentColor" opacity="0.25" />
+              <path d="M96 120 Q70 105 55 118 Q72 128 96 120" fill="currentColor" opacity="0.2" />
+            </svg>
+            {/* Secondary smaller branch on the left */}
+            <svg
+              viewBox="0 0 120 400"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute -left-8 bottom-32 w-32 h-auto opacity-[0.025] text-forest"
+            >
+              <path
+                d="M60 400 Q58 320 62 240 Q64 160 58 80"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeLinecap="round"
+              />
+              <path d="M62 340 Q80 325 92 332 Q78 342 62 340" fill="currentColor" opacity="0.35" />
+              <path d="M60 260 Q42 248 30 258 Q44 265 60 260" fill="currentColor" opacity="0.3" />
+              <path d="M62 180 Q78 168 90 178 Q76 186 62 180" fill="currentColor" opacity="0.25" />
+              <path d="M60 110 Q44 98 34 108 Q46 115 60 110" fill="currentColor" opacity="0.2" />
+            </svg>
+          </div>
+
           <StaggerContainer className="relative z-10 px-5 pt-4 pb-32 max-w-lg mx-auto space-y-5 w-full">
 
-            {/* PREMIUM Hero Header - Ultra-polished like Dashboard */}
+            {/* ORGANIC MODERNISM Hero - Matching Dashboard aesthetic */}
             <StaggerItem>
               <motion.div
                 initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="relative overflow-hidden rounded-[2.5rem] h-44"
-                style={{ boxShadow: '0 12px 40px rgba(234,88,12,0.12), 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.4)' }}
+                className="relative overflow-hidden rounded-[32px] h-52 shadow-glass-xl"
               >
-                {/* Enhanced gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-100/80 via-amber-100/70 to-peach/80" />
-
-                {/* Multiple animated gradient orbs */}
-                <motion.div
-                  animate={{
-                    scale: [1, 1.3, 1],
-                    x: [0, 25, 0],
-                    y: [0, -15, 0],
-                  }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-orange-400/25 to-amber-400/20 rounded-full blur-3xl"
+                {/* Pexels Background Image */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${heroBackground.src})` }}
                 />
 
-                <motion.div
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    x: [0, -20, 0],
-                    y: [0, 15, 0],
-                  }}
-                  transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                  className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-rose-400/20 to-coral/15 rounded-full blur-3xl"
-                />
+                {/* Organic gradient overlays for depth and readability */}
+                <div className="absolute inset-0 bg-gradient-to-br from-forest/40 via-forest/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent" />
 
-                <motion.div
-                  animate={{
-                    scale: [1, 1.15, 1],
-                    rotate: [0, 180, 360],
-                  }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 bg-gradient-to-br from-peach/15 to-amber-200/10 rounded-full blur-2xl"
-                />
-
-                {/* Premium glassmorphic overlay */}
-                <div className="relative h-full backdrop-blur-2xl bg-white/35 border border-white/20 ring-1 ring-black/[0.03]">
+                {/* Glass content */}
+                <div className="relative h-full">
                   <div className="relative h-full p-7 flex flex-col justify-between">
-                    {/* Icon badge - top right */}
-                    <div className="absolute top-5 right-5">
-                      <motion.div
-                        whileHover={{ scale: 1.08, rotate: 5 }}
-                        whileTap={{ scale: 0.96 }}
-                        className="w-14 h-14 rounded-[1.25rem] bg-gradient-to-br from-white/70 via-white/50 to-white/60 backdrop-blur-md ring-1 ring-black/[0.06] shadow-xl flex items-center justify-center"
-                      >
-                        <History className="w-7 h-7 text-orange-600 drop-shadow-sm" strokeWidth={2.5} />
-                      </motion.div>
-                    </div>
-
-                    {/* Title */}
-                    <div className="flex flex-col items-start gap-1.5 pr-20">
+                    {/* Title - bottom left with display serif font */}
+                    <div className="flex flex-col items-start gap-2 pr-16 mt-auto">
                       <motion.span
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2, duration: 0.6 }}
-                        className="text-[0.7rem] font-extrabold text-foreground/50 tracking-[0.15em] uppercase"
+                        className="text-[11px] font-semibold text-white/80 tracking-[0.2em] uppercase font-body"
                       >
                         Your Journey
                       </motion.span>
@@ -310,41 +331,41 @@ export default function HistoryPage() {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3, duration: 0.6 }}
-                        className="text-5xl font-black tracking-tight text-foreground leading-[0.95] drop-shadow-lg"
+                        className="text-display-xl font-display font-bold text-white leading-[0.95] drop-shadow-lg"
                         style={{
-                          textShadow: '0 2px 20px rgba(0,0,0,0.08)'
+                          textShadow: '0 4px 24px rgba(0,0,0,0.3)'
                         }}
                       >
                         History
                       </motion.h1>
                     </div>
 
-                    {/* Stats badges */}
+                    {/* Compact stat badges - bottom right (40-50% smaller than before) */}
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.5, duration: 0.6 }}
-                      className="flex items-center gap-3"
+                      className="absolute bottom-5 right-5 flex items-center gap-2"
                     >
                       <motion.div
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        className="flex items-center gap-2.5 px-5 py-2.5 rounded-[1.25rem] bg-white/60 backdrop-blur-md ring-1 ring-black/[0.06] shadow-lg shadow-orange-500/10"
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/95 backdrop-blur-sm shadow-glass border border-white/50"
                       >
-                        <span className="text-2xl drop-shadow-sm">📝</span>
-                        <div className="flex flex-col leading-tight">
-                          <span className="text-[0.6rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Logged</span>
-                          <span className="text-lg font-black text-foreground">{entries.length} <span className="text-xs font-bold text-muted-foreground">meals</span></span>
+                        <FileText className="w-4 h-4 text-forest" />
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-base font-bold text-charcoal">{entries.length}</span>
+                          <span className="text-[10px] font-medium text-charcoal/60">meals</span>
                         </div>
                       </motion.div>
                       {stats.highBloatingCount > 0 && (
                         <motion.div
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          className="flex items-center gap-2.5 px-5 py-2.5 rounded-[1.25rem] bg-white/60 backdrop-blur-md ring-1 ring-black/[0.06] shadow-lg shadow-rose-500/10"
+                          whileHover={{ scale: 1.05 }}
+                          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/95 backdrop-blur-sm shadow-glass border border-white/50"
                         >
-                          <span className="text-2xl drop-shadow-sm">🔥</span>
-                          <div className="flex flex-col leading-tight">
-                            <span className="text-[0.6rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em]">Triggers</span>
-                            <span className="text-lg font-black text-foreground">{stats.highBloatingCount}</span>
+                          <Flame className="w-4 h-4 text-burnt" />
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-base font-bold text-charcoal">{stats.highBloatingCount}</span>
+                            <span className="text-[10px] font-medium text-charcoal/60">triggers</span>
                           </div>
                         </motion.div>
                       )}
@@ -354,97 +375,81 @@ export default function HistoryPage() {
               </motion.div>
             </StaggerItem>
 
-            {/* Quick Stats Banner - Premium Design */}
+            {/* Quick Stats Banner - Glass Card */}
             {entries.length >= 3 && (
               <StaggerItem>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.6 }}
-                  className="relative overflow-hidden rounded-[2rem]"
-                  style={{ boxShadow: '0 8px 32px rgba(147,51,234,0.1), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.4)' }}
+                  className="glass-card p-5"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-100/80 via-lavender/70 to-pink-100/80" />
-
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -right-12 -top-12 w-40 h-40 bg-purple-400/15 rounded-full blur-2xl"
-                  />
-
-                  <div className="relative backdrop-blur-2xl bg-white/40 border border-white/20 ring-1 ring-black/[0.04]">
-                    <div className="p-5 flex gap-4">
-                      <div className="flex-1 text-center">
-                        <p className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em] mb-1">Avg This Week</p>
-                        <div className="flex items-center justify-center gap-2">
-                          {stats.weeklyAvg > 0 ? (
-                            <>
-                              <span className="text-2xl">{stats.weeklyAvg <= 2 ? '😊' : stats.weeklyAvg >= 4 ? '😣' : '😐'}</span>
-                              <span className="text-2xl font-black text-foreground">{stats.weeklyAvg.toFixed(1)}</span>
-                              <span className="text-sm font-bold text-muted-foreground">/5</span>
-                            </>
-                          ) : (
-                            <span className="text-sm font-bold text-muted-foreground">No data</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="w-px bg-white/50" />
-                      <div className="flex-1 text-center">
-                        <p className="text-[0.65rem] font-extrabold text-muted-foreground/70 uppercase tracking-[0.1em] mb-1">Top Trigger</p>
-                        {stats.topTrigger ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <span
-                              className="w-3 h-3 rounded-full shadow-lg"
-                              style={{ backgroundColor: getTriggerCategory(stats.topTrigger.category)?.color }}
-                            />
-                            <span className="text-base font-black text-foreground truncate">
-                              {getTriggerCategory(stats.topTrigger.category)?.displayName?.split(' - ')[1] ||
-                               getTriggerCategory(stats.topTrigger.category)?.displayName}
-                            </span>
-                          </div>
+                  <div className="flex gap-4">
+                    <div className="flex-1 text-center">
+                      <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-widest mb-1.5">Avg This Week</p>
+                      <div className="flex items-center justify-center gap-2">
+                        {stats.weeklyAvg > 0 ? (
+                          <>
+                            <span className="text-lg">{stats.weeklyAvg <= 2 ? '😊' : stats.weeklyAvg >= 4 ? '😣' : '😐'}</span>
+                            <span className="text-xl font-bold text-charcoal">{stats.weeklyAvg.toFixed(1)}</span>
+                            <span className="text-xs font-medium text-charcoal/50">/5</span>
+                          </>
                         ) : (
-                          <p className="text-sm font-bold text-muted-foreground">None yet</p>
+                          <span className="text-sm font-medium text-charcoal/50">No data</span>
                         )}
                       </div>
+                    </div>
+                    <div className="w-px bg-charcoal/10" />
+                    <div className="flex-1 text-center">
+                      <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-widest mb-1.5">Top Trigger</p>
+                      {stats.topTrigger ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full"
+                            style={{ backgroundColor: getTriggerCategory(stats.topTrigger.category)?.color }}
+                          />
+                          <span className="text-sm font-bold text-charcoal truncate">
+                            {getTriggerCategory(stats.topTrigger.category)?.displayName?.split(' - ')[1] ||
+                             getTriggerCategory(stats.topTrigger.category)?.displayName}
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="text-sm font-medium text-charcoal/50">None yet</p>
+                      )}
                     </div>
                   </div>
                 </motion.div>
               </StaggerItem>
             )}
 
-            {/* Filter Tabs - Premium Design */}
+            {/* Filter Tabs - Clean Glass Design */}
             <StaggerItem>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="relative overflow-hidden rounded-[1.5rem]"
-                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.4)' }}
+                className="glass-card p-1.5 flex gap-1.5"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-100/80 via-white/70 to-gray-50/80" />
-
-                <div className="relative backdrop-blur-xl bg-white/45 border border-white/20 ring-1 ring-black/[0.04] p-2 flex gap-2">
-                  {[
-                    { key: 'all' as FilterType, label: `All (${entries.length})`, icon: null },
-                    { key: 'high-bloating' as FilterType, label: `High (${stats.highBloatingCount})`, icon: <Flame className="w-3.5 h-3.5" /> },
-                    { key: 'this-week' as FilterType, label: `This Week (${stats.thisWeekCount})`, icon: null },
-                  ].map((tab) => (
-                    <motion.button
-                      key={tab.key}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setFilter(tab.key)}
-                      className={`flex-1 py-3 px-3 rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                        filter === tab.key
-                          ? 'bg-gradient-to-br from-primary via-primary to-teal-600 text-white shadow-lg shadow-primary/30'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-white/80'
-                      }`}
-                    >
-                      {tab.icon}
-                      {tab.label}
-                    </motion.button>
-                  ))}
-                </div>
+                {[
+                  { key: 'all' as FilterType, label: `All (${entries.length})`, icon: null },
+                  { key: 'high-bloating' as FilterType, label: `High (${stats.highBloatingCount})`, icon: <Flame className="w-3.5 h-3.5" /> },
+                  { key: 'this-week' as FilterType, label: `This Week (${stats.thisWeekCount})`, icon: null },
+                ].map((tab) => (
+                  <motion.button
+                    key={tab.key}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setFilter(tab.key)}
+                    className={`flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                      filter === tab.key
+                        ? 'bg-gradient-to-br from-forest to-forest-light text-white shadow-md shadow-forest/20'
+                        : 'text-charcoal/50 hover:text-charcoal hover:bg-sage/50'
+                    }`}
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </motion.button>
+                ))}
               </motion.div>
             </StaggerItem>
 
@@ -465,7 +470,7 @@ export default function HistoryPage() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.15 + groupIndex * 0.05, duration: 0.4 }}
-                      className="text-sm font-black text-foreground/60 uppercase tracking-[0.15em] px-2"
+                      className="text-xs font-bold text-charcoal/45 uppercase tracking-[0.15em] px-1"
                     >
                       {group.label}
                     </motion.h2>
@@ -510,10 +515,10 @@ export default function HistoryPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={loadMore}
                   disabled={entriesLoading}
-                  className="relative overflow-hidden rounded-2xl px-8 py-4 font-bold shadow-lg"
+                  className="relative overflow-hidden rounded-2xl px-8 py-3.5 font-bold shadow-md"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-teal-600/90" />
-                  <div className="relative flex items-center gap-2 text-white">
+                  <div className="absolute inset-0 bg-gradient-to-br from-forest to-forest-light" />
+                  <div className="relative flex items-center gap-2 text-white text-sm">
                     {entriesLoading ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1010,178 +1015,132 @@ function PremiumEntryCard({
   const displayTitle = entry.custom_title || entry.meal_title || getQuickMealTitle(entry);
   const displayEmoji = entry.meal_emoji || '🍽️';
 
-  // Premium gradient configurations based on rating
-  const getCardStyle = (rating: number | null) => {
+  // Refined, subtle color coding for card accents
+  const getCardAccent = (rating: number | null) => {
     if (!rating) {
-      // Unrated - Elegant neutral with subtle purple tint
       return {
-        gradient: 'from-gray-100/90 via-slate-100/80 to-gray-50/90',
-        orb1: 'bg-gray-400/15',
-        orb2: 'bg-slate-400/10',
-        shadow: 'shadow-gray-500/10',
-        accent: 'bg-gray-500',
-        iconBg: 'from-gray-50 to-slate-100',
+        accent: 'bg-charcoal/60',
+        iconBg: 'from-sage to-sage-light',
+        borderTint: 'border-charcoal/5',
       };
     }
     if (rating <= 2) {
-      // Green - Perfect, no bloating
       return {
-        gradient: 'from-emerald-100/90 via-teal-100/80 to-green-50/90',
-        orb1: 'bg-emerald-400/20',
-        orb2: 'bg-teal-400/15',
-        shadow: 'shadow-emerald-500/15',
-        accent: 'bg-gradient-to-br from-emerald-500 to-teal-600',
-        iconBg: 'from-emerald-50 to-teal-100',
+        accent: 'bg-gradient-to-br from-forest to-forest-light',
+        iconBg: 'from-sage to-sage-light',
+        borderTint: 'border-forest/8',
       };
     }
     if (rating === 3) {
-      // Yellow/Amber - Moderate bloating
       return {
-        gradient: 'from-amber-100/90 via-yellow-100/80 to-orange-50/90',
-        orb1: 'bg-amber-400/20',
-        orb2: 'bg-yellow-400/15',
-        shadow: 'shadow-amber-500/15',
-        accent: 'bg-gradient-to-br from-amber-500 to-orange-500',
-        iconBg: 'from-amber-50 to-yellow-100',
+        accent: 'bg-gradient-to-br from-amber-500 to-amber-600',
+        iconBg: 'from-amber-50 to-orange-50',
+        borderTint: 'border-amber-500/8',
       };
     }
-    // Red/Coral - High bloating trigger
     return {
-      gradient: 'from-rose-100/90 via-red-100/80 to-coral/90',
-      orb1: 'bg-rose-400/20',
-      orb2: 'bg-red-400/15',
-      shadow: 'shadow-rose-500/15',
-      accent: 'bg-gradient-to-br from-rose-500 to-red-600',
-      iconBg: 'from-rose-50 to-red-100',
+      accent: 'bg-gradient-to-br from-burnt to-burnt-dark',
+      iconBg: 'from-rose-50 to-red-50',
+      borderTint: 'border-burnt/8',
     };
   };
 
-  const style = getCardStyle(rating);
+  const accent = getCardAccent(rating);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.96 }}
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ scale: 1.02, y: -4 }}
-      className="relative overflow-hidden rounded-[1.75rem] cursor-pointer group"
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5)' }}
+      whileHover={{ scale: 1.01, y: -2 }}
+      className={`glass-card overflow-hidden cursor-pointer group ${accent.borderTint}`}
     >
-      {/* Gradient Background */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient}`} />
+      {/* Rating Indicator Badge - Top Right (compact) */}
+      {rating ? (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className={`absolute top-3 right-3 w-10 h-10 rounded-xl ${accent.accent} flex items-center justify-center shadow-md z-10`}
+        >
+          <div className="flex items-baseline">
+            <span className="text-white font-bold text-xs">{rating}</span>
+            <span className="text-white/70 font-medium text-[9px]">/5</span>
+          </div>
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="absolute top-3 right-3 px-2.5 py-1.5 rounded-lg bg-sage backdrop-blur-md z-10"
+        >
+          <span className="text-[9px] font-bold text-charcoal/50 uppercase tracking-wide">Unrated</span>
+        </motion.div>
+      )}
 
-      {/* Animated orbs for depth */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          x: [0, 15, 0],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className={`absolute -right-12 -top-12 w-32 h-32 ${style.orb1} rounded-full blur-2xl`}
-      />
-      <motion.div
-        animate={{
-          scale: [1, 1.15, 1],
-          x: [0, -10, 0],
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className={`absolute -left-8 -bottom-8 w-28 h-28 ${style.orb2} rounded-full blur-2xl`}
-      />
-
-      {/* Premium glass overlay */}
-      <div className="relative backdrop-blur-2xl bg-white/40 border border-white/20 ring-1 ring-black/[0.04] group-hover:bg-white/50 transition-all duration-500">
-        {/* Rating Indicator Badge - Top Right */}
-        {rating ? (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className={`absolute top-3 right-3 w-12 h-12 rounded-2xl ${style.accent} flex items-center justify-center shadow-lg z-10`}
-          >
-            <div className="flex items-baseline">
-              <span className="text-white font-black text-sm">{rating}</span>
-              <span className="text-white/80 font-bold text-[10px]">/5</span>
-            </div>
-          </motion.div>
+      {/* Main Content */}
+      <div className="flex gap-3.5 p-4" onClick={onViewDetails}>
+        {/* Photo / Icon (slightly smaller, more refined) */}
+        {entry.photo_url ? (
+          <MealPhoto
+            photoUrl={entry.photo_url}
+            className="w-16 h-16 rounded-2xl shadow-sm cursor-pointer object-cover flex-shrink-0 ring-1 ring-black/[0.04]"
+            priority={isFirstPhoto}
+            thumbnail={true}
+          />
         ) : (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute top-3 right-3 px-3 py-2 rounded-xl bg-gradient-to-br from-gray-100/80 to-slate-100/80 backdrop-blur-md ring-1 ring-black/[0.06] shadow-md z-10"
+          <div
+            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${accent.iconBg} flex items-center justify-center cursor-pointer flex-shrink-0`}
           >
-            <span className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wide">No rating</span>
-          </motion.div>
+            <span className="text-2xl">
+              {entry.entry_method === 'text' ? '✍️' : displayEmoji}
+            </span>
+          </div>
         )}
 
-        {/* Main Content */}
-        <div className="flex gap-4 p-4" onClick={onViewDetails}>
-          {/* Square Photo with premium styling */}
-          {entry.photo_url ? (
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="relative"
-            >
-              <MealPhoto
-                photoUrl={entry.photo_url}
-                className="w-20 h-20 rounded-2xl shadow-lg cursor-pointer object-cover flex-shrink-0 ring-1 ring-black/[0.06]"
-                priority={isFirstPhoto}
-                thumbnail={true}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              whileHover={{ scale: 1.05, rotate: 5 }}
-              className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${style.iconBg} flex items-center justify-center shadow-lg cursor-pointer flex-shrink-0 ring-1 ring-black/[0.06]`}
-            >
-              <span className="text-3xl drop-shadow-sm">
-                {entry.entry_method === 'text' ? '✍️' : displayEmoji}
-              </span>
-            </motion.div>
-          )}
-
           {/* Content */}
-          <div className="flex-1 min-w-0 flex flex-col justify-center gap-2 pr-8">
+          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 pr-8">
             {/* Title Row */}
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-xl flex-shrink-0 drop-shadow-sm">{displayEmoji}</span>
-              <h3 className="font-black text-foreground text-base truncate leading-tight">
+              <span className="text-lg flex-shrink-0">{displayEmoji}</span>
+              <h3 className="font-bold text-charcoal text-sm truncate leading-tight">
                 {displayTitle}
               </h3>
             </div>
 
             {/* Time & Rating Info */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground font-bold">
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3 text-charcoal/40" />
+                <p className="text-[11px] text-charcoal/50 font-medium">
                   {format(new Date(entry.created_at), 'h:mm a')}
                 </p>
               </div>
               {rating && (
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm">{RATING_EMOJIS[rating]}</span>
-                  <span className="text-xs font-bold text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs">{RATING_EMOJIS[rating]}</span>
+                  <span className="text-[11px] font-medium text-charcoal/50">
                     {RATING_LABELS[rating]}
                   </span>
                 </div>
               )}
             </div>
 
-            {/* Trigger badges preview */}
+            {/* Trigger badges preview - more refined */}
             {entry.detected_triggers && entry.detected_triggers.length > 0 && (
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center gap-1 flex-wrap mt-0.5">
                 {entry.detected_triggers.slice(0, 2).map((trigger, i) => {
                   const categoryInfo = getTriggerCategory(trigger.category);
                   return (
                     <span
                       key={i}
-                      className="px-2 py-0.5 text-[10px] font-bold rounded-full flex items-center gap-1"
+                      className="px-2 py-0.5 text-[9px] font-semibold rounded-full flex items-center gap-1"
                       style={{
-                        backgroundColor: `${categoryInfo?.color}25`,
+                        backgroundColor: `${categoryInfo?.color}15`,
                         color: categoryInfo?.color,
                       }}
                     >
                       <span
-                        className="w-1.5 h-1.5 rounded-full"
+                        className="w-1 h-1 rounded-full"
                         style={{ backgroundColor: categoryInfo?.color }}
                       />
                       {trigger.food || categoryInfo?.displayName?.split(' - ')[1]}
@@ -1189,8 +1148,8 @@ function PremiumEntryCard({
                   );
                 })}
                 {entry.detected_triggers.length > 2 && (
-                  <span className="text-[10px] font-bold text-muted-foreground">
-                    +{entry.detected_triggers.length - 2} more
+                  <span className="text-[9px] font-medium text-charcoal/40">
+                    +{entry.detected_triggers.length - 2}
                   </span>
                 )}
               </div>
@@ -1198,17 +1157,17 @@ function PremiumEntryCard({
           </div>
         </div>
 
-        {/* Menu Button - Absolute positioned */}
-        <div className="absolute top-4 right-14">
+        {/* Menu Button */}
+        <div className="absolute top-3.5 right-12">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-xl bg-white/40 hover:bg-white/60 backdrop-blur-sm ring-1 ring-black/[0.06] shadow-sm"
+                className="h-7 w-7 rounded-lg hover:bg-sage/50 transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
-                <MoreVertical className="w-4 h-4" />
+                <MoreVertical className="w-3.5 h-3.5 text-charcoal/40" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-xl shadow-xl border-white/50">
@@ -1232,7 +1191,6 @@ function PremiumEntryCard({
         {!entry.bloating_rating && isPending && (
           <InlineRating entryId={entry.id} />
         )}
-      </div>
     </motion.div>
   );
 }
