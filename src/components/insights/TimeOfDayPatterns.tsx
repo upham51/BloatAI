@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MealEntry } from '@/types';
 
@@ -20,6 +20,21 @@ const TIME_PERIODS: TimePeriod[] = [
   { label: 'Night', range: '10pm+', startHour: 22, endHour: 5 },
 ];
 
+const CATCHY_SUBTITLES = [
+  "Your belly keeps receipts",
+  "The clock knows your stomach's secrets",
+  "Timing is everything, especially for bloat",
+  "Your gut has a schedule of its own",
+  "Some hours hit harder than others",
+  "Every meal leaves a timestamp",
+  "Your stomach watches the clock too",
+  "Patterns your gut wants you to see",
+  "The rhythm your belly lives by",
+  "When your stomach has something to say",
+  "Your digestive diary, by the hour",
+  "The hours that matter most",
+];
+
 function getTimePeriodIndex(hour: number): number {
   if (hour >= 6 && hour <= 11) return 0;
   if (hour >= 12 && hour <= 17) return 1;
@@ -33,6 +48,9 @@ const easing: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  const catchySubtitle = useRef(
+    CATCHY_SUBTITLES[Math.floor(Math.random() * CATCHY_SUBTITLES.length)]
+  ).current;
 
   const periodData = useMemo(() => {
     const completedEntries = entries.filter(
@@ -107,21 +125,9 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
           <h2 className="font-display text-lg sm:text-xl font-bold text-charcoal tracking-tight">
             When Your Gut Speaks Up
           </h2>
-          <div className="flex items-center justify-center gap-2 mt-1">
-            <p className="text-xs text-charcoal/40">
-              Peak{' '}
-              <span className="font-semibold text-charcoal/60">
-                {periodData[dominantIndex].label}
-              </span>
-            </p>
-            <span className="text-charcoal/20 text-xs">&middot;</span>
-            <p className="text-xs text-charcoal/40">
-              <span className="font-semibold text-charcoal/60">
-                {periodData[dominantIndex].percentage}%
-              </span>{' '}
-              of bloating
-            </p>
-          </div>
+          <p className="text-xs text-charcoal/45 font-medium italic mt-1">
+            {catchySubtitle}
+          </p>
         </motion.div>
 
         {/* Chart area */}
@@ -137,21 +143,15 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
               transition={{ duration: 2, ease: easing }}
             >
               <div
-                className="mr-8 border-t border-dashed"
+                className="border-t border-dashed"
                 style={{ borderColor: 'rgba(212, 222, 212, 0.45)' }}
               />
-              <span
-                className="absolute right-0 -translate-y-1/2 text-[10px] font-medium"
-                style={{ color: 'rgba(149, 160, 149, 0.5)' }}
-              >
-                {Math.round(pct * maxPercentage)}%
-              </span>
             </motion.div>
           ))}
 
           {/* Baseline */}
           <motion.div
-            className="absolute bottom-0 left-0 right-8 border-t pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 border-t pointer-events-none"
             style={{ borderColor: 'rgba(212, 222, 212, 0.5)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -159,7 +159,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
           />
 
           {/* Bars */}
-          <div className="flex items-end h-full gap-3 sm:gap-5 pr-8">
+          <div className="flex items-end h-full gap-3 sm:gap-5">
             {periodData.map((period, i) => {
               const heightPct =
                 maxPercentage > 0
@@ -185,30 +185,9 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                   onMouseLeave={() => setHoveredBar(null)}
                   style={{ cursor: 'pointer' }}
                 >
-                  {/* Percentage label above bar */}
+                  {/* The bar with percentage inside */}
                   <motion.div
-                    className="absolute left-1/2 -translate-x-1/2 text-xs font-semibold whitespace-nowrap"
-                    style={{
-                      color: '#1A4D2E',
-                      bottom: `${Math.max(heightPct, period.percentage > 0 ? 5 : 1.5) + 2}%`,
-                    }}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{
-                      opacity: period.percentage > 0 ? 0.75 : 0,
-                      y: 0,
-                    }}
-                    transition={{
-                      duration: 0.8,
-                      delay: delay + duration * 0.75,
-                      ease: easing,
-                    }}
-                  >
-                    {period.percentage}%
-                  </motion.div>
-
-                  {/* The bar */}
-                  <motion.div
-                    className="absolute bottom-0 left-1 right-1 sm:left-1.5 sm:right-1.5 rounded-t-lg"
+                    className="absolute bottom-0 left-1 right-1 sm:left-1.5 sm:right-1.5 rounded-t-lg overflow-hidden"
                     style={{
                       background: isDominant
                         ? 'linear-gradient(to top, #1A4D2E, #2A5E3E)'
@@ -233,7 +212,28 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                         ease: easing,
                       },
                     }}
-                  />
+                  >
+                    {/* Percentage inside the bar */}
+                    {period.percentage > 0 && (
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{
+                          duration: 0.6,
+                          delay: delay + duration * 0.8,
+                          ease: easing,
+                        }}
+                      >
+                        <span
+                          className="text-sm sm:text-base font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
+                          style={{ textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}
+                        >
+                          {period.percentage}%
+                        </span>
+                      </motion.div>
+                    )}
+                  </motion.div>
 
                   {/* Hover tooltip */}
                   <AnimatePresence>
@@ -260,7 +260,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
         </div>
 
         {/* Period labels */}
-        <div className="flex pr-8 mt-2">
+        <div className="flex mt-2">
           {periodData.map((period, i) => {
             const isDominant = i === dominantIndex;
             return (
