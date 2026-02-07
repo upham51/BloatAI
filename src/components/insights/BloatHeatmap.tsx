@@ -127,34 +127,10 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
       initial={{ opacity: 0, scale: 0.96, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-teal-500/10"
+      className="relative overflow-hidden rounded-[2rem] shadow-xl"
     >
-      {/* Multi-layer gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-teal-50/90 via-emerald-50/80 to-cyan-50/90" />
-
-      {/* Animated gradient orbs */}
-      <motion.div
-        animate={{
-          scale: [1, 1.3, 1],
-          x: [0, 25, 0],
-          y: [0, -15, 0],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-teal-400/25 to-emerald-400/20 rounded-full blur-3xl"
-      />
-
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          x: [0, -20, 0],
-          y: [0, 15, 0],
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-cyan-400/20 to-teal-300/15 rounded-full blur-3xl"
-      />
-
-      {/* Premium glass overlay */}
-      <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 rounded-[2rem]">
+      {/* Clean white card */}
+      <div className="relative bg-white border border-border/40 rounded-[2rem]">
         <div className="p-6">
           {/* Header */}
           <motion.div
@@ -350,7 +326,7 @@ export function BloatHeatmap({ entries }: BloatHeatmapProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="flex items-center justify-center gap-6 text-xs pt-4 border-t border-white/50"
+            className="flex items-center justify-center gap-6 text-xs pt-4 border-t border-border/30"
           >
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm" />

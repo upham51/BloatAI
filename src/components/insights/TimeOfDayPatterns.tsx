@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { MealEntry } from '@/types';
 import { Clock } from 'lucide-react';
 
@@ -14,8 +14,10 @@ interface TimePeriod {
   startHour: number;
   endHour: number;
   color: string;
+  colorEnd: string;
   lightColor: string;
   textColor: string;
+  glowColor: string;
 }
 
 const TIME_PERIODS: TimePeriod[] = [
@@ -26,8 +28,10 @@ const TIME_PERIODS: TimePeriod[] = [
     startHour: 6,
     endHour: 11,
     color: '#f59e0b',
+    colorEnd: '#f97316',
     lightColor: 'rgba(245, 158, 11, 0.12)',
     textColor: 'text-amber-700',
+    glowColor: 'rgba(245, 158, 11, 0.4)',
   },
   {
     label: 'Afternoon',
@@ -36,8 +40,10 @@ const TIME_PERIODS: TimePeriod[] = [
     startHour: 12,
     endHour: 17,
     color: '#f43f5e',
+    colorEnd: '#e11d48',
     lightColor: 'rgba(244, 63, 94, 0.12)',
     textColor: 'text-rose-700',
+    glowColor: 'rgba(244, 63, 94, 0.4)',
   },
   {
     label: 'Evening',
@@ -46,8 +52,10 @@ const TIME_PERIODS: TimePeriod[] = [
     startHour: 18,
     endHour: 21,
     color: '#8b5cf6',
+    colorEnd: '#7c3aed',
     lightColor: 'rgba(139, 92, 246, 0.12)',
     textColor: 'text-violet-700',
+    glowColor: 'rgba(139, 92, 246, 0.4)',
   },
   {
     label: 'Night',
@@ -56,8 +64,10 @@ const TIME_PERIODS: TimePeriod[] = [
     startHour: 22,
     endHour: 5,
     color: '#6366f1',
+    colorEnd: '#4f46e5',
     lightColor: 'rgba(99, 102, 241, 0.12)',
     textColor: 'text-indigo-700',
+    glowColor: 'rgba(99, 102, 241, 0.4)',
   },
 ];
 
@@ -75,21 +85,40 @@ function getDominantInsight(label: string, percentage: number): string {
   return `Some bloating happens in the ${label.toLowerCase()}`;
 }
 
-function polarToCartesian(
-  cx: number,
-  cy: number,
-  radius: number,
-  angleInDegrees: number
-) {
-  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180;
-  return {
-    x: cx + radius * Math.cos(angleInRadians),
-    y: cy + radius * Math.sin(angleInRadians),
-  };
+/** Animated counter that counts from 0 to target */
+function AnimatedCounter({ target, delay, duration, suffix = '' }: { target: number; delay: number; duration: number; suffix?: string }) {
+  const nodeRef = useRef<HTMLSpanElement>(null);
+  const motionVal = useMotionValue(0);
+  const rounded = useTransform(motionVal, (v) => Math.round(v));
+
+  useEffect(() => {
+    const controls = animate(motionVal, target, {
+      duration,
+      delay,
+      ease: [0.16, 1, 0.3, 1],
+    });
+    const unsub = rounded.on('change', (v) => {
+      if (nodeRef.current) nodeRef.current.textContent = `${v}${suffix}`;
+    });
+    return () => { controls.stop(); unsub(); };
+  }, [target, delay, duration, suffix, motionVal, rounded]);
+
+  return <span ref={nodeRef}>0{suffix}</span>;
 }
 
+// Chart layout constants
+const CHART_WIDTH = 320;
+const CHART_HEIGHT = 200;
+const BAR_AREA_TOP = 10;
+const BAR_AREA_BOTTOM = CHART_HEIGHT - 4;
+const BAR_MAX_HEIGHT = BAR_AREA_BOTTOM - BAR_AREA_TOP;
+const BAR_COUNT = 4;
+const BAR_GAP = 16;
+const SIDE_PADDING = 28;
+const BAR_WIDTH = (CHART_WIDTH - SIDE_PADDING * 2 - BAR_GAP * (BAR_COUNT - 1)) / BAR_COUNT;
+
 export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
-  const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
+  const [selectedBar, setSelectedBar] = useState<number | null>(null);
   const [animationPhase, setAnimationPhase] = useState<'waiting' | 'drawing' | 'done'>('waiting');
 
   const periodData = useMemo(() => {
@@ -121,49 +150,11 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
   }, [entries]);
 
   const totalMeals = periodData.reduce((sum, p) => sum + p.count, 0);
+  const maxPercentage = Math.max(...periodData.map((p) => p.percentage), 1);
   const dominantIndex = periodData.reduce(
     (maxIdx, p, i, arr) => (p.percentage > arr[maxIdx].percentage ? i : maxIdx),
     0
   );
-
-  // Chart dimensions
-  const CHART_SIZE = 240;
-  const CENTER = CHART_SIZE / 2;
-  const RADIUS = 82;
-  const STROKE_WIDTH = 32;
-  const GAP_DEGREES = 4;
-
-  // Build segment data
-  const segments = useMemo(() => {
-    const totalPercentage = periodData.reduce((s, p) => s + p.percentage, 0);
-    if (totalPercentage === 0) {
-      return periodData.map((period, i) => ({
-        ...period,
-        startAngle: i * 90,
-        endAngle: (i + 1) * 90 - GAP_DEGREES,
-        sweepAngle: 90 - GAP_DEGREES,
-        isEmpty: true,
-        midAngle: i * 90 + 45,
-      }));
-    }
-
-    let currentAngle = 0;
-    return periodData.map((period) => {
-      const sweepAngle = (period.percentage / 100) * 360;
-      const startAngle = currentAngle;
-      const endAngle = currentAngle + Math.max(sweepAngle - GAP_DEGREES, 0);
-      const midAngle = currentAngle + sweepAngle / 2;
-      currentAngle += sweepAngle;
-      return {
-        ...period,
-        startAngle,
-        endAngle,
-        sweepAngle: Math.max(sweepAngle - GAP_DEGREES, 0),
-        isEmpty: period.percentage === 0,
-        midAngle,
-      };
-    });
-  }, [periodData]);
 
   // Start animation on mount
   useEffect(() => {
@@ -173,63 +164,53 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
 
   useEffect(() => {
     if (animationPhase === 'drawing') {
-      const timer = setTimeout(() => setAnimationPhase('done'), 5200);
+      const timer = setTimeout(() => setAnimationPhase('done'), 5500);
       return () => clearTimeout(timer);
     }
   }, [animationPhase]);
 
-  const selectedData = selectedSegment !== null ? periodData[selectedSegment] : null;
+  const selectedData = selectedBar !== null ? periodData[selectedBar] : null;
 
-  // Calculate emoji positions on/near arcs
-  const emojiPositions = useMemo(() => {
-    return segments.map((seg) => {
-      const pos = polarToCartesian(CENTER, CENTER, RADIUS + STROKE_WIDTH / 2 + 20, seg.midAngle);
-      return pos;
+  // Calculate bar positions & animation timing
+  const bars = useMemo(() => {
+    return periodData.map((period, i) => {
+      const x = SIDE_PADDING + i * (BAR_WIDTH + BAR_GAP);
+      const barHeightRatio = maxPercentage > 0 ? period.percentage / maxPercentage : 0;
+      const barHeight = Math.max(barHeightRatio * BAR_MAX_HEIGHT, period.percentage > 0 ? 8 : 3);
+      const y = BAR_AREA_BOTTOM - barHeight;
+
+      // Stagger: each bar gets ~1s of animation, distributed across the 5s window
+      const delay = 0.4 + i * 1.0;
+      const duration = 1.4;
+
+      return { ...period, x, y, barHeight, delay, duration, index: i };
     });
-  }, [segments]);
+  }, [periodData, maxPercentage]);
 
-  // Cumulative animation delays - each segment starts after previous one finishes
-  // Total 5s animation: distribute proportionally by segment size
-  const segmentAnimations = useMemo(() => {
-    const TOTAL_DRAW_TIME = 4.5; // seconds for drawing
-    const BASE_DELAY = 0.5; // initial delay
-    const totalSweep = segments.reduce((s, seg) => s + (seg.isEmpty ? 0 : seg.sweepAngle), 0);
-
-    let cumulativeDelay = BASE_DELAY;
-    return segments.map((seg) => {
-      const delay = cumulativeDelay;
-      const duration = totalSweep > 0 && !seg.isEmpty
-        ? Math.max((seg.sweepAngle / totalSweep) * TOTAL_DRAW_TIME, 0.4)
-        : 0.4;
-      cumulativeDelay += duration;
-      return { delay, duration };
-    });
-  }, [segments]);
-
-  const circumference = 2 * Math.PI * RADIUS;
+  // Grid line y positions (25%, 50%, 75%, 100%)
+  const gridLines = [0.25, 0.5, 0.75, 1.0].map((pct) => ({
+    y: BAR_AREA_BOTTOM - pct * BAR_MAX_HEIGHT,
+    label: `${Math.round(pct * maxPercentage)}%`,
+  }));
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-violet-500/10"
+      className="relative overflow-hidden rounded-[2rem] shadow-xl"
     >
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-50/90 via-purple-50/80 to-indigo-50/90" />
-
-      {/* Glass overlay */}
-      <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 rounded-[2rem]">
+      {/* Clean white card */}
+      <div className="relative bg-white border border-border/40 rounded-[2rem]">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border-2 border-white/80 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-border/30 flex items-center justify-center shadow-sm">
               <Clock className="w-6 h-6 text-violet-600" strokeWidth={2.5} />
             </div>
             <div>
               <h3
                 className="font-black text-foreground text-xl tracking-tight"
-                style={{ textShadow: '0 1px 8px rgba(0,0,0,0.04)' }}
               >
                 When Your Gut Speaks Up
               </h3>
@@ -239,247 +220,306 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
             </div>
           </div>
 
-          {/* Donut Chart */}
-          <div className="flex flex-col items-center mt-4 mb-2">
-            <div
-              className="relative"
-              style={{ width: CHART_SIZE + 48, height: CHART_SIZE + 48 }}
-            >
+          {/* Bar Chart */}
+          <div className="flex flex-col items-center mt-6 mb-2">
+            <div className="w-full" style={{ maxWidth: CHART_WIDTH + 20 }}>
               <svg
-                viewBox={`-24 -24 ${CHART_SIZE + 48} ${CHART_SIZE + 48}`}
-                width={CHART_SIZE + 48}
-                height={CHART_SIZE + 48}
+                viewBox={`-10 -30 ${CHART_WIDTH + 20} ${CHART_HEIGHT + 60}`}
+                width="100%"
+                preserveAspectRatio="xMidYMid meet"
                 className="overflow-visible"
               >
-                {/* Subtle background ring */}
-                <circle
-                  cx={CENTER}
-                  cy={CENTER}
-                  r={RADIUS}
-                  fill="none"
-                  stroke="rgba(139, 92, 246, 0.06)"
-                  strokeWidth={STROKE_WIDTH}
+                <defs>
+                  {/* Gradient definitions for each bar */}
+                  {TIME_PERIODS.map((period, i) => (
+                    <linearGradient key={`grad-${i}`} id={`barGrad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={period.color} stopOpacity="1" />
+                      <stop offset="100%" stopColor={period.colorEnd} stopOpacity="0.85" />
+                    </linearGradient>
+                  ))}
+                  {/* Shimmer gradient for sweep effect */}
+                  {TIME_PERIODS.map((_, i) => (
+                    <linearGradient key={`shimmer-${i}`} id={`shimmer-${i}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="white" stopOpacity="0.5" />
+                      <stop offset="40%" stopColor="white" stopOpacity="0.15" />
+                      <stop offset="60%" stopColor="white" stopOpacity="0.15" />
+                      <stop offset="100%" stopColor="white" stopOpacity="0" />
+                    </linearGradient>
+                  ))}
+                  {/* Glow filters */}
+                  {TIME_PERIODS.map((period, i) => (
+                    <filter key={`glow-${i}`} id={`barGlow-${i}`} x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+                      <feFlood floodColor={period.color} floodOpacity="0.35" result="color" />
+                      <feComposite in="color" in2="blur" operator="in" result="shadow" />
+                      <feMerge>
+                        <feMergeNode in="shadow" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  ))}
+                  {/* Rounded bar clip paths */}
+                  {bars.map((bar, i) => (
+                    <clipPath key={`clip-${i}`} id={`barClip-${i}`}>
+                      <rect
+                        x={bar.x}
+                        y={bar.y}
+                        width={BAR_WIDTH}
+                        height={bar.barHeight}
+                        rx={BAR_WIDTH / 2}
+                        ry={BAR_WIDTH / 2}
+                      />
+                    </clipPath>
+                  ))}
+                </defs>
+
+                {/* Subtle horizontal grid lines - animate in */}
+                {gridLines.map((line, i) => (
+                  <motion.line
+                    key={`grid-${i}`}
+                    x1={SIDE_PADDING - 8}
+                    y1={line.y}
+                    x2={CHART_WIDTH - SIDE_PADDING + 8}
+                    y2={line.y}
+                    stroke="currentColor"
+                    className="text-border/40"
+                    strokeWidth="0.8"
+                    strokeDasharray="4 4"
+                    initial={{ opacity: 0, pathLength: 0 }}
+                    animate={animationPhase !== 'waiting' ? { opacity: 0.6, pathLength: 1 } : {}}
+                    transition={{ duration: 0.8, delay: 0.1 + i * 0.08, ease: 'easeOut' }}
+                  />
+                ))}
+
+                {/* Baseline */}
+                <motion.line
+                  x1={SIDE_PADDING - 8}
+                  y1={BAR_AREA_BOTTOM}
+                  x2={CHART_WIDTH - SIDE_PADDING + 8}
+                  y2={BAR_AREA_BOTTOM}
+                  stroke="currentColor"
+                  className="text-border/60"
+                  strokeWidth="1.2"
+                  initial={{ opacity: 0 }}
+                  animate={animationPhase !== 'waiting' ? { opacity: 1 } : {}}
+                  transition={{ duration: 0.5, delay: 0.2 }}
                 />
 
-                {/* Donut segments - sequential draw animation */}
-                {segments.map((seg, i) => {
-                  if (seg.isEmpty && totalMeals > 0) return null;
-                  if (seg.sweepAngle <= 0 && totalMeals > 0) return null;
-
-                  const segmentLength = (seg.sweepAngle / 360) * circumference;
-                  const offset = (seg.startAngle / 360) * circumference;
-                  const isSelected = selectedSegment === i;
+                {/* Bars with animations */}
+                {bars.map((bar, i) => {
+                  const isSelected = selectedBar === i;
                   const isDominant = i === dominantIndex && totalMeals > 0;
-                  const anim = segmentAnimations[i];
 
                   return (
-                    <motion.circle
-                      key={seg.label}
-                      cx={CENTER}
-                      cy={CENTER}
-                      r={RADIUS}
-                      fill="none"
-                      stroke={seg.color}
-                      strokeWidth={isSelected ? STROKE_WIDTH + 8 : isDominant ? STROKE_WIDTH + 4 : STROKE_WIDTH}
-                      strokeDasharray={`${segmentLength} ${circumference - segmentLength}`}
-                      strokeDashoffset={-offset}
-                      strokeLinecap="round"
-                      style={{
-                        transform: 'rotate(-90deg)',
-                        transformOrigin: '50% 50%',
-                        cursor: 'pointer',
-                        filter: isSelected
-                          ? `drop-shadow(0 0 12px ${seg.color}80)`
-                          : isDominant && animationPhase === 'done'
-                          ? `drop-shadow(0 0 6px ${seg.color}50)`
-                          : 'none',
-                      }}
-                      initial={{ strokeDasharray: `0 ${circumference}`, opacity: 0.4 }}
-                      animate={animationPhase !== 'waiting' ? {
-                        strokeDasharray: `${segmentLength} ${circumference - segmentLength}`,
-                        opacity: seg.isEmpty ? 0.3 : 1,
-                      } : {
-                        strokeDasharray: `0 ${circumference}`,
-                        opacity: 0.4,
-                      }}
-                      transition={{
-                        duration: anim.duration,
-                        delay: anim.delay,
-                        ease: [0.33, 1, 0.68, 1],
-                      }}
-                      onClick={() =>
-                        setSelectedSegment(selectedSegment === i ? null : i)
-                      }
-                    />
-                  );
-                })}
+                    <g key={bar.label}>
+                      {/* Shadow/glow layer behind bar */}
+                      <motion.rect
+                        x={bar.x + 2}
+                        y={BAR_AREA_BOTTOM}
+                        width={BAR_WIDTH - 4}
+                        rx={(BAR_WIDTH - 4) / 2}
+                        ry={(BAR_WIDTH - 4) / 2}
+                        fill={bar.color}
+                        opacity={0}
+                        initial={{ height: 0, y: BAR_AREA_BOTTOM }}
+                        animate={animationPhase !== 'waiting' ? {
+                          height: bar.barHeight,
+                          y: bar.y,
+                          opacity: isSelected ? 0.25 : isDominant && animationPhase === 'done' ? 0.15 : 0.08,
+                        } : {}}
+                        transition={{
+                          height: { duration: bar.duration, delay: bar.delay, ease: [0.34, 1.56, 0.64, 1] },
+                          y: { duration: bar.duration, delay: bar.delay, ease: [0.34, 1.56, 0.64, 1] },
+                          opacity: { duration: 0.6, delay: bar.delay + bar.duration * 0.7 },
+                        }}
+                        style={{ filter: 'blur(8px)' }}
+                      />
 
-                {/* Emoji labels positioned on the outside of each arc */}
-                {segments.map((seg, i) => {
-                  if (seg.isEmpty && totalMeals > 0) return null;
-                  if (seg.sweepAngle <= 0 && totalMeals > 0) return null;
-                  const pos = emojiPositions[i];
-                  const anim = segmentAnimations[i];
-                  const isSelected = selectedSegment === i;
+                      {/* Main bar */}
+                      <motion.rect
+                        x={bar.x}
+                        y={BAR_AREA_BOTTOM}
+                        width={BAR_WIDTH}
+                        rx={BAR_WIDTH / 2}
+                        ry={BAR_WIDTH / 2}
+                        fill={`url(#barGrad-${i})`}
+                        cursor="pointer"
+                        initial={{ height: 0, y: BAR_AREA_BOTTOM }}
+                        animate={animationPhase !== 'waiting' ? {
+                          height: bar.barHeight,
+                          y: bar.y,
+                        } : {}}
+                        transition={{
+                          duration: bar.duration,
+                          delay: bar.delay,
+                          ease: [0.34, 1.56, 0.64, 1],
+                        }}
+                        style={{
+                          filter: isSelected ? `drop-shadow(0 0 10px ${bar.glowColor})` : 'none',
+                        }}
+                        onClick={() => setSelectedBar(selectedBar === i ? null : i)}
+                        whileHover={{ scaleX: 1.08, transition: { duration: 0.2 } }}
+                        whileTap={{ scaleX: 0.95 }}
+                      />
 
-                  return (
-                    <motion.g
-                      key={`emoji-${seg.label}`}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={animationPhase !== 'waiting' ? { opacity: 1, scale: isSelected ? 1.3 : 1 } : { opacity: 0, scale: 0 }}
-                      transition={{
-                        opacity: { duration: 0.4, delay: anim.delay + anim.duration * 0.5 },
-                        scale: { duration: 0.5, delay: anim.delay + anim.duration * 0.5, type: 'spring', stiffness: 200, damping: 12 },
-                      }}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => setSelectedSegment(selectedSegment === i ? null : i)}
-                    >
-                      <text
-                        x={pos.x}
-                        y={pos.y}
+                      {/* Shimmer sweep overlay */}
+                      <motion.rect
+                        x={bar.x}
+                        y={BAR_AREA_BOTTOM}
+                        width={BAR_WIDTH}
+                        rx={BAR_WIDTH / 2}
+                        ry={BAR_WIDTH / 2}
+                        fill={`url(#shimmer-${i})`}
+                        pointerEvents="none"
+                        initial={{ height: 0, y: BAR_AREA_BOTTOM, opacity: 0 }}
+                        animate={animationPhase !== 'waiting' ? {
+                          height: bar.barHeight,
+                          y: bar.y,
+                          opacity: [0, 0, 0.8, 0],
+                        } : {}}
+                        transition={{
+                          height: { duration: bar.duration, delay: bar.delay, ease: [0.34, 1.56, 0.64, 1] },
+                          y: { duration: bar.duration, delay: bar.delay, ease: [0.34, 1.56, 0.64, 1] },
+                          opacity: { duration: 1.2, delay: bar.delay + bar.duration * 0.6, ease: 'easeOut' },
+                        }}
+                      />
+
+                      {/* Percentage label above bar */}
+                      <motion.text
+                        x={bar.x + BAR_WIDTH / 2}
+                        y={bar.y - 12}
                         textAnchor="middle"
-                        dominantBaseline="central"
-                        style={{ fontSize: '20px' }}
+                        dominantBaseline="auto"
+                        fill={bar.color}
+                        fontWeight="800"
+                        fontSize="13"
+                        initial={{ opacity: 0, y: bar.y + 10 }}
+                        animate={animationPhase !== 'waiting' ? {
+                          opacity: bar.percentage > 0 ? 1 : 0.4,
+                          y: bar.y - 12,
+                        } : {}}
+                        transition={{
+                          opacity: { duration: 0.5, delay: bar.delay + bar.duration * 0.7 },
+                          y: { duration: 0.6, delay: bar.delay + bar.duration * 0.6, ease: [0.16, 1, 0.3, 1] },
+                        }}
                       >
-                        {seg.emoji}
-                      </text>
-                    </motion.g>
-                  );
-                })}
+                        {bar.percentage > 0 ? `${bar.percentage}%` : '-'}
+                      </motion.text>
 
-                {/* Percentage labels on the arc for segments large enough */}
-                {segments.map((seg, i) => {
-                  if (seg.isEmpty && totalMeals > 0) return null;
-                  if (seg.percentage < 15) return null; // Only show on segments with enough space
-                  const labelPos = polarToCartesian(CENTER, CENTER, RADIUS, seg.midAngle);
-                  const anim = segmentAnimations[i];
+                      {/* Emoji below baseline */}
+                      <motion.text
+                        x={bar.x + BAR_WIDTH / 2}
+                        y={BAR_AREA_BOTTOM + 22}
+                        textAnchor="middle"
+                        dominantBaseline="auto"
+                        fontSize="18"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={animationPhase !== 'waiting' ? {
+                          opacity: 1,
+                          scale: isSelected ? 1.25 : 1,
+                        } : {}}
+                        transition={{
+                          opacity: { duration: 0.4, delay: bar.delay + bar.duration * 0.5 },
+                          scale: { type: 'spring', stiffness: 300, damping: 15, delay: bar.delay + bar.duration * 0.5 },
+                        }}
+                        cursor="pointer"
+                        onClick={() => setSelectedBar(selectedBar === i ? null : i)}
+                      >
+                        {bar.emoji}
+                      </motion.text>
 
-                  return (
-                    <motion.text
-                      key={`pct-${seg.label}`}
-                      x={labelPos.x}
-                      y={labelPos.y}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill="white"
-                      fontWeight="800"
-                      fontSize="12"
-                      style={{
-                        textShadow: '0 1px 3px rgba(0,0,0,0.4)',
-                        pointerEvents: 'none',
-                      }}
-                      initial={{ opacity: 0 }}
-                      animate={animationPhase !== 'waiting' ? { opacity: 1 } : { opacity: 0 }}
-                      transition={{
-                        duration: 0.4,
-                        delay: anim.delay + anim.duration * 0.7,
-                      }}
-                    >
-                      {seg.percentage}%
-                    </motion.text>
+                      {/* Label below emoji */}
+                      <motion.text
+                        x={bar.x + BAR_WIDTH / 2}
+                        y={BAR_AREA_BOTTOM + 42}
+                        textAnchor="middle"
+                        dominantBaseline="auto"
+                        fill="currentColor"
+                        className="text-muted-foreground"
+                        fontWeight="700"
+                        fontSize="10"
+                        initial={{ opacity: 0 }}
+                        animate={animationPhase !== 'waiting' ? { opacity: 0.7 } : {}}
+                        transition={{ duration: 0.4, delay: bar.delay + bar.duration * 0.8 }}
+                      >
+                        {bar.label}
+                      </motion.text>
+
+                      {/* Selection ring / highlight dot at top of bar */}
+                      {isSelected && (
+                        <motion.circle
+                          cx={bar.x + BAR_WIDTH / 2}
+                          cy={bar.y}
+                          r={5}
+                          fill="white"
+                          stroke={bar.color}
+                          strokeWidth={2.5}
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                        />
+                      )}
+
+                      {/* Dominant bar crown indicator - subtle pulsing dot */}
+                      {isDominant && !isSelected && animationPhase === 'done' && (
+                        <motion.circle
+                          cx={bar.x + BAR_WIDTH / 2}
+                          cy={bar.y - 2}
+                          r={3}
+                          fill={bar.color}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0.4, 0.9, 0.4] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                        />
+                      )}
+                    </g>
                   );
                 })}
               </svg>
-
-              {/* Center content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ padding: 24 }}>
-                <AnimatePresence mode="wait">
-                  {selectedData ? (
-                    <motion.div
-                      key={`selected-${selectedSegment}`}
-                      initial={{ opacity: 0, scale: 0.85 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.85 }}
-                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                      className="text-center"
-                    >
-                      <span className="text-3xl">{selectedData.emoji}</span>
-                      <div className="text-3xl font-black text-foreground leading-tight mt-1">
-                        {selectedData.percentage}%
-                      </div>
-                      <div className="text-xs font-bold text-muted-foreground mt-1">
-                        {selectedData.label}
-                      </div>
-                      <div className="text-[10px] font-semibold text-muted-foreground">
-                        {selectedData.count} {selectedData.count === 1 ? 'meal' : 'meals'}
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="total"
-                      initial={{ opacity: 0, scale: 0.85 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.85 }}
-                      transition={{ duration: 0.25 }}
-                      className="text-center"
-                    >
-                      <motion.div
-                        className="text-3xl font-black text-foreground leading-tight"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 3, duration: 0.8 }}
-                      >
-                        {totalMeals}
-                      </motion.div>
-                      <motion.div
-                        className="text-xs font-semibold text-muted-foreground mt-1"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 3.2, duration: 0.8 }}
-                      >
-                        meals tracked
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
             </div>
           </div>
 
-          {/* Legend - compact pill style */}
+          {/* Interactive stat row - appears after bars */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 4.5, duration: 0.6 }}
-            className="grid grid-cols-2 gap-2 mt-1"
+            initial={{ opacity: 0, y: 15 }}
+            animate={animationPhase !== 'waiting' ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 4.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="grid grid-cols-4 gap-2 mt-2"
           >
             {periodData.map((period, i) => {
-              const isSelected = selectedSegment === i;
-              const isDominant = i === dominantIndex && totalMeals > 0;
+              const isSelected = selectedBar === i;
               return (
                 <motion.button
                   key={period.label}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() =>
-                    setSelectedSegment(selectedSegment === i ? null : i)
-                  }
-                  className={`flex items-center gap-2.5 p-3 rounded-2xl border transition-all duration-200 text-left ${
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedBar(selectedBar === i ? null : i)}
+                  className={`text-center p-2.5 rounded-2xl border transition-all duration-200 ${
                     isSelected
-                      ? 'bg-white/90 border-violet-200/80 shadow-md'
-                      : 'bg-white/50 border-white/60 hover:bg-white/70'
+                      ? 'bg-gray-50 border-border/60 shadow-md'
+                      : 'bg-transparent border-transparent hover:bg-gray-50/60'
                   }`}
                 >
                   <div
-                    className="w-3.5 h-3.5 rounded-full flex-shrink-0"
-                    style={{
-                      backgroundColor: period.color,
-                      boxShadow: isSelected || isDominant
-                        ? `0 0 8px ${period.color}60`
-                        : 'none',
-                    }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm">{period.emoji}</span>
-                      <span className={`text-xs font-bold ${period.textColor}`}>
-                        {period.label}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground font-medium">
-                      {period.percentage}%
-                      {period.avgBloating > 0 && ` \u00B7 avg ${period.avgBloating}/5`}
-                    </span>
+                    className="text-base font-black"
+                    style={{ color: period.color }}
+                  >
+                    {animationPhase !== 'waiting' ? (
+                      <AnimatedCounter
+                        target={period.count}
+                        delay={bars[i]?.delay ?? 0.4 + i}
+                        duration={bars[i]?.duration ?? 1}
+                        suffix=""
+                      />
+                    ) : '0'}
                   </div>
+                  <div className="text-[10px] text-muted-foreground font-semibold mt-0.5">
+                    meals
+                  </div>
+                  {period.avgBloating > 0 && (
+                    <div className="text-[9px] text-muted-foreground/70 font-medium mt-0.5">
+                      avg {period.avgBloating}/5
+                    </div>
+                  )}
                 </motion.button>
               );
             })}
@@ -487,7 +527,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
 
           {/* Selected segment insight */}
           <AnimatePresence>
-            {selectedData && selectedSegment !== null && (
+            {selectedData && selectedBar !== null && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -495,7 +535,16 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className="overflow-hidden"
               >
-                <div className="mt-4 p-4 rounded-2xl bg-white/70 backdrop-blur-sm border border-violet-100/60">
+                <div className="mt-4 p-4 rounded-2xl bg-gray-50/80 border border-border/30">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-lg">{selectedData.emoji}</span>
+                    <span className={`text-sm font-bold ${selectedData.textColor}`}>
+                      {selectedData.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      {selectedData.range}
+                    </span>
+                  </div>
                   <p className="text-sm text-foreground/80 font-medium leading-relaxed">
                     {getDominantInsight(selectedData.label, selectedData.percentage)}
                     {selectedData.avgBloating > 0 && (
@@ -518,7 +567,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 5 }}
-            className="flex items-center justify-center gap-2 text-xs pt-4 mt-4 border-t border-white/50"
+            className="flex items-center justify-center gap-2 text-xs pt-4 mt-4 border-t border-border/30"
           >
             <span className="text-muted-foreground font-semibold">
               {totalMeals} {totalMeals === 1 ? 'meal' : 'meals'} analyzed

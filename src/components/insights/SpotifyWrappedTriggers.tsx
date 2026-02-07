@@ -299,17 +299,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden rounded-[2rem] shadow-2xl"
       >
-        {/* Premium gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-100/80 via-orange-100/70 to-amber-100/80" />
-
-        {/* Animated orbs */}
-        <motion.div
-          animate={{ scale: [1, 1.3, 1], x: [0, 20, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-br from-rose-400/20 to-orange-400/15 rounded-full blur-3xl"
-        />
-
-        <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/80 rounded-[2rem] p-6">
+        <div className="relative bg-white border border-border/40 rounded-[2rem] p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500/20 to-orange-500/20 flex items-center justify-center">
               <AlertTriangle className="w-6 h-6 text-rose-600" />
@@ -340,9 +330,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden rounded-[2rem] shadow-xl"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-100/80 via-orange-100/70 to-amber-100/80" />
-
-        <div className="relative backdrop-blur-2xl bg-white/70 border-2 border-white/80 rounded-[2rem] p-6">
+        <div className="relative bg-white border border-border/40 rounded-[2rem] p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500/20 to-orange-500/20 flex items-center justify-center">
               <AlertTriangle className="w-6 h-6 text-rose-600" />
@@ -367,43 +355,10 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
       initial={{ opacity: 0, scale: 0.96, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-rose-500/10"
+      className="relative overflow-hidden rounded-[2rem] shadow-xl"
     >
-      {/* Multi-layer gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-rose-100/80 via-orange-100/70 to-amber-100/80" />
-
-      {/* Animated gradient orbs for depth */}
-      <motion.div
-        animate={{
-          scale: [1, 1.3, 1],
-          x: [0, 25, 0],
-          y: [0, -15, 0],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-rose-400/25 to-orange-400/20 rounded-full blur-3xl"
-      />
-
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          x: [0, -20, 0],
-          y: [0, 15, 0],
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-amber-400/20 to-yellow-300/15 rounded-full blur-3xl"
-      />
-
-      <motion.div
-        animate={{
-          scale: [1, 1.15, 1],
-          rotate: [0, 180, 360],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 bg-gradient-to-br from-orange-300/15 to-rose-300/10 rounded-full blur-2xl"
-      />
-
-      {/* Premium glass overlay */}
-      <div className="relative backdrop-blur-2xl bg-white/60 border-2 border-white/80 rounded-[2rem]">
+      {/* Clean white card */}
+      <div className="relative bg-white border border-border/40 rounded-[2rem]">
         <div className="p-6">
           {/* Header */}
           <motion.div
