@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TriggerConfidenceLevel } from '@/lib/insightsAnalysis';
 import { getTriggerCategory } from '@/types';
-import { getFoodImage } from '@/lib/pexelsApi';
+import { getFoodImage, getCategorySearchQuery } from '@/lib/pexelsApi';
 import { ChevronDown, ChevronUp, Eye, Zap, AlertTriangle, Leaf, Check, ChefHat, AlertCircle, Sparkles } from 'lucide-react';
 
 // Safe alternatives data integrated from SafeAlternativesCards
@@ -231,6 +231,20 @@ function getSeverityBadgeColor(impactScore: number): string {
   return 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30';
 }
 
+function getSeverityBorderColor(impactScore: number): string {
+  if (impactScore >= 2.0) return 'border-rose-500';
+  if (impactScore >= 1.0) return 'border-orange-500';
+  if (impactScore >= 0.5) return 'border-amber-400';
+  return 'border-emerald-400';
+}
+
+function getSeverityGlowStyle(impactScore: number): React.CSSProperties {
+  if (impactScore >= 2.0) return { filter: 'drop-shadow(0 0 6px rgba(244,63,94,0.7)) drop-shadow(0 0 12px rgba(244,63,94,0.4))' };
+  if (impactScore >= 1.0) return { filter: 'drop-shadow(0 0 6px rgba(249,115,22,0.7)) drop-shadow(0 0 12px rgba(249,115,22,0.4))' };
+  if (impactScore >= 0.5) return { filter: 'drop-shadow(0 0 6px rgba(251,191,36,0.7)) drop-shadow(0 0 12px rgba(251,191,36,0.4))' };
+  return { filter: 'drop-shadow(0 0 6px rgba(52,211,153,0.7)) drop-shadow(0 0 12px rgba(52,211,153,0.4))' };
+}
+
 export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTriggersProps) {
   const [topTriggers, setTopTriggers] = useState<TriggerCardData[]>([]);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -247,10 +261,10 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
       const triggersWithImages = await Promise.all(
         sorted.map(async (trigger) => {
           const categoryInfo = getTriggerCategory(trigger.category);
-          const topFood = trigger.topFoods[0] || categoryInfo?.displayName || trigger.category;
 
-          // Fetch image from Pexels
-          const imageData = await getFoodImage(topFood, trigger.category).catch(() => null);
+          // Use moody/aesthetic category-specific query for Pexels
+          const searchQuery = getCategorySearchQuery(trigger.category);
+          const imageData = await getFoodImage(searchQuery, trigger.category).catch(() => null);
 
           return {
             category: trigger.category,
@@ -427,7 +441,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
               whileTap={{ scale: 0.98 }}
               className={`relative overflow-hidden rounded-[1.5rem] h-56 cursor-pointer group shadow-xl ${gradientColors.glow}`}
             >
-              {/* Background Image with Overlay */}
+              {/* Full-strength photography background */}
               {topTrigger.imageUrl && (
                 <div className="absolute inset-0 overflow-hidden rounded-[1.5rem]">
                   <motion.div
@@ -437,8 +451,13 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                     className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                     style={{ backgroundImage: `url(${topTrigger.imageUrl})` }}
                   />
-                  <div className={`absolute inset-0 bg-gradient-to-br ${gradientColors.from} ${gradientColors.to} opacity-50`} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                  {/* Bottom 35% scrim for text readability - no color overlay */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 25%, rgba(0,0,0,0.1) 35%, transparent 50%)',
+                    }}
+                  />
                 </div>
               )}
 
@@ -449,21 +468,24 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
               {/* Content Overlay */}
               <div className="relative h-full flex flex-col justify-between p-6 text-white">
-                {/* Top Section - Severity Badge */}
+                {/* Top Section - Glassmorphism Rank Badge + Glowing Signal Bars */}
                 <div className="flex justify-between items-start">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.5, duration: 0.4 }}
-                    className={`px-4 py-2 rounded-full backdrop-blur-md bg-white/20 border border-white/30 shadow-lg`}
+                    className={`px-4 py-2 rounded-full backdrop-blur-xl bg-black/30 border-2 ${getSeverityBorderColor(topTrigger.impactScore)} shadow-lg`}
+                    style={{
+                      boxShadow: `0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)`,
+                    }}
                   >
                     <span className="text-sm font-bold text-white drop-shadow-md">
                       #1 Trigger
                     </span>
                   </motion.div>
 
-                  {/* Severity indicator bar */}
-                  <div className="flex items-center gap-1.5">
+                  {/* Severity indicator bar with glow effect */}
+                  <div className="flex items-center gap-1.5" style={getSeverityGlowStyle(topTrigger.impactScore)}>
                     {[1, 2, 3, 4, 5].map((level) => (
                       <motion.div
                         key={level}
@@ -472,7 +494,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                         transition={{ delay: 0.6 + level * 0.1, duration: 0.3 }}
                         className={`w-2 rounded-full ${
                           topTrigger.impactScore >= level * 0.5
-                            ? 'bg-white shadow-lg'
+                            ? 'bg-white'
                             : 'bg-white/30'
                         }`}
                         style={{ height: `${8 + level * 4}px` }}
@@ -761,8 +783,8 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                         {/* Content */}
                         <div className="relative h-full flex items-center justify-between px-5">
                           <div className="flex items-center gap-4">
-                            {/* Severity indicator */}
-                            <div className="flex items-center gap-1">
+                            {/* Severity indicator with glow */}
+                            <div className="flex items-center gap-1" style={getSeverityGlowStyle(trigger.impactScore)}>
                               {[1, 2, 3].map((level) => (
                                 <div
                                   key={level}
