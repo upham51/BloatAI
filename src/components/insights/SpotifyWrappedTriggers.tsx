@@ -441,22 +441,8 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
               {/* Content Overlay */}
               <div className="relative h-full flex flex-col justify-between p-6 text-white">
-                {/* Top Section - Glassmorphism Rank Badge + Glowing Signal Bars */}
+                {/* Top Section - Glowing Signal Bars (left) + Glassmorphism Rank Badge (right) */}
                 <div className="flex justify-between items-start">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5, duration: 0.4 }}
-                    className={`px-4 py-2 rounded-full backdrop-blur-xl bg-black/30 border-2 ${getSeverityBorderColor(topTrigger.impactScore)} shadow-lg`}
-                    style={{
-                      boxShadow: `0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)`,
-                    }}
-                  >
-                    <span className="text-sm font-bold text-white drop-shadow-md">
-                      #1 Trigger
-                    </span>
-                  </motion.div>
-
                   {/* Severity indicator bars - #1 trigger always all red */}
                   <div className="flex items-end gap-1.5" style={{ filter: 'drop-shadow(0 0 8px rgba(239,68,68,0.7)) drop-shadow(0 0 14px rgba(239,68,68,0.4))' }}>
                     {[1, 2, 3].map((level) => (
@@ -470,6 +456,20 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                       />
                     ))}
                   </div>
+
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5, duration: 0.4 }}
+                    className={`px-4 py-2 rounded-full backdrop-blur-xl bg-black/30 border-2 ${getSeverityBorderColor(topTrigger.impactScore)} shadow-lg`}
+                    style={{
+                      boxShadow: `0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)`,
+                    }}
+                  >
+                    <span className="text-sm font-bold text-white drop-shadow-md">
+                      #1 Trigger
+                    </span>
+                  </motion.div>
                 </div>
 
                 {/* Bottom Section */}
