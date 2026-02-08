@@ -4,9 +4,10 @@ import { haptics } from '@/lib/haptics';
 interface ScanningAnimationProps {
   imageUrl?: string | null;
   onComplete?: () => void;
+  isExiting?: boolean;
 }
 
-export function ScanningAnimation({ imageUrl, onComplete }: ScanningAnimationProps) {
+export function ScanningAnimation({ imageUrl, onComplete, isExiting = false }: ScanningAnimationProps) {
   const [progress, setProgress] = useState(0);
   const [activePhase, setActivePhase] = useState(0);
   const animationRef = useRef<number | null>(null);
@@ -31,6 +32,14 @@ export function ScanningAnimation({ imageUrl, onComplete }: ScanningAnimationPro
       haptics.stopScanningPulse();
     };
   }, []);
+
+  // Snap to complete state when exiting
+  useEffect(() => {
+    if (isExiting) {
+      setProgress(100);
+      setActivePhase(phases.length - 1);
+    }
+  }, [isExiting, phases.length]);
 
   // Smooth progress animation using requestAnimationFrame
   useEffect(() => {
@@ -73,7 +82,9 @@ export function ScanningAnimation({ imageUrl, onComplete }: ScanningAnimationPro
   }, [onComplete, phases.length]);
 
   return (
-    <div className="absolute inset-0 z-20 flex flex-col overflow-hidden will-change-transform">
+    <div className={`absolute inset-0 z-20 flex flex-col overflow-hidden will-change-transform transition-all duration-500 ease-out ${
+      isExiting ? 'opacity-0 scale-[1.03]' : 'opacity-100 scale-100'
+    }`}>
       {/* Premium dark gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-[#080812] to-slate-950" />
 
