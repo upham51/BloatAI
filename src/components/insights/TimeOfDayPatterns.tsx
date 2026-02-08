@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useMemo, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MealEntry } from '@/types';
+import { getPeakTimesBackground, fetchPeakTimesBackground, PexelsPhoto } from '@/lib/pexels';
 
 interface TimeOfDayPatternsProps {
   entries: MealEntry[];
@@ -31,6 +32,10 @@ function getTimePeriodIndex(hour: number): number {
 const CHART_HEIGHT = 150;
 const MAX_BAR_PCT = 78;
 const easing: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const PERIOD_KEYS: ('morning' | 'afternoon' | 'evening' | 'night')[] = [
+  'morning', 'afternoon', 'evening', 'night',
+];
 
 export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
   const periodData = useMemo(() => {
@@ -68,6 +73,23 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
     0
   );
 
+  const dominantPeriodKey = PERIOD_KEYS[dominantIndex];
+  const [bgPhoto, setBgPhoto] = useState<PexelsPhoto>(() =>
+    getPeakTimesBackground(dominantPeriodKey)
+  );
+
+  useEffect(() => {
+    if (!totalMeals) return;
+    // Set sync fallback immediately for the new dominant period
+    setBgPhoto(getPeakTimesBackground(dominantPeriodKey));
+    // Then upgrade with a random photo from the Pexels collection
+    let cancelled = false;
+    fetchPeakTimesBackground(dominantPeriodKey).then((photo) => {
+      if (!cancelled) setBgPhoto(photo);
+    });
+    return () => { cancelled = true; };
+  }, [dominantPeriodKey, totalMeals]);
+
   if (!totalMeals) {
     return (
       <motion.div
@@ -93,9 +115,26 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1.2, ease: easing }}
-      className="glass-card overflow-hidden"
+      className="glass-card overflow-hidden relative"
     >
-      <div className="px-5 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5">
+      {/* Pexels collection background – keyed to dominant time period */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={bgPhoto.src}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${bgPhoto.src})` }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.2, ease: easing }}
+        />
+      </AnimatePresence>
+
+      {/* Dark overlay so chart elements remain legible */}
+      <div className="absolute inset-0 bg-gradient-to-b from-charcoal/70 via-charcoal/60 to-charcoal/75" />
+
+      {/* Content sits above background */}
+      <div className="relative z-10 px-5 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5">
         {/* Header */}
         <motion.div
           className="text-center mb-4"
@@ -103,10 +142,10 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
           animate={{ opacity: 1 }}
           transition={{ duration: 1.5, ease: easing }}
         >
-          <h2 className="font-display text-lg sm:text-xl font-bold text-charcoal tracking-tight">
+          <h2 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
             Peak Symptom Times
           </h2>
-          <p className="text-xs text-charcoal/45 font-medium italic mt-1">
+          <p className="text-xs text-white/60 font-medium italic mt-1">
             When you report the most issues
           </p>
         </motion.div>
@@ -125,7 +164,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
             >
               <div
                 className="border-t border-dashed"
-                style={{ borderColor: 'rgba(212, 222, 212, 0.45)' }}
+                style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
               />
             </motion.div>
           ))}
@@ -133,7 +172,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
           {/* Baseline */}
           <motion.div
             className="absolute bottom-0 left-0 right-0 border-t pointer-events-none"
-            style={{ borderColor: 'rgba(212, 222, 212, 0.5)' }}
+            style={{ borderColor: 'rgba(255, 255, 255, 0.25)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, ease: easing }}
@@ -154,8 +193,8 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
 
               const barOpacity =
                 period.percentage > 0
-                  ? 0.4 + (period.percentage / maxPercentage) * 0.6
-                  : 0.08;
+                  ? 0.5 + (period.percentage / maxPercentage) * 0.5
+                  : 0.1;
 
               return (
                 <div
@@ -167,8 +206,8 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                     className="absolute bottom-0 left-1 right-1 sm:left-1.5 sm:right-1.5 rounded-t-lg overflow-hidden"
                     style={{
                       background: isDominant
-                        ? 'linear-gradient(to top, #1A4D2E, #2A5E3E)'
-                        : 'linear-gradient(to top, #1A4D2E, #3A7D5A)',
+                        ? 'linear-gradient(to top, rgba(255,255,255,0.85), rgba(255,255,255,0.55))'
+                        : 'linear-gradient(to top, rgba(255,255,255,0.55), rgba(255,255,255,0.3))',
                     }}
                     initial={{ height: 0, opacity: 0 }}
                     animate={{
@@ -201,8 +240,8 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                         }}
                       >
                         <span
-                          className="text-sm sm:text-base font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
-                          style={{ textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}
+                          className="text-sm sm:text-base font-bold text-charcoal drop-shadow-[0_0px_4px_rgba(255,255,255,0.6)]"
+                          style={{ textShadow: '0 0 6px rgba(255,255,255,0.5)' }}
                         >
                           {period.percentage}%
                         </span>
@@ -225,12 +264,12 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                 key={period.label}
                 className="flex-1 text-center"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: isDominant ? 0.9 : 0.55 }}
+                animate={{ opacity: isDominant ? 1 : 0.6 }}
                 transition={{ duration: 1.5, delay: 0.5, ease: easing }}
               >
                 <span
                   className={`text-[11px] ${isDominant ? 'font-semibold' : 'font-medium'}`}
-                  style={{ color: isDominant ? '#1A4D2E' : '#8A948A' }}
+                  style={{ color: isDominant ? '#FFFFFF' : 'rgba(255,255,255,0.65)' }}
                 >
                   {period.label}
                 </span>
@@ -238,7 +277,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                   <motion.div
                     className="mx-auto mt-1 rounded-full"
                     style={{
-                      background: '#1A4D2E',
+                      background: '#FFFFFF',
                       height: 3,
                       width: '60%',
                       maxWidth: 48,
@@ -253,6 +292,15 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
           })}
         </div>
       </div>
+
+      {/* Photographer attribution */}
+      {bgPhoto.photographer && (
+        <div className="absolute bottom-1 right-2 z-10">
+          <span className="text-[8px] text-white/30">
+            Photo: {bgPhoto.photographer} / Pexels
+          </span>
+        </div>
+      )}
     </motion.div>
   );
 }
