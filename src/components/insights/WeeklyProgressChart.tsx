@@ -288,13 +288,13 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
                     x={chartDimensions.width - padding.right + 8}
                     y={guideY + 3}
                     fontSize="8.5"
-                    fill="#8A948A"
+                    fill="#1A1A1A"
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.7 }}
+                    animate={{ opacity: 1 }}
                     transition={{ duration: 2, delay: 0.5, ease: easing }}
                   >
                     <tspan fontWeight="600">{bloating}</tspan>
-                    <tspan dx="4" fontSize="7.5" fill="#95A095">{label}</tspan>
+                    <tspan dx="4" fontSize="7.5" fill="#3A3A3A">{label}</tspan>
                   </motion.text>
                 </g>
               );
@@ -337,24 +337,34 @@ export function WeeklyProgressChart({ entries }: WeeklyProgressChartProps) {
 
               return (
                 <g key={index}>
-                  {/* Current day soft glow ring — appears smoothly after line animation */}
+                  {/* Current day soft glow ring — fades in after data point, then pulsates */}
                   {isToday && hasDataPoint && (
-                    <motion.circle
-                      cx={point.x}
-                      cy={point.y}
-                      r="10"
-                      fill="none"
-                      stroke={color}
-                      strokeWidth="1.5"
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: [1, 1.3, 1], opacity: [0.35, 0.1, 0.35] }}
+                    <motion.g
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
                       transition={{
-                        delay: ANIM_DURATION + 1.2,
-                        duration: 2.5,
-                        repeat: Infinity,
-                        ease: "easeInOut",
+                        delay: pointDelay + 0.8,
+                        duration: 1.5,
+                        ease: "easeOut",
                       }}
-                    />
+                    >
+                      <motion.circle
+                        cx={point.x}
+                        cy={point.y}
+                        r="10"
+                        fill="none"
+                        stroke={color}
+                        strokeWidth="1.5"
+                        opacity="0.35"
+                        animate={{ scale: [1, 1.3, 1], opacity: [0.35, 0.1, 0.35] }}
+                        transition={{
+                          delay: pointDelay + 0.8 + 1.8,
+                          duration: 2.5,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    </motion.g>
                   )}
 
                   {/* Hover ring */}
