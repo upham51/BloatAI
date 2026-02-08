@@ -106,6 +106,9 @@ export default function AddEntryPage() {
   // Optional bloating rating
   const [bloatingRating, setBloatingRating] = useState<number | null>(null);
 
+  // Transition state for smooth scanner -> content animation
+  const [showResults, setShowResults] = useState(false);
+
   // Saving state
   const [isSaving, setIsSaving] = useState(false);
 
@@ -117,6 +120,20 @@ export default function AddEntryPage() {
       }
     };
   }, [photoUrl]);
+
+  // Smooth transition: fade out scanner, then reveal content
+  useEffect(() => {
+    if (!isAnalyzing && photoAnalyzed && !showResults) {
+      // Delay content reveal to let scanner fade out
+      const timer = setTimeout(() => {
+        setShowResults(true);
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+    if (!photoAnalyzed) {
+      setShowResults(false);
+    }
+  }, [isAnalyzing, photoAnalyzed, showResults]);
 
   // Form is valid when we have a photo and AI has analyzed it
   const isValid = photoUrl && photoAnalyzed && aiDescription.trim();
@@ -147,6 +164,7 @@ export default function AddEntryPage() {
   const analyzePhoto = async (file: File) => {
     setIsAnalyzing(true);
     setPhotoAnalyzed(false);
+    setShowResults(false);
     try {
       const base64 = await fileToBase64(file);
 
@@ -221,6 +239,7 @@ export default function AddEntryPage() {
     setPhotoUrl(null);
     setPhotoFile(null);
     setPhotoAnalyzed(false);
+    setShowResults(false);
     setAiDescription('');
     setCreativeMealTitle('');
     setMealCategory('');
@@ -506,11 +525,13 @@ export default function AddEntryPage() {
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent pointer-events-none" />
             
-            {/* Scanning Animation */}
-            {isAnalyzing && <ScanningAnimation imageUrl={photoUrl} />}
+            {/* Scanning Animation - stays visible during exit transition */}
+            {(isAnalyzing || (photoAnalyzed && !showResults)) && (
+              <ScanningAnimation imageUrl={photoUrl} isExiting={!isAnalyzing && photoAnalyzed} />
+            )}
             
-            {/* Creative meal title overlay */}
-            {photoAnalyzed && aiDescription && <div className="absolute bottom-0 left-0 right-0 p-6 animate-slide-up">
+            {/* Creative meal title overlay - appears after scanner fades out */}
+            {showResults && aiDescription && <div className="absolute bottom-0 left-0 right-0 p-6 animate-slide-up">
                 <p className="text-xs font-semibold text-primary-foreground/70 uppercase tracking-widest mb-1">{mealCategory}</p>
                 <h1 className="text-2xl font-bold text-primary-foreground drop-shadow-lg tracking-tight line-clamp-2">
                   {creativeMealTitle || 'Your meal'}
@@ -529,18 +550,11 @@ export default function AddEntryPage() {
               </>}
           </section>
 
-          {/* Scrollable Content - Only show after analysis completes */}
-          {!isAnalyzing && (
+          {/* Scrollable Content - Reveal after scanner exit transition */}
+          {showResults && (
           <section
-            className={`flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)] ${
-              photoAnalyzed
-                ? 'animate-card-reveal'
-                : 'opacity-0 translate-y-[60px]'
-            }`}
-            style={{
-              transform: 'translateZ(0)',
-              WebkitTransform: 'translateZ(0)'
-            }}
+            className="flex-1 -mt-6 relative z-10 rounded-t-[2rem] bg-background overflow-y-auto shadow-[0_-8px_30px_-12px_hsl(var(--foreground)/0.15)] animate-card-reveal opacity-0"
+            style={{ animationFillMode: 'forwards' }}
           >
             <div className="p-5 space-y-4 pt-8">
           {/* AI Analysis Results */}
@@ -689,7 +703,7 @@ export default function AddEntryPage() {
           )}
 
           {/* Sticky Save Button at Bottom of Content */}
-          {!isAnalyzing && photoAnalyzed && <div className="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent pt-8">
+          {showResults && <div className="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent pt-8">
               <button
                 onClick={handleSave}
                 onTouchStart={() => {
