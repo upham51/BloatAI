@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TriggerConfidenceLevel } from '@/lib/insightsAnalysis';
 import { getTriggerCategory } from '@/types';
@@ -267,6 +267,20 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
   const [topTriggers, setTopTriggers] = useState<TriggerCardData[]>([]);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [imagesLoading, setImagesLoading] = useState(true);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const setCardRef = useCallback((index: number) => (el: HTMLDivElement | null) => {
+    cardRefs.current[index] = el;
+  }, []);
+
+  useEffect(() => {
+    if (expandedIndex !== null && cardRefs.current[expandedIndex]) {
+      // Small delay to let the expand animation start
+      setTimeout(() => {
+        cardRefs.current[expandedIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [expandedIndex]);
 
   useEffect(() => {
     async function loadTriggerData() {
@@ -404,6 +418,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
 
           {/* Hero Card - #1 Trigger */}
           <motion.div
+            ref={setCardRef(0)}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
@@ -725,6 +740,7 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                   return (
                     <motion.div
                       key={trigger.category}
+                      ref={setCardRef(actualIndex)}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.6 + idx * 0.1, duration: 0.4 }}
@@ -868,11 +884,11 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                                       <Sparkles size={10} className="text-emerald-500 ml-auto" />
                                     </div>
                                     <div className="space-y-3">
-                                      {SAFE_ALTERNATIVES_DATA[trigger.category].betterOptions.slice(0, 2).map((option, optIdx) => (
+                                      {SAFE_ALTERNATIVES_DATA[trigger.category].betterOptions.map((option, optIdx) => (
                                         <div key={optIdx}>
                                           <div className="text-[10px] font-bold text-emerald-700 mb-1.5 uppercase tracking-wide">{option.title}</div>
                                           <div className="flex flex-wrap gap-1.5">
-                                            {option.items.slice(0, 4).map((item, itemIdx) => (
+                                            {option.items.map((item, itemIdx) => (
                                               <span
                                                 key={itemIdx}
                                                 className="inline-flex items-center px-2.5 py-1 rounded-lg bg-white/80 text-[10px] font-semibold text-foreground/80 border border-emerald-200/50"
@@ -881,11 +897,6 @@ export function SpotifyWrappedTriggers({ triggerConfidence }: SpotifyWrappedTrig
                                                 {item}
                                               </span>
                                             ))}
-                                            {option.items.length > 4 && (
-                                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100/80 text-[10px] font-bold text-emerald-700">
-                                                +{option.items.length - 4} more
-                                              </span>
-                                            )}
                                           </div>
                                         </div>
                                       ))}
