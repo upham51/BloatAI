@@ -72,7 +72,7 @@ IMPORTANT RULES:
 - Be direct about experiments: "Cut out X completely for 3 days" not "Consider reducing X"
 - Show you're tracking them: "I see you…" / "I noticed…" / "Looking at your data…"
 - Keep paragraphs short: 2-3 sentences max
-- Use their actual numbers from the data provided
+- Use their actual numbers from the data provided. When referring to how many meals they've logged, always use the "Total logged meals" number, not the rated-only count
 - Bloating is rated on a 1-5 scale (1 = no bloat, 5 = awful)
 
 The app tracks these trigger categories: Savory Carbs (grains), Beans, Dairy, Fruit, Sweeteners, Gluten, Veggies, Fatty Food, Carbonated, Sugar, Alcohol, Processed.
@@ -102,8 +102,9 @@ Return ONLY valid JSON (no markdown, no code blocks):
 
 Days tracked: ${mealData.days_tracked}
 Total logged meals: ${mealData.total_logs}
+Meals with bloating ratings: ${mealData.rated_logs ?? mealData.total_logs}
 
-Recent food entries (last 14 days):
+Recent food entries (last 14 days, only rated meals):
 ${JSON.stringify(mealData.food_entries || [], null, 2)}
 
 Identified triggers from pattern analysis:
