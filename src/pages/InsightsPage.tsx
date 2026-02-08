@@ -10,6 +10,7 @@ import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { BloatInsightsCard } from '@/components/insights/BloatInsightsCard';
 import { SpotifyWrappedTriggers } from '@/components/insights/SpotifyWrappedTriggers';
 import { TimeOfDayPatterns } from '@/components/insights/TimeOfDayPatterns';
+import { SafeFoodsCard } from '@/components/insights/SafeFoodsCard';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -431,6 +432,11 @@ export default function InsightsPage() {
             {/* 2. PEAK SYMPTOM TIMES - Timing insights */}
             <StaggerItem>
               <TimeOfDayPatterns entries={entries} />
+            </StaggerItem>
+
+            {/* 2.5. SAFE FOR YOU - Foods that don't cause issues */}
+            <StaggerItem>
+              <SafeFoodsCard entries={entries} />
             </StaggerItem>
 
             {/* 3. YOUR BLOAT RHYTHM - Pattern awareness */}
