@@ -329,6 +329,20 @@ export function getFoodPhoto(foodName: string): PexelsPhoto {
 }
 
 /**
+ * Get a static fallback for a specific time period (sync, for initial render)
+ */
+export function getPeakTimesBackground(period: 'morning' | 'afternoon' | 'evening' | 'night'): PexelsPhoto {
+  return FALLBACK_PHOTOS[period];
+}
+
+/**
+ * Fetch a random background from the Pexels collection for a specific time period
+ */
+export async function fetchPeakTimesBackground(period: 'morning' | 'afternoon' | 'evening' | 'night'): Promise<PexelsPhoto> {
+  return getRandomCollectionPhoto(period);
+}
+
+/**
  * Preload images for better performance
  */
 export function preloadImages(photos: PexelsPhoto[]): void {
