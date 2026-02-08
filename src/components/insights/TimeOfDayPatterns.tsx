@@ -1,5 +1,5 @@
-import { useMemo, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { MealEntry } from '@/types';
 
 interface TimeOfDayPatternsProps {
@@ -20,20 +20,6 @@ const TIME_PERIODS: TimePeriod[] = [
   { label: 'Night', range: '10pm+', startHour: 22, endHour: 5 },
 ];
 
-const CATCHY_SUBTITLES = [
-  "Your belly keeps receipts",
-  "The clock knows your stomach's secrets",
-  "Timing is everything, especially for bloat",
-  "Your gut has a schedule of its own",
-  "Some hours hit harder than others",
-  "Every meal leaves a timestamp",
-  "Your stomach watches the clock too",
-  "Patterns your gut wants you to see",
-  "The rhythm your belly lives by",
-  "When your stomach has something to say",
-  "Your digestive diary, by the hour",
-  "The hours that matter most",
-];
 
 function getTimePeriodIndex(hour: number): number {
   if (hour >= 6 && hour <= 11) return 0;
@@ -47,11 +33,6 @@ const MAX_BAR_PCT = 78;
 const easing: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
-  const [hoveredBar, setHoveredBar] = useState<number | null>(null);
-  const catchySubtitle = useRef(
-    CATCHY_SUBTITLES[Math.floor(Math.random() * CATCHY_SUBTITLES.length)]
-  ).current;
-
   const periodData = useMemo(() => {
     const completedEntries = entries.filter(
       (e) => e.rating_status === 'completed' && e.bloating_rating
@@ -97,7 +78,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
       >
         <div className="p-6 text-center py-8">
           <h3 className="font-display text-xl font-bold text-charcoal mb-2">
-            When Your Gut Speaks Up
+            Peak Symptom Times
           </h3>
           <p className="text-sm text-charcoal/60 font-medium">
             Log meals to see timing patterns
@@ -123,10 +104,10 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
           transition={{ duration: 1.5, ease: easing }}
         >
           <h2 className="font-display text-lg sm:text-xl font-bold text-charcoal tracking-tight">
-            When Your Gut Speaks Up
+            Peak Symptom Times
           </h2>
           <p className="text-xs text-charcoal/45 font-medium italic mt-1">
-            {catchySubtitle}
+            When you report the most issues
           </p>
         </motion.div>
 
@@ -166,7 +147,6 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                   ? (period.percentage / maxPercentage) * MAX_BAR_PCT
                   : 0;
               const isDominant = i === dominantIndex;
-              const isHovered = hoveredBar === i;
 
               // Stagger across 5 seconds total
               const delay = 0.3 + (i / 3) * 1.6;
@@ -181,9 +161,6 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                 <div
                   key={period.label}
                   className="flex-1 h-full relative"
-                  onMouseEnter={() => setHoveredBar(i)}
-                  onMouseLeave={() => setHoveredBar(null)}
-                  style={{ cursor: 'pointer' }}
                 >
                   {/* The bar with percentage inside */}
                   <motion.div
@@ -196,9 +173,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{
                       height: `${Math.max(heightPct, period.percentage > 0 ? 5 : 1.5)}%`,
-                      opacity: isHovered
-                        ? Math.min(barOpacity + 0.15, 1)
-                        : barOpacity,
+                      opacity: barOpacity,
                     }}
                     transition={{
                       height: {
@@ -207,8 +182,8 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                         ease: easing,
                       },
                       opacity: {
-                        duration: isHovered ? 0.2 : duration,
-                        delay: isHovered ? 0 : delay,
+                        duration,
+                        delay,
                         ease: easing,
                       },
                     }}
@@ -235,24 +210,6 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
                     )}
                   </motion.div>
 
-                  {/* Hover tooltip */}
-                  <AnimatePresence>
-                    {isHovered && period.avgBloating > 0 && (
-                      <motion.div
-                        className="absolute left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-full text-[11px] font-bold text-white whitespace-nowrap z-10"
-                        style={{
-                          background: '#1A4D2E',
-                          bottom: `${Math.max(heightPct, 5) + 8}%`,
-                        }}
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 4 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {period.avgBloating}/5
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
               );
             })}
@@ -260,7 +217,7 @@ export function TimeOfDayPatterns({ entries }: TimeOfDayPatternsProps) {
         </div>
 
         {/* Period labels */}
-        <div className="flex mt-2">
+        <div className="flex gap-3 sm:gap-5 mt-2">
           {periodData.map((period, i) => {
             const isDominant = i === dominantIndex;
             return (

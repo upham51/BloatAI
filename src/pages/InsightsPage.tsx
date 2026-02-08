@@ -428,14 +428,14 @@ export default function InsightsPage() {
               </StaggerItem>
             )}
 
-            {/* 2. YOUR BLOAT RHYTHM - Pattern awareness */}
-            <StaggerItem>
-              <BloatHeatmap entries={entries} />
-            </StaggerItem>
-
-            {/* 3. WHEN YOUR GUT SPEAKS UP - Timing insights */}
+            {/* 2. PEAK SYMPTOM TIMES - Timing insights */}
             <StaggerItem>
               <TimeOfDayPatterns entries={entries} />
+            </StaggerItem>
+
+            {/* 3. YOUR BLOAT RHYTHM - Pattern awareness */}
+            <StaggerItem>
+              <BloatHeatmap entries={entries} />
             </StaggerItem>
 
             {/* 5. WHY THIS KEEPS HAPPENING - Support & education */}
