@@ -55,9 +55,9 @@ function getTimeOfDay(date: Date): string {
 function prepareInsightsPayload(entries: MealEntry[]) {
   const completedEntries = entries.filter(e => e.rating_status === 'completed');
 
-  // Calculate days tracked
-  const dates = completedEntries.map(e => new Date(e.created_at).getTime());
-  const firstEntry = dates.length > 0 ? Math.min(...dates) : Date.now();
+  // Calculate days tracked using ALL entries (not just completed)
+  const allDates = entries.map(e => new Date(e.created_at).getTime());
+  const firstEntry = allDates.length > 0 ? Math.min(...allDates) : Date.now();
   const daysTracked = Math.max(1, Math.ceil((Date.now() - firstEntry) / (1000 * 60 * 60 * 24)));
 
   // Recent entries (last 14 days)
@@ -107,7 +107,8 @@ function prepareInsightsPayload(entries: MealEntry[]) {
 
   return {
     days_tracked: daysTracked,
-    total_logs: completedEntries.length,
+    total_logs: entries.length,
+    rated_logs: completedEntries.length,
     food_entries: foodEntries,
     identified_triggers: identifiedTriggers,
     time_patterns: {
@@ -126,10 +127,7 @@ export function BloatInsightsCard({ entries }: BloatInsightsCardProps) {
   const [error, setError] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const completedCount = useMemo(
-    () => entries.filter(e => e.rating_status === 'completed').length,
-    [entries]
-  );
+  const totalCount = entries.length;
 
   const hasGeneratedToday = insight !== null;
 
@@ -228,7 +226,7 @@ export function BloatInsightsCard({ entries }: BloatInsightsCardProps) {
                 </motion.div>
                 <div className="text-center">
                   <p className="text-sm font-bold text-charcoal">Analyzing your patterns...</p>
-                  <p className="text-xs text-muted-foreground mt-1">Crunching {completedCount} meals</p>
+                  <p className="text-xs text-muted-foreground mt-1">Crunching {totalCount} meals</p>
                 </div>
               </motion.div>
             )}
@@ -350,7 +348,7 @@ export function BloatInsightsCard({ entries }: BloatInsightsCardProps) {
                 className="space-y-4"
               >
                 <p className="text-sm text-charcoal/60 font-medium leading-relaxed">
-                  Get personalized insights about your bloating patterns, trigger analysis, and actionable tips based on your {completedCount} logged meals.
+                  Get personalized insights about your bloating patterns, trigger analysis, and actionable tips based on your {totalCount} logged meals.
                 </p>
 
                 <motion.button
