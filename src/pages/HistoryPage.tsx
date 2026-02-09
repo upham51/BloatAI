@@ -310,7 +310,7 @@ export default function HistoryPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className="relative overflow-hidden rounded-[32px] h-52 shadow-glass-xl"
               >
                 {/* Pexels Background Image */}
@@ -331,7 +331,7 @@ export default function HistoryPage() {
                       <motion.span
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2, duration: 0.6 }}
+                        transition={{ delay: 0, duration: 0.2 }}
                         className="text-[11px] font-semibold text-white/80 tracking-[0.2em] uppercase font-body"
                       >
                         Your Journey
@@ -339,7 +339,7 @@ export default function HistoryPage() {
                       <motion.h1
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3, duration: 0.6 }}
+                        transition={{ delay: 0, duration: 0.2 }}
                         className="text-display-xl font-display font-bold text-white leading-[0.95] drop-shadow-lg"
                         style={{
                           textShadow: '0 4px 24px rgba(0,0,0,0.3)'
@@ -353,7 +353,7 @@ export default function HistoryPage() {
                     <motion.div
                       initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5, duration: 0.6 }}
+                      transition={{ delay: 0, duration: 0.2 }}
                       className="absolute bottom-5 right-5 flex items-center gap-2"
                     >
                       <motion.div
@@ -390,7 +390,7 @@ export default function HistoryPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.6 }}
+                  transition={{ delay: 0, duration: 0.2 }}
                   className="glass-card p-5"
                 >
                   <div className="flex gap-4">
@@ -436,7 +436,7 @@ export default function HistoryPage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
+                transition={{ delay: 0, duration: 0.2 }}
                 className="glass-card p-1.5 flex gap-1.5"
               >
                 {[

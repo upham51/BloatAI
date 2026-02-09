@@ -182,7 +182,7 @@ export default function DashboardPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className="relative overflow-hidden rounded-[32px] h-52 shadow-glass-xl"
               >
                 {/* Pexels Background Image */}
@@ -221,7 +221,7 @@ export default function DashboardPage() {
                       <motion.span
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2, duration: 0.6 }}
+                        transition={{ delay: 0, duration: 0.2 }}
                         className="text-[11px] font-semibold text-white/80 tracking-[0.2em] uppercase font-body"
                       >
                         Good {timePeriod}
@@ -229,7 +229,7 @@ export default function DashboardPage() {
                       <motion.h1
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3, duration: 0.6 }}
+                        transition={{ delay: 0, duration: 0.2 }}
                         className="text-display-xl font-display font-bold text-white leading-[0.95] drop-shadow-lg"
                         style={{
                           textShadow: '0 4px 24px rgba(0,0,0,0.3)'
@@ -243,7 +243,7 @@ export default function DashboardPage() {
                     <motion.div
                       initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5, duration: 0.6 }}
+                      transition={{ delay: 0, duration: 0.2 }}
                       className="absolute bottom-5 right-5 flex items-center gap-2"
                     >
                       <motion.div
@@ -376,7 +376,7 @@ export default function DashboardPage() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ delay: 0, duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                     className="premium-card p-8 text-center"
                   >
                     {/* Ambient orb background */}
@@ -429,7 +429,7 @@ export default function DashboardPage() {
                           key={step.title}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.4 + index * 0.1, duration: 0.6 }}
+                          transition={{ delay: index * 0.03, duration: 0.2 }}
                           whileHover={{ scale: 1.05, y: -4 }}
                           className="glass-card p-5 text-center cursor-default"
                         >
@@ -453,7 +453,7 @@ export default function DashboardPage() {
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7, duration: 0.6 }}
+                    transition={{ delay: 0, duration: 0.2 }}
                     className="glass-card p-5"
                   >
                     <div className="flex items-start gap-4">
@@ -479,7 +479,7 @@ export default function DashboardPage() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.96, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     className="relative overflow-hidden rounded-[32px] shadow-glass-xl"
                   >
                     {/* Nature Background Image */}
@@ -499,7 +499,7 @@ export default function DashboardPage() {
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2, duration: 0.6 }}
+                          transition={{ delay: 0, duration: 0.2 }}
                           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 mb-4"
                         >
                           <Sparkles className="w-3.5 h-3.5 text-white" />
@@ -509,7 +509,7 @@ export default function DashboardPage() {
                         <motion.h3
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3, duration: 0.6 }}
+                          transition={{ delay: 0, duration: 0.2 }}
                           className="font-display text-2xl font-bold text-white mb-2"
                           style={{ textShadow: '0 2px 16px rgba(0,0,0,0.3)' }}
                         >
@@ -518,7 +518,7 @@ export default function DashboardPage() {
                         <motion.p
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          transition={{ delay: 0.4, duration: 0.6 }}
+                          transition={{ delay: 0, duration: 0.2 }}
                           className="text-sm text-white/80 font-medium max-w-xs mx-auto"
                           style={{ textShadow: '0 1px 8px rgba(0,0,0,0.2)' }}
                         >
@@ -530,7 +530,7 @@ export default function DashboardPage() {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, duration: 0.6 }}
+                        transition={{ delay: 0, duration: 0.2 }}
                         className="rounded-2xl bg-white/15 backdrop-blur-xl border border-white/20 p-4"
                       >
                         <div className="flex justify-between items-center mb-3 text-xs">
@@ -544,7 +544,7 @@ export default function DashboardPage() {
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${(completedCount / neededForInsights) * 100}%` }}
-                              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                               className="h-full rounded-full bg-white/90"
                             />
                           </div>
@@ -587,7 +587,7 @@ export default function DashboardPage() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4, duration: 0.6 }}
+                    transition={{ delay: 0, duration: 0.2 }}
                     className="glass-card p-6"
                   >
                     <CorrelationTeaser entries={entries} />

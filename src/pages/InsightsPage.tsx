@@ -4,7 +4,6 @@ import { Sparkles, BarChart3, Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
-import InsightsLoader from '@/components/shared/InsightsLoader';
 import { BloatingGuide } from '@/components/guide/BloatingGuide';
 import { BloatHeatmap } from '@/components/insights/BloatHeatmap';
 import { BloatInsightsCard } from '@/components/insights/BloatInsightsCard';
@@ -54,22 +53,6 @@ export default function InsightsPage() {
     img2.src = heroBackground.src;
   }, [natureBackground, heroBackground]);
 
-  // Loading state for AI magic animation
-  const [isAnalyzing, setIsAnalyzing] = useState(true);
-  const [analysisKey, setAnalysisKey] = useState(0);
-
-  // Trigger re-analysis on page visit - optimized for faster loading
-  useEffect(() => {
-    setIsAnalyzing(true);
-    setAnalysisKey(prev => prev + 1);
-
-    // Minimal loading delay for smooth UX (reduced from 800ms)
-    const timer = setTimeout(() => {
-      setIsAnalyzing(false);
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, [completedCount]); // Re-run when completed entries change (includes new ratings)
 
   // Generate advanced insights for comprehensive card
   const advancedInsights = useMemo(() => {
@@ -93,23 +76,6 @@ export default function InsightsPage() {
     ).length;
   }, [advancedInsights]);
 
-  // Full-screen loading state
-  if (isAnalyzing && hasEnoughData) {
-    return (
-      <AppLayout>
-        <div className="fixed inset-0 bg-background z-50 flex flex-col items-center justify-center">
-          <GrainTexture />
-          <InsightsLoader />
-          <p className="mt-6 text-lg font-semibold text-primary animate-pulse">
-            Analyzing your insights
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Crunching the numbers...
-          </p>
-        </div>
-      </AppLayout>
-    );
-  }
 
   if (!hasEnoughData) {
     return (
@@ -146,7 +112,7 @@ export default function InsightsPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   className="relative overflow-hidden rounded-[32px] shadow-glass-xl"
                 >
                   {/* Nature Background Image */}
@@ -166,7 +132,7 @@ export default function InsightsPage() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.6 }}
+                        transition={{ delay: 0, duration: 0.2 }}
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 mb-4"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-white" />
@@ -176,7 +142,7 @@ export default function InsightsPage() {
                       <motion.h3
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3, duration: 0.6 }}
+                        transition={{ delay: 0, duration: 0.2 }}
                         className="font-display text-2xl font-bold text-white mb-2"
                         style={{ textShadow: '0 2px 16px rgba(0,0,0,0.3)' }}
                       >
@@ -185,7 +151,7 @@ export default function InsightsPage() {
                       <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4, duration: 0.6 }}
+                        transition={{ delay: 0, duration: 0.2 }}
                         className="text-sm text-white/80 font-medium max-w-xs mx-auto"
                         style={{ textShadow: '0 1px 8px rgba(0,0,0,0.2)' }}
                       >
@@ -197,7 +163,7 @@ export default function InsightsPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5, duration: 0.6 }}
+                      transition={{ delay: 0, duration: 0.2 }}
                       className="rounded-2xl bg-white/15 backdrop-blur-xl border border-white/20 p-4"
                     >
                       <div className="flex justify-between items-center mb-3 text-xs">
@@ -211,7 +177,7 @@ export default function InsightsPage() {
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${(completedCount / neededForInsights) * 100}%` }}
-                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                             className="h-full rounded-full bg-white/90"
                           />
                         </div>
@@ -250,7 +216,7 @@ export default function InsightsPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6, duration: 0.6 }}
+                      transition={{ delay: 0, duration: 0.2 }}
                       className="mt-5 flex justify-center"
                     >
                       <motion.button
@@ -325,7 +291,7 @@ export default function InsightsPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.96, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className="relative overflow-hidden rounded-[32px] h-52 shadow-glass-xl"
               >
                 {/* Pexels Background Image */}
@@ -347,7 +313,7 @@ export default function InsightsPage() {
                         <motion.span
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.2, duration: 0.6 }}
+                          transition={{ delay: 0, duration: 0.2 }}
                           className="text-[11px] font-semibold text-white/80 tracking-[0.2em] uppercase font-body"
                         >
                           Your Story So Far
@@ -355,7 +321,7 @@ export default function InsightsPage() {
                         <motion.h1
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.3, duration: 0.6 }}
+                          transition={{ delay: 0, duration: 0.2 }}
                           className="text-display-xl font-display font-bold text-white leading-[0.95] drop-shadow-lg"
                           style={{
                             textShadow: '0 4px 24px rgba(0,0,0,0.3)'
@@ -369,7 +335,7 @@ export default function InsightsPage() {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, duration: 0.6 }}
+                        transition={{ delay: 0, duration: 0.2 }}
                         className="flex flex-col gap-1.5 flex-shrink-0"
                       >
                         {patternCount > 0 && (
