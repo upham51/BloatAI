@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Camera, ImageIcon, X, Sparkles, Pencil, RefreshCw, Plus, ArrowRight, ChevronDown, ChevronUp, Info, Scan } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +8,7 @@ import { TriggerInfoModal } from '@/components/shared/TriggerInfoModal';
 import { ScanningAnimation } from '@/components/shared/ScanningAnimation';
 import { NotesInput } from '@/components/meals/NotesInput';
 import { TextOnlyEntry } from '@/components/meals/TextOnlyEntry';
+import { SubmissionConfirmation } from '@/components/meals/SubmissionConfirmation';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMilestones } from '@/contexts/MilestonesContext';
@@ -111,6 +112,13 @@ export default function AddEntryPage() {
 
   // Saving state
   const [isSaving, setIsSaving] = useState(false);
+
+  // Confirmation overlay state
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const handleConfirmationComplete = useCallback(() => {
+    setShowConfirmation(false);
+    navigate('/dashboard');
+  }, [navigate]);
 
   // Cleanup object URL on unmount or when photoUrl changes to prevent memory leaks
   useEffect(() => {
@@ -349,7 +357,7 @@ export default function AddEntryPage() {
       haptics.stopSavingPulse();
       haptics.mealSavedCelebration();
 
-      navigate('/dashboard');
+      setShowConfirmation(true);
     } catch (error) {
       console.error('Save error:', error);
       haptics.stopSavingPulse();
@@ -740,5 +748,8 @@ export default function AddEntryPage() {
           {/* Trigger Info Modal */}
           <TriggerInfoModal trigger={triggerInfoModal} isOpen={!!triggerInfoModal} onClose={() => setTriggerInfoModal(null)} />
         </>}
+
+      {/* Luxury confirmation overlay */}
+      <SubmissionConfirmation show={showConfirmation} onComplete={handleConfirmationComplete} />
     </div>;
 }

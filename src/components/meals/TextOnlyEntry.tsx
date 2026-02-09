@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Search, X, ArrowRight, ChevronDown, Plus, AlertCircle, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { NotesInput } from './NotesInput';
+import { SubmissionConfirmation } from './SubmissionConfirmation';
 import { useMeals } from '@/contexts/MealContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +31,11 @@ export function TextOnlyEntry() {
   const [bloatingRating, setBloatingRating] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const handleConfirmationComplete = useCallback(() => {
+    setShowConfirmation(false);
+    navigate('/dashboard');
+  }, [navigate]);
 
   // Get unique recent meals (last 30 days, unique by title)
   const recentMeals = useMemo(() => {
@@ -220,7 +226,7 @@ export function TextOnlyEntry() {
           : "We'll remind you to rate in 90 minutes.",
       });
 
-      navigate('/dashboard');
+      setShowConfirmation(true);
     } catch (error) {
       console.error('Save error:', error);
       toast({
@@ -515,6 +521,9 @@ export function TextOnlyEntry() {
           )}
         </button>
       </div>
+
+      {/* Luxury confirmation overlay */}
+      <SubmissionConfirmation show={showConfirmation} onComplete={handleConfirmationComplete} />
     </div>
   );
 }
