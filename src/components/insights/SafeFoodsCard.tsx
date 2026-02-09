@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { ShieldCheck, Leaf, Minus } from 'lucide-react';
-import { MealEntry } from '@/types';
+import { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldCheck, Leaf, Minus, ChevronDown } from 'lucide-react';
+import { MealEntry, TRIGGER_CATEGORIES } from '@/types';
 
 interface SafeFoodsCardProps {
   entries: MealEntry[];
@@ -11,11 +11,22 @@ interface SafeFood {
   food: string;
   avgBloating: number;
   occurrences: number;
+  category: string;
+  categoryDisplayName: string;
 }
+
+const VISIBLE_COUNT = 5;
 
 const easing: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
+function getCategoryDisplayName(categoryId: string): string {
+  const cat = TRIGGER_CATEGORIES.find((c) => c.id === categoryId);
+  return cat?.displayName ?? categoryId;
+}
+
 export function SafeFoodsCard({ entries }: SafeFoodsCardProps) {
+  const [expanded, setExpanded] = useState(false);
+
   const safeFoods = useMemo(() => {
     const completedEntries = entries.filter(
       (e) => e.rating_status === 'completed' && e.bloating_rating !== null
@@ -23,8 +34,11 @@ export function SafeFoodsCard({ entries }: SafeFoodsCardProps) {
 
     if (completedEntries.length === 0) return [];
 
-    // Track each specific food's bloating scores
-    const foodStats: Record<string, { totalBloating: number; count: number }> = {};
+    // Track each specific food's bloating scores and category
+    const foodStats: Record<
+      string,
+      { totalBloating: number; count: number; category: string }
+    > = {};
 
     completedEntries.forEach((entry) => {
       entry.detected_triggers?.forEach((trigger) => {
@@ -32,7 +46,11 @@ export function SafeFoodsCard({ entries }: SafeFoodsCardProps) {
         if (!foodName) return;
 
         if (!foodStats[foodName]) {
-          foodStats[foodName] = { totalBloating: 0, count: 0 };
+          foodStats[foodName] = {
+            totalBloating: 0,
+            count: 0,
+            category: trigger.category,
+          };
         }
         foodStats[foodName].totalBloating += entry.bloating_rating!;
         foodStats[foodName].count++;
@@ -47,14 +65,22 @@ export function SafeFoodsCard({ entries }: SafeFoodsCardProps) {
       })
       .map(([food, stats]) => ({
         food,
-        avgBloating: Math.round((stats.totalBloating / stats.count) * 10) / 10,
+        avgBloating:
+          Math.round((stats.totalBloating / stats.count) * 10) / 10,
         occurrences: stats.count,
+        category: stats.category,
+        categoryDisplayName: getCategoryDisplayName(stats.category),
       }))
       .sort((a, b) => a.avgBloating - b.avgBloating)
-      .slice(0, 8);
+      .slice(0, 12);
 
     return safe;
   }, [entries]);
+
+  const visibleFoods = expanded
+    ? safeFoods
+    : safeFoods.slice(0, VISIBLE_COUNT);
+  const hiddenCount = safeFoods.length - VISIBLE_COUNT;
 
   return (
     <motion.div
@@ -87,7 +113,7 @@ export function SafeFoodsCard({ entries }: SafeFoodsCardProps) {
                 Safe for You
               </h2>
               <p className="text-xs text-muted-foreground font-semibold mt-0.5">
-                Foods that haven't caused issues
+                Common triggers that don't seem to affect you
               </p>
             </div>
           </motion.div>
@@ -114,35 +140,64 @@ export function SafeFoodsCard({ entries }: SafeFoodsCardProps) {
               </div>
             </motion.div>
           ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="flex flex-wrap gap-2.5"
-            >
-              {safeFoods.map((item, idx) => (
-                <motion.div
-                  key={item.food}
-                  initial={{ opacity: 0, scale: 0.85, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{
-                    delay: 0.35 + idx * 0.06,
-                    duration: 0.45,
-                    ease: easing,
-                  }}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-br from-emerald-50/90 to-teal-50/70 border border-emerald-200/40 shadow-sm hover:shadow-md hover:border-emerald-300/50 transition-all cursor-default"
+            <div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="flex flex-wrap gap-2.5"
+              >
+                <AnimatePresence initial={false}>
+                  {visibleFoods.map((item, idx) => (
+                    <motion.div
+                      key={item.food}
+                      initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.85, y: -5 }}
+                      transition={{
+                        delay: expanded ? idx * 0.03 : 0.35 + idx * 0.06,
+                        duration: 0.45,
+                        ease: easing,
+                      }}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-br from-emerald-50/90 to-teal-50/70 border border-emerald-200/40 shadow-sm hover:shadow-md hover:border-emerald-300/50 transition-all cursor-default"
+                    >
+                      <Leaf size={14} className="text-emerald-500 flex-shrink-0" />
+                      <span className="text-sm font-semibold text-foreground/85">
+                        {item.food}
+                      </span>
+                      <span className="text-[10px] font-medium text-muted-foreground/70 bg-foreground/[0.04] px-1.5 py-0.5 rounded-md">
+                        {item.categoryDisplayName}
+                      </span>
+                      <span className="text-[10px] font-bold text-emerald-600/70 bg-emerald-100/60 px-1.5 py-0.5 rounded-md">
+                        {item.avgBloating}/5
+                      </span>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+
+              {/* Expand / Collapse button */}
+              {hiddenCount > 0 && (
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.4 }}
+                  onClick={() => setExpanded((prev) => !prev)}
+                  className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600/80 hover:text-emerald-700 transition-colors cursor-pointer"
                 >
-                  <Leaf size={14} className="text-emerald-500 flex-shrink-0" />
-                  <span className="text-sm font-semibold text-foreground/85">
-                    {item.food}
-                  </span>
-                  <span className="text-[10px] font-bold text-emerald-600/70 bg-emerald-100/60 px-1.5 py-0.5 rounded-md">
-                    {item.avgBloating}/5
-                  </span>
-                </motion.div>
-              ))}
-            </motion.div>
+                  <motion.span
+                    animate={{ rotate: expanded ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChevronDown size={14} />
+                  </motion.span>
+                  {expanded
+                    ? 'Show less'
+                    : `+${hiddenCount} more`}
+                </motion.button>
+              )}
+            </div>
           )}
         </div>
       </div>
