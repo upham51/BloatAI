@@ -268,9 +268,9 @@ export function MilestonesCard() {
       {/* Main Card */}
       <motion.div
         className="relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl shadow-sage/15"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       >
         {/* Ambient background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -463,7 +463,7 @@ export function MilestonesCard() {
                             className="absolute inset-y-0 left-0 bg-gradient-to-r from-sage to-mint rounded-full"
                             initial={{ width: 0 }}
                             animate={{ width: `${tierProgress.percentage}%` }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                           />
                         </div>
                       )}

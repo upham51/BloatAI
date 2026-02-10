@@ -20,9 +20,9 @@ export const PageTransition = ({ children, className = '' }: PageTransitionProps
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
+      exit={{ opacity: 0, y: -4 }}
       transition={{
         duration: 0.15,
         ease: [0.22, 1, 0.36, 1],
@@ -51,7 +51,7 @@ export const StaggerContainer = ({ children, className = '' }: PageTransitionPro
       variants={{
         visible: {
           transition: {
-            staggerChildren: 0.04,
+            staggerChildren: 0.03,
             delayChildren: 0,
           },
         },
@@ -76,12 +76,12 @@ export const StaggerItem = ({ children, className = '' }: PageTransitionProps) =
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, y: 8 },
+        hidden: { opacity: 0, y: 6 },
         visible: {
           opacity: 1,
           y: 0,
           transition: {
-            duration: 0.2,
+            duration: 0.18,
             ease: [0.22, 1, 0.36, 1],
           },
         },
@@ -105,11 +105,11 @@ export const ScaleTransition = ({ children, className = '' }: PageTransitionProp
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
+      initial={{ opacity: 0, scale: 0.985 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
+      exit={{ opacity: 0, scale: 0.985 }}
       transition={{
-        duration: 0.15,
+        duration: 0.12,
         ease: [0.22, 1, 0.36, 1],
       }}
       className={className}
@@ -131,11 +131,11 @@ export const SlideTransition = ({ children, className = '' }: PageTransitionProp
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 16 }}
+      initial={{ opacity: 0, x: 12 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -16 }}
+      exit={{ opacity: 0, x: -8 }}
       transition={{
-        duration: 0.15,
+        duration: 0.12,
         ease: [0.22, 1, 0.36, 1],
       }}
       className={className}

@@ -229,7 +229,7 @@ export function CorrelationTeaser({ entries, className = '' }: CorrelationTeaser
             key={correlation.trigger}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: isPlaceholder ? 0.6 : 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: Math.min(index * 0.05, 0.15) }}
             className={`relative overflow-hidden rounded-xl border ${getSeverityBg(correlation.severity)} ${isPlaceholder ? 'opacity-60' : ''}`}
           >
             <div className="p-4">

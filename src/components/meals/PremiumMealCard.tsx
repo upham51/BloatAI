@@ -49,14 +49,14 @@ export function PremiumMealCard({
 
   return (
     <motion.button
-      initial={{ opacity: 0, y: 20, scale: 0.96 }}
+      initial={{ opacity: 0, y: 12, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
-        delay: index * 0.1,
-        duration: 0.6,
-        ease: [0.16, 1, 0.3, 1],
+        delay: Math.min(index * 0.06, 0.18),
+        duration: 0.3,
+        ease: [0.22, 1, 0.36, 1],
       }}
-      whileHover={{ scale: 1.03, y: -4 }}
+      whileHover={{ scale: 1.015, y: -2 }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       className={cn(

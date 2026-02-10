@@ -108,10 +108,16 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Minimal loading fallback - avoids jarring full-screen spinners.
-// Since routes are prefetched, this rarely shows. When it does, it's brief.
+// Lightweight skeleton fallback — matches general page shape so the transition
+// from loading to content feels seamless. Rarely visible due to prefetching.
 function LoadingFallback() {
-  return <div className="min-h-screen" />;
+  return (
+    <div className="min-h-screen max-w-lg mx-auto px-4 pt-6 space-y-4">
+      <div className="h-8 w-40 rounded-xl bg-muted animate-pulse" />
+      <div className="h-48 rounded-[2rem] bg-muted/60 animate-pulse" />
+      <div className="h-32 rounded-[2rem] bg-muted/40 animate-pulse" />
+    </div>
+  );
 }
 
 function AppRoutes() {
