@@ -17,7 +17,7 @@ export function BottomNav() {
     <motion.nav
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       className="fixed bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none safe-bottom"
     >
       {/* Floating Dock Container - Glass Island */}
@@ -50,26 +50,13 @@ export function BottomNav() {
                 {isCenter ? (
                   /* Center FAB - Forest Green with Glow */
                   <div className="relative flex items-center justify-center w-16 h-14">
-                    {/* Animated glow ring */}
-                    <motion.div
+                    {/* Static glow ring */}
+                    <div
                       className="absolute inset-0 rounded-full bg-forest"
-                      animate={{
+                      style={{
                         boxShadow: isActive
-                          ? [
-                              '0 0 20px 4px rgba(26, 77, 46, 0.4)',
-                              '0 0 28px 8px rgba(26, 77, 46, 0.5)',
-                              '0 0 20px 4px rgba(26, 77, 46, 0.4)',
-                            ]
-                          : [
-                              '0 0 12px 2px rgba(26, 77, 46, 0.2)',
-                              '0 0 18px 4px rgba(26, 77, 46, 0.3)',
-                              '0 0 12px 2px rgba(26, 77, 46, 0.2)',
-                            ],
-                      }}
-                      transition={{
-                        duration: 2.5,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
+                          ? '0 0 20px 4px rgba(26, 77, 46, 0.4)'
+                          : '0 0 12px 2px rgba(26, 77, 46, 0.2)',
                       }}
                     />
                     <div

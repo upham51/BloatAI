@@ -22,13 +22,41 @@ import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 
 // Lazy load main app pages (loaded on demand for better initial performance)
-const DashboardPage = lazy(() => import("./pages/DashboardPage"));
-const AddEntryPage = lazy(() => import("./pages/AddEntryPage"));
-const HistoryPage = lazy(() => import("./pages/HistoryPage"));
-const InsightsPage = lazy(() => import("./pages/InsightsPage"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage"));
-const PricingPage = lazy(() => import("./pages/PricingPage"));
-const BarcodeScanner = lazy(() => import("./components/meals/BarcodeScanner").then(m => ({ default: m.BarcodeScanner })));
+const dashboardImport = () => import("./pages/DashboardPage");
+const addEntryImport = () => import("./pages/AddEntryPage");
+const historyImport = () => import("./pages/HistoryPage");
+const insightsImport = () => import("./pages/InsightsPage");
+const profileImport = () => import("./pages/ProfilePage");
+const pricingImport = () => import("./pages/PricingPage");
+const barcodeScannerImport = () => import("./components/meals/BarcodeScanner").then(m => ({ default: m.BarcodeScanner }));
+
+const DashboardPage = lazy(dashboardImport);
+const AddEntryPage = lazy(addEntryImport);
+const HistoryPage = lazy(historyImport);
+const InsightsPage = lazy(insightsImport);
+const ProfilePage = lazy(profileImport);
+const PricingPage = lazy(pricingImport);
+const BarcodeScanner = lazy(barcodeScannerImport);
+
+// Prefetch all main routes after initial load so tab switching is instant
+function prefetchRoutes() {
+  dashboardImport();
+  addEntryImport();
+  historyImport();
+  insightsImport();
+  profileImport();
+}
+
+if (typeof window !== 'undefined') {
+  const ric = (window as unknown as Record<string, unknown>).requestIdleCallback as
+    | ((cb: () => void, opts?: { timeout: number }) => number)
+    | undefined;
+  if (ric) {
+    ric(prefetchRoutes, { timeout: 2000 });
+  } else {
+    setTimeout(prefetchRoutes, 1000);
+  }
+}
 
 // Lazy load admin pages (rarely used, can load on demand)
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -58,32 +86,14 @@ const queryClient = new QueryClient({
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="relative">
-          <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="min-h-screen" />;
   if (!user) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="relative">
-          <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="min-h-screen" />;
   if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
@@ -92,31 +102,16 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
-  if (isLoading || isAdminLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="relative">
-          <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
-        </div>
-      </div>
-    );
-  }
+  if (isLoading || isAdminLoading) return <div className="min-h-screen" />;
   if (!user) return <Navigate to="/" replace />;
   if (!isAdmin) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
-// Loading fallback for lazy-loaded components
+// Minimal loading fallback - avoids jarring full-screen spinners.
+// Since routes are prefetched, this rarely shows. When it does, it's brief.
 function LoadingFallback() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="relative">
-        <div className="w-12 h-12 border-4 border-primary/20 rounded-full" />
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
-      </div>
-    </div>
-  );
+  return <div className="min-h-screen" />;
 }
 
 function AppRoutes() {
@@ -174,7 +169,7 @@ function GlobalBackground() {
   ]);
   if (!enableOn.has(pathname)) return null;
 
-  return <DeferredMeshGradientBackground variant="balanced" delayMs={2500} />;
+  return <DeferredMeshGradientBackground variant="balanced" delayMs={100} />;
 }
 
 function RouteProviders({ children }: { children: React.ReactNode }) {
