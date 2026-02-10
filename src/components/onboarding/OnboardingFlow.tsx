@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { PrimaryGoal } from '@/types/quiz';
@@ -10,11 +10,9 @@ import {
   BookOpen,
   History,
   ChevronRight,
-  Leaf,
 } from 'lucide-react';
 
 type OnboardingStep =
-  | 'start'
   | 'discover'
   | 'track'
   | 'patterns'
@@ -23,7 +21,6 @@ type OnboardingStep =
   | 'finish';
 
 const STEPS: OnboardingStep[] = [
-  'start',
   'discover',
   'track',
   'patterns',
@@ -82,51 +79,6 @@ function BackgroundParticles() {
   );
 }
 
-// Icon cards that float around the logo
-function FloatingCards({ visible }: { visible: boolean }) {
-  const cards = [
-    { icon: '🥗', label: 'Meals', x: -80, y: -60 },
-    { icon: '📊', label: 'Insights', x: 80, y: -40 },
-    { icon: '🧠', label: 'AI', x: -60, y: 60 },
-    { icon: '✨', label: 'Patterns', x: 70, y: 50 },
-  ];
-
-  return (
-    <>
-      {cards.map((card, i) => (
-        <motion.div
-          key={card.label}
-          className="absolute"
-          style={{ left: '50%', top: '50%' }}
-          initial={{ opacity: 0, x: 0, y: 0, scale: 0.3 }}
-          animate={
-            visible
-              ? {
-                  opacity: 1,
-                  x: card.x,
-                  y: card.y,
-                  scale: 1,
-                }
-              : { opacity: 0, x: 0, y: 0, scale: 0.3 }
-          }
-          transition={{
-            duration: 0.7,
-            delay: i * 0.12,
-            ease: [0.34, 1.56, 0.64, 1],
-          }}
-        >
-          <GlassCard className="px-3 py-2 flex items-center gap-2">
-            <span className="text-lg">{card.icon}</span>
-            <span className="text-xs font-medium text-white/70">
-              {card.label}
-            </span>
-          </GlassCard>
-        </motion.div>
-      ))}
-    </>
-  );
-}
-
 // Continue button anchored to bottom of screen
 function ContinueButton({
   onClick,
@@ -152,21 +104,40 @@ function ContinueButton({
   );
 }
 
-// Step wrapper with consistent layout
+// Step wrapper with consistent layout and swipe support
 function StepContainer({
   children,
   stepKey,
+  direction,
+  onSwipeLeft,
+  onSwipeRight,
 }: {
   children: React.ReactNode;
   stepKey: string;
+  direction: number;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
 }) {
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
+    const threshold = 50;
+    if (info.offset.x < -threshold && info.velocity.x < 0 && onSwipeLeft) {
+      onSwipeLeft();
+    } else if (info.offset.x > threshold && info.velocity.x > 0 && onSwipeRight) {
+      onSwipeRight();
+    }
+  };
+
   return (
     <motion.div
       key={stepKey}
-      initial={{ opacity: 0, x: 40 }}
+      initial={{ opacity: 0, x: direction > 0 ? 80 : -80 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -40 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ opacity: 0, x: direction > 0 ? -80 : 80 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.15}
+      onDragEnd={handleDragEnd}
       className="flex flex-col h-full px-6 pt-safe-top"
     >
       {children}
@@ -252,27 +223,15 @@ function GoalTile({
 }
 
 export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
-  const [step, setStep] = useState<OnboardingStep>('start');
+  const [step, setStep] = useState<OnboardingStep>('discover');
   const [name, setName] = useState('');
   const [goal, setGoal] = useState<PrimaryGoal | ''>('');
-  const [showCards, setShowCards] = useState(false);
+  const [direction, setDirection] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const currentIndex = STEPS.indexOf(step);
-
-  // Auto-advance from start screen after 2.5s
-  useEffect(() => {
-    if (step === 'start') {
-      const cardsTimer = setTimeout(() => setShowCards(true), 800);
-      const advanceTimer = setTimeout(() => setStep('discover'), 2800);
-      return () => {
-        clearTimeout(cardsTimer);
-        clearTimeout(advanceTimer);
-      };
-    }
-  }, [step]);
 
   // Focus name input when entering name step
   useEffect(() => {
@@ -282,12 +241,21 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
     }
   }, [step]);
 
-  const goNext = () => {
+  const goNext = useCallback(() => {
     const nextIndex = currentIndex + 1;
     if (nextIndex < STEPS.length) {
+      setDirection(1);
       setStep(STEPS[nextIndex]);
     }
-  };
+  }, [currentIndex]);
+
+  const goBack = useCallback(() => {
+    const prevIndex = currentIndex - 1;
+    if (prevIndex >= 0) {
+      setDirection(-1);
+      setStep(STEPS[prevIndex]);
+    }
+  }, [currentIndex]);
 
   const handleFinish = async () => {
     setIsSubmitting(true);
@@ -329,27 +297,43 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
     }
   };
 
+  // Determine if swiping forward is allowed on the current step
+  const canSwipeForward = () => {
+    if (step === 'name' && !name.trim()) return false;
+    if (step === 'goal' && !goal) return false;
+    if (step === 'finish') return false;
+    return true;
+  };
+
+  const handleSwipeLeft = () => {
+    if (canSwipeForward()) goNext();
+  };
+
+  const handleSwipeRight = () => {
+    goBack();
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-[#0A1628] overflow-hidden">
       <BackgroundParticles />
 
-      {/* Progress indicator - hidden on start/finish */}
-      {step !== 'start' && step !== 'finish' && (
+      {/* Progress indicator - hidden on finish */}
+      {step !== 'finish' && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="absolute top-0 left-0 right-0 z-10 px-6 pt-4"
         >
           <div className="flex gap-1.5 max-w-xs mx-auto">
-            {STEPS.filter((s) => s !== 'start' && s !== 'finish').map(
+            {STEPS.filter((s) => s !== 'finish').map(
               (s, i) => {
                 const activeIndex = STEPS.filter(
-                  (s) => s !== 'start' && s !== 'finish'
+                  (s) => s !== 'finish'
                 ).indexOf(step);
                 return (
                   <div
                     key={s}
-                    className={`h-1 flex-1 rounded-full transition-all duration-500 ${
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
                       i <= activeIndex
                         ? 'bg-[#4AEDC4]'
                         : 'bg-white/10'
@@ -363,73 +347,24 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
       )}
 
       {/* Step content */}
-      <AnimatePresence mode="wait">
-        {/* ── STEP: START ── */}
-        {step === 'start' && (
-          <StepContainer key="start" stepKey="start">
-            <div className="flex-1 flex flex-col items-center justify-center relative">
+      <AnimatePresence mode="wait" custom={direction}>
+        {/* ── STEP: DISCOVER ── */}
+        {step === 'discover' && (
+          <StepContainer key="discover" stepKey="discover" direction={direction} onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight}>
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  duration: 0.8,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="relative"
+                transition={{ delay: 0.1, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
+                className="mb-8"
               >
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#4AEDC4] to-[#8BAF9E] flex items-center justify-center shadow-lg">
-                  <Leaf className="w-10 h-10 text-[#0A1628]" strokeWidth={2} />
-                </div>
-                {/* Glow ring */}
-                <motion.div
-                  className="absolute -inset-4 rounded-[28px] border border-[#4AEDC4]/20"
-                  animate={{
-                    scale: [1, 1.15, 1],
-                    opacity: [0.4, 0, 0.4],
-                  }}
-                  transition={{ duration: 2.5, repeat: Infinity }}
-                />
-              </motion.div>
-
-              <motion.h1
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-3xl font-display font-bold text-white mt-6"
-              >
-                BloatAI
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ delay: 0.5, duration: 0.6 }}
-                className="text-sm text-white/50 mt-2 font-body"
-              >
-                Decode your body's signals
-              </motion.p>
-
-              <FloatingCards visible={showCards} />
-            </div>
-
-            <div className="pb-10">
-              <ContinueButton onClick={goNext} label="Get Started" />
-            </div>
-          </StepContainer>
-        )}
-
-        {/* ── STEP: DISCOVER ── */}
-        {step === 'discover' && (
-          <StepContainer key="discover" stepKey="discover">
-            <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.6 }}
-                className="mb-6"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4AEDC4]/20 to-[#8BAF9E]/20 border border-[#4AEDC4]/20 flex items-center justify-center mx-auto">
-                  <Sparkles className="w-8 h-8 text-[#4AEDC4]" />
+                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#4AEDC4]/20 to-[#8BAF9E]/20 border border-[#4AEDC4]/30 flex items-center justify-center mx-auto relative">
+                  <Sparkles className="w-10 h-10 text-[#4AEDC4]" />
+                  <motion.div
+                    className="absolute -inset-3 rounded-[24px] border border-[#4AEDC4]/15"
+                    animate={{ scale: [1, 1.12, 1], opacity: [0.3, 0, 0.3] }}
+                    transition={{ duration: 2.5, repeat: Infinity }}
+                  />
                 </div>
               </motion.div>
 
@@ -467,14 +402,14 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
             </div>
 
             <div className="pb-10">
-              <ContinueButton onClick={goNext} />
+              <ContinueButton onClick={goNext} label="Get Started" />
             </div>
           </StepContainer>
         )}
 
         {/* ── STEP: TRACK ── */}
         {step === 'track' && (
-          <StepContainer key="track" stepKey="track">
+          <StepContainer key="track" stepKey="track" direction={direction} onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight}>
             <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
               <motion.div
                 initial={{ opacity: 0, scale: 0.5 }}
@@ -524,7 +459,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
         {/* ── STEP: PATTERNS ── */}
         {step === 'patterns' && (
-          <StepContainer key="patterns" stepKey="patterns">
+          <StepContainer key="patterns" stepKey="patterns" direction={direction} onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight}>
             <div className="flex-1 flex flex-col justify-center px-2">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
@@ -571,7 +506,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
         {/* ── STEP: NAME ── */}
         {step === 'name' && (
-          <StepContainer key="name" stepKey="name">
+          <StepContainer key="name" stepKey="name" direction={direction} onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight}>
             <div className="flex-1 flex flex-col justify-center px-2">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
@@ -625,7 +560,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
         {/* ── STEP: GOAL ── */}
         {step === 'goal' && (
-          <StepContainer key="goal" stepKey="goal">
+          <StepContainer key="goal" stepKey="goal" direction={direction} onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight}>
             <div className="flex-1 flex flex-col justify-center px-2">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
@@ -686,7 +621,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
         {/* ── STEP: FINISH ── */}
         {step === 'finish' && (
-          <StepContainer key="finish" stepKey="finish">
+          <StepContainer key="finish" stepKey="finish" direction={direction} onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight}>
             <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
               {/* Celebration glow */}
               <motion.div
@@ -708,7 +643,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
                 className="relative mb-6"
               >
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#4AEDC4] to-[#8BAF9E] flex items-center justify-center">
-                  <span className="text-3xl">✨</span>
+                  <Sparkles className="w-10 h-10 text-[#0A1628]" />
                 </div>
               </motion.div>
 
@@ -758,6 +693,18 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
           </StepContainer>
         )}
       </AnimatePresence>
+
+      {/* Swipe hint on first screen */}
+      {step === 'discover' && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.3 }}
+          transition={{ delay: 1.5, duration: 0.8 }}
+          className="absolute bottom-3 left-0 right-0 text-center text-xs text-white/30 font-body"
+        >
+          Swipe or tap to continue
+        </motion.p>
+      )}
     </div>
   );
 }
