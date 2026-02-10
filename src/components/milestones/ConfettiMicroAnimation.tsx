@@ -218,8 +218,8 @@ export function BadgeReveal({
           exit={{ scale: 0, rotate: 180 }}
           transition={{
             type: "spring",
-            stiffness: 200,
-            damping: 15,
+            stiffness: 380,
+            damping: 22,
           }}
         >
           {/* Glow background */}
@@ -335,8 +335,8 @@ export function TierUnlockAnimation({
             exit={{ scale: 0.5, y: 50, opacity: 0 }}
             transition={{
               type: "spring",
-              stiffness: 200,
-              damping: 20,
+              stiffness: 380,
+              damping: 24,
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -359,9 +359,9 @@ export function TierUnlockAnimation({
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{
                   type: "spring",
-                  stiffness: 200,
-                  damping: 12,
-                  delay: 0.2,
+                  stiffness: 360,
+                  damping: 20,
+                  delay: 0.15,
                 }}
               >
                 <span className="text-4xl">

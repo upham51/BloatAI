@@ -50,11 +50,11 @@ export const PremiumButton = forwardRef<HTMLButtonElement, PremiumButtonProps>(
           variants[variant],
           className
         )}
-        whileHover={!isDisabled ? { scale: 1.02 } : undefined}
-        whileTap={!isDisabled ? { scale: 0.98 } : undefined}
-        initial={{ opacity: 0, y: 20 }}
+        whileHover={!isDisabled ? { scale: 1.015 } : undefined}
+        whileTap={!isDisabled ? { scale: 0.96 } : undefined}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       >
         {/* Animated shimmer effect */}
         {variant === 'primary' && !isDisabled && (

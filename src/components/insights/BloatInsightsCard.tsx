@@ -175,18 +175,18 @@ export function BloatInsightsCard({ entries }: BloatInsightsCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.96, y: 20 }}
+      initial={{ opacity: 0, scale: 0.97, y: 12 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       className="relative overflow-hidden rounded-[2rem] shadow-xl"
     >
       <div className="relative bg-white border border-border/40 rounded-[2rem]">
         <div className="p-6">
           {/* Header */}
           <motion.div
-            initial={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
+            transition={{ delay: 0.08, duration: 0.25 }}
             className="flex items-center gap-3 mb-5"
           >
             <motion.div
@@ -270,9 +270,9 @@ export function BloatInsightsCard({ entries }: BloatInsightsCardProps) {
                   {insightParagraphs.map((paragraph, idx) => (
                     <motion.p
                       key={idx}
-                      initial={{ opacity: 0, y: 8 }}
+                      initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 + idx * 0.08, duration: 0.4 }}
+                      transition={{ delay: Math.min(0.05 + idx * 0.04, 0.25), duration: 0.25 }}
                       className="text-sm text-charcoal/80 leading-relaxed font-medium"
                     >
                       {paragraph}
@@ -307,9 +307,9 @@ export function BloatInsightsCard({ entries }: BloatInsightsCardProps) {
                             {insight.action_items.map((item, idx) => (
                               <motion.div
                                 key={idx}
-                                initial={{ opacity: 0, x: -10 }}
+                                initial={{ opacity: 0, x: -8 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.1 + idx * 0.08 }}
+                                transition={{ delay: Math.min(0.05 + idx * 0.04, 0.2) }}
                                 className="flex items-start gap-3"
                               >
                                 <div className="w-5 h-5 rounded-lg bg-forest/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -329,7 +329,7 @@ export function BloatInsightsCard({ entries }: BloatInsightsCardProps) {
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
+                  transition={{ delay: 0.2 }}
                   className="text-[10px] text-muted-foreground/60 font-semibold text-center pt-1"
                 >
                   Generated {format(new Date(insight.generated_at), 'MMM d, yyyy')}
@@ -368,7 +368,7 @@ export function BloatInsightsCard({ entries }: BloatInsightsCardProps) {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.25 }}
               className="mt-3"
             >
               <div className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-sage/30">

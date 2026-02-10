@@ -15,12 +15,12 @@ export function GlassCard({ children, className, delay = 0 }: GlassCardProps) {
         'relative w-full max-w-md',
         className
       )}
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      initial={{ opacity: 0, y: 20, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
-        duration: 0.8,
+        duration: 0.35,
         delay,
-        ease: [0.23, 1, 0.32, 1],
+        ease: [0.22, 1, 0.36, 1],
       }}
     >
       {/* Outer glow */}

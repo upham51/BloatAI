@@ -137,7 +137,7 @@
 
   body {
     @apply text-foreground antialiased font-body;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "cv11" 1;
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
@@ -197,15 +197,16 @@
       0 8px 24px rgba(45, 55, 72, 0.05),
       0 2px 8px rgba(45, 55, 72, 0.03),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .glass-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     box-shadow:
-      0 24px 64px rgba(45, 55, 72, 0.12),
-      0 12px 32px rgba(45, 55, 72, 0.08),
-      0 4px 12px rgba(45, 55, 72, 0.05),
+      0 20px 56px rgba(26, 77, 46, 0.08),
+      0 8px 24px rgba(45, 55, 72, 0.06),
+      0 4px 12px rgba(45, 55, 72, 0.04),
       inset 0 1px 0 rgba(255, 255, 255, 1);
   }
 
@@ -227,7 +228,8 @@
       0 1px 4px rgba(45, 55, 72, 0.02),
       inset 0 2px 0 rgba(255, 255, 255, 1),
       inset 0 -1px 0 rgba(0, 0, 0, 0.03);
-    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
   }
 
@@ -250,12 +252,12 @@
   }
 
   .premium-card:hover {
-    transform: translateY(-3px) scale(1.005);
+    transform: translateY(-2px) scale(1.003);
     box-shadow:
-      0 32px 96px rgba(45, 55, 72, 0.12),
-      0 16px 48px rgba(45, 55, 72, 0.08),
-      0 6px 20px rgba(45, 55, 72, 0.05),
-      0 2px 8px rgba(45, 55, 72, 0.03),
+      0 24px 80px rgba(26, 77, 46, 0.08),
+      0 12px 40px rgba(45, 55, 72, 0.06),
+      0 4px 16px rgba(45, 55, 72, 0.04),
+      0 1px 4px rgba(45, 55, 72, 0.02),
       inset 0 2px 0 rgba(255, 255, 255, 1);
   }
 
@@ -592,7 +594,17 @@
 
   /* Tactile button press */
   .tactile-press {
-    @apply active:scale-95 transition-transform duration-150;
+    @apply active:scale-[0.96] transition-transform duration-150;
+  }
+
+  /* Tabular nums for animated/stat numbers — prevents layout shift */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Label tracking — improves legibility at small sizes */
+  .label-tracking {
+    letter-spacing: 0.03em;
   }
 }
 
@@ -653,7 +665,7 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 1.5s ease-out;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .animate-slide-up {
@@ -698,7 +710,7 @@
 }
 
 .animate-scale-in {
-  animation: scaleIn 1.0s ease-out;
+  animation: scaleIn 0.35s ease-out;
 }
 
 /* Slide down animation */
@@ -708,7 +720,7 @@
 }
 
 .animate-slide-down {
-  animation: slideDown 1.0s ease-out;
+  animation: slideDown 0.35s ease-out;
   overflow: hidden;
 }
 
@@ -790,7 +802,7 @@
 }
 
 .animate-spring-in {
-  animation: springIn 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: springIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .animate-gentle-float {

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { TrendingDown, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 
 interface HealthScoreGaugeProps {
   avgBloating: number; // 0-5 scale
@@ -58,6 +59,8 @@ export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount, hi
     return change;
   }, [healthScore]);
 
+  const animatedScore = useAnimatedNumber(healthScore, 700, 200);
+
   const goalScore = 60;
 
   // SVG ring parameters
@@ -69,9 +72,9 @@ export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount, hi
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       className="glass-card p-6 relative overflow-hidden"
     >
       {/* Ambient orb background */}
@@ -141,7 +144,7 @@ export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount, hi
               filter="url(#ringGlow)"
               initial={{ strokeDashoffset: circumference }}
               animate={{ strokeDashoffset: circumference - progress }}
-              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
             />
 
             {/* Glowing tip */}
@@ -153,29 +156,29 @@ export function HealthScoreGauge({ avgBloating, totalMeals, lowBloatingCount, hi
               filter="url(#ringGlow)"
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 1.5 }}
+              transition={{ duration: 0.3, delay: 0.7 }}
             />
           </svg>
 
           {/* Center Score Display */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pt-8">
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
               className="text-center"
             >
               <span
-                className="text-5xl font-bold"
+                className="text-5xl font-bold tabular-nums"
                 style={{ color: ringColor }}
               >
-                {healthScore}
+                {animatedScore}
               </span>
               <div className="text-xs text-charcoal/40 font-medium">out of 100</div>
               <motion.div
-                initial={{ opacity: 0, y: 5 }}
+                initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
+                transition={{ delay: 0.35 }}
                 className={`mt-2 px-4 py-1.5 rounded-full text-xs font-bold ${bgColor} ${textColor}`}
               >
                 {level}
