@@ -47,21 +47,21 @@ const FALLBACK_PHOTOS: Record<CollectionKey, PexelsPhoto> = {
   night: { id: 10, src: 'https://images.pexels.com/photos/4033165/pexels-photo-4033165.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm night atmosphere', photographer: 'Taryn Elliott' },
   history: { id: 401, src: 'https://images.pexels.com/photos/3560168/pexels-photo-3560168.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm morning wellness', photographer: 'Lisa Fotios' },
   insights: { id: 501, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm lake with mountains', photographer: 'Eberhard Grossgasteiger' },
-  // Onboarding cinematic fallbacks
-  'onboarding-hero': { id: 601, src: 'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Abstract scientific visualization', photographer: 'Rostislav Uzunov' },
-  'onboarding-camera': { id: 602, src: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Beautiful food photography', photographer: 'Ella Olsson' },
-  'onboarding-features': { id: 603, src: 'https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Wellness and health', photographer: 'Andrea Piacquadio' },
-  'onboarding-personal': { id: 604, src: 'https://images.pexels.com/photos/3760607/pexels-photo-3760607.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Welcoming personal setting', photographer: 'Andrea Piacquadio' },
-  'onboarding-goals': { id: 605, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene nature destination', photographer: 'Eberhard Grossgasteiger' },
+  // Onboarding cinematic fallbacks (portrait 9:16 crops)
+  'onboarding-hero': { id: 601, src: 'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=1422', alt: 'Abstract scientific visualization', photographer: 'Rostislav Uzunov' },
+  'onboarding-camera': { id: 602, src: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=1422', alt: 'Beautiful food photography', photographer: 'Ella Olsson' },
+  'onboarding-features': { id: 603, src: 'https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=1422', alt: 'Wellness and health', photographer: 'Andrea Piacquadio' },
+  'onboarding-personal': { id: 604, src: 'https://images.pexels.com/photos/3760607/pexels-photo-3760607.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=1422', alt: 'Welcoming personal setting', photographer: 'Andrea Piacquadio' },
+  'onboarding-goals': { id: 605, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=1422', alt: 'Serene nature destination', photographer: 'Eberhard Grossgasteiger' },
 };
 
 /**
  * Fetch all photos from a Pexels collection.
  * Caches results in localStorage for 24 hours.
  */
-async function fetchCollectionPhotos(collectionKey: CollectionKey): Promise<PexelsPhoto[]> {
+async function fetchCollectionPhotos(collectionKey: CollectionKey, preferPortrait = false): Promise<PexelsPhoto[]> {
   const collectionId = COLLECTION_IDS[collectionKey];
-  const cacheKey = COLLECTION_CACHE_PREFIX + collectionKey;
+  const cacheKey = COLLECTION_CACHE_PREFIX + collectionKey + (preferPortrait ? '_portrait' : '');
 
   // Check cache first
   try {
@@ -95,14 +95,18 @@ async function fetchCollectionPhotos(collectionKey: CollectionKey): Promise<Pexe
     const data = await response.json();
     const photos: PexelsPhoto[] = (data.media || [])
       .filter((item: Record<string, unknown>) => item.type === 'Photo')
-      .map((item: Record<string, unknown>) => ({
-        id: item.id as number,
-        src: ((item.src as Record<string, string>)?.large2x ||
-              (item.src as Record<string, string>)?.large ||
-              (item.src as Record<string, string>)?.original || ''),
-        alt: (item.alt as string) || `${collectionKey} background`,
-        photographer: (item.photographer as string) || 'Unknown',
-      }));
+      .map((item: Record<string, unknown>) => {
+        const src = item.src as Record<string, string>;
+        const imageSrc = preferPortrait
+          ? (src?.portrait || src?.large2x || src?.large || src?.original || '')
+          : (src?.large2x || src?.large || src?.original || '');
+        return {
+          id: item.id as number,
+          src: imageSrc,
+          alt: (item.alt as string) || `${collectionKey} background`,
+          photographer: (item.photographer as string) || 'Unknown',
+        };
+      });
 
     if (photos.length > 0) {
       try {
@@ -123,8 +127,8 @@ async function fetchCollectionPhotos(collectionKey: CollectionKey): Promise<Pexe
  * Get a random photo from a Pexels collection.
  * Falls back to a static image if the API is unavailable.
  */
-async function getRandomCollectionPhoto(collectionKey: CollectionKey): Promise<PexelsPhoto> {
-  const photos = await fetchCollectionPhotos(collectionKey);
+async function getRandomCollectionPhoto(collectionKey: CollectionKey, preferPortrait = false): Promise<PexelsPhoto> {
+  const photos = await fetchCollectionPhotos(collectionKey, preferPortrait);
   if (photos.length > 0) {
     return photos[Math.floor(Math.random() * photos.length)];
   }
@@ -387,7 +391,7 @@ export function getOnboardingBackground(screen: OnboardingScreen): PexelsPhoto {
  * Fetch a random background from the Pexels collection for an onboarding screen
  */
 export async function fetchOnboardingBackground(screen: OnboardingScreen): Promise<PexelsPhoto> {
-  return getRandomCollectionPhoto(ONBOARDING_COLLECTION_MAP[screen]);
+  return getRandomCollectionPhoto(ONBOARDING_COLLECTION_MAP[screen], true);
 }
 
 /**
