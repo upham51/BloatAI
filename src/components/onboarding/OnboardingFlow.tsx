@@ -348,14 +348,12 @@ function FeatureTile({
 
 /** Goal selection tile with radio-style indicator */
 function GoalTile({
-  emoji,
   title,
   desc,
   selected,
   onClick,
   reducedMotion,
 }: {
-  emoji: string;
   title: string;
   desc: string;
   selected: boolean;
@@ -372,7 +370,6 @@ function GoalTile({
     >
       <GlassCard selected={selected} className="p-5">
         <div className="flex items-center gap-4">
-          <span className="text-2xl flex-shrink-0" aria-hidden="true">{emoji}</span>
           <div className="flex-1 min-w-0">
             <h4
               className={`text-base font-semibold tracking-wide ${
@@ -580,22 +577,13 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
             <div className="flex-1" />
 
             {/* Content anchored to bottom over gradient */}
-            <div className="relative z-10 px-6 pb-14">
+            <div className="relative z-10 px-6 pb-14 flex flex-col items-center text-center">
               <motion.div
                 {...scaleIn}
                 transition={{ delay: 0.15, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
                 className="mb-6"
               >
-                <div className="w-16 h-16 rounded-2xl bg-[#10B981]/15 border border-[#10B981]/25 flex items-center justify-center relative">
-                  <Sparkles className="w-8 h-8 text-[#10B981]" />
-                  {!reducedMotion && (
-                    <motion.div
-                      className="absolute -inset-2 rounded-[18px] border border-[#10B981]/15"
-                      animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0, 0.3] }}
-                      transition={{ duration: 2.5, repeat: Infinity }}
-                    />
-                  )}
-                </div>
+                <div className="onboarding-dot-loader" aria-hidden="true" />
               </motion.div>
 
               <motion.h2
@@ -609,7 +597,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
               <motion.p
                 {...fadeUp}
                 transition={{ delay: 0.4, duration: 0.6 }}
-                className="text-base text-[#CBD5E1] leading-[1.6] tracking-[0.3px] font-body mb-6 max-w-[320px]"
+                className="text-base text-[#CBD5E1] leading-[1.6] tracking-[0.3px] font-body mb-6 max-w-[320px] mx-auto"
               >
                 AI-powered meal tracking that learns your unique digestive
                 patterns
@@ -662,7 +650,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
           >
             <div className="flex-1" />
 
-            <div className="relative z-10 px-6 pb-14">
+            <div className="relative z-10 px-6 pb-14 flex flex-col items-center text-center">
               <motion.div
                 {...scaleIn}
                 transition={{
@@ -677,9 +665,6 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
                     className="w-10 h-10 text-[#10B981]"
                     strokeWidth={1.5}
                   />
-                  <span className="text-xs text-[#94A3B8] font-body font-medium tracking-wider uppercase">
-                    10 sec
-                  </span>
                   {/* Shutter animation ring */}
                   {!reducedMotion && (
                     <motion.div
@@ -705,7 +690,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
               <motion.p
                 {...fadeUp}
                 transition={{ delay: 0.35, duration: 0.6 }}
-                className="text-base text-[#CBD5E1] leading-[1.6] tracking-[0.3px] font-body mb-8 max-w-[320px]"
+                className="text-base text-[#CBD5E1] leading-[1.6] tracking-[0.3px] font-body mb-8 max-w-[320px] mx-auto"
               >
                 Snap a photo. We analyze ingredients, portions, and potential
                 triggers instantly.
@@ -799,7 +784,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
           >
             <div className="flex-1" />
 
-            <div className="relative z-10 px-6 pb-14">
+            <div className="relative z-10 px-6 pb-14 flex flex-col items-center text-center">
               <motion.h2
                 {...fadeUp}
                 transition={{ delay: 0.1, duration: 0.5 }}
@@ -870,7 +855,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
           >
             <div className="flex-1" />
 
-            <div className="relative z-10 px-6 pb-14">
+            <div className="relative z-10 px-6 pb-14 flex flex-col items-center text-center">
               <motion.h2
                 {...fadeUp}
                 transition={{ delay: 0.1, duration: 0.5 }}
@@ -894,7 +879,6 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
                 className="space-y-3 max-w-sm w-full mb-8"
               >
                 <GoalTile
-                  emoji="🩺"
                   title="Manage IBS"
                   desc="Track symptoms and find relief strategies"
                   selected={goal === 'reduce-symptoms'}
@@ -902,7 +886,6 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
                   reducedMotion={reducedMotion}
                 />
                 <GoalTile
-                  emoji="🥦"
                   title="FODMAP Sensitivity"
                   desc="Identify trigger foods and safe alternatives"
                   selected={goal === 'identify-triggers'}
@@ -910,7 +893,6 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
                   reducedMotion={reducedMotion}
                 />
                 <GoalTile
-                  emoji="🌿"
                   title="General Wellness"
                   desc="Improve overall digestive health"
                   selected={goal === 'general-wellness'}
