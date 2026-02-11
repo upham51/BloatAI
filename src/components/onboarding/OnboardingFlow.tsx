@@ -524,47 +524,49 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[60] overflow-hidden"
+      className="fixed inset-0 z-[60] overflow-hidden flex items-center justify-center"
       style={{ backgroundColor: COLORS.midnight }}
       role="dialog"
       aria-modal="true"
       aria-label="Onboarding"
     >
-      {/* Cinematic background image with Ken Burns */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
-          className="absolute inset-0"
-        >
-          <CinematicBackground
-            photo={currentBackground}
-            isActive={true}
-            reducedMotion={reducedMotion}
-          />
-        </motion.div>
-      </AnimatePresence>
+      {/* Mobile-width container — constrains portrait images and centers content */}
+      <div className="relative w-full max-w-md h-full overflow-hidden">
+        {/* Cinematic background image with Ken Burns */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={step}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="absolute inset-0"
+          >
+            <CinematicBackground
+              photo={currentBackground}
+              isActive={true}
+              reducedMotion={reducedMotion}
+            />
+          </motion.div>
+        </AnimatePresence>
 
-      {/* Particle overlay */}
-      <BackgroundParticles reducedMotion={reducedMotion} />
+        {/* Particle overlay */}
+        <BackgroundParticles reducedMotion={reducedMotion} />
 
-      {/* Progress indicator - hidden on finish */}
-      {step !== 'finish' && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-          className="absolute top-0 left-0 right-0 z-10 px-6 pt-5"
-        >
-          <ProgressIndicator steps={STEPS} currentIndex={currentIndex} />
-        </motion.div>
-      )}
+        {/* Progress indicator - hidden on finish */}
+        {step !== 'finish' && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="absolute top-0 left-0 right-0 z-10 px-6 pt-5"
+          >
+            <ProgressIndicator steps={STEPS} currentIndex={currentIndex} />
+          </motion.div>
+        )}
 
-      {/* Step content */}
-      <AnimatePresence mode="wait" custom={direction}>
+        {/* Step content */}
+        <AnimatePresence mode="wait" custom={direction}>
         {/* ── STEP: DISCOVER (Hero) ── */}
         {step === 'discover' && (
           <StepContainer
@@ -1030,6 +1032,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
           </StepContainer>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 }
