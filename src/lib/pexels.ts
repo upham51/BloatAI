@@ -22,6 +22,12 @@ const COLLECTION_IDS = {
   night: 'g4f1tbc',
   history: '89mjhkg',
   insights: '89mjhkg',
+  // Onboarding cinematic backgrounds
+  'onboarding-hero': 'dm8oixp',
+  'onboarding-camera': '0srzhjn',
+  'onboarding-features': 'f0ctflu',
+  'onboarding-personal': 'wopazlc',
+  'onboarding-goals': 'gcipq8x',
 } as const;
 
 type CollectionKey = keyof typeof COLLECTION_IDS;
@@ -41,6 +47,12 @@ const FALLBACK_PHOTOS: Record<CollectionKey, PexelsPhoto> = {
   night: { id: 10, src: 'https://images.pexels.com/photos/4033165/pexels-photo-4033165.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm night atmosphere', photographer: 'Taryn Elliott' },
   history: { id: 401, src: 'https://images.pexels.com/photos/3560168/pexels-photo-3560168.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm morning wellness', photographer: 'Lisa Fotios' },
   insights: { id: 501, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Calm lake with mountains', photographer: 'Eberhard Grossgasteiger' },
+  // Onboarding cinematic fallbacks
+  'onboarding-hero': { id: 601, src: 'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Abstract scientific visualization', photographer: 'Rostislav Uzunov' },
+  'onboarding-camera': { id: 602, src: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Beautiful food photography', photographer: 'Ella Olsson' },
+  'onboarding-features': { id: 603, src: 'https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Wellness and health', photographer: 'Andrea Piacquadio' },
+  'onboarding-personal': { id: 604, src: 'https://images.pexels.com/photos/3760607/pexels-photo-3760607.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Welcoming personal setting', photographer: 'Andrea Piacquadio' },
+  'onboarding-goals': { id: 605, src: 'https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Serene nature destination', photographer: 'Eberhard Grossgasteiger' },
 };
 
 /**
@@ -350,4 +362,48 @@ export function preloadImages(photos: PexelsPhoto[]): void {
     const img = new Image();
     img.src = photo.src;
   });
+}
+
+// ── Onboarding Cinematic Backgrounds ──
+
+export type OnboardingScreen = 'hero' | 'camera' | 'features' | 'personal' | 'goals';
+
+const ONBOARDING_COLLECTION_MAP: Record<OnboardingScreen, CollectionKey> = {
+  hero: 'onboarding-hero',
+  camera: 'onboarding-camera',
+  features: 'onboarding-features',
+  personal: 'onboarding-personal',
+  goals: 'onboarding-goals',
+};
+
+/**
+ * Get a static fallback for an onboarding screen (sync, for initial render)
+ */
+export function getOnboardingBackground(screen: OnboardingScreen): PexelsPhoto {
+  return FALLBACK_PHOTOS[ONBOARDING_COLLECTION_MAP[screen]];
+}
+
+/**
+ * Fetch a random background from the Pexels collection for an onboarding screen
+ */
+export async function fetchOnboardingBackground(screen: OnboardingScreen): Promise<PexelsPhoto> {
+  return getRandomCollectionPhoto(ONBOARDING_COLLECTION_MAP[screen]);
+}
+
+/**
+ * Fetch all onboarding backgrounds concurrently.
+ * Returns a record keyed by screen name.
+ */
+export async function fetchAllOnboardingBackgrounds(): Promise<Record<OnboardingScreen, PexelsPhoto>> {
+  const screens: OnboardingScreen[] = ['hero', 'camera', 'features', 'personal', 'goals'];
+  const results = await Promise.all(screens.map(s => fetchOnboardingBackground(s)));
+  return Object.fromEntries(screens.map((s, i) => [s, results[i]])) as Record<OnboardingScreen, PexelsPhoto>;
+}
+
+/**
+ * Get all static fallbacks for onboarding (sync, for initial render)
+ */
+export function getAllOnboardingBackgrounds(): Record<OnboardingScreen, PexelsPhoto> {
+  const screens: OnboardingScreen[] = ['hero', 'camera', 'features', 'personal', 'goals'];
+  return Object.fromEntries(screens.map(s => [s, getOnboardingBackground(s)])) as Record<OnboardingScreen, PexelsPhoto>;
 }
