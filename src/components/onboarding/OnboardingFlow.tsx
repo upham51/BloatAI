@@ -103,7 +103,6 @@ function CinematicBackground({
         alt=""
         role="presentation"
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ height: '65%' }}
         initial={{ scale: 1 }}
         animate={
           isActive && !reducedMotion
@@ -123,17 +122,18 @@ function CinematicBackground({
         }
       />
 
-      {/* Sophisticated gradient overlay */}
+      {/* Gradient overlay — fades image into midnight at the bottom */}
       <div
         className="absolute inset-0"
         style={{
           background: `linear-gradient(
             to bottom,
             transparent 0%,
-            transparent 25%,
-            rgba(11, 17, 32, 0.4) 45%,
-            rgba(11, 17, 32, 0.7) 60%,
-            ${COLORS.midnight} 85%
+            transparent 30%,
+            rgba(11, 17, 32, 0.3) 45%,
+            rgba(11, 17, 32, 0.65) 55%,
+            rgba(11, 17, 32, 0.88) 65%,
+            ${COLORS.midnight} 78%
           )`,
         }}
       />
@@ -524,7 +524,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-hidden"
+      className="fixed inset-0 z-[60] overflow-hidden"
       style={{ backgroundColor: COLORS.midnight }}
       role="dialog"
       aria-modal="true"
@@ -578,7 +578,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
             <div className="flex-1" />
 
             {/* Content anchored to bottom over gradient */}
-            <div className="relative z-10 px-6 pb-10">
+            <div className="relative z-10 px-6 pb-14">
               <motion.div
                 {...scaleIn}
                 transition={{ delay: 0.15, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
@@ -660,7 +660,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
           >
             <div className="flex-1" />
 
-            <div className="relative z-10 px-6 pb-10">
+            <div className="relative z-10 px-6 pb-14">
               <motion.div
                 {...scaleIn}
                 transition={{
@@ -729,7 +729,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
           >
             <div className="flex-1" />
 
-            <div className="relative z-10 px-6 pb-10">
+            <div className="relative z-10 px-6 pb-14">
               <motion.h2
                 {...fadeUp}
                 transition={{ delay: 0.1, duration: 0.5 }}
@@ -797,7 +797,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
           >
             <div className="flex-1" />
 
-            <div className="relative z-10 px-6 pb-10">
+            <div className="relative z-10 px-6 pb-14">
               <motion.h2
                 {...fadeUp}
                 transition={{ delay: 0.1, duration: 0.5 }}
@@ -868,7 +868,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
           >
             <div className="flex-1" />
 
-            <div className="relative z-10 px-6 pb-10">
+            <div className="relative z-10 px-6 pb-14">
               <motion.h2
                 {...fadeUp}
                 transition={{ delay: 0.1, duration: 0.5 }}
@@ -1007,7 +1007,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
               </motion.div>
             </div>
 
-            <div className="relative z-10 px-6 pb-10">
+            <div className="relative z-10 px-6 pb-14">
               <motion.button
                 initial={reducedMotion ? undefined : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
