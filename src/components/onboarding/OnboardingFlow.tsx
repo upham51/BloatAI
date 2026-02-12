@@ -226,16 +226,16 @@ function GlassCard({
 
 
 }: {children: React.ReactNode;className?: string;selected?: boolean;}) {
-  return (
-    <div
-      className={`backdrop-blur-xl rounded-2xl border transition-all duration-300 ${
-      selected ?
-      'bg-[#10B981]/10 border-[#10B981]/40' :
-      'bg-white/[0.06] border-white/[0.1]'} ${
-      className}`}>
+  return;
 
-      {children}
-    </div>);
+
+
+
+
+
+
+
+
 
 }
 
