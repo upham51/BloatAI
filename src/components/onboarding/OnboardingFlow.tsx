@@ -10,7 +10,7 @@ import {
   preloadImages } from
 '@/lib/pexels';
 import {
-  Camera,
+
   Map,
   Sparkles,
   BookOpen,
@@ -661,9 +661,9 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
                 className="mb-6">
 
                 <GlassCard className="w-28 h-28 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
-                  <Camera
-                    className="w-10 h-10 text-[#10B981]"
-                    strokeWidth={1.5} />
+                  
+
+
 
                   {/* Shutter animation ring */}
                   {!reducedMotion
