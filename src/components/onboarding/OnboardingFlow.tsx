@@ -10,7 +10,7 @@ import {
   preloadImages } from
 '@/lib/pexels';
 import {
-
+  Camera,
   Map,
   Sparkles,
   BookOpen,
@@ -226,16 +226,16 @@ function GlassCard({
 
 
 }: {children: React.ReactNode;className?: string;selected?: boolean;}) {
-  return;
+  return (
+    <div
+      className={`backdrop-blur-xl rounded-2xl border transition-all duration-300 ${
+      selected ?
+      'bg-[#10B981]/10 border-[#10B981]/40' :
+      'bg-white/[0.06] border-white/[0.1]'} ${
+      className}`}>
 
-
-
-
-
-
-
-
-
+      {children}
+    </div>);
 
 }
 
@@ -661,19 +661,19 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
                 className="mb-6">
 
                 <GlassCard className="w-28 h-28 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
-                  
-
-
+                  <Camera
+                    className="w-10 h-10 text-[#10B981]"
+                    strokeWidth={1.5} />
 
                   {/* Shutter animation ring */}
-                  {!reducedMotion
-
-
-
-
-
-
-
+                  {!reducedMotion &&
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl border-2 border-[#10B981]/20"
+                    animate={{
+                      scale: [1, 1.05, 1],
+                      opacity: [0.3, 0.6, 0.3]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }} />
 
                   }
                 </GlassCard>
