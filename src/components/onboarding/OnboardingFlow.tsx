@@ -666,14 +666,14 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
                     strokeWidth={1.5} />
 
                   {/* Shutter animation ring */}
-                  {!reducedMotion &&
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl border-2 border-[#10B981]/20"
-                    animate={{
-                      scale: [1, 1.05, 1],
-                      opacity: [0.3, 0.6, 0.3]
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }} />
+                  {!reducedMotion
+
+
+
+
+
+
+
 
                   }
                 </GlassCard>
