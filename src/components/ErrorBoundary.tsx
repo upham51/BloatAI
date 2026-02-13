@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 
 interface Props {
   children: ReactNode;
+  fallback?: ReactNode;
+  onReset?: () => void;
 }
 
 interface State {
@@ -44,11 +46,18 @@ export class ErrorBoundary extends Component<Props, State> {
       error: null,
       errorInfo: null,
     });
-    window.location.href = '/';
+    this.props.onReset?.();
+    if (!this.props.onReset) {
+      window.location.href = '/';
+    }
   };
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
           <div className="max-w-md w-full space-y-4 text-center">

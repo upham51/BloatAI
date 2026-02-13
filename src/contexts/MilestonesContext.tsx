@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { useMeals } from './MealContext';
 import {
@@ -112,12 +112,26 @@ export function MilestonesProvider({ children }: { children: ReactNode }) {
     loadState();
   }, [user]);
 
-  // Save state to localStorage whenever it changes
+  // Debounced save to localStorage to avoid excessive writes
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saveState = useCallback((state: MilestoneState) => {
-    if (user) {
-      localStorage.setItem(`${STORAGE_KEY}_${user.id}`, JSON.stringify(state));
+    if (!user) return;
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
+    saveTimeoutRef.current = setTimeout(() => {
+      localStorage.setItem(`${STORAGE_KEY}_${user.id}`, JSON.stringify(state));
+    }, 300);
   }, [user]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Helper functions
   const getEntriesWithRatings = useCallback(() => {
@@ -436,12 +450,29 @@ export function MilestonesProvider({ children }: { children: ReactNode }) {
     return events;
   }, [milestoneState, user, entries, getTotalCount, getCompletedCount, getUniqueLoggingDays, getConsecutiveLoggingDays, getDaysSinceFirstEntry, getTopTriggerFromEntries, saveState]);
 
-  // Auto-check milestones when entries change
+  // Auto-check milestones when entries change (debounced to avoid excessive recalculation)
+  const checkTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevEntriesLengthRef = useRef(0);
   useEffect(() => {
-    if (milestoneState && entries.length > 0) {
-      checkAndUpdateMilestones();
+    // Only trigger when entries.length actually changes
+    if (entries.length === prevEntriesLengthRef.current) return;
+    prevEntriesLengthRef.current = entries.length;
+
+    if (!milestoneState || entries.length === 0) return;
+
+    if (checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
     }
-  }, [entries.length]);
+    checkTimeoutRef.current = setTimeout(() => {
+      checkAndUpdateMilestones();
+    }, 500);
+
+    return () => {
+      if (checkTimeoutRef.current) {
+        clearTimeout(checkTimeoutRef.current);
+      }
+    };
+  }, [entries.length, milestoneState, checkAndUpdateMilestones]);
 
   // Tab unlock checks
   const isTabUnlocked = useCallback((tabId: InsightTab): boolean => {
@@ -1083,35 +1114,48 @@ export function MilestonesProvider({ children }: { children: ReactNode }) {
     setPendingEvents([]);
   }, []);
 
+  // Memoize the context value to prevent unnecessary re-renders of all consumers
+  const contextValue = useMemo<MilestonesContextType>(
+    () => ({
+      milestoneState,
+      isLoading,
+      getCurrentTier,
+      getTierProgress,
+      isTabUnlocked,
+      getTabUnlockProgress,
+      isMilestoneComplete,
+      getNextMilestone,
+      checkAndUpdateMilestones,
+      startExperiment,
+      completeExperiment,
+      setPendingExperimentMeal,
+      getPendingExperimentMealId,
+      cancelExperiment,
+      getCurrentExperiment,
+      getCompletedExperiments,
+      getSuggestedExperiment,
+      generateAIGuide,
+      getAIGuideConsultation,
+      generateBlueprint,
+      getBlueprint,
+      pendingEvents,
+      clearPendingEvent,
+      clearAllPendingEvents,
+    }),
+    [
+      milestoneState, isLoading,
+      getCurrentTier, getTierProgress, isTabUnlocked, getTabUnlockProgress,
+      isMilestoneComplete, getNextMilestone, checkAndUpdateMilestones,
+      startExperiment, completeExperiment, setPendingExperimentMeal,
+      getPendingExperimentMealId, cancelExperiment, getCurrentExperiment,
+      getCompletedExperiments, getSuggestedExperiment,
+      generateAIGuide, getAIGuideConsultation, generateBlueprint, getBlueprint,
+      pendingEvents, clearPendingEvent, clearAllPendingEvents,
+    ]
+  );
+
   return (
-    <MilestonesContext.Provider
-      value={{
-        milestoneState,
-        isLoading,
-        getCurrentTier,
-        getTierProgress,
-        isTabUnlocked,
-        getTabUnlockProgress,
-        isMilestoneComplete,
-        getNextMilestone,
-        checkAndUpdateMilestones,
-        startExperiment,
-        completeExperiment,
-        setPendingExperimentMeal,
-        getPendingExperimentMealId,
-        cancelExperiment,
-        getCurrentExperiment,
-        getCompletedExperiments,
-        getSuggestedExperiment,
-        generateAIGuide,
-        getAIGuideConsultation,
-        generateBlueprint,
-        getBlueprint,
-        pendingEvents,
-        clearPendingEvent,
-        clearAllPendingEvents
-      }}
-    >
+    <MilestonesContext.Provider value={contextValue}>
       {children}
     </MilestonesContext.Provider>
   );

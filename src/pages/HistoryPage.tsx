@@ -1,8 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, MoreVertical, Clock, Flame, Edit3, TrendingUp, Pencil, X, Check, FileText, Sparkles } from 'lucide-react';
+import { Flame, FileText, Sparkles, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
@@ -10,21 +9,15 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { EditMealModal } from '@/components/meals/EditMealModal';
 import { EditTitleModal } from '@/components/meals/EditTitleModal';
 import { MealPhoto } from '@/components/meals/MealPhoto';
+import { EntryCard, getMealDisplayTitle } from '@/components/meals/EntryCard';
 import { useMeals } from '@/contexts/MealContext';
 import { useMilestones } from '@/contexts/MilestonesContext';
 import { useToast } from '@/hooks/use-toast';
 import { MealEntry, RATING_LABELS, RATING_EMOJIS, getTriggerCategory, QUICK_NOTES } from '@/types';
-import { formatDistanceToNow, format, isAfter, subDays, isToday, isYesterday, startOfDay } from 'date-fns';
-import { formatTriggerDisplay } from '@/lib/triggerUtils';
+import { format, isAfter, subDays, isToday, isYesterday, startOfDay } from 'date-fns';
 import { haptics } from '@/lib/haptics';
 import { getHistoryHeroBackground, fetchHistoryHeroBackground } from '@/lib/pexels';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -68,10 +61,11 @@ export default function HistoryPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // Preload hero background
+  // Preload hero background with cleanup
   useEffect(() => {
     const img = new Image();
     img.src = heroBackground.src;
+    return () => { img.src = ''; };
   }, [heroBackground]);
 
   // Calculate stats
@@ -180,7 +174,7 @@ export default function HistoryPage() {
     return groupedEntries.flatMap(group => group.entries);
   }, [groupedEntries]);
 
-  const handleDelete = async (id: string, description: string) => {
+  const handleDelete = useCallback(async (id: string, description: string) => {
     if (!confirm('Delete this entry? This cannot be undone.')) return;
 
     await deleteEntry(id);
@@ -188,7 +182,7 @@ export default function HistoryPage() {
       title: 'Entry deleted',
       description: `"${description}" has been removed.`,
     });
-  };
+  }, [deleteEntry, toast]);
 
   const handleRate = async (rating: number) => {
     if (!ratingEntry) return;
@@ -247,10 +241,6 @@ export default function HistoryPage() {
     setDetailsEntry(entry);
     setNotesInput(entry.notes || '');
     setIsEditingNotes(false);
-  };
-
-  const getMealDisplayTitle = (entry: MealEntry) => {
-    return entry.custom_title || entry.meal_title || getQuickMealTitle(entry);
   };
 
   return (
@@ -492,7 +482,7 @@ export default function HistoryPage() {
                           .reduce((sum, g) => sum + g.entries.length, 0) + entryIndex;
 
                         return (
-                          <PremiumEntryCard
+                          <EntryCard
                             key={entry.id}
                             entry={entry}
                             userAvg={userAvg}
@@ -859,347 +849,5 @@ export default function HistoryPage() {
         </DrawerContent>
       </Drawer>
     </AppLayout>
-  );
-}
-
-// Inline Rating Component for pending entries - Premium Design
-function InlineRating({ entryId }: { entryId: string }) {
-  const { updateRating, skipRating } = useMeals();
-  const { getPendingExperimentMealId, completeExperiment } = useMilestones();
-  const { toast } = useToast();
-
-  const handleRate = async (rating: number) => {
-    haptics.success();
-    try {
-      await updateRating(entryId, rating);
-
-      // Check if this is a pending experiment meal
-      const pendingExperimentMealId = getPendingExperimentMealId();
-      if (pendingExperimentMealId && pendingExperimentMealId === entryId) {
-        // Complete the experiment with this rating
-        await completeExperiment(entryId, rating);
-        toast({
-          title: 'Experiment Complete!',
-          description: 'Check your Experiments tab to see the results.'
-        });
-      } else {
-        toast({ title: 'Rating saved!', description: `Rated as ${RATING_LABELS[rating].toLowerCase()}.` });
-      }
-    } catch (error) {
-      console.error('Failed to save rating:', error);
-      toast({
-        title: 'Failed to save rating',
-        description: 'Please try again or check your connection.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleSkip = async () => {
-    haptics.light();
-    try {
-      await skipRating(entryId);
-      toast({ title: 'Rating skipped' });
-    } catch (error) {
-      console.error('Failed to skip rating:', error);
-      toast({
-        title: 'Failed to skip rating',
-        description: 'Please try again or check your connection.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  // Gradient helper functions matching Dashboard style
-  const getGradient = (r: number) => {
-    if (r <= 2) return 'from-emerald-400 to-teal-500';
-    if (r === 3) return 'from-amber-400 to-orange-500';
-    return 'from-rose-400 to-red-500';
-  };
-
-  const getShadow = (r: number) => {
-    if (r <= 2) return 'shadow-emerald-500/30';
-    if (r === 3) return 'shadow-amber-500/30';
-    return 'shadow-rose-500/30';
-  };
-
-  return (
-    <div className="px-4 py-4 border-t border-white/30 bg-white/30 backdrop-blur-sm">
-      <p className="text-sm font-bold text-foreground mb-3">How did this meal make you feel?</p>
-      <div className="grid grid-cols-5 gap-2 mb-3">
-        {[1, 2, 3, 4, 5].map((rating, index) => (
-          <motion.button
-            key={rating}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05, duration: 0.3 }}
-            whileHover={{ scale: 1.1, y: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              haptics.light();
-              handleRate(rating);
-            }}
-            className={`relative overflow-hidden flex flex-col items-center justify-center gap-1.5 py-4 px-1 rounded-[1rem] backdrop-blur-md bg-white/70 border-2 border-white/85 hover:border-white shadow-lg hover:shadow-xl ${getShadow(rating)} transition-all duration-500 group`}
-          >
-            {/* Gradient overlay on hover */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(rating)} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-            <span className="relative text-2xl font-black text-foreground group-hover:text-white group-hover:scale-110 transition-all duration-300 drop-shadow-sm">
-              {rating}
-            </span>
-            <span className="relative text-[8px] font-extrabold uppercase tracking-[0.06em] text-muted-foreground group-hover:text-white/95 transition-colors duration-300">
-              {RATING_LABELS[rating]}
-            </span>
-          </motion.button>
-        ))}
-      </div>
-      <button
-        onClick={handleSkip}
-        className="text-xs text-muted-foreground font-bold hover:text-foreground transition-colors"
-      >
-        Skip for now
-      </button>
-    </div>
-  );
-}
-
-function getQuickMealTitle(entry: MealEntry) {
-  // If user set a custom title, use it
-  if (entry.custom_title) return entry.custom_title;
-
-  // If AI generated a title, use it
-  if (entry.meal_title) return entry.meal_title;
-
-  const foods = Array.from(
-    new Set((entry.detected_triggers || []).map(t => (t.food || '').trim()).filter(Boolean))
-  );
-
-  if (foods.length > 0) {
-    return foods.slice(0, 3).join(' • ');
-  }
-
-  // Fallback: compress the AI prose into a short noun phrase
-  const firstSentence = entry.meal_description.split(/[.!?\n]/)[0] || entry.meal_description;
-  let s = firstSentence.trim().replace(/^"|"$/g, '');
-
-  // Remove common verbose openers
-  s = s
-    .replace(/^(a|an|the)\s+/i, '')
-    .replace(/^(?:\w+\s+){0,3}(stack|bowl|plate|serving)\s+of\s+/i, '')
-    .replace(/^(vibrant|hearty|delicious|generous|beautiful|tall)\s+/i, '');
-
-  // Prefer the part before the first comma
-  s = (s.split(',')[0] || s).trim();
-
-  const words = s.split(/\s+/).filter(Boolean);
-  const short = words.slice(0, 4).join(' ');
-  return short.length > 0 ? short : 'Meal';
-}
-
-// PREMIUM ENTRY CARD - The star of the show with beautiful gradient backgrounds
-function PremiumEntryCard({
-  entry,
-  userAvg,
-  onRate,
-  onEdit,
-  onDelete,
-  onViewDetails,
-  onEditTitle,
-  delay = 0,
-  isFirstPhoto = false,
-}: {
-  entry: MealEntry;
-  userAvg: number;
-  onRate: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onViewDetails: () => void;
-  onEditTitle: () => void;
-  delay?: number;
-  isFirstPhoto?: boolean;
-}) {
-  const isPending = entry.rating_status === 'pending';
-  const rating = entry.bloating_rating;
-
-  const displayTitle = entry.custom_title || entry.meal_title || getQuickMealTitle(entry);
-  const displayEmoji = entry.meal_emoji || '🍽️';
-
-  // Refined, subtle color coding for card accents
-  const getCardAccent = (rating: number | null) => {
-    if (!rating) {
-      return {
-        accent: 'bg-charcoal/60',
-        iconBg: 'from-sage to-sage-light',
-        borderTint: 'border-charcoal/5',
-      };
-    }
-    if (rating <= 2) {
-      return {
-        accent: 'bg-gradient-to-br from-forest to-forest-light',
-        iconBg: 'from-sage to-sage-light',
-        borderTint: 'border-forest/8',
-      };
-    }
-    if (rating === 3) {
-      return {
-        accent: 'bg-gradient-to-br from-amber-500 to-amber-600',
-        iconBg: 'from-amber-50 to-orange-50',
-        borderTint: 'border-amber-500/8',
-      };
-    }
-    return {
-      accent: 'bg-gradient-to-br from-burnt to-burnt-dark',
-      iconBg: 'from-rose-50 to-red-50',
-      borderTint: 'border-burnt/8',
-    };
-  };
-
-  const accent = getCardAccent(rating);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ scale: 1.01, y: -2 }}
-      className={`glass-card overflow-hidden cursor-pointer group ${accent.borderTint}`}
-    >
-      {/* Rating Indicator Badge - Top Right (compact) */}
-      {rating ? (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className={`absolute top-3 right-3 w-10 h-10 rounded-xl ${accent.accent} flex items-center justify-center shadow-md z-10`}
-        >
-          <div className="flex items-baseline">
-            <span className="text-white font-bold text-xs">{rating}</span>
-            <span className="text-white/70 font-medium text-[9px]">/5</span>
-          </div>
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="absolute top-3 right-3 px-2.5 py-1.5 rounded-lg bg-sage backdrop-blur-md z-10"
-        >
-          <span className="text-[9px] font-bold text-charcoal/50 uppercase tracking-wide">Unrated</span>
-        </motion.div>
-      )}
-
-      {/* Main Content */}
-      <div className="flex gap-3.5 p-4" onClick={onViewDetails}>
-        {/* Photo / Icon (slightly smaller, more refined) */}
-        {entry.photo_url ? (
-          <MealPhoto
-            photoUrl={entry.photo_url}
-            className="w-16 h-16 rounded-2xl shadow-sm cursor-pointer object-cover flex-shrink-0 ring-1 ring-black/[0.04]"
-            priority={isFirstPhoto}
-            thumbnail={true}
-          />
-        ) : (
-          <div
-            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${accent.iconBg} flex items-center justify-center cursor-pointer flex-shrink-0`}
-          >
-            <span className="text-2xl">
-              {entry.entry_method === 'text' ? '✍️' : displayEmoji}
-            </span>
-          </div>
-        )}
-
-          {/* Content */}
-          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 pr-8">
-            {/* Title Row */}
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-lg flex-shrink-0">{displayEmoji}</span>
-              <h3 className="font-bold text-charcoal text-sm truncate leading-tight">
-                {displayTitle}
-              </h3>
-            </div>
-
-            {/* Time & Rating Info */}
-            <div className="flex items-center gap-2.5">
-              <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3 text-charcoal/40" />
-                <p className="text-[11px] text-charcoal/50 font-medium">
-                  {format(new Date(entry.created_at), 'h:mm a')}
-                </p>
-              </div>
-              {rating && (
-                <div className="flex items-center gap-1">
-                  <span className="text-xs">{RATING_EMOJIS[rating]}</span>
-                  <span className="text-[11px] font-medium text-charcoal/50">
-                    {RATING_LABELS[rating]}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Trigger badges preview - more refined */}
-            {entry.detected_triggers && entry.detected_triggers.length > 0 && (
-              <div className="flex items-center gap-1 flex-wrap mt-0.5">
-                {entry.detected_triggers.slice(0, 2).map((trigger, i) => {
-                  const categoryInfo = getTriggerCategory(trigger.category);
-                  return (
-                    <span
-                      key={i}
-                      className="px-2 py-0.5 text-[9px] font-semibold rounded-full flex items-center gap-1"
-                      style={{
-                        backgroundColor: `${categoryInfo?.color}15`,
-                        color: categoryInfo?.color,
-                      }}
-                    >
-                      <span
-                        className="w-1 h-1 rounded-full"
-                        style={{ backgroundColor: categoryInfo?.color }}
-                      />
-                      {trigger.food || categoryInfo?.displayName?.split(' - ')[1]}
-                    </span>
-                  );
-                })}
-                {entry.detected_triggers.length > 2 && (
-                  <span className="text-[9px] font-medium text-charcoal/40">
-                    +{entry.detected_triggers.length - 2}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Menu Button */}
-        <div className="absolute top-3.5 right-12">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 rounded-lg hover:bg-sage/50 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="w-3.5 h-3.5 text-charcoal/40" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-xl shadow-xl border-white/50">
-              <DropdownMenuItem onClick={onEditTitle} className="rounded-lg font-medium">
-                <Pencil className="w-4 h-4 mr-2" />
-                Edit Title
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onEdit} className="rounded-lg font-medium">
-                <Edit3 className="w-4 h-4 mr-2" />
-                Edit Details
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDelete} className="text-destructive rounded-lg font-medium">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Inline Rating (Full Width Below) */}
-        {!entry.bloating_rating && isPending && (
-          <InlineRating entryId={entry.id} />
-        )}
-    </motion.div>
   );
 }

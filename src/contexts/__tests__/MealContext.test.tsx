@@ -85,8 +85,32 @@ vi.mock('@/lib/bloatingUtils', async () => {
 });
 
 // Import after mocks
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MealProvider, useMeals } from '../MealContext';
 import { AuthProvider } from '../AuthContext';
+
+// Create a fresh QueryClient for each test
+function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: 0,
+      },
+    },
+  });
+}
+
+function TestWrapper({ children }: { children: React.ReactNode }) {
+  const queryClient = createTestQueryClient();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 // Helper to create mock meal entry
 const createMockMealEntry = (overrides: Partial<MealEntry> = {}): MealEntry => ({
@@ -162,11 +186,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -184,11 +208,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -202,11 +226,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -227,11 +251,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -249,18 +273,20 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
         expect(contextValue?.isLoading).toBe(false);
       });
 
-      expect(consoleError).toHaveBeenCalled();
+      // With TanStack Query, DB errors result in empty entries rather than console.error
+      // TanStack Query handles the error internally via its error state
+      expect(contextValue?.entries).toEqual([]);
       consoleError.mockRestore();
     });
 
@@ -276,11 +302,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -299,11 +325,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -345,11 +371,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -388,11 +414,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -415,11 +441,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -445,11 +471,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -472,11 +498,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -503,11 +529,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -538,11 +564,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -572,11 +598,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -604,11 +630,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -635,11 +661,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -672,11 +698,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -710,11 +736,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -737,11 +763,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -764,11 +790,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -791,11 +817,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -816,11 +842,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -849,11 +875,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {
@@ -875,11 +901,11 @@ describe('MealContext', () => {
       let contextValue: ReturnType<typeof useMeals> | null = null;
 
       render(
-        <AuthProvider>
+        <TestWrapper>
           <MealProvider>
             <TestConsumer onReady={(ctx) => { contextValue = ctx; }} />
           </MealProvider>
-        </AuthProvider>
+        </TestWrapper>
       );
 
       await waitFor(() => {

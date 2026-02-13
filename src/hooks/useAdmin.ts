@@ -1,44 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export function useAdmin() {
-  const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+async function checkAdminRole(userId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle();
 
-  useEffect(() => {
-    async function checkAdminRole() {
-      if (!user) {
-        setIsAdmin(false);
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error checking admin role:', error);
-          setIsAdmin(false);
-        } else {
-          setIsAdmin(!!data);
-        }
-      } catch (err) {
-        console.error('Error checking admin role:', err);
-        setIsAdmin(false);
-      } finally {
-        setIsLoading(false);
-      }
+    if (error) {
+      console.error('Error checking admin role:', error);
+      return false;
     }
 
-    checkAdminRole();
-  }, [user]);
+    return !!data;
+  } catch (err) {
+    console.error('Error checking admin role:', err);
+    return false;
+  }
+}
+
+export function useAdmin() {
+  const { user } = useAuth();
+
+  const { data: isAdmin = false, isLoading } = useQuery({
+    queryKey: ['admin-role', user?.id],
+    queryFn: () => checkAdminRole(user!.id),
+    enabled: !!user,
+    // Cache admin status for 10 minutes to prevent duplicate DB queries
+    // across AdminRoute, MealContext, SubscriptionContext etc.
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
 
   return { isAdmin, isLoading };
 }
