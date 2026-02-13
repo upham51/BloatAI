@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, useCallback, ReactNode } from 'react';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MealEntry, DetectedTrigger } from '@/types';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
-import { retryWithBackoff } from '@/lib/bloatingUtils';
 import { localPhotoStorage } from '@/lib/localPhotoStorage';
 
 interface MealContextType {
@@ -29,81 +29,72 @@ const MealContext = createContext<MealContextType | undefined>(undefined);
 function dbRowToMealEntry(row: any): MealEntry {
   return {
     ...row,
-    detected_triggers: Array.isArray(row.detected_triggers) 
+    detected_triggers: Array.isArray(row.detected_triggers)
       ? row.detected_triggers as DetectedTrigger[]
       : [],
-    title_options: Array.isArray(row.title_options) 
+    title_options: Array.isArray(row.title_options)
       ? row.title_options as string[]
       : [],
     entry_method: row.entry_method || 'photo',
   };
 }
 
-const ENTRIES_PER_PAGE = 20; // Load 20 entries at a time for faster initial load
+const ENTRIES_PER_PAGE = 20;
+
+// Query key factory for consistent cache keys
+export const mealKeys = {
+  all: (userId: string) => ['meals', userId] as const,
+};
+
+// Fetch function extracted for testability
+async function fetchMealPage(userId: string, pageParam: number) {
+  const from = pageParam * ENTRIES_PER_PAGE;
+  const to = from + ENTRIES_PER_PAGE - 1;
+
+  const { data, error } = await supabase
+    .from('meal_entries')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  if (error) throw error;
+  return (data || []).map(dbRowToMealEntry);
+}
 
 export function MealProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [entries, setEntries] = useState<MealEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
+  const queryClient = useQueryClient();
 
-  const fetchEntries = async (loadMore = false) => {
-    if (!user) {
-      setEntries([]);
-      setIsLoading(false);
-      setHasMore(false);
-      return;
-    }
+  // Use infinite query for paginated data with automatic caching & deduplication
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: user ? mealKeys.all(user.id) : ['meals', 'none'],
+    queryFn: ({ pageParam }) => fetchMealPage(user!.id, pageParam as number),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.length === ENTRIES_PER_PAGE ? allPages.length : undefined;
+    },
+    enabled: !!user,
+  });
 
-    setIsLoading(true);
+  // Flatten pages into a single entries array (memoized)
+  const entries = useMemo(() => data?.pages.flat() ?? [], [data]);
 
-    const currentPage = loadMore ? page + 1 : 0;
-    const from = currentPage * ENTRIES_PER_PAGE;
-    const to = from + ENTRIES_PER_PAGE - 1;
+  const hasMore = hasNextPage ?? false;
 
-    const { data, error } = await supabase
-      .from('meal_entries')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .range(from, to);
+  // --- Mutations with optimistic updates ---
 
-    if (error) {
-      console.error('Error fetching entries:', error);
-    } else {
-      const newEntries = (data || []).map(dbRowToMealEntry);
+  const addMutation = useMutation({
+    mutationFn: async (entryData: Omit<MealEntry, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+      if (!user) throw new Error('User not authenticated');
 
-      if (loadMore) {
-        setEntries(prev => [...prev, ...newEntries]);
-        setPage(currentPage);
-      } else {
-        setEntries(newEntries);
-        setPage(0);
-      }
-
-      // Check if there are more entries
-      setHasMore(newEntries.length === ENTRIES_PER_PAGE);
-    }
-    setIsLoading(false);
-  };
-
-  const loadMore = async () => {
-    if (!isLoading && hasMore) {
-      await fetchEntries(true);
-    }
-  };
-
-  useEffect(() => {
-    fetchEntries();
-  }, [user]);
-
-  const addEntry = async (entryData: Omit<MealEntry, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<MealEntry> => {
-    if (!user) throw new Error('User not authenticated');
-
-    // Use retry logic for database operations
-    const { data, error } = await retryWithBackoff(async () => {
-      const result = await supabase
+      const { data, error } = await supabase
         .from('meal_entries')
         .insert({
           meal_description: entryData.meal_description,
@@ -126,99 +117,148 @@ export function MealProvider({ children }: { children: ReactNode }) {
         .select()
         .single();
 
-      if (result.error) throw result.error;
-      return result;
-    });
+      if (error) throw error;
+      return dbRowToMealEntry(data);
+    },
+    onSuccess: (newEntry) => {
+      // Prepend new entry to first page of cache
+      if (!user) return;
+      queryClient.setQueryData(mealKeys.all(user.id), (old: any) => {
+        if (!old?.pages) return old;
+        const newPages = [...old.pages];
+        newPages[0] = [newEntry, ...(newPages[0] || [])];
+        return { ...old, pages: newPages };
+      });
+    },
+  });
 
-    if (error) throw error;
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<MealEntry> }) => {
+      const dbUpdates: Record<string, any> = { ...updates };
+      if (updates.detected_triggers) {
+        dbUpdates.detected_triggers = updates.detected_triggers as unknown as Json;
+      }
 
-    const newEntry = dbRowToMealEntry(data);
-    setEntries(prev => [newEntry, ...prev]);
-    return newEntry;
-  };
-
-  const updateEntry = async (id: string, updates: Partial<MealEntry>) => {
-    const dbUpdates: Record<string, any> = { ...updates };
-    if (updates.detected_triggers) {
-      dbUpdates.detected_triggers = updates.detected_triggers as unknown as Json;
-    }
-
-    // Fix optimistic update race condition: only update local state AFTER successful DB update
-    const { error } = await retryWithBackoff(async () => {
-      const result = await supabase
+      const { error } = await supabase
         .from('meal_entries')
         .update(dbUpdates)
         .eq('id', id);
 
-      if (result.error) throw result.error;
-      return result;
-    });
+      if (error) throw error;
+      return { id, updates };
+    },
+    onSuccess: ({ id, updates }) => {
+      // Update entry in cache
+      if (!user) return;
+      queryClient.setQueryData(mealKeys.all(user.id), (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: MealEntry[]) =>
+            page.map(entry =>
+              entry.id === id ? { ...entry, ...updates } : entry
+            )
+          ),
+        };
+      });
+    },
+  });
 
-    if (error) throw error;
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      // Find entry for photo cleanup
+      const entry = entries.find(e => e.id === id);
 
-    // Update local state only after successful database update
-    setEntries(prev =>
-      prev.map(entry =>
-        entry.id === id ? { ...entry, ...updates } : entry
-      )
-    );
-  };
+      const { error } = await supabase
+        .from('meal_entries')
+        .delete()
+        .eq('id', id);
 
-  const deleteEntry = async (id: string) => {
-    // Find the entry to get the photo reference
-    const entry = entries.find(e => e.id === id);
+      if (error) throw error;
 
-    const { error } = await supabase
-      .from('meal_entries')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-
-    // Delete photo from local storage if it exists
-    if (entry?.photo_url) {
-      try {
-        await localPhotoStorage.deletePhoto(entry.photo_url);
-        console.log('✅ Photo deleted from local storage:', entry.photo_url);
-      } catch (error) {
-        console.error('Failed to delete photo from local storage:', error);
-        // Don't throw - entry is already deleted from DB
+      // Delete photo from local storage if it exists
+      if (entry?.photo_url) {
+        try {
+          await localPhotoStorage.deletePhoto(entry.photo_url);
+        } catch (photoError) {
+          console.error('Failed to delete photo from local storage:', photoError);
+          // Don't throw - entry is already deleted from DB
+        }
       }
-    }
 
-    setEntries(prev => prev.filter(entry => entry.id !== id));
-  };
+      return id;
+    },
+    onSuccess: (deletedId) => {
+      // Remove entry from cache
+      if (!user) return;
+      queryClient.setQueryData(mealKeys.all(user.id), (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: MealEntry[]) =>
+            page.filter(entry => entry.id !== deletedId)
+          ),
+        };
+      });
+    },
+  });
 
-  const updateRating = async (id: string, rating: number) => {
-    await updateEntry(id, {
-      bloating_rating: rating,
-      rating_status: 'completed',
-    });
-  };
+  // --- API methods (stable references via useCallback) ---
 
-  const skipRating = async (id: string) => {
-    await updateEntry(id, {
-      rating_status: 'skipped',
-    });
-  };
+  const addEntry = useCallback(
+    async (entryData: Omit<MealEntry, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<MealEntry> => {
+      if (!user) throw new Error('User not authenticated');
+      return addMutation.mutateAsync(entryData);
+    },
+    [user, addMutation]
+  );
 
-  const getPendingEntry = (): MealEntry | null => {
+  const updateEntry = useCallback(
+    async (id: string, updates: Partial<MealEntry>): Promise<void> => {
+      await updateMutation.mutateAsync({ id, updates });
+    },
+    [updateMutation]
+  );
+
+  const deleteEntry = useCallback(
+    async (id: string): Promise<void> => {
+      await deleteMutation.mutateAsync(id);
+    },
+    [deleteMutation]
+  );
+
+  const updateRating = useCallback(
+    async (id: string, rating: number): Promise<void> => {
+      await updateEntry(id, {
+        bloating_rating: rating,
+        rating_status: 'completed',
+      });
+    },
+    [updateEntry]
+  );
+
+  const skipRating = useCallback(
+    async (id: string): Promise<void> => {
+      await updateEntry(id, {
+        rating_status: 'skipped',
+      });
+    },
+    [updateEntry]
+  );
+
+  const getPendingEntry = useCallback((): MealEntry | null => {
     const now = new Date();
 
-    // Filter all pending entries
     const pendingEntries = entries.filter(entry => entry.rating_status === 'pending');
-
     if (pendingEntries.length === 0) return null;
 
-    // Find the entry that is most overdue (has the earliest rating_due_at that has passed)
-    // Or the oldest pending entry if none have a due date
+    // Find the entry that is most overdue
     const overdueEntries = pendingEntries.filter(entry => {
       if (!entry.rating_due_at) return false;
       const dueAt = new Date(entry.rating_due_at);
       return dueAt <= now;
     });
 
-    // Return the most overdue entry (earliest due date)
     if (overdueEntries.length > 0) {
       return overdueEntries.sort((a, b) => {
         const aTime = new Date(a.rating_due_at!).getTime();
@@ -227,7 +267,7 @@ export function MealProvider({ children }: { children: ReactNode }) {
       })[0];
     }
 
-    // If no overdue entries, return the oldest pending entry (still within 24 hours)
+    // If no overdue entries, return the oldest pending entry within 24 hours
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const recentPending = pendingEntries.filter(entry => {
       const createdAt = new Date(entry.created_at);
@@ -241,34 +281,59 @@ export function MealProvider({ children }: { children: ReactNode }) {
     }
 
     return null;
-  };
+  }, [entries]);
 
-  const getRecentEntries = (limit = 10): MealEntry[] => {
-    return entries.slice(0, limit);
-  };
+  const getRecentEntries = useCallback(
+    (limit = 10): MealEntry[] => entries.slice(0, limit),
+    [entries]
+  );
 
-  const getTotalCount = () => entries.length;
-  const getCompletedCount = () => entries.filter(e => e.rating_status === 'completed').length;
+  const getTotalCount = useCallback(() => entries.length, [entries]);
+
+  const getCompletedCount = useCallback(
+    () => entries.filter(e => e.rating_status === 'completed').length,
+    [entries]
+  );
+
+  const refetch = useCallback(async () => {
+    if (!user) return;
+    await queryClient.invalidateQueries({ queryKey: mealKeys.all(user.id) });
+  }, [user, queryClient]);
+
+  const loadMore = useCallback(async () => {
+    if (!isFetchingNextPage && hasMore) {
+      await fetchNextPage();
+    }
+  }, [isFetchingNextPage, hasMore, fetchNextPage]);
+
+  // Memoize the context value to prevent unnecessary re-renders of consumers
+  const contextValue = useMemo<MealContextType>(
+    () => ({
+      entries,
+      isLoading,
+      hasMore,
+      addEntry,
+      updateEntry,
+      deleteEntry,
+      updateRating,
+      skipRating,
+      getPendingEntry,
+      getRecentEntries,
+      getTotalCount,
+      getCompletedCount,
+      refetch,
+      loadMore,
+    }),
+    [
+      entries, isLoading, hasMore,
+      addEntry, updateEntry, deleteEntry, updateRating, skipRating,
+      getPendingEntry, getRecentEntries, getTotalCount, getCompletedCount,
+      refetch, loadMore,
+    ]
+  );
 
   return (
-    <MealContext.Provider
-      value={{
-        entries,
-        isLoading,
-        hasMore,
-        addEntry,
-        updateEntry,
-        deleteEntry,
-        updateRating,
-        skipRating,
-        getPendingEntry,
-        getRecentEntries,
-        getTotalCount,
-        getCompletedCount,
-        refetch: () => fetchEntries(false),
-        loadMore,
-      }}
-    >
+    <MealContext.Provider value={contextValue}>
       {children}
     </MealContext.Provider>
   );

@@ -12,7 +12,8 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { DeferredMeshGradientBackground } from "@/components/ui/DeferredMeshGradientBackground";
-import { lazy, Suspense, useContext, useState } from "react";
+import { lazy, Suspense, useContext, useState, useCallback } from "react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { RecoveryModeContext } from "@/contexts/RecoveryModeContext";
 import { initRecoveryMode } from "@/lib/recoveryMode";
 
@@ -122,6 +123,7 @@ function LoadingFallback() {
 
 function AppRoutes() {
   return (
+    <ErrorBoundary>
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
         <Route path="/" element={<PublicRoute><WelcomePage /></PublicRoute>} />
@@ -143,6 +145,7 @@ function AppRoutes() {
       <Route path="*" element={<NotFound />} />
     </Routes>
     </Suspense>
+    </ErrorBoundary>
   );
 }
 
