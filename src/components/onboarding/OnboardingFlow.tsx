@@ -611,8 +611,8 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
 
                 <GlassCard className="px-4 py-2 inline-flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full animate-pulse bg-[#c3603c]" />
-                  <span className="text-xs font-medium text-[#CBD5E1] font-body">
-                    Powered by Claude 
+                  <span className="text-xs font-medium text-[#CBD5E1] font-body">Powered by Gemini
+
                   </span>
                 </GlassCard>
               </motion.div>
